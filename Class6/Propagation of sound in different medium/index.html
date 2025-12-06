@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Propagation in Different Mediums</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: #ffeb3b;
+        }
+        
+        .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                flex-direction: row;
+            }
+            
+            .simulation-section {
+                flex: 2;
+            }
+            
+            .controls-section {
+                flex: 1;
+                min-width: 350px;
+            }
+        }
+        
+        .simulation-section, .controls-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .simulation-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 60%; /* 16:9 aspect ratio */
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .canvas-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .medium-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .medium-btn {
+            padding: 12px 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .medium-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .medium-btn.active {
+            border-color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.3);
+            box-shadow: 0 0 12px rgba(79, 195, 247, 0.5);
+        }
+        
+        .medium-icon {
+            font-size: 20px;
+        }
+        
+        .medium-description {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 6px;
+            color: #4fc3f7;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #bbdefb;
+        }
+        
+        .slider-container {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #bbdefb;
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background: #4fc3f7;
+            color: #1a237e;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #8cc6ff;
+            transform: translateY(-2px);
+        }
+        
+        .info-panels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .info-panels {
+                flex-direction: row;
+            }
+            
+            .info-panel {
+                flex: 1;
+            }
+        }
+        
+        .info-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            margin-bottom: 8px;
+            color: #4fc3f7;
+            font-size: 1.1rem;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .comparison-table th {
+            background: rgba(79, 195, 247, 0.2);
+        }
+        
+        .speed-comparison {
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(30, 60, 120, 0.5);
+            border-radius: 6px;
+        }
+        
+        .speed-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 4px 0;
+            overflow: hidden;
+        }
+        
+        .speed-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        #solid-speed {
+            width: 95%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+        }
+        
+        #liquid-speed {
+            width: 70%;
+            background: linear-gradient(90deg, #2196f3, #03a9f4);
+        }
+        
+        #gas-speed {
+            width: 30%;
+            background: linear-gradient(90deg, #ff9800, #ffb74d);
+        }
+        
+        .molecule-info {
+            margin-top: 12px;
+        }
+        
+        .molecule-count {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+        
+        .count-bar {
+            height: 6px;
+            margin-left: 8px;
+            border-radius: 3px;
+            flex-grow: 1;
+        }
+        
+        #solid-count {
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            width: 95%;
+        }
+        
+        #liquid-count {
+            background: linear-gradient(90deg, #2196f3, #03a9f4);
+            width: 70%;
+        }
+        
+        #gas-count {
+            background: linear-gradient(90deg, #ff9800, #ffb74d);
+            width: 30%;
+        }
+        
+        .sound-indicator {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #4fc3f7;
+            margin-top: 12px;
+        }
+        
+        .sound-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #4fc3f7;
+        }
+        
+        .sound-value {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: #ffeb3b;
+        }
+        
+        .sound-unit {
+            font-size: 12px;
+            color: #bbdefb;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+        }
+        
+        .interaction-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+        
+        .gas-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .action-btn {
+            background: rgba(255, 152, 0, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid transparent;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 167, 38, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .action-btn:active {
+            background: rgba(255, 152, 0, 1);
+        }
+        
+        #gas-simulation, #solid-liquid-simulation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        /* Mobile-specific adjustments */
+        @media (max-width: 767px) {
+            .medium-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .simulation-container {
+                padding-bottom: 70%; /* Slightly taller on mobile */
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .gas-controls {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                gap: 10px;
+            }
+            
+            .simulation-section, .controls-section, .info-panel {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sound Propagation in Different Mediums</h1>
+            <p class="subtitle">Explore how sound waves travel through solids, liquids, and gases in this interactive simulation</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="simulation-section">
+                <h2>Simulation</h2>
+                <div class="simulation-container">
+                    <div class="canvas-wrapper">
+                        <canvas id="mainCanvas"></canvas>
+                        <div id="gas-simulation">
+                            <canvas id="simulationCanvas"></canvas>
+                        </div>
+                        <div id="solid-liquid-simulation">
+                            <canvas id="solidLiquidCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="interaction-hint" id="interaction-hint">
+                    Click on the wooden desk to knock and observe sound propagation
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <h2>Controls</h2>
+                
+                <div class="control-group">
+                    <h3>Select Medium</h3>
+                    <div class="medium-selector">
+                        <div class="medium-btn active" id="solid-btn" data-medium="solid">
+                            <span class="medium-icon">🪵</span>
+                            <span>SOLID</span>
+                            <span class="medium-description">Knocking on Wooden Desk</span>
+                        </div>
+                        <div class="medium-btn" id="liquid-btn" data-medium="liquid">
+                            <span class="medium-icon">🌊</span>
+                            <span>LIQUID</span>
+                            <span class="medium-description">Water Drop Ripples</span>
+                        </div>
+                        <div class="medium-btn" id="gas-btn" data-medium="gas">
+                            <span class="medium-icon">🎤</span>
+                            <span>GAS</span>
+                            <span class="medium-description">Person Calling Bird</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group" id="solid-liquid-controls">
+                    <h3>Wave Properties</h3>
+                    
+                    <div class="slider-container">
+                        <label for="frequency">Frequency: <span id="frequencyValue">440 Hz</span></label>
+                        <input type="range" id="frequency" min="50" max="2000" value="440" step="10">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="amplitude">Amplitude: <span id="amplitudeValue">0.5</span></label>
+                        <input type="range" id="amplitude" min="0.1" max="1" value="0.5" step="0.1">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="damping">Damping: <span id="dampingValue">0.2</span></label>
+                        <input type="range" id="damping" min="0" max="1" value="0.2" step="0.05">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="playBtn">Play Sound</button>
+                        <button id="resetBtn">Reset</button>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <h3>Wave Properties</h3>
+                        <div id="waveProperties">
+                            <p>Speed: <span id="speedValue">3300 m/s</span></p>
+                            <p>Wavelength: <span id="wavelengthValue">7.5 m</span></p>
+                            <p>Wave Type: <span id="waveTypeValue">Longitudinal & Transverse</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group" id="gas-controls" style="display: none;">
+                    <h3>Gas Simulation Controls</h3>
+                    <div class="gas-controls">
+                        <button class="action-btn" id="call-bird-btn">
+                            <span class="icon">🔊</span>
+                            Call Bird
+                        </button>
+                        <button class="action-btn" id="reset-bird-btn">
+                            <span class="icon">🔄</span>
+                            Reset
+                        </button>
+                    </div>
+                    <div class="info-box">
+                        <p>Click "Call Bird" to generate sound waves and see if the bird hears you!</p>
+                    </div>
+                </div>
+                
+                <div class="sound-indicator">
+                    <div class="sound-title">SOUND INTENSITY</div>
+                    <div class="sound-value" id="sound-value">85<span class="sound-unit"> dB</span></div>
+                    <div id="sound-source">Knocking on Wooden Desk</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panels">
+            <div class="info-panel">
+                <h2>Current Medium Information</h2>
+                <div class="info-content">
+                    <div class="info-box">
+                        <h3 id="current-medium-title">SOLID (Wooden Desk)</h3>
+                        <div class="info-item">• Sound Source: Knocking on wooden desk</div>
+                        <div class="info-item">• Wave Type: Longitudinal & Transverse</div>
+                        <div class="info-item">• Propagation: Fast (3300 m/s in wood)</div>
+                        <div class="info-item">• Energy Transfer: Through molecular vibrations</div>
+                    </div>
+                    
+                    <div class="speed-comparison">
+                        <div>Relative Speed Comparison:</div>
+                        <div>Solid (Wood): <div class="speed-bar"><div class="speed-fill" id="solid-speed"></div></div></div>
+                        <div>Liquid (Water): <div class="speed-bar"><div class="speed-fill" id="liquid-speed"></div></div></div>
+                        <div>Gas (Air): <div class="speed-bar"><div class="speed-fill" id="gas-speed"></div></div></div>
+                    </div>
+                    
+                    <div class="molecule-info">
+                        <div class="sound-title">MOLECULE DENSITY</div>
+                        <div class="molecule-count">
+                            <span>Solid:</span>
+                            <div class="count-bar" id="solid-count"></div>
+                        </div>
+                        <div class="molecule-count">
+                            <span>Liquid:</span>
+                            <div class="count-bar" id="liquid-count"></div>
+                        </div>
+                        <div class="molecule-count">
+                            <span>Gas:</span>
+                            <div class="count-bar" id="gas-count"></div>
+                        </div>
+                        <div class="info-item" style="margin-top: 10px; font-size: 12px;">
+                            Higher density = Faster sound propagation
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2>Sound Propagation in Different Media</h2>
+                <div class="info-content">
+                    <div class="info-box">
+                        <h3>Solids (Wood)</h3>
+                        <p>In solids like wood, sound travels as both longitudinal (compression) and transverse (shear) waves. Wood has a speed of about 3300-4000 m/s depending on the type.</p>
+                        <ul>
+                            <li>Longitudinal waves: Compression along grain</li>
+                            <li>Transverse waves: Perpendicular to grain</li>
+                            <li>Faster along grain than across grain</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>Liquids (Water)</h3>
+                        <p>In liquids, sound travels primarily as longitudinal waves through compression and rarefaction. Water transmits sound efficiently at about 1480 m/s.</p>
+                        <ul>
+                            <li>Only longitudinal waves (no shear strength)</li>
+                            <li>Faster in saltwater than freshwater</li>
+                            <li>Temperature affects speed significantly</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>Gases (Air)</h3>
+                        <p>In gases, sound travels as longitudinal waves through compression and rarefaction of molecules. Speed depends on temperature and molecular weight.</p>
+                        <ul>
+                            <li>Higher temperature = faster speed</li>
+                            <li>Lower molecular weight = faster speed</li>
+                            <li>Only longitudinal waves</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Interactive Physics Simulation | Shows how sound travels through different mediums</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        const mainCanvas = document.getElementById('mainCanvas');
+        
+        // Set initial renderer size
+        function setRendererSize() {
+            const container = mainCanvas.parentElement;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        
+        setRendererSize();
+        renderer.setClearColor(0x0a1a3a, 1);
+        mainCanvas.appendChild(renderer.domElement);
+        
+        // Enhanced Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        // Add point light for better depth
+        const pointLight = new THREE.PointLight(0x4fc3f7, 0.5, 100);
+        pointLight.position.set(0, 10, 10);
+        scene.add(pointLight);
+        
+        // Camera position
+        camera.position.z = 20;
+        camera.position.y = 5;
+        camera.lookAt(0, 0, 0);
+        
+        // Variables
+        let currentMedium = 'solid';
+        let waves = [];
+        let time = 0;
+        let animationFunction;
+        let raycaster, mouse;
+        
+        // Initialize raycaster for interaction
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
+        
+        // Create visualization based on current medium
+        function createVisualization() {
+            // Clear previous objects
+            while(scene.children.length > 0) { 
+                if (scene.children[0] instanceof THREE.Light) break;
+                scene.remove(scene.children[0]); 
+            }
+            
+            // Add lights back
+            scene.add(ambientLight);
+            scene.add(directionalLight);
+            scene.add(pointLight);
+            
+            waves = [];
+            
+            // Show/hide appropriate simulation
+            if (currentMedium === 'gas') {
+                document.getElementById('gas-simulation').style.display = 'block';
+                document.getElementById('solid-liquid-simulation').style.display = 'none';
+                renderer.domElement.style.display = 'none';
+                startGasSimulation();
+                updateSoundInfo('Person Calling Bird', 65);
+                document.getElementById('interaction-hint').textContent = 'Click "Call Bird" to see sound travel through air!';
+                document.getElementById('gas-controls').style.display = 'block';
+                document.getElementById('solid-liquid-controls').style.display = 'none';
+                document.getElementById('current-medium-title').textContent = 'GAS (Person Calling Bird)';
+            } else if (currentMedium === 'solid' || currentMedium === 'liquid') {
+                document.getElementById('gas-simulation').style.display = 'none';
+                document.getElementById('solid-liquid-simulation').style.display = 'block';
+                renderer.domElement.style.display = 'none';
+                document.getElementById('gas-controls').style.display = 'none';
+                document.getElementById('solid-liquid-controls').style.display = 'block';
+                
+                startSolidLiquidSimulation();
+                
+                if (currentMedium === 'solid') {
+                    updateSoundInfo('Knocking on Wooden Desk', 85);
+                    document.getElementById('interaction-hint').textContent = 'Click on the wooden desk to knock and observe sound propagation';
+                    document.getElementById('current-medium-title').textContent = 'SOLID (Wooden Desk)';
+                } else {
+                    updateSoundInfo('Water Drop Ripples', 72);
+                    document.getElementById('interaction-hint').textContent = 'Watch the water drop create perfect ripples in the liquid!';
+                    document.getElementById('current-medium-title').textContent = 'LIQUID (Water Drop)';
+                }
+            }
+        }
+        
+        function updateSoundInfo(source, value) {
+            document.getElementById('sound-source').textContent = source;
+            document.getElementById('sound-value').innerHTML = `${value}<span class="sound-unit"> dB</span>`;
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            setRendererSize();
+        });
+        
+        // Switch medium
+        document.getElementById('solid-btn').addEventListener('click', () => {
+            currentMedium = 'solid';
+            updateButtonStates('solid');
+            createVisualization();
+        });
+        
+        document.getElementById('liquid-btn').addEventListener('click', () => {
+            currentMedium = 'liquid';
+            updateButtonStates('liquid');
+            createVisualization();
+        });
+        
+        document.getElementById('gas-btn').addEventListener('click', () => {
+            currentMedium = 'gas';
+            updateButtonStates('gas');
+            createVisualization();
+        });
+        
+        function updateButtonStates(activeMedium) {
+            document.getElementById('solid-btn').classList.toggle('active', activeMedium === 'solid');
+            document.getElementById('liquid-btn').classList.toggle('active', activeMedium === 'liquid');
+            document.getElementById('gas-btn').classList.toggle('active', activeMedium === 'gas');
+        }
+        
+        // Create initial visualization
+        createVisualization();
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 0.01;
+            
+            // Run current animation
+            if (animationFunction) animationFunction();
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Start animation
+        animate();
+
+        // Enhanced Solid/Liquid Simulation Code
+        function startSolidLiquidSimulation() {
+            // Canvas setup
+            const canvas = document.getElementById("solidLiquidCanvas");
+            const ctx = canvas.getContext("2d");
+            
+            // Responsive canvas
+            function setCanvasSize() {
+                const container = canvas.parentElement;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            setCanvasSize();
+            window.addEventListener("resize", setCanvasSize);
+            
+            // Animation variables
+            let animationId = null;
+            let isPlaying = false;
+            let time = 0;
+            let dropY = -50; // Initial position for water drop
+            let dropActive = false;
+            
+            // Wave properties
+            let frequency = 440;
+            let amplitude = 0.5;
+            let damping = 0.2;
+            let medium = currentMedium;
+            
+            // Material properties database
+            const materialProperties = {
+                solid: { 
+                    color: '#8B4513', // Brown color for wood
+                    speed: 3300, // Speed of sound in wood (m/s)
+                    waveType: 'Longitudinal & Transverse'
+                },
+                liquid: { 
+                    color: '#1E88E5', // Blue color for water
+                    speed: 1480, 
+                    waveType: 'Longitudinal'
+                }
+            };
+            
+            // Draw the visualization
+            function draw() {
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Clear canvas
+                ctx.fillStyle = '#0a1a3a';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw medium background
+                if (medium === 'solid') {
+                    // Draw wooden desk
+                    ctx.fillStyle = '#8B4513'; // Wood color
+                    ctx.fillRect(0, height/2, width, height/2);
+                    
+                    // Draw wood grain texture
+                    ctx.strokeStyle = '#5D4037';
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < width; i += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(i, height/2);
+                        ctx.lineTo(i, height);
+                        ctx.stroke();
+                    }
+                    
+                    // Draw desk surface details
+                    ctx.strokeStyle = '#A1887F';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/2);
+                    ctx.lineTo(width, height/2);
+                    ctx.stroke();
+                    
+                    // Draw desk legs
+                    ctx.fillStyle = '#5D4037';
+                    ctx.fillRect(width * 0.1, height/2, 15, height/2);
+                    ctx.fillRect(width * 0.9 - 15, height/2, 15, height/2);
+                    
+                } else {
+                    // Draw liquid medium (water)
+                    const gradient = ctx.createLinearGradient(0, height/2, 0, height);
+                    gradient.addColorStop(0, '#1E88E540'); // Light blue at top
+                    gradient.addColorStop(1, '#0D47A180'); // Darker blue at bottom
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, height/2, width, height/2);
+                    
+                    // Draw water surface with gentle waves
+                    ctx.strokeStyle = '#64B5F6';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, height/2);
+                    
+                    for (let x = 0; x < width; x++) {
+                        const y = height/2 + Math.sin(x * 0.02 + time * 0.3) * 3;
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                    
+                    // Draw water drop
+                    if (dropActive || medium === 'liquid') {
+                        const dropX = width * 0.7;
+                        
+                        // Animate drop falling
+                        if (medium === 'liquid' && dropY < height/2 - 10) {
+                            dropY += 2;
+                        }
+                        
+                        // Draw water drop
+                        ctx.fillStyle = '#BBDEFB';
+                        ctx.beginPath();
+                        ctx.arc(dropX, dropY, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Draw drop highlight
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                        ctx.beginPath();
+                        ctx.arc(dropX - 3, dropY - 3, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Draw drop tail
+                        if (dropY < height/2 - 15) {
+                            ctx.strokeStyle = '#90CAF9';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(dropX, dropY + 8);
+                            ctx.lineTo(dropX, dropY + 15);
+                            ctx.stroke();
+                        }
+                        
+                        // Create ripple when drop hits water
+                        if (Math.abs(dropY - (height/2 - 10)) < 2) {
+                            dropActive = true;
+                            isPlaying = true;
+                            setTimeout(() => {
+                                isPlaying = false;
+                                dropActive = false;
+                                dropY = -50; // Reset drop position
+                            }, 2000);
+                        }
+                    }
+                }
+                
+                // Draw sound source (knocking hand for solid)
+                if (medium === 'solid') {
+                    // Draw knocking hand
+                    const handX = width * 0.3;
+                    const handY = height/2 - 20;
+                    
+                    // Hand animation
+                    const handOffset = isPlaying ? Math.sin(time * 10) * 10 : 0;
+                    
+                    // Draw arm
+                    ctx.strokeStyle = '#FFCCBC';
+                    ctx.lineWidth = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(handX - 40, handY - 30);
+                    ctx.lineTo(handX + handOffset, handY);
+                    ctx.stroke();
+                    
+                    // Draw hand
+                    ctx.fillStyle = '#FFCCBC';
+                    ctx.beginPath();
+                    ctx.arc(handX + handOffset, handY, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw knuckles
+                    ctx.fillStyle = '#FFAB91';
+                    for (let i = -1; i <= 1; i++) {
+                        ctx.beginPath();
+                        ctx.arc(handX + handOffset + i * 5, handY - 5, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    // Draw impact point when knocking
+                    if (isPlaying && Math.abs(handOffset) > 8) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                        ctx.beginPath();
+                        ctx.arc(handX, height/2, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                // Draw waves propagating from source
+                if (isPlaying) {
+                    const maxRadius = Math.min(width, height) / 2;
+                    const waveCount = 5;
+                    
+                    for (let i = 0; i < waveCount; i++) {
+                        const radius = (time * 50 + i * 40) % maxRadius;
+                        const alpha = 1 - radius / maxRadius;
+                        
+                        if (radius < maxRadius) {
+                            ctx.strokeStyle = materialProperties[medium].color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            
+                            if (medium === 'solid') {
+                                // For solid, waves propagate along the desk surface
+                                const sourceX = width * 0.3;
+                                ctx.arc(sourceX, height/2, radius, 0, Math.PI * 2);
+                                
+                                // Draw wood grain distortion effect
+                                ctx.setLineDash([5, 5]);
+                                ctx.stroke();
+                                ctx.setLineDash([]);
+                                
+                                // Draw transverse wave components
+                                if (materialProperties[medium].waveType.includes('Transverse')) {
+                                    const peakCount = 8;
+                                    for (let j = 0; j < peakCount; j++) {
+                                        const angle = (j / peakCount) * Math.PI * 2;
+                                        const peakX = sourceX + Math.cos(angle) * radius;
+                                        const peakY = height/2 + Math.sin(angle) * radius;
+                                        
+                                        // Calculate transverse displacement
+                                        const displacement = Math.sin(angle * 3 + time * 8) * amplitude * 8 * alpha;
+                                        const displacedY = peakY + displacement;
+                                        
+                                        ctx.fillStyle = materialProperties[medium].color;
+                                        ctx.beginPath();
+                                        ctx.arc(peakX, displacedY, Math.max(2, width / 200), 0, Math.PI * 2);
+                                        ctx.fill();
+                                    }
+                                }
+                            } else {
+                                // For liquid, circular waves from drop impact point
+                                const sourceX = width * 0.7;
+                                const sourceY = height/2;
+                                ctx.arc(sourceX, sourceY, radius, 0, Math.PI * 2);
+                                ctx.stroke();
+                                
+                                // Draw perfect concentric circles for water waves
+                                ctx.strokeStyle = '#E3F2FD' + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                                ctx.setLineDash([]);
+                                ctx.lineWidth = 1.5;
+                                ctx.beginPath();
+                                ctx.arc(sourceX, sourceY, radius, 0, Math.PI * 2);
+                                ctx.stroke();
+                                
+                                // Draw secondary waves for more realistic water effect
+                                if (i % 2 === 0) {
+                                    ctx.strokeStyle = '#BBDEFB' + Math.floor(alpha * 150).toString(16).padStart(2, '0');
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.arc(sourceX, sourceY, radius + 5, 0, Math.PI * 2);
+                                    ctx.stroke();
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Draw labels
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `${Math.max(12, width / 50)}px Arial`;
+                ctx.textAlign = 'center';
+                
+                if (medium === 'solid') {
+                    ctx.fillText('Wooden Desk - Click to Knock', width/2, 30);
+                    ctx.fillText('Sound Source: Knocking Hand', width * 0.3, height/2 - 50);
+                } else {
+                    ctx.fillText('Water - Drop Creates Ripples', width/2, 30);
+                    ctx.fillText('Sound Source: Water Drop Impact', width * 0.7, height/2 - 50);
+                }
+            }
+            
+            // Animation loop
+            function animate() {
+                time += 0.05;
+                draw();
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            // Start animation
+            animate();
+            
+            // Add click interaction for knocking on desk
+            canvas.addEventListener('click', function(event) {
+                if (medium === 'solid') {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+                    
+                    // Check if click is on the desk surface
+                    if (y > canvas.height/2 - 50 && y < canvas.height/2 + 50) {
+                        isPlaying = true;
+                        setTimeout(() => {
+                            isPlaying = false;
+                        }, 1000);
+                    }
+                }
+            });
+            
+            // Control event listeners
+            document.getElementById('frequency').addEventListener('input', function(e) {
+                frequency = e.target.value;
+                document.getElementById('frequencyValue').textContent = frequency + ' Hz';
+                updateWaveProperties();
+            });
+            
+            document.getElementById('amplitude').addEventListener('input', function(e) {
+                amplitude = parseFloat(e.target.value);
+                document.getElementById('amplitudeValue').textContent = amplitude;
+            });
+            
+            document.getElementById('damping').addEventListener('input', function(e) {
+                damping = parseFloat(e.target.value);
+                document.getElementById('dampingValue').textContent = damping;
+            });
+            
+            document.getElementById('playBtn').addEventListener('click', function() {
+                if (medium === 'liquid') {
+                    // For liquid, activate the water drop
+                    dropActive = true;
+                    dropY = -50;
+                } else {
+                    isPlaying = !isPlaying;
+                    this.textContent = isPlaying ? 'Pause' : 'Play Sound';
+                }
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                time = 0;
+                isPlaying = false;
+                dropActive = false;
+                dropY = -50;
+                document.getElementById('playBtn').textContent = 'Play Sound';
+            });
+            
+            // Update wave properties display
+            function updateWaveProperties() {
+                const speed = materialProperties[medium].speed;
+                const wavelength = speed / frequency;
+                const waveType = materialProperties[medium].waveType;
+                
+                document.getElementById('speedValue').textContent = speed + ' m/s';
+                document.getElementById('wavelengthValue').textContent = wavelength.toFixed(2) + ' m';
+                document.getElementById('waveTypeValue').textContent = waveType;
+            }
+            
+            // Initialize
+            updateWaveProperties();
+            
+            // Set initial medium based on current simulation
+            medium = currentMedium;
+            
+            // Return cleanup function
+            return () => {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                window.removeEventListener("resize", setCanvasSize);
+                canvas.removeEventListener('click', function() {});
+            };
+        }
+
+        // Gas Simulation Code (unchanged)
+        function startGasSimulation() {
+            // Canvas setup
+            const canvas = document.getElementById("simulationCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Responsive canvas
+            function setCanvasSize() {
+                const container = canvas.parentElement;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            setCanvasSize();
+            window.addEventListener("resize", setCanvasSize);
+
+            // Simulation variables
+            let isCalling = false;
+            let animationId = null;
+            let lastTime = null;
+            let waves = []; // {radius, speed, alpha, amplitude}
+            let waveSpeedPxPerSec = 220; // Will be adjusted based on screen size
+
+            // Source and geometry helpers that depend on canvas size
+            function soundSourcePos() {
+                return {
+                    x: canvas.width * 0.2,
+                    y: canvas.height * 0.6,
+                };
+            }
+            
+            function treePerchPos() {
+                const treeX = canvas.width * 0.8;
+                const groundY = canvas.height * 0.7;
+                const trunkHeight = canvas.height * 0.25;
+                const trunkWidth = Math.max(20, canvas.width * 0.03);
+                const branchEndX = treeX - Math.min(canvas.width * 0.18, 180);
+                const branchEndY = groundY - trunkHeight * 0.6 - Math.min(8, canvas.height * 0.02);
+                return { x: branchEndX - 8, y: branchEndY - 6 };
+            }
+
+            // Wave creation (concentric expanding wavefront)
+            function createWave() {
+                waves.push({
+                    radius: 0,
+                    speed: waveSpeedPxPerSec,
+                    alpha: 1,
+                    amplitude: 12,
+                });
+            }
+
+            // Update waves using dt in seconds
+            function updateWaves(dt) {
+                for (let i = waves.length - 1; i >= 0; i--) {
+                    const w = waves[i];
+                    w.radius += w.speed * dt;
+                    // simple attenuation: alpha decays with radius
+                    w.alpha = Math.max(0, 1 - w.radius / (canvas.width * 0.9));
+                    if (
+                        w.alpha <= 0.02 ||
+                        w.radius > Math.max(canvas.width, canvas.height) * 2
+                    ) {
+                        waves.splice(i, 1);
+                    }
+                }
+            }
+
+            // Drawing functions
+            function drawBackground() {
+                // Sky
+                ctx.fillStyle = "#e8f4f8";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Sun
+                ctx.fillStyle = "#FFD700";
+                ctx.beginPath();
+                ctx.arc(canvas.width - 50, 50, Math.min(30, canvas.width * 0.05), 0, Math.PI * 2);
+                ctx.fill();
+
+                // Clouds
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(100, 80, Math.min(20, canvas.width * 0.03), 0, Math.PI * 2);
+                ctx.arc(130, 70, Math.min(25, canvas.width * 0.04), 0, Math.PI * 2);
+                ctx.arc(160, 80, Math.min(20, canvas.width * 0.03), 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ground
+                const groundHeight = canvas.height * 0.3;
+                ctx.fillStyle = "#7ec850";
+                ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+
+                // Grass (simple)
+                ctx.fillStyle = "#6ab04c";
+                const grassSpacing = Math.max(10, canvas.width / 80);
+                for (let i = 0; i < canvas.width; i += grassSpacing) {
+                    const height = 4 + (i % 30 === 0 ? 6 : 2);
+                    ctx.fillRect(i, canvas.height - groundHeight, 8, height);
+                }
+            }
+
+            // Draw tree
+            function drawTree() {
+                const treeX = canvas.width * 0.8;
+                const groundY = canvas.height * 0.7;
+                const trunkHeight = canvas.height * 0.25;
+                const trunkWidth = Math.max(20, canvas.width * 0.03);
+
+                const grd = ctx.createLinearGradient(
+                    treeX - trunkWidth,
+                    groundY - trunkHeight,
+                    treeX + trunkWidth,
+                    groundY
+                );
+                grd.addColorStop(0, "#8b4513");
+                grd.addColorStop(1, "#5d2b0c");
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.moveTo(treeX - trunkWidth / 2, groundY);
+                ctx.quadraticCurveTo(
+                    treeX - trunkWidth * 0.9,
+                    groundY - trunkHeight * 0.4,
+                    treeX - trunkWidth * 0.3,
+                    groundY - trunkHeight
+                );
+                ctx.lineTo(treeX + trunkWidth * 0.3, groundY - trunkHeight);
+                ctx.quadraticCurveTo(
+                    treeX + trunkWidth * 0.9,
+                    groundY - trunkHeight * 0.4,
+                    treeX + trunkWidth / 2,
+                    groundY
+                );
+                ctx.closePath();
+                ctx.fill();
+
+                const branchStartX = treeX - trunkWidth * 0.2;
+                const branchStartY = groundY - trunkHeight * 0.6;
+                const branchEndX = treeX - Math.min(canvas.width * 0.18, 180);
+                const branchEndY = branchStartY - Math.min(8, canvas.height * 0.02);
+
+                ctx.strokeStyle = "#6b3b14";
+                ctx.lineWidth = Math.max(4, trunkWidth * 0.6);
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                ctx.moveTo(branchStartX, branchStartY);
+                ctx.quadraticCurveTo(
+                    treeX - trunkWidth - 30,
+                    branchStartY - 15,
+                    branchEndX,
+                    branchEndY
+                );
+                ctx.stroke();
+
+                function drawFoliage(cx, cy, r, c1, c2) {
+                    ctx.fillStyle = c1;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = c2;
+                    ctx.beginPath();
+                    ctx.arc(cx - r * 0.45, cy - r * 0.45, r * 0.75, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(cx + r * 0.5, cy - r * 0.55, r * 0.85, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                const foliageRadius = Math.max(30, canvas.width * 0.06);
+                drawFoliage(
+                    treeX,
+                    groundY - trunkHeight - foliageRadius / 2,
+                    foliageRadius,
+                    "#2ecc71",
+                    "#27ae60"
+                );
+
+                return {
+                    x: branchEndX - 8,
+                    y: branchEndY - 6,
+                };
+            }
+
+            // Draw bird
+            function drawBird(x, y, isFlying = false) {
+                ctx.save();
+                const size = Math.max(10, canvas.width * 0.02);
+                // body
+                ctx.fillStyle = "#f1c40f";
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+                // head
+                ctx.beginPath();
+                ctx.arc(x + size - 2, y - size / 2, size / 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                // beak
+                ctx.fillStyle = "#e67e22";
+                ctx.beginPath();
+                ctx.moveTo(x + size + 5, y - size / 2);
+                ctx.lineTo(x + size + 10, y - size / 2);
+                ctx.lineTo(x + size + 5, y - size / 2 + 4);
+                ctx.fill();
+                // eye
+                ctx.fillStyle = "#2c3e50";
+                ctx.beginPath();
+                ctx.arc(x + size + 2, y - size / 2 - 2, 2, 0, Math.PI * 2);
+                ctx.fill();
+                // wing
+                const wingOffset = isFlying ? Math.sin(Date.now() / 150) * 6 : 0;
+                ctx.fillStyle = "#d4ac0d";
+                ctx.beginPath();
+                ctx.ellipse(
+                    x - size / 3,
+                    y + wingOffset,
+                    size / 1.5,
+                    size / 2,
+                    0,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                // motion lines if flying
+                if (isFlying) {
+                    ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(x - size - 12, y);
+                    ctx.lineTo(x - size - 20, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                ctx.restore();
+            }
+
+            // Draw human
+            function drawHuman() {
+                const x = canvas.width * 0.2;
+                const y = canvas.height * 0.7;
+                const sizeScale = Math.min(1, canvas.width / 800);
+
+                ctx.fillStyle = "#3498db";
+                ctx.fillRect(x - 15 * sizeScale, y - 70 * sizeScale, 30 * sizeScale, 70 * sizeScale);
+
+                ctx.fillStyle = "#ffdbac";
+                ctx.beginPath();
+                ctx.arc(x, y - 85 * sizeScale, 18 * sizeScale, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "#2c3e50";
+                ctx.beginPath();
+                ctx.arc(x, y - 92 * sizeScale, 18 * sizeScale, 0, Math.PI, true);
+                ctx.fill();
+
+                ctx.fillStyle = "#2c3e50";
+                ctx.beginPath();
+                ctx.arc(x - 6 * sizeScale, y - 88 * sizeScale, 3 * sizeScale, 0, Math.PI * 2);
+                ctx.arc(x + 6 * sizeScale, y - 88 * sizeScale, 3 * sizeScale, 0, Math.PI * 2);
+                ctx.fill();
+
+                // mouth
+                ctx.beginPath();
+                if (isCalling) {
+                    ctx.arc(x, y - 80 * sizeScale, 6 * sizeScale, 0, Math.PI, false);
+                } else {
+                    ctx.moveTo(x - 4 * sizeScale, y - 78 * sizeScale);
+                    ctx.lineTo(x + 4 * sizeScale, y - 78 * sizeScale);
+                }
+                ctx.stroke();
+
+                return { x, y };
+            }
+
+            // Draw waves as concentric circles with pressure visualization
+            function drawWaves() {
+                const s = soundSourcePos();
+                waves.forEach((w, idx) => {
+                    // Draw the main wave circle
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, w.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(52,152,219,${Math.max(0.02, w.alpha * 0.9)})`;
+                    ctx.lineWidth = 2 + (1 - w.alpha) * 2;
+                    ctx.stroke();
+
+                    // Label for first visible wave
+                    if (idx === 0 && w.alpha > 0.4) {
+                        ctx.fillStyle = `rgba(52,152,219,${w.alpha})`;
+                        ctx.font = `${Math.max(10, canvas.width / 60)}px Arial`;
+                        ctx.fillText("Sound Wave", s.x + w.radius - 30, s.y - 10);
+                    }
+                });
+            }
+
+            // Sound source indicator near human
+            function drawSoundSource() {
+                if (!isCalling) return;
+                const s = soundSourcePos();
+                const pulse = 8 + Math.sin(Date.now() / 120) * 4;
+                ctx.fillStyle = "rgba(231,76,60,0.7)";
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, pulse, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#e74c3c";
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "#e74c3c";
+                ctx.font = `${Math.max(10, canvas.width / 60)}px Arial`;
+                ctx.fillText("Sound Source", s.x - 35, s.y - 15);
+            }
+
+            // bird state
+            let birdState = null;
+
+            // Main animation loop using high-resolution timestamps
+            function animate(currentTime) {
+                if (!lastTime) lastTime = currentTime;
+                const dt = Math.max(0, (currentTime - lastTime) / 1000);
+                lastTime = currentTime;
+
+                // Adjust wave speed based on canvas size
+                waveSpeedPxPerSec = canvas.width * 0.3;
+
+                // clear (full canvas)
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                drawBackground();
+                const perch = drawTree();
+
+                // initialize bird on first frame
+                if (!birdState) {
+                    birdState = {
+                        x: perch.x,
+                        y: perch.y,
+                        isFlying: false,
+                        perched: true,
+                    };
+                }
+
+                drawSoundSource();
+                drawWaves();
+                const humanPos = drawHuman();
+
+                // keep perched bird anchored to branch (in case of resize)
+                if (birdState.perched) {
+                    birdState.x = perch.x;
+                    birdState.y = perch.y;
+                }
+
+                // check if any wave reached bird perch (distance check)
+                const s = soundSourcePos();
+                const birdPerch = { x: birdState.x, y: birdState.y };
+                const dx = birdPerch.x - s.x;
+                const dy = birdPerch.y - s.y;
+                const distToBird = Math.sqrt(dx * dx + dy * dy);
+
+                if (isCalling && waves.length > 0 && birdState.perched) {
+                    for (let w of waves) {
+                        // trigger when wavefront crosses perch distance
+                        if (w.radius >= distToBird - 15 && w.radius <= distToBird + 15) {
+                            // bird hears and flies away
+                            birdState.isFlying = true;
+                            birdState.perched = false;
+                            document.getElementById('interaction-hint').textContent = "The bird heard you! It's flying away!";
+                            break;
+                        }
+                    }
+                }
+
+                // bird flight update (away from human)
+                if (birdState.isFlying) {
+                    const targetX = canvas.width + 50; // fly off the screen to the right
+                    const targetY = birdState.y - 80; // fly upward
+                    const dx2 = targetX - birdState.x;
+                    const dy2 = targetY - birdState.y;
+                    const dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                    const speed = 160 * dt; // pixels per frame scaled by dt
+                    if (dist > 6) {
+                        birdState.x += (dx2 / dist) * speed;
+                        birdState.y += (dy2 / dist) * speed;
+                    } else {
+                        // Bird has flown away
+                        birdState.isFlying = false;
+                        document.getElementById('interaction-hint').textContent = "The bird has flown away!";
+                    }
+                }
+
+                drawBird(birdState.x, birdState.y, birdState.isFlying);
+
+                // update physics
+                updateWaves(dt);
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            // start animation
+            animationId = requestAnimationFrame(animate);
+
+            // Event listeners
+            document.getElementById('call-bird-btn').addEventListener("click", () => {
+                if (isCalling) return;
+                isCalling = true;
+                document.getElementById('call-bird-btn').disabled = true;
+                document.getElementById('interaction-hint').textContent = "Making sound waves... Watch them travel!";
+
+                // create pulses periodically
+                const createInterval = setInterval(() => {
+                    if (isCalling) createWave();
+                    else clearInterval(createInterval);
+                }, 350);
+
+                // stop calling after 4 seconds
+                setTimeout(() => {
+                    isCalling = false;
+                    document.getElementById('call-bird-btn').disabled = false;
+                    if (document.getElementById('interaction-hint').textContent !== "The bird heard you! It's flying away!") {
+                        document.getElementById('interaction-hint').textContent = "Sound waves sent!";
+                    }
+                }, 4000);
+            });
+
+            document.getElementById('reset-bird-btn').addEventListener("click", () => {
+                isCalling = false;
+                document.getElementById('call-bird-btn').disabled = false;
+                waves = [];
+                birdState = null;
+                document.getElementById('interaction-hint').textContent = 'Click "Call Bird" to see sound travel through air!';
+            });
+
+            // re-init when window size changes
+            window.addEventListener("resize", () => {
+                setCanvasSize();
+            });
+
+            // Return cleanup function
+            return () => {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                window.removeEventListener("resize", setCanvasSize);
+            };
+        }
+    </script>
+</body>
+</html>

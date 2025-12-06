@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Message Exchange for Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6ecbf5 0%, #059ee3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #ffeb3b;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .communication-area {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-area {
+            flex-grow: 1;
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 3px solid #b3e5fc;
+        }
+        
+        .message {
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+        
+        .message.sent {
+            background-color: #a5d6a7;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.received {
+            background-color: #ffcc80;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: #e0e0e0;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            max-width: 80%;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #888;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 3px solid #4fc3f7;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: #0288d1;
+            box-shadow: 0 0 8px rgba(2, 136, 209, 0.5);
+        }
+        
+        button {
+            background-color: #4fc3f7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #0288d1;
+        }
+        
+        button:hover {
+            background-color: #29b6f6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #0288d1;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #0288d1;
+        }
+        
+        .scene-container {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(180deg, #87CEEB 0%, #1E90FF 100%);
+            position: relative;
+        }
+        
+        .character-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .user-controls button {
+            flex: 1;
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            max-width: 1100px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions h2 {
+            color: #0288d1;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .bounce {
+            animation: bounce 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .scene-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Message Exchange</h1>
+    <div class="subtitle">Send fun messages between colorful 3D characters!</div>
+    
+    <div class="container">
+        <div class="communication-area">
+            <div class="chat-area" id="chatArea">
+                <div class="message received">
+                    <div class="message-sender">Alex:</div>
+                    <div>Hi Sam! How are you today?</div>
+                    <div class="message-time">10:05 AM</div>
+                </div>
+                <div class="message sent">
+                    <div class="message-sender">You:</div>
+                    <div>I'm great! I love this 3D message app!</div>
+                    <div class="message-time">10:06 AM</div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <span id="typingUser">Alex</span> is typing <span class="typing-dots"><span></span><span></span><span></span></span>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type your message here...">
+                <button id="sendButton">Send</button>
+            </div>
+            
+            <div class="character-info">
+                <div>You are: <span id="userName">Sam</span></div>
+                <div>Friend: <span id="friendName">Alex</span> <span class="status-dot"></span></div>
+            </div>
+            
+            <div class="user-controls">
+                <button id="switchUserBtn">Switch User</button>
+                <button id="clearChatBtn">Clear Chat</button>
+            </div>
+        </div>
+        
+        <div class="scene-container" id="sceneContainer">
+            <!-- 3D scene will be rendered here -->
+            <div class="status-indicator">
+                <span>Online</span>
+                <div class="status-dot"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h2>How to Use This App:</h2>
+        <p>1. Type your message in the input box and click "Send" or press Enter</p>
+        <p>2. Watch the 3D characters react when messages are sent and received</p>
+        <p>3. The characters will bounce when new messages arrive</p>
+        <p>4. Use "Switch User" to change who you're chatting as</p>
+        <p>5. Have fun communicating with your friends!</p>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const chatArea = document.getElementById('chatArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const sceneContainer = document.getElementById('sceneContainer');
+        const userNameElement = document.getElementById('userName');
+        const friendNameElement = document.getElementById('friendName');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const typingUser = document.getElementById('typingUser');
+        const switchUserBtn = document.getElementById('switchUserBtn');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        
+        // User names
+        const userNames = ['Sam', 'Alex', 'Taylor', 'Jordan'];
+        let currentUserIndex = 0;
+        let currentFriendIndex = 1;
+        
+        // Message history
+        let messageHistory = [];
+        
+        // Initialize Three.js scene
+        let scene, camera, renderer;
+        let character1, character2;
+        let isTyping = false;
+        let typingTimeout = null;
+        
+        function initThreeJS() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, sceneContainer.clientWidth / sceneContainer.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 12);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+            sceneContainer.appendChild(renderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Add ground
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x90EE90 });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            scene.add(ground);
+            
+            // Add some scenery
+            addScenery();
+            
+            // Create characters
+            createCharacters();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation loop
+            animate();
+        }
+        
+        function addScenery() {
+            // Add some trees
+            for (let i = 0; i < 5; i++) {
+                const treeGroup = new THREE.Group();
+                
+                // Tree trunk
+                const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.3, 1.5, 8);
+                const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                treeGroup.add(trunk);
+                
+                // Tree top
+                const topGeometry = new THREE.ConeGeometry(1, 2, 8);
+                const topMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+                const top = new THREE.Mesh(topGeometry, topMaterial);
+                top.position.y = 1.5;
+                treeGroup.add(top);
+                
+                // Position trees randomly
+                treeGroup.position.set(
+                    (Math.random() - 0.5) * 15,
+                    0,
+                    (Math.random() - 0.5) * 15
+                );
+                
+                scene.add(treeGroup);
+            }
+            
+            // Add some flowers
+            for (let i = 0; i < 10; i++) {
+                const flowerGroup = new THREE.Group();
+                
+                // Flower stem
+                const stemGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8);
+                const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x32CD32 });
+                const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+                stem.position.y = 0.25;
+                flowerGroup.add(stem);
+                
+                // Flower head
+                const headGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+                const headMaterial = new THREE.MeshStandardMaterial({ 
+                    color: new THREE.Color().setHSL(Math.random(), 0.8, 0.7) 
+                });
+                const head = new THREE.Mesh(headGeometry, headMaterial);
+                head.position.y = 0.6;
+                flowerGroup.add(head);
+                
+                // Position flowers randomly
+                flowerGroup.position.set(
+                    (Math.random() - 0.5) * 18,
+                    0,
+                    (Math.random() - 0.5) * 18
+                );
+                
+                scene.add(flowerGroup);
+            }
+        }
+        
+        function createCharacters() {
+            // Character 1 (left side)
+            const char1Group = new THREE.Group();
+            
+            // Body
+            const bodyGeometry1 = new THREE.CylinderGeometry(0.8, 0.8, 2, 32);
+            const bodyMaterial1 = new THREE.MeshStandardMaterial({ color: 0xFF6B6B });
+            const body1 = new THREE.Mesh(bodyGeometry1, bodyMaterial1);
+            body1.position.y = 1;
+            char1Group.add(body1);
+            
+            // Head
+            const headGeometry1 = new THREE.SphereGeometry(0.7, 32, 32);
+            const headMaterial1 = new THREE.MeshStandardMaterial({ color: 0xFFD166 });
+            const head1 = new THREE.Mesh(headGeometry1, headMaterial1);
+            head1.position.y = 2.5;
+            char1Group.add(head1);
+            
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            const leftEye1 = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye1.position.set(-0.2, 2.6, 0.6);
+            char1Group.add(leftEye1);
+            
+            const rightEye1 = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye1.position.set(0.2, 2.6, 0.6);
+            char1Group.add(rightEye1);
+            
+            // Smile
+            const smileCurve = new THREE.EllipseCurve(
+                0, 0,            // ax, aY
+                0.3, 0.2,        // xRadius, yRadius
+                0, Math.PI,      // aStartAngle, aEndAngle
+                false,           // aClockwise
+                0                // aRotation
+            );
+            
+            const smilePoints = smileCurve.getPoints(10);
+            const smileGeometry = new THREE.BufferGeometry().setFromPoints(smilePoints);
+            const smileMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+            const smile = new THREE.Line(smileGeometry, smileMaterial);
+            smile.position.set(0, 2.3, 0.6);
+            smile.rotation.x = Math.PI / 2;
+            char1Group.add(smile);
+            
+            // Position character
+            char1Group.position.set(-4, 0, 0);
+            scene.add(char1Group);
+            character1 = char1Group;
+            
+            // Character 2 (right side)
+            const char2Group = new THREE.Group();
+            
+            // Body
+            const bodyGeometry2 = new THREE.CylinderGeometry(0.8, 0.8, 2, 32);
+            const bodyMaterial2 = new THREE.MeshStandardMaterial({ color: 0x4ECDC4 });
+            const body2 = new THREE.Mesh(bodyGeometry2, bodyMaterial2);
+            body2.position.y = 1;
+            char2Group.add(body2);
+            
+            // Head
+            const headGeometry2 = new THREE.SphereGeometry(0.7, 32, 32);
+            const headMaterial2 = new THREE.MeshStandardMaterial({ color: 0xFFD166 });
+            const head2 = new THREE.Mesh(headGeometry2, headMaterial2);
+            head2.position.y = 2.5;
+            char2Group.add(head2);
+            
+            // Eyes
+            const leftEye2 = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye2.position.set(-0.2, 2.6, 0.6);
+            char2Group.add(leftEye2);
+            
+            const rightEye2 = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye2.position.set(0.2, 2.6, 0.6);
+            char2Group.add(rightEye2);
+            
+            // Smile
+            const smile2 = new THREE.Line(smileGeometry, smileMaterial);
+            smile2.position.set(0, 2.3, 0.6);
+            smile2.rotation.x = Math.PI / 2;
+            char2Group.add(smile2);
+            
+            // Position character
+            char2Group.position.set(4, 0, 0);
+            scene.add(char2Group);
+            character2 = char2Group;
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Gentle floating animation
+            const time = Date.now() * 0.001;
+            character1.position.y = Math.sin(time) * 0.1;
+            character2.position.y = Math.sin(time + 1) * 0.1;
+            
+            // Slight rotation
+            character1.rotation.y = Math.sin(time * 0.5) * 0.1;
+            character2.rotation.y = Math.sin(time * 0.5 + 1) * 0.1;
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = sceneContainer.clientWidth / sceneContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+        }
+        
+        // Message handling
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === '') return;
+            
+            // Add message to chat
+            addMessage(userNameElement.textContent, messageText, 'sent');
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Animate character
+            animateCharacter(character2);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate reply after a short delay
+            setTimeout(() => {
+                hideTypingIndicator();
+                
+                const replies = [
+                    "That's awesome!",
+                    "I think so too!",
+                    "What's your favorite color?",
+                    "Do you like to draw?",
+                    "Let's play a game!",
+                    "I love learning new things!",
+                    "Have you read any good books?",
+                    "What's your favorite subject in school?",
+                    "That sounds like fun!",
+                    "I agree with you!",
+                    "Tell me more about that!",
+                    "How was your day?"
+                ];
+                const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                addMessage(friendNameElement.textContent, randomReply, 'received');
+                
+                // Animate the other character
+                animateCharacter(character1);
+            }, 1500 + Math.random() * 2000);
+        }
+        
+        function addMessage(sender, text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender';
+            senderDiv.textContent = `${sender}:`;
+            
+            const textDiv = document.createElement('div');
+            textDiv.textContent = text;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = getCurrentTime();
+            
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(textDiv);
+            messageDiv.appendChild(timeDiv);
+            
+            chatArea.appendChild(messageDiv);
+            
+            // Save to message history
+            messageHistory.push({
+                sender,
+                text,
+                type,
+                time: timeDiv.textContent
+            });
+            
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function getCurrentTime() {
+            const now = new Date();
+            return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        function showTypingIndicator() {
+            typingUser.textContent = friendNameElement.textContent;
+            typingIndicator.style.display = 'block';
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+        
+        function animateCharacter(character) {
+            // Reset scale
+            character.scale.set(1, 1, 1);
+            
+            // Create bounce animation
+            let scale = { x: 1, y: 1, z: 1 };
+            
+            // Use a simple animation since TWEEN is not included
+            let startTime = null;
+            function bounceAnimation(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) / 500; // 500ms duration
+                
+                if (progress < 1) {
+                    // Bounce up
+                    if (progress < 0.5) {
+                        const scaleFactor = 1 + 0.2 * (progress / 0.5);
+                        character.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    } 
+                    // Bounce down
+                    else {
+                        const scaleFactor = 1.2 - 0.2 * ((progress - 0.5) / 0.5);
+                        character.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    }
+                    requestAnimationFrame(bounceAnimation);
+                } else {
+                    character.scale.set(1, 1, 1);
+                }
+            }
+            
+            requestAnimationFrame(bounceAnimation);
+        }
+        
+        function switchUser() {
+            currentUserIndex = (currentUserIndex + 1) % userNames.length;
+            currentFriendIndex = (currentFriendIndex + 1) % userNames.length;
+            
+            // Make sure user and friend have different names
+            if (currentUserIndex === currentFriendIndex) {
+                currentFriendIndex = (currentFriendIndex + 1) % userNames.length;
+            }
+            
+            userNameElement.textContent = userNames[currentUserIndex];
+            friendNameElement.textContent = userNames[currentFriendIndex];
+            
+            // Add a system message
+            const systemMessage = document.createElement('div');
+            systemMessage.style.textAlign = 'center';
+            systemMessage.style.fontStyle = 'italic';
+            systemMessage.style.margin = '10px 0';
+            systemMessage.style.color = '#666';
+            systemMessage.textContent = `You are now chatting as ${userNames[currentUserIndex]}`;
+            chatArea.appendChild(systemMessage);
+            
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function clearChat() {
+            chatArea.innerHTML = '';
+            messageHistory = [];
+            
+            // Add a welcome message
+            addMessage(friendNameElement.textContent, `Hi ${userNameElement.textContent}! Let's chat!`, 'received');
+            animateCharacter(character1);
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        switchUserBtn.addEventListener('click', switchUser);
+        clearChatBtn.addEventListener('click', clearChat);
+        
+        // Initialize the app
+        window.addEventListener('load', () => {
+            initThreeJS();
+            
+            // Add a fun welcome message
+            setTimeout(() => {
+                addMessage(friendNameElement.textContent, "Welcome to our 3D message app! Send me a message!", 'received');
+                animateCharacter(character1);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

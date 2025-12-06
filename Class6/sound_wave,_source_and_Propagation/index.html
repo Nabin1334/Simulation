@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Wave Propagation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #ff6b6b;
+            color: #ffeb3b;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            color: #a5d6ff;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1100px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .simulation-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            max-height: 800px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 0 #1565c0;
+            border-bottom: 3px dashed #4fc3f7;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 20px 0 12px;
+            color: #ffcc00;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(to right, #ff8a00, #ff5252);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #c62828;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #c62828;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #c62828;
+        }
+
+        .slider-container {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #ffcc00;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #4fc3f7, #ff5252);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffeb3b;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .example-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .example-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4fc3f7;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .color-box {
+            width: 25px;
+            height: 25px;
+            border-radius: 6px;
+            border: 2px solid white;
+        }
+
+        .compression {
+            background: #ff5252;
+        }
+
+        .rarefaction {
+            background: #2196f3;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            font-size: 1.1rem;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            background: linear-gradient(to right, #4caf50, #8bc34a);
+            box-shadow: 0 4px 0 #2e7d32;
+            font-size: 1rem;
+            padding: 10px 15px;
+            min-width: auto;
+        }
+
+        .demo-btn:hover {
+            box-shadow: 0 6px 0 #2e7d32;
+        }
+
+        .demo-btn:active {
+            box-shadow: 0 2px 0 #2e7d32;
+        }
+
+        ul {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .quiz-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px dashed #ffcc00;
+        }
+
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffcc00;
+            font-size: 1.2rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .correct {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .incorrect {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .value-display {
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        .concept-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .key-concept {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 8px solid #4fc3f7;
+        }
+
+        .spring-analogy {
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 8px solid #ffcc00;
+        }
+
+        .real-example {
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 8px solid #4caf50;
+        }
+
+        .human-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .human {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .human-icon {
+            font-size: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .human-label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
+        }
+
+        .spring-icon {
+            font-size: 2rem;
+            margin: 0 10px;
+            color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-wave-square"></i> Sound Wave Adventure</h1>
+            <p class="subtitle">Discover How Sound Travels Through Space!</p>
+        </header>
+
+        <div class="content">
+            <div class="simulation-container">
+                <h2><i class="fas fa-tv"></i> Interactive Sound Lab</h2>
+                <p>Watch how sound waves travel from the speaker to your ears! Red areas are high pressure, blue areas are low pressure.</p>
+                
+                <div class="controls">
+                    <button id="play-pause">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button id="reset">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    
+                    <div class="slider-container">
+                        <label for="amplitude"><i class="fas fa-volume-up"></i> Amplitude (Loudness)</label>
+                        <input type="range" id="amplitude" min="0.1" max="2" step="0.1" value="1">
+                        <div class="value-display" id="amplitude-value">Medium</div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="frequency"><i class="fas fa-music"></i> Frequency (Pitch)</label>
+                        <input type="range" id="frequency" min="0.5" max="3" step="0.1" value="1">
+                        <div class="value-display" id="frequency-value">Medium</div>
+                    </div>
+                </div>
+
+                <div class="demo-buttons">
+                    <button class="demo-btn" id="whisper-btn">
+                        <i class="fas fa-volume-down"></i> Whisper
+                    </button>
+                    <button class="demo-btn" id="shout-btn">
+                        <i class="fas fa-volume-up"></i> Shout
+                    </button>
+                    <button class="demo-btn" id="low-pitch-btn">
+                        <i class="fas fa-drum"></i> Low Pitch
+                    </button>
+                    <button class="demo-btn" id="high-pitch-btn">
+                        <i class="fas fa-bell"></i> High Pitch
+                    </button>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="color-box compression"></div>
+                        <span>Compression (High Pressure)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box rarefaction"></div>
+                        <span>Rarefaction (Low Pressure)</span>
+                    </div>
+                </div>
+                
+                <div id="canvas-container">
+                    <!-- Three.js canvas will be inserted here -->
+                </div>
+                
+                <div class="human-container">
+                    <div class="human">
+                        <div class="human-icon" id="source-human">👨‍🔬</div>
+                        <div class="human-label">Sound Source</div>
+                    </div>
+                    <div class="spring-icon">
+                        <i class="fas fa-wind"></i> Sound Wave <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="human">
+                        <div class="human-icon" id="receiver-human">👩‍🎓</div>
+                        <div class="human-label">Sound Receiver</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2><i class="fas fa-book-open"></i> Learning Zone</h2>
+                
+                <div class="key-concept">
+                    <h3><i class="fas fa-lightbulb"></i> What Are Sound Waves?</h3>
+                    <p>Sound waves are vibrations that travel through air, water, or solids. When something vibrates, it pushes air molecules together and pulls them apart, creating waves that travel to your ears!</p>
+                </div>
+                
+                <div class="spring-analogy">
+                    <h3><i class="fas fa-wind"></i> Spring Analogy</h3>
+                    <p>Imagine a slinky! When you push and pull it, the coils bunch up (compression) and spread out (rarefaction). Sound waves work the same way with air molecules!</p>
+                </div>
+                
+                <div class="real-example">
+                    <h3><i class="fas fa-microphone-alt"></i> Real World Examples</h3>
+                    <div class="examples">
+                        <div class="example-card">
+                            <div class="example-title"><i class="fas fa-guitar"></i> Musical Instruments</div>
+                            <p>Guitar strings vibrate to create sound waves that travel through the air to your ears.</p>
+                        </div>
+                        <div class="example-card">
+                            <div class="example-title"><i class="fas fa-user"></i> Your Voice</div>
+                            <p>When you talk, your vocal cords vibrate and create sound waves.</p>
+                        </div>
+                        <div class="example-card">
+                            <div class="example-title"><i class="fas fa-tv"></i> Speakers</div>
+                            <p>Speaker cones move back and forth to push air and create sound.</p>
+                        </div>
+                        <div class="example-card">
+                            <div class="example-title"><i class="fas fa-fish"></i> Underwater Sounds</div>
+                            <p>Dolphins use sound to communicate underwater where sound travels faster!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-star"></i> Key Concepts</h3>
+                <ul>
+                    <li><strong>Compression:</strong> Where air molecules are squeezed together (HIGH pressure)</li>
+                    <li><strong>Rarefaction:</strong> Where air molecules are spread apart (LOW pressure)</li>
+                    <li><strong>Amplitude:</strong> Wave height = LOUDNESS of sound</li>
+                    <li><strong>Frequency:</strong> Waves per second = PITCH of sound</li>
+                    <li><strong>Wavelength:</strong> Distance between compressions</li>
+                </ul>
+                
+                <div class="quiz-box">
+                    <div class="quiz-question"><i class="fas fa-question-circle"></i> Quick Quiz: What happens when you increase amplitude?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="true">The sound gets louder</div>
+                        <div class="quiz-option" data-correct="false">The sound gets higher pitched</div>
+                        <div class="quiz-option" data-correct="false">The sound travels faster</div>
+                        <div class="quiz-option" data-correct="false">The sound changes color</div>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-flask"></i> Try This Experiment</h3>
+                <p>Place your fingers gently on your throat and say "Ahhh". Can you feel the vibrations? That's your vocal cords creating sound waves!</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p><i class="fas fa-graduation-cap"></i> Sound Wave Adventure | Made for 6th Grade Science Fun!</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0c1445);
+        
+        const container = document.getElementById('canvas-container');
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 5, 15);
+        camera.lookAt(0, 0, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+        
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 15);
+        scene.add(directionalLight);
+        
+        // Create a grid floor
+        const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+        scene.add(gridHelper);
+        
+        // Create two human figures at the ends
+        function createHuman(x, color) {
+            const group = new THREE.Group();
+            
+            // Body
+            const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: color });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.y = 0.75;
+            group.add(body);
+            
+            // Head
+            const headGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+            const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc99 });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.y = 1.8;
+            group.add(head);
+            
+            // Arms
+            const armGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
+            const leftArm = new THREE.Mesh(armGeometry, bodyMaterial);
+            leftArm.position.set(-0.5, 1, 0);
+            leftArm.rotation.z = Math.PI / 4;
+            group.add(leftArm);
+            
+            const rightArm = new THREE.Mesh(armGeometry, bodyMaterial);
+            rightArm.position.set(0.5, 1, 0);
+            rightArm.rotation.z = -Math.PI / 4;
+            group.add(rightArm);
+            
+            // Legs
+            const legGeometry = new THREE.CylinderGeometry(0.15, 0.15, 1.2, 8);
+            const leftLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+            leftLeg.position.set(-0.2, -0.6, 0);
+            group.add(leftLeg);
+            
+            const rightLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+            rightLeg.position.set(0.2, -0.6, 0);
+            group.add(rightLeg);
+            
+            group.position.x = x;
+            return group;
+        }
+        
+        // Create source and receiver humans
+        const sourceHuman = createHuman(-8, 0xff5722);
+        scene.add(sourceHuman);
+        
+        const receiverHuman = createHuman(8, 0x4caf50);
+        scene.add(receiverHuman);
+        
+        // Create air particles (molecules)
+        const particles = [];
+        const particleCount = 100;
+        const particleGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+        
+        // Spring lines between particles
+        const springLines = [];
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x4caf50 });
+        
+        // Initialize particles and springs
+        for (let i = 0; i < particleCount; i++) {
+            const particleMaterial = new THREE.MeshStandardMaterial({ color: 0x2196f3 });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            particle.position.set(-7 + i * 0.14, 0, 0);
+            particle.userData.originalX = particle.position.x;
+            particle.userData.index = i;
+            scene.add(particle);
+            particles.push(particle);
+            
+            // Create spring lines between particles
+            if (i > 0) {
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                    particles[i-1].position,
+                    particle.position
+                ]);
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                scene.add(line);
+                springLines.push(line);
+            }
+        }
+        
+        // Animation variables
+        let time = 0;
+        let isPlaying = true;
+        let amplitude = 1;
+        let frequency = 1;
+        
+        // Update function for animation
+        function animate() {
+            if (isPlaying) {
+                time += 0.02 * frequency;
+                
+                // Animate source human (vibrating)
+                sourceHuman.position.x = -8 + Math.sin(time * 5) * amplitude * 0.2;
+                
+                // Update particle positions to create wave
+                for (let i = 0; i < particles.length; i++) {
+                    const particle = particles[i];
+                    const distanceFromSource = particle.userData.originalX + 7;
+                    
+                    // Create longitudinal wave (particles move along x-axis)
+                    const waveOffset = Math.sin(distanceFromSource * 2 - time * 5) * amplitude * 0.5;
+                    particle.position.x = particle.userData.originalX + waveOffset;
+                    
+                    // Add slight vertical movement for visual clarity
+                    particle.position.y = Math.sin(distanceFromSource * 1.5 - time * 3) * amplitude * 0.1;
+                    
+                    // Color particles based on compression/rarefaction
+                    let compressionFactor;
+                    if (i === 0) {
+                        compressionFactor = Math.sin(distanceFromSource * 2 - time * 5);
+                    } else if (i === particles.length - 1) {
+                        compressionFactor = Math.sin((distanceFromSource - 0.14) * 2 - time * 5);
+                    } else {
+                        const leftDist = particles[i-1].position.x - particle.position.x;
+                        const rightDist = particles[i+1].position.x - particle.position.x;
+                        compressionFactor = (leftDist + rightDist) * 5;
+                    }
+                    
+                    // Color from blue (rarefaction) to red (compression)
+                    const color = new THREE.Color();
+                    if (compressionFactor > 0) {
+                        color.setRGB(1, 1 - compressionFactor, 1 - compressionFactor);
+                    } else {
+                        color.setRGB(1 + compressionFactor, 1 + compressionFactor, 1);
+                    }
+                    particle.material.color = color;
+                }
+                
+                // Update spring lines
+                for (let i = 0; i < springLines.length; i++) {
+                    const line = springLines[i];
+                    const points = [
+                        particles[i].position,
+                        particles[i+1].position
+                    ];
+                    line.geometry.setFromPoints(points);
+                    
+                    // Color springs based on compression
+                    const distance = points[0].distanceTo(points[1]);
+                    const normalDistance = 0.14;
+                    const compression = (normalDistance - distance) * 10;
+                    
+                    if (compression > 0) {
+                        line.material.color.setRGB(1, 1 - compression, 1 - compression);
+                    } else {
+                        line.material.color.setRGB(1 + compression, 1 + compression, 1);
+                    }
+                }
+                
+                // Make receiver human react to sound waves
+                const waveAtReceiver = Math.sin(15 * 2 - time * 5) * amplitude * 0.1;
+                receiverHuman.position.y = Math.max(0, waveAtReceiver);
+                
+                // Animate human icons
+                const sourceHumanIcon = document.getElementById('source-human');
+                const receiverHumanIcon = document.getElementById('receiver-human');
+                
+                if (amplitude > 1.5) {
+                    sourceHumanIcon.textContent = "👨‍🔬";
+                    sourceHumanIcon.style.transform = `scale(${1 + amplitude * 0.1})`;
+                } else {
+                    sourceHumanIcon.textContent = "👨‍🔬";
+                    sourceHumanIcon.style.transform = "scale(1)";
+                }
+                
+                if (waveAtReceiver > 0.05) {
+                    receiverHumanIcon.textContent = "👩‍🎓";
+                    receiverHumanIcon.style.transform = `scale(${1 + waveAtReceiver * 2})`;
+                } else {
+                    receiverHumanIcon.textContent = "👩‍🎓";
+                    receiverHumanIcon.style.transform = "scale(1)";
+                }
+            }
+            
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+        
+        // Control event handlers
+        document.getElementById('play-pause').addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            document.getElementById('play-pause').innerHTML = isPlaying ? 
+                '<i class="fas fa-pause"></i> Pause' : 
+                '<i class="fas fa-play"></i> Play';
+        });
+        
+        document.getElementById('reset').addEventListener('click', () => {
+            time = 0;
+            isPlaying = true;
+            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i> Pause';
+            document.getElementById('amplitude').value = 1;
+            document.getElementById('frequency').value = 1;
+            amplitude = 1;
+            frequency = 1;
+            updateValueDisplays();
+        });
+        
+        document.getElementById('amplitude').addEventListener('input', (e) => {
+            amplitude = parseFloat(e.target.value);
+            updateValueDisplays();
+        });
+        
+        document.getElementById('frequency').addEventListener('input', (e) => {
+            frequency = parseFloat(e.target.value);
+            updateValueDisplays();
+        });
+        
+        // Demo buttons
+        document.getElementById('whisper-btn').addEventListener('click', () => {
+            amplitude = 0.3;
+            document.getElementById('amplitude').value = amplitude;
+            updateValueDisplays();
+        });
+        
+        document.getElementById('shout-btn').addEventListener('click', () => {
+            amplitude = 1.8;
+            document.getElementById('amplitude').value = amplitude;
+            updateValueDisplays();
+        });
+        
+        document.getElementById('low-pitch-btn').addEventListener('click', () => {
+            frequency = 0.6;
+            document.getElementById('frequency').value = frequency;
+            updateValueDisplays();
+        });
+        
+        document.getElementById('high-pitch-btn').addEventListener('click', () => {
+            frequency = 2.5;
+            document.getElementById('frequency').value = frequency;
+            updateValueDisplays();
+        });
+        
+        // Quiz functionality
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const isCorrect = this.getAttribute('data-correct') === 'true';
+                
+                // Remove previous classes
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                
+                // Add appropriate class
+                this.classList.add(isCorrect ? 'correct' : 'incorrect');
+                
+                // If incorrect, show the correct answer
+                if (!isCorrect) {
+                    document.querySelector('.quiz-option[data-correct="true"]').classList.add('correct');
+                }
+            });
+        });
+        
+        // Update value displays
+        function updateValueDisplays() {
+            const amplitudeValue = document.getElementById('amplitude-value');
+            if (amplitude < 0.5) amplitudeValue.textContent = 'Quiet';
+            else if (amplitude < 1.5) amplitudeValue.textContent = 'Medium';
+            else amplitudeValue.textContent = 'Loud';
+            
+            const frequencyValue = document.getElementById('frequency-value');
+            if (frequency < 1) frequencyValue.textContent = 'Low Pitch';
+            else if (frequency < 2) frequencyValue.textContent = 'Medium Pitch';
+            else frequencyValue.textContent = 'High Pitch';
+        }
+        
+        // Initial update
+        updateValueDisplays();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Energy Transformation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0a0a2a, #1a2980, #26d0ce);
+            color: white;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .energy-flow-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            margin: 0 auto;
+            max-width: 90%;
+        }
+        
+        .stage {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stage-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .stage-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .arrow {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        button {
+            padding: 0.8rem 1.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #startBtn {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        #startBtn.running {
+            background: linear-gradient(135deg, #F44336, #C62828);
+        }
+        
+        #scene-container {
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .footer {
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .info-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+            display: none;
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 0.5rem;
+            color: #4FC3F7;
+        }
+        
+        .info-panel.active {
+            display: block;
+        }
+        
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+        
+        .stats-panel h3 {
+            margin-bottom: 0.5rem;
+            color: #4FC3F7;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFEB3B;
+        }
+        
+        .education-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+        
+        .education-panel h3 {
+            margin-bottom: 0.5rem;
+            color: #4FC3F7;
+        }
+        
+        .education-step {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .education-step.active {
+            background: rgba(79, 195, 247, 0.3);
+            border-left: 3px solid #4FC3F7;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #4FC3F7;
+            border-radius: 50%;
+            text-align: center;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .energy-flow-indicator {
+                padding: 0.6rem 1rem;
+            }
+            
+            .stage-label {
+                font-size: 0.8rem;
+            }
+            
+            button {
+                padding: 0.7rem 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .info-panel, .stats-panel, .education-panel {
+                position: relative;
+                top: auto;
+                right: auto;
+                bottom: auto;
+                left: auto;
+                max-width: 100%;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="header">
+            <h1>⚡ Solar Energy Transformation</h1>
+            <p class="subtitle">From sunlight to electricity to power your home</p>
+            
+            <div class="control-panel">
+                <button id="startBtn">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">Start Energy Flow</span>
+                </button>
+                
+                <div class="energy-flow-indicator">
+                    <div class="stage">
+                        <div class="stage-color" style="background-color: #FFC107;"></div>
+                        <span class="stage-label">Solar Energy</span>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-color" style="background-color: #2196F3;"></div>
+                        <span class="stage-label">DC Electricity</span>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-color" style="background-color: #9C27B0;"></div>
+                        <span class="stage-label">Battery Storage</span>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-color" style="background-color: #FFEB3B;"></div>
+                        <span class="stage-label">Light Energy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="scene-container">
+            <div class="education-panel" id="educationPanel">
+                <h3>Solar Energy Process</h3>
+                <div class="education-step active" id="step1">
+                    <span class="step-number">1</span>
+                    <span>Sun emits photons (light energy)</span>
+                </div>
+                <div class="education-step" id="step2">
+                    <span class="step-number">2</span>
+                    <span>Solar panels convert photons to electrons</span>
+                </div>
+                <div class="education-step" id="step3">
+                    <span class="step-number">3</span>
+                    <span>Battery stores electrical energy</span>
+                </div>
+                <div class="education-step" id="step4">
+                    <span class="step-number">4</span>
+                    <span>Light bulb converts electricity to light</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🌞 Solar Panel → 🔋 Battery → 💡 Light Bulb | Complete Energy Transformation Cycle</p>
+        </div>
+        
+        <div class="info-panel" id="infoPanel">
+            <h3>Energy Transformation Process</h3>
+            <p>1. Sunlight (photons) hits solar panels</p>
+            <p>2. Solar cells convert light to DC electricity</p>
+            <p>3. Electricity is stored in batteries</p>
+            <p>4. Stored energy powers the light bulb</p>
+        </div>
+        
+        <div class="stats-panel" id="statsPanel">
+            <h3>Energy Statistics</h3>
+            <p>Generated: <span class="stat-value" id="energyGenerated">0</span> kWh</p>
+            <p>Stored: <span class="stat-value" id="energyStored">0</span> kWh</p>
+            <p>Used: <span class="stat-value" id="energyUsed">0</span> kWh</p>
+        </div>
+    </div>
+
+    <script>
+        // Main Three.js application
+        class SolarEnergyTransformation {
+            constructor() {
+                this.isAnimating = false;
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.sun = null;
+                this.solarPanels = [];
+                this.battery = null;
+                this.lightBulb = null;
+                this.wires = [];
+                this.currentStep = 1;
+                this.energyPulse = 0;
+                this.bulbIntensity = 0;
+                
+                // Energy statistics
+                this.energyGenerated = 0;
+                this.energyStored = 0;
+                this.energyUsed = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                // Scene setup
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x0a0a2a);
+                this.scene.fog = new THREE.Fog(0x0a0a2a, 20, 50);
+                
+                // Camera
+                const container = document.getElementById('scene-container');
+                this.camera = new THREE.PerspectiveCamera(
+                    60, 
+                    container.clientWidth / container.clientHeight, 
+                    0.1, 
+                    1000
+                );
+                this.camera.position.set(0, 8, 15);
+                this.camera.lookAt(0, 2, 0);
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                container.appendChild(this.renderer.domElement);
+                
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+                this.scene.add(ambientLight);
+                
+                const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+                sunLight.position.set(-10, 15, 5);
+                sunLight.castShadow = true;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                sunLight.shadow.camera.near = 0.5;
+                sunLight.shadow.camera.far = 50;
+                sunLight.shadow.camera.left = -20;
+                sunLight.shadow.camera.right = 20;
+                sunLight.shadow.camera.top = 20;
+                sunLight.shadow.camera.bottom = -20;
+                this.scene.add(sunLight);
+                
+                // Create objects
+                this.createSun();
+                this.createSolarPanels();
+                this.createBattery();
+                this.createLightBulb();
+                this.createGround();
+                this.createWires();
+                
+                // Start animation loop
+                this.animate();
+                
+                // Event listeners
+                window.addEventListener('resize', () => this.onWindowResize());
+                document.getElementById('startBtn').addEventListener('click', () => this.toggleAnimation());
+                
+                // Show info panel on hover
+                const infoPanel = document.getElementById('infoPanel');
+                container.addEventListener('mouseenter', () => {
+                    infoPanel.classList.add('active');
+                });
+                container.addEventListener('mouseleave', () => {
+                    infoPanel.classList.remove('active');
+                });
+            }
+            
+            createSun() {
+                const sunGroup = new THREE.Group();
+                
+                // Core sun
+                const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
+                const sunMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xFFC107,
+                });
+                const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+                sunGroup.add(sun);
+
+                // Sun rays (multiple rings)
+                for (let i = 0; i < 3; i++) {
+                    const rayGeometry = new THREE.RingGeometry(2.3 + i * 0.3, 2.5 + i * 0.3, 32);
+                    const rayMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0xFFD54F,
+                        transparent: true,
+                        opacity: 0.4 - i * 0.1,
+                        side: THREE.DoubleSide
+                    });
+                    const rays = new THREE.Mesh(rayGeometry, rayMaterial);
+                    rays.rotation.x = Math.PI / 2;
+                    rays.userData.rotationSpeed = 0.002 * (i + 1);
+                    sunGroup.add(rays);
+                }
+
+                // Glow effect
+                const glowGeometry = new THREE.SphereGeometry(2.8, 32, 32);
+                const glowMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xFFEB3B,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                sunGroup.add(glow);
+
+                sunGroup.position.set(-10, 8, -5);
+                this.sun = sunGroup;
+                this.scene.add(sunGroup);
+            }
+            
+            createSolarPanels() {
+                const panelGroup = new THREE.Group();
+                
+                // Create a more realistic solar panel
+                const createRealisticSolarPanel = (x, z) => {
+                    const panelGroup = new THREE.Group();
+                    
+                    // Panel frame (aluminum)
+                    const frameGeometry = new THREE.BoxGeometry(3.5, 0.2, 2.5);
+                    const frameMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0xC0C0C0,
+                        metalness: 0.9,
+                        roughness: 0.2
+                    });
+                    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+                    panelGroup.add(frame);
+                    
+                    // Glass cover with anti-reflective coating
+                    const glassGeometry = new THREE.BoxGeometry(3.2, 0.05, 2.2);
+                    const glassMaterial = new THREE.MeshPhysicalMaterial({ 
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.95,
+                        transmission: 0.95,
+                        roughness: 0.05,
+                        metalness: 0,
+                        clearcoat: 1,
+                        clearcoatRoughness: 0.05
+                    });
+                    const glass = new THREE.Mesh(glassGeometry, glassMaterial);
+                    glass.position.y = 0.125;
+                    panelGroup.add(glass);
+                    
+                    // Solar cells (silicon with grid lines)
+                    const cellsGeometry = new THREE.BoxGeometry(3, 0.1, 2);
+                    const cellsMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x1A237E,
+                        metalness: 0.1,
+                        roughness: 0.8,
+                        emissive: 0x0D47A1,
+                        emissiveIntensity: 0.2
+                    });
+                    const cells = new THREE.Mesh(cellsGeometry, cellsMaterial);
+                    cells.position.y = 0.1;
+                    panelGroup.add(cells);
+                    
+                    // Grid lines (silver)
+                    const gridMaterial = new THREE.LineBasicMaterial({ color: 0xC0C0C0 });
+                    
+                    // Vertical grid lines
+                    for (let i = 0; i < 6; i++) {
+                        const points = [];
+                        points.push(new THREE.Vector3(-1.5 + i * 0.6, 0.16, -1));
+                        points.push(new THREE.Vector3(-1.5 + i * 0.6, 0.16, 1));
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const line = new THREE.Line(geometry, gridMaterial);
+                        panelGroup.add(line);
+                    }
+                    
+                    // Horizontal grid lines
+                    for (let i = 0; i < 5; i++) {
+                        const points = [];
+                        points.push(new THREE.Vector3(-1.5, 0.16, -1 + i * 0.5));
+                        points.push(new THREE.Vector3(1.5, 0.16, -1 + i * 0.5));
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const line = new THREE.Line(geometry, gridMaterial);
+                        panelGroup.add(line);
+                    }
+                    
+                    // Panel support structure
+                    const supportGeometry = new THREE.CylinderGeometry(0.05, 0.05, 2, 8);
+                    const supportMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x606060,
+                        metalness: 0.7,
+                        roughness: 0.3
+                    });
+                    
+                    const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+                    support1.position.set(-1.2, -1, 0);
+                    support1.rotation.z = Math.PI / 2;
+                    panelGroup.add(support1);
+                    
+                    const support2 = new THREE.Mesh(supportGeometry, supportMaterial);
+                    support2.position.set(1.2, -1, 0);
+                    support2.rotation.z = Math.PI / 2;
+                    panelGroup.add(support2);
+                    
+                    // Junction box
+                    const junctionGeometry = new THREE.BoxGeometry(0.4, 0.2, 0.3);
+                    const junctionMaterial = new THREE.MeshStandardMaterial({ 
+                        color: 0x333333,
+                        metalness: 0.3,
+                        roughness: 0.7
+                    });
+                    const junctionBox = new THREE.Mesh(junctionGeometry, junctionMaterial);
+                    junctionBox.position.set(1, 0.1, 0.8);
+                    panelGroup.add(junctionBox);
+                    
+                    // Cables from junction box
+                    const cableGeometry = new THREE.CylinderGeometry(0.03, 0.03, 1, 8);
+                    const cableMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+                    
+                    const cable1 = new THREE.Mesh(cableGeometry, cableMaterial);
+                    cable1.position.set(1.2, -0.4, 0.8);
+                    cable1.rotation.z = Math.PI / 2;
+                    panelGroup.add(cable1);
+                    
+                    const cable2 = new THREE.Mesh(cableGeometry, cableMaterial);
+                    cable2.position.set(1.2, -0.6, 0.8);
+                    cable2.rotation.z = Math.PI / 2;
+                    panelGroup.add(cable2);
+                    
+                    // Position and rotate the panel
+                    panelGroup.position.set(x, 2.5, z);
+                    panelGroup.rotation.x = -Math.PI / 5;
+                    panelGroup.castShadow = true;
+                    
+                    return panelGroup;
+                };
+                
+                // Create two solar panels
+                const panel1 = createRealisticSolarPanel(-2, -2);
+                const panel2 = createRealisticSolarPanel(2, -2);
+                
+                panelGroup.add(panel1);
+                panelGroup.add(panel2);
+                
+                this.solarPanels.push(panel1);
+                this.solarPanels.push(panel2);
+                this.scene.add(panelGroup);
+            }
+            
+            createBattery() {
+                const batteryGroup = new THREE.Group();
+
+                // Battery body
+                const bodyGeometry = new THREE.BoxGeometry(1.2, 1.8, 0.8);
+                const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x263238,
+                    metalness: 0.5,
+                    roughness: 0.5
+                });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.castShadow = true;
+                batteryGroup.add(body);
+
+                // Battery terminals
+                const terminalGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.3, 16);
+                const terminalMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xFFD700,
+                    metalness: 0.9,
+                    roughness: 0.1
+                });
+                
+                const terminal1 = new THREE.Mesh(terminalGeometry, terminalMaterial);
+                terminal1.position.set(-0.3, 1.05, 0);
+                batteryGroup.add(terminal1);
+
+                const terminal2 = new THREE.Mesh(terminalGeometry, terminalMaterial);
+                terminal2.position.set(0.3, 1.05, 0);
+                batteryGroup.add(terminal2);
+
+                // Plus/minus signs
+                const plusGeometry = new THREE.BoxGeometry(0.15, 0.02, 0.02);
+                const signMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+                const plus1 = new THREE.Mesh(plusGeometry, signMaterial);
+                plus1.position.set(-0.3, 1.25, 0);
+                batteryGroup.add(plus1);
+                const plus2 = plus1.clone();
+                plus2.rotation.z = Math.PI / 2;
+                batteryGroup.add(plus2);
+
+                const minus = new THREE.Mesh(plusGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+                minus.position.set(0.3, 1.25, 0);
+                batteryGroup.add(minus);
+
+                // Energy level indicator
+                const indicatorGeometry = new THREE.PlaneGeometry(0.8, 0.4);
+                const indicatorMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x00FF00,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+                indicator.position.set(0, 0, 0.41);
+                batteryGroup.add(indicator);
+
+                // Battery label
+                const labelGeometry = new THREE.PlaneGeometry(0.6, 0.3);
+                const labelMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xFFFFFF,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const label = new THREE.Mesh(labelGeometry, labelMaterial);
+                label.position.set(0, -0.5, 0.41);
+                batteryGroup.add(label);
+
+                batteryGroup.position.set(5, 1.5, 0);
+                this.battery = batteryGroup;
+                this.scene.add(batteryGroup);
+            }
+            
+            createLightBulb() {
+                const bulbGroup = new THREE.Group();
+
+                // Ultra-bright bulb glass - only the bulb surface glows
+                const bulbGeometry = new THREE.SphereGeometry(0.4, 32, 32);
+                const bulbMaterial = new THREE.MeshPhysicalMaterial({ 
+                    color: 0xFFFFFF, // Pure white for maximum brightness
+                    emissive: 0xFFFF00, // Ultra-bright yellow emissive
+                    emissiveIntensity: 0, // Start with no emission
+                    transparent: true,
+                    opacity: 0.95,
+                    transmission: 0.7,
+                    roughness: 0.05, // Very smooth surface for maximum light
+                    metalness: 0,
+                    clearcoat: 1,
+                    clearcoatRoughness: 0.02
+                });
+                const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+                bulbGroup.add(bulb);
+
+                // Ultra-bright filament
+                const filamentGroup = new THREE.Group();
+                
+                // Create a more realistic filament structure
+                const filamentGeometry = new THREE.TorusGeometry(0.15, 0.015, 12, 24);
+                const filamentMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xFFAA00,
+                    emissive: 0xFF5500, // Ultra-bright orange emissive
+                    emissiveIntensity: 0
+                });
+                const filamentRing = new THREE.Mesh(filamentGeometry, filamentMaterial);
+                filamentRing.rotation.x = Math.PI / 2;
+                filamentGroup.add(filamentRing);
+                
+                // Add support wires
+                const wireGeometry = new THREE.CylinderGeometry(0.008, 0.008, 0.3, 8);
+                const wireMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+                
+                for (let i = 0; i < 4; i++) {
+                    const wire = new THREE.Mesh(wireGeometry, wireMaterial);
+                    wire.rotation.z = (Math.PI / 2) * i;
+                    wire.position.y = 0.15;
+                    filamentGroup.add(wire);
+                }
+                
+                bulbGroup.add(filamentGroup);
+
+                // Base (Edison screw base)
+                const baseGeometry = new THREE.CylinderGeometry(0.25, 0.2, 0.4, 16);
+                const baseMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xC0C0C0,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
+                const base = new THREE.Mesh(baseGeometry, baseMaterial);
+                base.position.y = -0.5;
+                bulbGroup.add(base);
+
+                // Base threads
+                const threadGeometry = new THREE.TorusGeometry(0.225, 0.012, 8, 16);
+                const threadMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x909090,
+                    metalness: 0.7,
+                    roughness: 0.4
+                });
+                
+                for (let i = 0; i < 3; i++) {
+                    const thread = new THREE.Mesh(threadGeometry, threadMaterial);
+                    thread.position.y = -0.4 + i * 0.1;
+                    thread.rotation.x = Math.PI / 2;
+                    bulbGroup.add(thread);
+                }
+
+                // Ultra-bright point light inside the bulb
+                const bulbLight = new THREE.PointLight(0xFFFF80, 0, 15, 1.8);
+                bulbGroup.add(bulbLight);
+
+                // Make the entire bulb glow yellow when active
+                const bulbGlowGeometry = new THREE.SphereGeometry(0.6, 32, 32);
+                const bulbGlowMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xFFFF00,
+                    transparent: true,
+                    opacity: 0.3,
+                    side: THREE.BackSide
+                });
+                const bulbGlow = new THREE.Mesh(bulbGlowGeometry, bulbGlowMaterial);
+                bulbGroup.add(bulbGlow);
+
+                bulbGroup.position.set(0, 3, 3);
+                bulbGroup.userData = { 
+                    bulbMaterial, 
+                    filamentMaterial, 
+                    bulbLight,
+                    filamentGroup,
+                    bulbGlowMaterial
+                };
+                this.lightBulb = bulbGroup;
+                this.scene.add(bulbGroup);
+            }
+            
+            createGround() {
+                // Create gray soil-like ground
+                const groundGeometry = new THREE.PlaneGeometry(50, 50);
+                const groundMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x7a6b5e, // Gray soil color
+                    roughness: 0.9,
+                    metalness: 0.1
+                });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+                
+                // Add some soil texture details
+                const soilDetailGeometry = new THREE.PlaneGeometry(50, 50, 20, 20);
+                const soilDetailMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x7a6b5e,
+                    roughness: 0.95,
+                    metalness: 0.05,
+                    wireframe: false
+                });
+                const soilDetail = new THREE.Mesh(soilDetailGeometry, soilDetailMaterial);
+                soilDetail.rotation.x = -Math.PI / 2;
+                soilDetail.position.y = 0.01;
+                this.scene.add(soilDetail);
+            }
+            
+            createWires() {
+                const createWire = (start, end, color) => {
+                    const curve = new THREE.QuadraticBezierCurve3(
+                        start,
+                        new THREE.Vector3(
+                            (start.x + end.x) / 2,
+                            Math.max(start.y, end.y) + 1,
+                            (start.z + end.z) / 2
+                        ),
+                        end
+                    );
+                    const points = curve.getPoints(50);
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const material = new THREE.LineBasicMaterial({ 
+                        color: color,
+                        transparent: true,
+                        opacity: 0.5,
+                        linewidth: 2
+                    });
+                    return new THREE.Line(geometry, material);
+                };
+
+                // Wire from solar panels to battery
+                const wire1 = createWire(
+                    new THREE.Vector3(0, 2.5, -2),
+                    new THREE.Vector3(5, 1.5, 0),
+                    0x2196F3
+                );
+                this.scene.add(wire1);
+                this.wires.push(wire1);
+
+                // Wire from battery to light bulb
+                const wire2 = createWire(
+                    new THREE.Vector3(5, 1.5, 0),
+                    new THREE.Vector3(0, 3, 3),
+                    0x9C27B0
+                );
+                this.scene.add(wire2);
+                this.wires.push(wire2);
+            }
+            
+            updateEducationStep(step) {
+                // Update the education panel to highlight the current step
+                document.querySelectorAll('.education-step').forEach((el, index) => {
+                    if (index + 1 === step) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                });
+                this.currentStep = step;
+            }
+            
+            toggleAnimation() {
+                this.isAnimating = !this.isAnimating;
+                
+                const button = document.getElementById('startBtn');
+                const buttonIcon = button.querySelector('.btn-icon');
+                const buttonText = button.querySelector('.btn-text');
+                
+                if (this.isAnimating) {
+                    button.classList.add('running');
+                    buttonIcon.textContent = '⏸';
+                    buttonText.textContent = 'Stop Energy Flow';
+                    this.updateEducationStep(1);
+                    
+                    // Start the energy flow simulation
+                    this.startEnergyFlow();
+                } else {
+                    button.classList.remove('running');
+                    buttonIcon.textContent = '▶';
+                    buttonText.textContent = 'Start Energy Flow';
+                    
+                    // Stop the energy flow
+                    this.stopEnergyFlow();
+                    
+                    // Reset education steps
+                    this.updateEducationStep(1);
+                }
+            }
+            
+            startEnergyFlow() {
+                // Update energy statistics
+                this.energyGenerated += 0.5;
+                document.getElementById('energyGenerated').textContent = this.energyGenerated.toFixed(2);
+                
+                // Gradually turn on the bulb like a real light
+                this.gradualBulbOn(800); // 0.8 seconds to full brightness
+                
+                // Update education steps with delay
+                setTimeout(() => {
+                    this.updateEducationStep(2);
+                    this.energyStored += 0.3;
+                    document.getElementById('energyStored').textContent = this.energyStored.toFixed(2);
+                }, 1000);
+                
+                setTimeout(() => {
+                    this.updateEducationStep(3);
+                }, 2000);
+                
+                setTimeout(() => {
+                    this.updateEducationStep(4);
+                    this.energyUsed += 0.2;
+                    document.getElementById('energyUsed').textContent = this.energyUsed.toFixed(2);
+                }, 3000);
+                
+                // Subtle flicker effect like real bulbs
+                this.energyPulse = setInterval(() => {
+                    if (this.isAnimating && this.bulbIntensity > 0.5) {
+                        // Random subtle flicker
+                        const flicker = 0.97 + Math.random() * 0.06;
+                        this.setBulbIntensity(this.bulbIntensity * flicker);
+                        
+                        // Return to normal after flicker
+                        setTimeout(() => {
+                            if (this.isAnimating) {
+                                this.setBulbIntensity(this.bulbIntensity / flicker);
+                            }
+                        }, 30);
+                    }
+                }, 2000);
+            }
+            
+            gradualBulbOn(duration) {
+                const startTime = Date.now();
+                const interval = 16; // ~60fps
+                
+                const animateBulb = () => {
+                    if (!this.isAnimating) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease-in-out curve for natural-looking light-up
+                    const intensity = progress < 0.5 ? 
+                        2 * progress * progress : 
+                        -1 + (4 - 2 * progress) * progress;
+                    
+                    this.setBulbIntensity(intensity);
+                    
+                    if (progress < 1) {
+                        setTimeout(animateBulb, interval);
+                    }
+                };
+                
+                animateBulb();
+            }
+            
+            setBulbIntensity(intensity) {
+                this.bulbIntensity = Math.max(0, Math.min(1, intensity));
+                
+                const { bulbMaterial, filamentMaterial, bulbLight, bulbGlowMaterial } = this.lightBulb.userData;
+                
+                // Ultra-bright bulb glow - only the bulb surface
+                bulbMaterial.emissiveIntensity = this.bulbIntensity * 4.0; // Ultra-strong yellow emission
+                filamentMaterial.emissiveIntensity = this.bulbIntensity * 5.0; // Ultra-bright filament
+                bulbLight.intensity = this.bulbIntensity * 12; // Ultra-bright light intensity
+                bulbGlowMaterial.opacity = this.bulbIntensity * 0.3; // Make the whole bulb glow yellow
+            }
+            
+            stopEnergyFlow() {
+                // Clear pulse interval
+                if (this.energyPulse) {
+                    clearInterval(this.energyPulse);
+                    this.energyPulse = 0;
+                }
+                
+                // Gradually turn off the bulb like a real light
+                this.gradualBulbOff(600); // 0.6 seconds to turn off
+            }
+            
+            gradualBulbOff(duration) {
+                const startIntensity = this.bulbIntensity;
+                const startTime = Date.now();
+                const interval = 16; // ~60fps
+                
+                const animateBulb = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease-out curve for natural-looking fade
+                    const intensity = startIntensity * (1 - progress * progress);
+                    
+                    this.setBulbIntensity(intensity);
+                    
+                    if (progress < 1) {
+                        setTimeout(animateBulb, interval);
+                    } else {
+                        // Ensure bulb is completely off
+                        const { bulbMaterial, filamentMaterial, bulbLight, bulbGlowMaterial } = this.lightBulb.userData;
+                        bulbMaterial.emissiveIntensity = 0;
+                        filamentMaterial.emissiveIntensity = 0;
+                        bulbLight.intensity = 0;
+                        bulbGlowMaterial.opacity = 0;
+                        this.bulbIntensity = 0;
+                    }
+                };
+                
+                animateBulb();
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                const time = performance.now() * 0.001;
+                
+                // Animate sun rays
+                this.sun.children.forEach((child, index) => {
+                    if (child.userData.rotationSpeed) {
+                        child.rotation.z += child.userData.rotationSpeed;
+                    }
+                });
+
+                // Pulsate sun glow
+                this.sun.children[this.sun.children.length - 1].scale.setScalar(1 + Math.sin(time * 2) * 0.05);
+
+                // Rotate filament slightly for animation effect when bulb is on
+                if (this.isAnimating && this.bulbIntensity > 0.3) {
+                    const { filamentGroup } = this.lightBulb.userData;
+                    filamentGroup.rotation.y += 0.008 * this.bulbIntensity;
+                }
+
+                // Gentle camera movement
+                this.camera.position.x = Math.sin(time * 0.1) * 0.5;
+                this.camera.position.y = 8 + Math.cos(time * 0.15) * 0.3;
+                this.camera.lookAt(0, 2, 0);
+
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            onWindowResize() {
+                const container = document.getElementById('scene-container');
+                this.camera.aspect = container.clientWidth / container.clientHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+
+        // Initialize the application when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            new SolarEnergyTransformation();
+        });
+    </script>
+</body>
+</html>

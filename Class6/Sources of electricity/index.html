@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electricity Sources - Simple Guide</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Reset and Base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      body {
+        background: #0f172a;
+        color: #fff;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      /* Header */
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 0 20px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        color: #38bdf8;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      /* Slideshow */
+      .slideshow {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Slide Container - Center Focus */
+      .slide-container {
+        position: relative;
+        min-height: 500px;
+      }
+
+      .slide {
+        display: none;
+      }
+
+      .slide.active {
+        display: block;
+        animation: fadeIn 0.8s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* CENTERED WIDE IMAGE */
+      .image-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      /* IMPROVED Image Container */
+      .wide-image-container {
+        width: 100%;
+        max-width: 900px;
+        min-height: 300px;
+        height: auto;
+        aspect-ratio: 16/10;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        background: #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+      }
+
+      /* Image wrapper for better scaling */
+      .image-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      /* IMPROVED Image styles */
+      .wide-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        object-position: center;
+        transition: transform 0.5s ease, opacity 0.3s ease;
+        border-radius: 8px;
+      }
+
+      .wide-image:hover {
+        transform: scale(1.05);
+      }
+
+      /* Better loading states */
+      .image-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        color: #64748b;
+        font-size: 1.1rem;
+      }
+
+      .image-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        color: #ef4444;
+        font-size: 1.1rem;
+      }
+
+      .image-fallback {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+      }
+
+      /* Content Below Image */
+      .content-below {
+        width: 100%;
+        max-width: 900px;
+        text-align: center;
+      }
+
+      .slide-title {
+        font-size: 2rem;
+        color: #38bdf8;
+        margin-bottom: 15px;
+      }
+
+      .slide-description {
+        color: #cbd5e1;
+        line-height: 1.7;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      /* Features Grid */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .feature-item {
+        background: rgba(56, 189, 248, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #38bdf8;
+        text-align: left;
+      }
+
+      .feature-item i {
+        color: #38bdf8;
+        margin-right: 10px;
+      }
+
+      /* Simple Controls */
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-btn {
+        background: #38bdf8;
+        color: white;
+        border: none;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+      }
+
+      .nav-btn:hover {
+        background: #0ea5e9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+      }
+
+      .nav-btn:disabled {
+        background: #475569;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .slide-counter {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+      }
+
+      .current-number {
+        color: #38bdf8;
+        font-weight: bold;
+        font-size: 1.3rem;
+      }
+
+      .total-number {
+        color: #94a3b8;
+      }
+
+      /* Indicators */
+      .indicators {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .indicator {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+        color: #94a3b8;
+      }
+
+      .indicator.active {
+        background: #38bdf8;
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .indicator:hover {
+        background: #475569;
+        transform: translateY(-2px);
+      }
+
+      /* Auto-play Control */
+      .auto-play-control {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 25px;
+        color: #94a3b8;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 30px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #475569;
+        transition: 0.4s;
+        border-radius: 30px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+        background-color: #38bdf8;
+      }
+
+      input:checked + .toggle-slider:before {
+        transform: translateX(30px);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+
+      /* IMPROVED Responsive Design */
+      @media (max-width: 768px) {
+        .wide-image-container {
+          min-height: 250px;
+          aspect-ratio: 16/11;
+        }
+
+        .slide-title {
+          font-size: 1.7rem;
+        }
+
+        .slide-description {
+          font-size: 1rem;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        body {
+          padding: 15px;
+        }
+
+        .slideshow {
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .wide-image-container {
+          min-height: 200px;
+          aspect-ratio: 4/3;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .controls {
+          gap: 15px;
+        }
+
+        .nav-btn {
+          width: 50px;
+          height: 50px;
+        }
+
+        .wide-image:hover {
+          transform: scale(1.02);
+        }
+
+        body {
+          padding: 10px;
+        }
+      }
+
+      /* Touch device optimizations */
+      @media (hover: none) {
+        .wide-image:hover {
+          transform: none;
+        }
+
+        .nav-btn:hover {
+          transform: none;
+        }
+
+        .indicator:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-bolt"></i> Electricity Sources</h1>
+        <p class="subtitle">
+          Four ways to generate electrical power. Click through to explore each
+          source.
+        </p>
+      </header>
+
+      <div class="slideshow">
+        <div class="slide-container" id="slideContainer">
+          <!-- Slides will be loaded by JavaScript -->
+        </div>
+
+        <div class="controls">
+          <button id="prevBtn" class="nav-btn">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="slide-counter">
+            <span class="current-number" id="currentSlide">1</span>
+            <span class="total-number">/ <span id="totalSlides">4</span></span>
+          </div>
+
+          <button id="nextBtn" class="nav-btn">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="indicators" id="indicators">
+          <!-- Indicators will be loaded by JavaScript -->
+        </div>
+
+        <div class="auto-play-control">
+          <span>Auto-play:</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="autoPlayToggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <footer>
+    
+      </footer>
+    </div>
+
+    <script>
+      // Electricity Sources Data
+      const electricitySources = [
+        {
+          id: 1,
+          title: "Dry Cell",
+          description:
+            "A dry cell is a portable battery that converts chemical energy into electrical energy. It's the most common type of battery found in household devices like remote controls, flashlights, and toys.",
+          image: "cell.webp",
+          features: [
+            "<i class='fas fa-battery-full'></i> Portable power source",
+            "<i class='fas fa-mobile-alt'></i> Used in small devices",
+            "<i class='fas fa-box'></i> Common sizes: AA, AAA",
+            "<i class='fas fa-trash'></i> Usually disposable",
+          ],
+        },
+        {
+          id: 2,
+          title: "Photo Cell (Solar)",
+          description:
+            "Solar cells convert sunlight directly into electricity using the photovoltaic effect. They're used in solar panels for homes, calculators, and many other applications.",
+          image: "photo.webp",
+          features: [
+            "<i class='fas fa-sun'></i> Uses sunlight",
+            "<i class='fas fa-leaf'></i> Clean energy source",
+            "<i class='fas fa-home'></i> Powers homes & devices",
+            "<i class='fas fa-infinity'></i> Renewable resource",
+          ],
+        },
+        {
+          id: 3,
+          title: "Dynamo",
+          description:
+            "A dynamo converts mechanical energy into electrical energy. It works by rotating a coil in a magnetic field, which generates electricity.",
+          image: "dynamo.webp",
+          features: [
+            "<i class='fas fa-cogs'></i> Mechanical to electrical",
+            "<i class='fas fa-bicycle'></i> Used in bicycles",
+            "<i class='fas fa-history'></i> Early power source",
+            "<i class='fas fa-plug'></i> Produces DC current",
+          ],
+        },
+        {
+          id: 4,
+          title: "Generator",
+          description:
+            "Generators convert mechanical energy into electrical energy, usually producing alternating current (AC). They're used in power plants and as backup power sources.",
+          image: "G.webp",
+          features: [
+            "<i class='fas fa-industry'></i> Large-scale power",
+            "<i class='fas fa-bolt'></i> Produces AC current",
+            "<i class='fas fa-gas-pump'></i> Various fuel types",
+            "<i class='fas fa-city'></i> Powers cities",
+          ],
+        },
+      ];
+
+      // App State
+      let currentSlide = 0;
+      let autoPlay = true;
+      let autoPlayInterval;
+
+      // DOM Elements
+      const slideContainer = document.getElementById("slideContainer");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const currentSlideEl = document.getElementById("currentSlide");
+      const totalSlidesEl = document.getElementById("totalSlides");
+      const indicatorsContainer = document.getElementById("indicators");
+      const autoPlayToggle = document.getElementById("autoPlayToggle");
+
+      // Initialize App
+      function initApp() {
+        createSlides();
+        createIndicators();
+        updateControls();
+        startAutoPlay();
+        totalSlidesEl.textContent = electricitySources.length;
+      }
+
+      // Create Slides with improved image handling
+      function createSlides() {
+        slideContainer.innerHTML = "";
+
+        electricitySources.forEach((source, index) => {
+          const slide = document.createElement("div");
+          slide.className = `slide ${index === 0 ? "active" : ""}`;
+          slide.id = `slide-${index}`;
+
+          slide.innerHTML = `
+                    <div class="image-center">
+                        <div class="wide-image-container">
+                            <div class="image-wrapper">
+                                <div class="image-loading" id="loading-${index}">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <div>Loading image...</div>
+                                </div>
+                                <div class="image-error" id="error-${index}" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>Failed to load image</div>
+                                </div>
+                                <img src="${source.image}" 
+                                     alt="${source.title}" 
+                                     class="wide-image"
+                                     style="opacity:0; transition: opacity 0.5s"
+                                     onload="handleImageLoad(${index})"
+                                     onerror="handleImageError(${index})"
+                                     loading="lazy">
+                            </div>
+                        </div>
+                        
+                        <div class="content-below">
+                            <h2 class="slide-title">${source.title}</h2>
+                            <p class="slide-description">${
+                              source.description
+                            }</p>
+                            
+                            <div class="features-grid">
+                                ${source.features
+                                  .map(
+                                    (feature) => `
+                                    <div class="feature-item">${feature}</div>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+          slideContainer.appendChild(slide);
+        });
+      }
+
+      // Enhanced image load handler
+      function handleImageLoad(index) {
+        const loadingEl = document.getElementById(`loading-${index}`);
+        const img = document.querySelector(`#slide-${index} .wide-image`);
+
+        if (loadingEl && img) {
+          img.style.opacity = "1";
+          loadingEl.style.display = "none";
+        }
+      }
+
+      // Enhanced image error handler
+      function handleImageError(index) {
+        const loadingEl = document.getElementById(`loading-${index}`);
+        const errorEl = document.getElementById(`error-${index}`);
+        const img = document.querySelector(`#slide-${index} .wide-image`);
+
+        if (loadingEl) loadingEl.style.display = "none";
+        if (errorEl) errorEl.style.display = "flex";
+        if (img) {
+          img.style.display = "none";
+
+          // Create fallback content
+          const fallback = document.createElement("div");
+          fallback.className = "image-fallback";
+          fallback.innerHTML = `
+            <div style="text-align: center;">
+              <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;"></i>
+              <div>Image not available</div>
+            </div>
+          `;
+
+          const container = img.parentElement;
+          container.appendChild(fallback);
+        }
+      }
+
+      // Create Indicators
+      function createIndicators() {
+        indicatorsContainer.innerHTML = "";
+
+        electricitySources.forEach((source, index) => {
+          const indicator = document.createElement("div");
+          indicator.className = `indicator ${index === 0 ? "active" : ""}`;
+          indicator.textContent = index + 1;
+          indicator.dataset.index = index;
+
+          indicator.addEventListener("click", () => goToSlide(index));
+          indicatorsContainer.appendChild(indicator);
+        });
+      }
+
+      // Navigation
+      function goToSlide(index) {
+        if (index < 0 || index >= electricitySources.length) return;
+
+        // Hide current slide
+        document.querySelector(".slide.active").classList.remove("active");
+        document.querySelector(".indicator.active").classList.remove("active");
+
+        // Show new slide
+        currentSlide = index;
+        document.getElementById(`slide-${index}`).classList.add("active");
+        document
+          .querySelector(`.indicator[data-index="${index}"]`)
+          .classList.add("active");
+
+        // Update controls
+        updateControls();
+        resetAutoPlay();
+      }
+
+      function nextSlide() {
+        const next = (currentSlide + 1) % electricitySources.length;
+        goToSlide(next);
+      }
+
+      function prevSlide() {
+        const prev =
+          (currentSlide - 1 + electricitySources.length) %
+          electricitySources.length;
+        goToSlide(prev);
+      }
+
+      // Update Controls
+      function updateControls() {
+        currentSlideEl.textContent = currentSlide + 1;
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === electricitySources.length - 1;
+      }
+
+      // Auto-play
+      function startAutoPlay() {
+        if (!autoPlay) return;
+        autoPlayInterval = setInterval(nextSlide, 5000);
+      }
+
+      function stopAutoPlay() {
+        clearInterval(autoPlayInterval);
+      }
+
+      function resetAutoPlay() {
+        stopAutoPlay();
+        if (autoPlay) startAutoPlay();
+      }
+
+      // Event Listeners
+      prevBtn.addEventListener("click", prevSlide);
+      nextBtn.addEventListener("click", nextSlide);
+
+      autoPlayToggle.addEventListener("change", function () {
+        autoPlay = this.checked;
+        if (autoPlay) {
+          startAutoPlay();
+        } else {
+          stopAutoPlay();
+        }
+      });
+
+      // Enhanced Navigation with Touch Support
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      // Touch event handlers for swipe gestures
+      slideContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      });
+
+      slideContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      });
+
+      function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            // Swipe left - next slide
+            nextSlide();
+          } else {
+            // Swipe right - previous slide
+            prevSlide();
+          }
+        }
+      }
+
+      // Keyboard Navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") prevSlide();
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === " ") {
+          e.preventDefault();
+          autoPlayToggle.checked = !autoPlayToggle.checked;
+          autoPlayToggle.dispatchEvent(new Event("change"));
+        }
+        if (e.key >= "1" && e.key <= "4") {
+          const index = parseInt(e.key) - 1;
+          goToSlide(index);
+        }
+      });
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", initApp);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Explorer </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <div id="infoPanel">
+            <h1>🌍 Energy Explorer</h1>
+            <div id="currentEnergy">Click buttons to explore!</div>
+            <div id="energyDescription" class="description">
+                Welcome to the Energy Explorer! Learn about different forms of energy by clicking the buttons below. Drag and drop pictures to add them to the scene!
+            </div>
+        </div>
+        
+        <div id="energyTable">
+            <h2>📊 Energy Types</h2>
+            <table>
+                <tr>
+                    <th>Energy Form</th>
+                    <th>Examples</th>
+                </tr>
+                <tr>
+                    <td>🔥 Heat</td>
+                    <td>Sun, Fire</td>
+                </tr>
+                <tr>
+                    <td>🔊 Sound</td>
+                    <td>Music, Voice</td>
+                </tr>
+                <tr>
+                    <td>💡 Light</td>
+                    <td>Bulb, Sun</td>
+                </tr>
+                <tr>
+                    <td>⚡ Electrical</td>
+                    <td>Battery,Wire, Power</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="controls">
+            <button class="energy-btn" onclick="showEnergy('heat')">🔥 Heat Energy</button>
+            <button class="energy-btn" onclick="showEnergy('sound')">🔊 Sound Energy</button>
+            <button class="energy-btn" onclick="showEnergy('light')">💡 Light Energy</button>
+            <button class="energy-btn" onclick="showEnergy('electrical')">⚡ Electrical Energy</button>
+            <button class="energy-btn" onclick="resetScene()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <!-- Pictures for energies denoted here -->
+    <!-- <img id="background-image" src="6b386272ea4b3d1ea7d613a6836a5cb8.jpg" style="display: none;">
+    <img id="heat-image" src="heatenergyyy.png" style="display: none;">
+    <img id="electrical-image" src="electricenergy.png" style="display: none;">
+    <img id="sound-image" src="sound_energy.webp" style="display: none;">
+    <img id="light-image" src="heat.webp" style="display: none;"> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Volumetric Light Ray Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0c0c2e, #1a1a3e);
+            color: white;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #scene-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .ui-panel {
+            width: 350px;
+            background: rgba(10, 10, 30, 0.85);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+            border-left: 1px solid rgba(100, 100, 200, 0.2);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: #aaccff;
+            text-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 25px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #88bbff;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(100, 130, 200, 0.3);
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4a8fff;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(100, 150, 255, 0.8);
+        }
+        
+        .value-display {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #aaccff;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(60, 100, 200, 0.5);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        
+        button:hover {
+            background: rgba(80, 120, 220, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        button.active {
+            background: #2a8bcc;
+            box-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+        }
+        
+        .info-panel {
+            background: rgba(20, 30, 60, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border-left: 3px solid #4a8fff;
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 10px;
+            color: #88bbff;
+        }
+        
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #aaccff;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .ui-panel {
+                width: 100%;
+                height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <div id="scene-container"></div>
+        </div>
+        
+        <div class="ui-panel">
+            <h1>Volumetric Light Ray Simulation</h1>
+            <p class="subtitle">Explore how light behaves in different environments</p>
+            
+            <div class="control-group">
+                <h2>Ray Properties</h2>
+                
+                <div class="slider-container">
+                    <label for="intensity">Light Intensity</label>
+                    <input type="range" id="intensity" min="0.1" max="3" step="0.1" value="1.5">
+                    <div class="value-display" id="intensity-value">1.5</div>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="sharpness">Beam Sharpness</label>
+                    <input type="range" id="sharpness" min="1" max="20" step="1" value="5">
+                    <div class="value-display" id="sharpness-value">5</div>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="density">Atmospheric Density</label>
+                    <input type="range" id="density" min="0.01" max="0.1" step="0.01" value="0.03">
+                    <div class="value-display" id="density-value">0.03</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h2>Ray Type</h2>
+                
+                <div class="btn-group">
+                    <button id="btn-searchlight" class="active">Searchlight</button>
+                    <button id="btn-laser">Laser</button>
+                    <button id="btn-sunbeam">Sunbeam</button>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="btn-blue">Blue</button>
+                    <button id="btn-gold">Gold</button>
+                    <button id="btn-red">Red</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h2>Environment</h2>
+                
+                <div class="btn-group">
+                    <button id="btn-clear" class="active">Clear Air</button>
+                    <button id="btn-foggy">Foggy</button>
+                    <button id="btn-dusty">Dusty</button>
+                </div>
+                
+                <div class="slider-container">
+                    <label for="animation">Animation Speed</label>
+                    <input type="range" id="animation" min="0.1" max="2" step="0.1" value="1">
+                    <div class="value-display" id="animation-value">1.0x</div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h3>About Volumetric Lighting</h3>
+                <p>Volumetric light rays are visible due to light scattering off particles in the air. This effect is known as "crepuscular rays" or "god rays" in atmospheric optics.</p>
+                <div class="explanation" id="current-explanation">
+                    The searchlight beam demonstrates how light spreads and becomes visible when interacting with atmospheric particles.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Enhanced shader code for more realistic light rays
+        const rayVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vPosition;
+
+            void main() {
+                vUv = uv;
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const rayFragmentShader = `
+            uniform vec3 color;
+            uniform float intensity;
+            uniform float sharpness;
+            uniform float time;
+            uniform float density;
+            uniform vec3 lightDir;
+
+            varying vec2 vUv;
+            varying vec3 vPosition;
+
+            // Simple noise function for creating subtle variations
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+            }
+
+            void main() {
+                // Horizontal fade (soft edges)
+                float distFromCenter = abs(vUv.x - 0.5);
+                float alphaStr = 1.0 - (distFromCenter * 2.0);
+                float alphaH = pow(alphaStr, sharpness);
+
+                // Vertical fade (soft tip)
+                float alphaV = smoothstep(1.0, 0.7, vUv.y);
+
+                // Add subtle noise for a more natural look
+                float noise = hash(vUv * 10.0 + time * 0.5) * 0.1 + 0.9;
+
+                // Combine all factors
+                float finalAlpha = alphaH * alphaV * intensity * noise * density;
+
+                // Add a subtle core to the beam for more realism
+                float core = smoothstep(0.3, 0.0, distFromCenter);
+                finalAlpha += core * 0.2 * intensity;
+
+                gl_FragColor = vec4(color, finalAlpha);
+            }
+        `;
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(8, 6, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(document.getElementById('scene-container').offsetWidth, 
+                        document.getElementById('scene-container').offsetHeight);
+        renderer.sortObjects = true;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.getElementById('scene-container').appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 2, 0);
+        controls.update();
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.2);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(10, 10, 5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // Global variables
+        let currentRayType = 'searchlight';
+        let currentColor = 'blue';
+        let currentEnvironment = 'clear';
+        let mainRay, secondaryRays = [];
+        let fogDensity = 0.03;
+
+        // Create the main volumetric ray
+        function createVolumetricRay(colorHex, length, width, intensity = 1.5, sharpness = 5.0) {
+            const geometry = new THREE.CylinderGeometry(width, width, length, 32, 1, true);
+            geometry.rotateX(Math.PI / 2);
+            geometry.translate(0, 0, length / 2);
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    color: { value: new THREE.Color(colorHex) },
+                    intensity: { value: intensity },
+                    sharpness: { value: sharpness },
+                    time: { value: 0 },
+                    density: { value: fogDensity },
+                    lightDir: { value: new THREE.Vector3(0, 0, 1) }
+                },
+                vertexShader: rayVertexShader,
+                fragmentShader: rayFragmentShader,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+                transparent: true,
+                depthWrite: false,
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            return mesh;
+        }
+
+        // Create secondary rays for more complex effects
+        function createSecondaryRays(count, colorHex, baseLength, baseWidth) {
+            const rays = [];
+            
+            for (let i = 0; i < count; i++) {
+                const length = baseLength * (0.7 + Math.random() * 0.6);
+                const width = baseWidth * (0.3 + Math.random() * 0.7);
+                const intensity = 0.3 + Math.random() * 0.5;
+                
+                const ray = createVolumetricRay(colorHex, length, width, intensity, 3.0 + Math.random() * 4);
+                
+                // Position randomly around the main ray
+                const angle = (i / count) * Math.PI * 2;
+                const distance = 0.5 + Math.random() * 2;
+                ray.position.set(
+                    Math.cos(angle) * distance,
+                    Math.random() * 2,
+                    Math.sin(angle) * distance
+                );
+                
+                // Look in a slightly different direction
+                const lookAt = new THREE.Vector3(
+                    (Math.random() - 0.5) * 5,
+                    2 + Math.random() * 3,
+                    (Math.random() - 0.5) * 5
+                );
+                ray.lookAt(lookAt);
+                
+                rays.push(ray);
+                scene.add(ray);
+            }
+            
+            return rays;
+        }
+
+        // Setup the scene with objects
+        function setupScene() {
+            // Ground plane
+            const planeGeo = new THREE.PlaneGeometry(50, 50);
+            const planeMat = new THREE.MeshStandardMaterial({ 
+                color: 0x22222a,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(planeGeo, planeMat);
+            ground.rotateX(-Math.PI / 2);
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Add some objects to interact with light
+            const cubeGeo = new THREE.BoxGeometry(2, 2, 2);
+            const cubeMat = new THREE.MeshStandardMaterial({ 
+                color: 0x4488ff,
+                roughness: 0.7,
+                metalness: 0.3
+            });
+            const cube = new THREE.Mesh(cubeGeo, cubeMat);
+            cube.position.set(-3, 1, 0);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            scene.add(cube);
+
+            const sphereGeo = new THREE.SphereGeometry(1.5, 32, 32);
+            const sphereMat = new THREE.MeshStandardMaterial({ 
+                color: 0xff8844,
+                roughness: 0.6,
+                metalness: 0.4
+            });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            sphere.position.set(4, 1.5, -2);
+            sphere.castShadow = true;
+            sphere.receiveShadow = true;
+            scene.add(sphere);
+
+            // Create a light source representation
+            const lightGeo = new THREE.SphereGeometry(0.5, 16, 16);
+            const lightMat = new THREE.MeshBasicMaterial({ 
+                color: 0xffffaa,
+                emissive: 0xffff44
+            });
+            const lightSource = new THREE.Mesh(lightGeo, lightMat);
+            lightSource.position.set(-5, 3, -5);
+            scene.add(lightSource);
+
+            // Create the main ray
+            mainRay = createVolumetricRay(0x0099ff, 25, 2.5, 1.5, 5.0);
+            mainRay.position.set(-5, 3, -5);
+            mainRay.lookAt(new THREE.Vector3(0, 5, 0));
+            scene.add(mainRay);
+
+            // Create secondary rays
+            secondaryRays = createSecondaryRays(8, 0x0099ff, 15, 1.0);
+        }
+
+        // Update ray properties based on current settings
+        function updateRayProperties() {
+            if (!mainRay) return;
+            
+            // Update color
+            let color;
+            switch(currentColor) {
+                case 'blue': color = 0x0099ff; break;
+                case 'gold': color = 0xffaa22; break;
+                case 'red': color = 0xff4444; break;
+                default: color = 0x0099ff;
+            }
+            
+            // Update ray type properties
+            let length, width, intensity, sharpness;
+            switch(currentRayType) {
+                case 'searchlight':
+                    length = 25;
+                    width = 2.5;
+                    intensity = 1.5;
+                    sharpness = 5.0;
+                    break;
+                case 'laser':
+                    length = 30;
+                    width = 0.3;
+                    intensity = 2.5;
+                    sharpness = 15.0;
+                    break;
+                case 'sunbeam':
+                    length = 20;
+                    width = 4.0;
+                    intensity = 1.2;
+                    sharpness = 3.0;
+                    break;
+                default:
+                    length = 25;
+                    width = 2.5;
+                    intensity = 1.5;
+                    sharpness = 5.0;
+            }
+            
+            // Update main ray
+            mainRay.material.uniforms.color.value = new THREE.Color(color);
+            mainRay.material.uniforms.intensity.value = intensity * parseFloat(document.getElementById('intensity').value);
+            mainRay.material.uniforms.sharpness.value = sharpness * parseFloat(document.getElementById('sharpness').value) / 5;
+            
+            // Replace geometry if dimensions changed significantly
+            if (Math.abs(mainRay.geometry.parameters.height - length) > 1 || 
+                Math.abs(mainRay.geometry.parameters.radiusTop - width) > 0.5) {
+                scene.remove(mainRay);
+                mainRay = createVolumetricRay(color, length, width, intensity, sharpness);
+                mainRay.position.set(-5, 3, -5);
+                mainRay.lookAt(new THREE.Vector3(0, 5, 0));
+                scene.add(mainRay);
+            }
+            
+            // Update secondary rays
+            secondaryRays.forEach(ray => scene.remove(ray));
+            if (currentRayType === 'sunbeam') {
+                secondaryRays = createSecondaryRays(12, color, length * 0.7, width * 0.5);
+            } else if (currentRayType === 'searchlight') {
+                secondaryRays = createSecondaryRays(8, color, length * 0.6, width * 0.4);
+            } else {
+                secondaryRays = [];
+            }
+            
+            // Update environment
+            updateEnvironment();
+            
+            // Update explanation text
+            updateExplanation();
+        }
+
+        // Update environment settings
+        function updateEnvironment() {
+            fogDensity = parseFloat(document.getElementById('density').value);
+            
+            // Update fog
+            scene.fog = new THREE.FogExp2(0x11111f, fogDensity);
+            scene.background = new THREE.Color(0x11111f);
+            
+            // Update ray density uniform
+            if (mainRay) {
+                mainRay.material.uniforms.density.value = fogDensity * 10;
+            }
+            
+            secondaryRays.forEach(ray => {
+                ray.material.uniforms.density.value = fogDensity * 10;
+            });
+        }
+
+        // Update explanation text
+        function updateExplanation() {
+            const explanationEl = document.getElementById('current-explanation');
+            let text = '';
+            
+            switch(currentRayType) {
+                case 'searchlight':
+                    text = 'Searchlight beams spread widely and are visible due to light scattering off particles in the air. The beam becomes more visible in foggy or dusty conditions.';
+                    break;
+                case 'laser':
+                    text = 'Laser beams are highly focused with minimal divergence. They maintain their intensity over long distances and are visible primarily through Rayleigh scattering.';
+                    break;
+                case 'sunbeam':
+                    text = 'Sunbeams (crepuscular rays) occur when sunlight streams through gaps in clouds or objects. Multiple beams create a dramatic atmospheric effect.';
+                    break;
+            }
+            
+            explanationEl.textContent = text;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Ray property sliders
+            document.getElementById('intensity').addEventListener('input', function() {
+                document.getElementById('intensity-value').textContent = this.value;
+                updateRayProperties();
+            });
+            
+            document.getElementById('sharpness').addEventListener('input', function() {
+                document.getElementById('sharpness-value').textContent = this.value;
+                updateRayProperties();
+            });
+            
+            document.getElementById('density').addEventListener('input', function() {
+                document.getElementById('density-value').textContent = this.value;
+                updateEnvironment();
+            });
+            
+            document.getElementById('animation').addEventListener('input', function() {
+                document.getElementById('animation-value').textContent = `${this.value}x`;
+            });
+            
+            // Ray type buttons
+            document.getElementById('btn-searchlight').addEventListener('click', function() {
+                setActiveButton(this, 'btn-searchlight', 'btn-laser', 'btn-sunbeam');
+                currentRayType = 'searchlight';
+                updateRayProperties();
+            });
+            
+            document.getElementById('btn-laser').addEventListener('click', function() {
+                setActiveButton(this, 'btn-searchlight', 'btn-laser', 'btn-sunbeam');
+                currentRayType = 'laser';
+                updateRayProperties();
+            });
+            
+            document.getElementById('btn-sunbeam').addEventListener('click', function() {
+                setActiveButton(this, 'btn-searchlight', 'btn-laser', 'btn-sunbeam');
+                currentRayType = 'sunbeam';
+                updateRayProperties();
+            });
+            
+            // Color buttons
+            document.getElementById('btn-blue').addEventListener('click', function() {
+                setActiveButton(this, 'btn-blue', 'btn-gold', 'btn-red');
+                currentColor = 'blue';
+                updateRayProperties();
+            });
+            
+            document.getElementById('btn-gold').addEventListener('click', function() {
+                setActiveButton(this, 'btn-blue', 'btn-gold', 'btn-red');
+                currentColor = 'gold';
+                updateRayProperties();
+            });
+            
+            document.getElementById('btn-red').addEventListener('click', function() {
+                setActiveButton(this, 'btn-blue', 'btn-gold', 'btn-red');
+                currentColor = 'red';
+                updateRayProperties();
+            });
+            
+            // Environment buttons
+            document.getElementById('btn-clear').addEventListener('click', function() {
+                setActiveButton(this, 'btn-clear', 'btn-foggy', 'btn-dusty');
+                document.getElementById('density').value = 0.01;
+                document.getElementById('density-value').textContent = '0.01';
+                updateEnvironment();
+            });
+            
+            document.getElementById('btn-foggy').addEventListener('click', function() {
+                setActiveButton(this, 'btn-clear', 'btn-foggy', 'btn-dusty');
+                document.getElementById('density').value = 0.03;
+                document.getElementById('density-value').textContent = '0.03';
+                updateEnvironment();
+            });
+            
+            document.getElementById('btn-dusty').addEventListener('click', function() {
+                setActiveButton(this, 'btn-clear', 'btn-foggy', 'btn-dusty');
+                document.getElementById('density').value = 0.07;
+                document.getElementById('density-value').textContent = '0.07';
+                updateEnvironment();
+            });
+        }
+
+        // Helper function to set active button
+        function setActiveButton(activeBtn, ...btnIds) {
+            btnIds.forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            activeBtn.classList.add('active');
+        }
+
+        // Animation
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            const animationSpeed = parseFloat(document.getElementById('animation').value);
+
+            // Update shader time uniform
+            if (mainRay) {
+                mainRay.material.uniforms.time.value = elapsedTime * animationSpeed;
+            }
+            
+            secondaryRays.forEach(ray => {
+                ray.material.uniforms.time.value = elapsedTime * animationSpeed;
+            });
+
+            // Animate the rays
+            if (mainRay) {
+                if (currentRayType === 'searchlight') {
+                    mainRay.rotation.y = Math.sin(elapsedTime * 0.5 * animationSpeed) * 0.3;
+                } else if (currentRayType === 'sunbeam') {
+                    mainRay.rotation.y = Math.sin(elapsedTime * 0.2 * animationSpeed) * 0.1;
+                }
+            }
+
+            // Animate secondary rays for sunbeams
+            if (currentRayType === 'sunbeam') {
+                secondaryRays.forEach((ray, index) => {
+                    ray.rotation.y = Math.sin(elapsedTime * 0.3 * animationSpeed + index) * 0.05;
+                    ray.material.uniforms.intensity.value = 0.5 + Math.sin(elapsedTime * 2 + index) * 0.3;
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = document.getElementById('scene-container').offsetWidth / 
+                            document.getElementById('scene-container').offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(
+                document.getElementById('scene-container').offsetWidth, 
+                document.getElementById('scene-container').offsetHeight
+            );
+        }
+
+        // Initialize the application
+        function init() {
+            setupScene();
+            setupEventListeners();
+            updateRayProperties();
+            
+            window.addEventListener('resize', onWindowResize, false);
+            animate();
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>

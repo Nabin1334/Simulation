@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Computer Input/Output System</title>
+    <link rel="stylesheet" href="parts-i-o.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Computer Input & Output System</h1>
+        <p class="subtitle">
+          Learn how computers receive and send information!
+        </p>
+      </header>
+
+      <div class="computer-system">
+        <div class="section">
+          <h2 class="section-title">Input Devices</h2>
+          <div class="devices">
+            <div class="device" data-device="keyboard">
+              <div class="device-icon">⌨️</div>
+              <div class="device-name">Keyboard</div>
+              <input type="text" id="keyboard" />
+            </div>
+            <div class="device" id="mouse" data-device="mouse">
+              <div class="device-icon">🖱️</div>
+              <div class="device-name">Mouse</div>
+            </div>
+            <div class="device" data-device="microphone">
+              <div class="device-icon">🎤</div>
+              <div class="device-name">Microphone</div>
+            </div>
+            <div class="device" data-device="scanner">
+              <div class="device-icon">📷</div>
+              <div class="device-name">Scanner</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="system-unit">
+          <div class="system-icon">💻</div>
+          <h2
+            class="section-title"
+            style="color: white; border-bottom-color: white">
+            System Unit
+          </h2>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Output Devices</h2>
+          <div class="devices">
+            <div class="device" data-device="monitor">
+              <div class="device-icon"><span id="output"></span>🖥️</div>
+              <div class="device-name">Monitor</div>
+            </div>
+            <div class="device" data-device="printer">
+              <div class="device-icon">🖨️</div>
+              <div class="device-name">Printer</div>
+            </div>
+            <div class="device" data-device="speaker">
+              <div class="device-icon">🔊</div>
+              <div class="device-name">Speaker</div>
+            </div>
+            <div class="device" data-device="headphones">
+              <div class="device-icon">🎧</div>
+              <div class="device-name">Headphones</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mass-storage">
+        <h2 class="mass-storage-title">Mass Storage Devices</h2>
+        <div class="storage-devices">
+          <div class="storage-device">
+            <div class="storage-icon">💾</div>
+            <div class="device-name">Hard Drive</div>
+          </div>
+          <div class="storage-device">
+            <div class="storage-icon">📀</div>
+            <div class="device-name">DVD Drive</div>
+          </div>
+          <div class="storage-device">
+            <div class="storage-icon">📁</div>
+            <div class="device-name">USB Drive</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h2>How Computers Work</h2>
+        <p>
+          <strong>Input Devices</strong> send information to the computer.
+          Examples: keyboard, mouse, microphone.
+        </p>
+        <p>
+          <strong>Output Devices</strong> receive information from the computer.
+          Examples: monitor, printer, speakers.
+        </p>
+        <p>
+          <strong>The System Unit (CPU)</strong> processes information from
+          input devices and sends it to output devices.
+        </p>
+        <p>
+          <strong>Mass Storage Devices</strong> store information for later use.
+        </p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Made for 5th Grade Computer Science | Learn how computers work!</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="parts-i-o.js"></script>
+  
+  </body>
+</html>

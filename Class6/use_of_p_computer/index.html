@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Uses of Computers and Mobile Phones</title>
+    <style>
+      :root {
+        --accent: #1a73e8;
+        --muted: #666;
+        --card-bg: #fff;
+        --panel-bg: #f8fbff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f0f2f5;
+        color: #222;
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 18px auto;
+        padding: 18px;
+      }
+      h1 {
+        color: var(--accent);
+        text-align: center;
+        margin: 6px 0 20px;
+        font-weight: 700;
+      }
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 0;
+        background: #fff;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        font-weight: 600;
+        color: var(--accent);
+      }
+      .btn.active {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 6px 14px rgba(26, 115, 232, 0.18);
+      }
+      .two-panels {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .panel {
+        position: relative;
+        height: 620px;
+        margin: 0 auto;
+        width: 100%;
+        background: linear-gradient(180deg, var(--panel-bg), #fff);
+        border-radius: 12px;
+        padding: 12px;
+        overflow: visible;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        display: none; /* Hide panels by default */
+      }
+      .panel.active {
+        display: block; /* Show only active panel */
+      }
+      .panel-title {
+        position: absolute;
+        left: 16px;
+        top: 12px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .central {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(1.1); /* Slightly larger central icon */
+        width: 200px; /* increased from 170px */
+        height: 180px; /* made slightly rectangular for computer */
+        border-radius: 18px;
+        background: var(--card-bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        z-index: 5;
+        text-align: center;
+        padding: 10px;
+      }
+      #centralComp.central {
+        width: 0px; /* wider for computer */
+        height: 0px; /* shorter height for computer shape */
+        border-radius: 12px; /* less rounded for computer */
+      }
+      #centralMob.central {
+        width: 0px; /* narrower for mobile */
+        height: 0px; /* taller for mobile shape */
+        border-radius: 25px; /* more rounded for mobile */
+      }
+      .central img {
+        width: 86px;
+        height: 86px;
+        object-fit: contain;
+        display: block;
+        margin-bottom: 6px;
+      }
+      #centralComp.central img {
+        width: 110px; /* larger computer icon */
+        height: 110px;
+      }
+      #centralMob.central img {
+        width: 80px; /* smaller mobile icon */
+        height: 80px;
+      }
+      .use-cases {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        padding: 40px; /* Add padding to prevent items touching edges */
+      } /* container for items */
+      .use-item {
+        position: absolute;
+        pointer-events: auto;
+        width: 140px; /* Slightly smaller cards */
+        padding: 15px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        transform: translate(-50%, -50%);
+        transition: transform 0.18s, box-shadow 0.18s;
+        z-index: 6;
+        cursor: pointer;
+      }
+      .use-item:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      }
+      .use-item img {
+        width: 75px;
+        height: 75px;
+        display: block;
+        margin: 5px auto;
+      }
+      .use-item h4 {
+        margin: 6px 0 4px;
+        font-size: 0.98rem;
+        color: var(--accent);
+      }
+      .use-item p {
+        margin: 0;
+        font-size: 0.83rem;
+        color: var(--muted);
+      }
+      /* SVG lines overlay */
+      .svg-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+      }
+      
+      /* Popup styles */
+      .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      
+      .popup-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+      
+      .popup {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+      
+      .popup-overlay.active .popup {
+        transform: translateY(0);
+      }
+      
+      .popup-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      
+      .popup-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      
+      .popup-icon {
+        width: 60px;
+        height: 60px;
+        margin-right: 15px;
+      }
+      
+      .popup-title {
+        font-size: 1.5rem;
+        color: var(--accent);
+        margin: 0;
+      }
+      
+      .popup-content {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #333;
+      }
+      
+      .popup-content ul {
+        padding-left: 20px;
+      }
+      
+      .popup-content li {
+        margin-bottom: 8px;
+      }
+
+      /* responsive */
+      @media (max-width: 980px) {
+        .two-panels {
+          grid-template-columns: 1fr;
+        }
+        .panel {
+          height: 700px; /* Taller to accommodate stacked items */
+        }
+
+        #centralComp.central {
+          width: 200px; /* slightly smaller on mobile screens */
+          height: 150px;
+        }
+
+        #centralMob.central {
+          width: 120px;
+          height: 180px;
+        }
+
+        .use-cases {
+          padding: 20px;
+        }
+
+        .use-item {
+          width: 130px; /* Even smaller on mobile */
+          padding: 12px;
+        }
+
+        /* Mobile-specific positioning */
+        .use-item:nth-child(1) {
+          transform: translate(-50%, -50%) translateY(-220px);
+        }
+        .use-item:nth-child(2) {
+          transform: translate(-50%, -50%) translate(120px, -110px);
+        }
+        .use-item:nth-child(3) {
+          transform: translate(-50%, -50%) translate(120px, 110px);
+        }
+        .use-item:nth-child(4) {
+          transform: translate(-50%, -50%) translateY(220px);
+        }
+        .use-item:nth-child(5) {
+          transform: translate(-50%, -50%) translate(-120px, 110px);
+        }
+        .use-item:nth-child(6) {
+          transform: translate(-50%, -50%) translate(-120px, -110px);
+        }
+      }
+
+      /* Small mobile adjustments */
+      @media (max-width: 480px) {
+        .panel {
+          height: 600px;
+        }
+
+        .use-item {
+          width: 110px;
+          font-size: 0.9em;
+        }
+
+        /* Tighter spacing for very small screens */
+        .use-item:nth-child(1) {
+          transform: translate(-50%, -50%) translateY(-180px);
+        }
+        .use-item:nth-child(2) {
+          transform: translate(-50%, -50%) translate(100px, -90px);
+        }
+        .use-item:nth-child(3) {
+          transform: translate(-50%, -50%) translate(100px, 90px);
+        }
+        .use-item:nth-child(4) {
+          transform: translate(-50%, -50%) translateY(180px);
+        }
+        .use-item:nth-child(5) {
+          transform: translate(-50%, -50%) translate(-100px, 90px);
+        }
+        .use-item:nth-child(6) {
+          transform: translate(-50%, -50%) translate(-100px, -90px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Where Computers and Mobiles Are Used</h1>
+
+      <div class="controls" role="tablist" aria-label="Select device view">
+        <button id="btnComputer" class="btn active" aria-pressed="true">
+          <img
+            src="https://img.icons8.com/color/96/000000/computer.png"
+            alt="Computer icon"
+            style="width: 24px; height: 24px; margin-right: 8px"
+          />
+          Computer
+        </button>
+        <button id="btnMobile" class="btn" aria-pressed="false">
+          <img
+            src="https://img.icons8.com/color/96/000000/smartphone.png"
+            alt="Mobile icon"
+            style="width: 24px; height: 24px; margin-right: 8px"
+          />
+          Mobile
+        </button>
+      </div>
+
+      <div class="two-panels">
+        <!-- Computer panel -->
+        <div
+          id="panelComputer"
+          class="panel active"
+          role="tabpanel"
+          aria-labelledby="btnComputer"
+        >
+          <div class="panel-title">Computer Usage</div>
+          <div id="centralComp" class="central"></div>
+          <div id="casesComp" class="use-cases"></div>
+          <div id="overlayComp" class="svg-overlay"></div>
+        </div>
+
+        <!-- Mobile panel -->
+        <div
+          id="panelMobile"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="btnMobile"
+        >
+          <div class="panel-title">Mobile Usage</div>
+          <div id="centralMob" class="central"></div>
+          <div id="casesMob" class="use-cases"></div>
+          <div id="overlayMob" class="svg-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup overlay -->
+    <div class="popup-overlay" id="popupOverlay">
+      <div class="popup">
+        <button class="popup-close" id="popupClose">&times;</button>
+        <div class="popup-header">
+          <img class="popup-icon" id="popupIcon" src="" alt="">
+          <h2 class="popup-title" id="popupTitle"></h2>
+        </div>
+        <div class="popup-content" id="popupContent"></div>
+      </div>
+    </div>
+
+    <!-- Data (icons from icons8 - suitable for demo) -->
+    <script>
+      const DATA = {
+        computer: {
+          title: "Computer",
+          icon: "computer-s.jpg",
+          uses: [
+            {
+              name: "School",
+              icon: "students_using_computer.webp",
+              text: "Online classes, research",
+              details: "Computers help students with:<ul><li>Online learning and virtual classrooms</li><li>Researching information for projects</li><li>Writing essays and assignments</li><li>Creating presentations</li><li>Learning programming and digital skills</li></ul>"
+            },
+            {
+              name: "Home",
+              icon: "https://img.icons8.com/color/96/000000/home.png",
+              text: "Browsing, movies, homework",
+              details: "At home, computers are used for:<ul><li>Browsing the internet for information</li><li>Watching movies and entertainment</li><li>Doing homework and school projects</li><li>Online shopping and banking</li><li>Connecting with family and friends</li></ul>"
+            },
+            {
+              name: "Business",
+              icon: "https://img.icons8.com/color/96/000000/business.png",
+              text: "Accounting, reports",
+              details: "In business, computers help with:<ul><li>Managing finances and accounting</li><li>Creating reports and presentations</li><li>Email communication with clients</li><li>Data analysis and decision making</li><li>Project management and planning</li></ul>"
+            },
+            {
+              name: "Work",
+              icon: "work.webp",
+              text: "Office work, meetings",
+              details: "At work, computers are essential for:<ul><li>Completing daily office tasks</li><li>Video conferences and meetings</li><li>Creating documents and spreadsheets</li><li>Collaborating with team members</li><li>Storing and organizing files</li></ul>"
+            },
+            {
+              name: "Hospital",
+              icon: "hospital.webp",
+              text: "Patient records, imaging",
+              details: "In hospitals, computers are used for:<ul><li>Storing patient medical records</li><li>Medical imaging like X-rays and scans</li><li>Monitoring patient health data</li><li>Scheduling appointments</li><li>Researching medical information</li></ul>"
+            },
+            {
+              name: "Bank",
+              icon: "bank.webp",
+              text: "Account management, transactions",
+              details: "Banks use computers for:<ul><li>Managing customer accounts</li><li>Processing transactions</li><li>Online banking services</li><li>Security and fraud detection</li><li>Financial calculations and reports</li></ul>"
+            },
+          ],
+        },
+        mobile: {
+          title: "Mobile",
+          icon: "https://img.icons8.com/color/96/000000/smartphone.png",
+          uses: [
+            {
+              name: "Communication",
+              icon: "https://img.icons8.com/color/96/000000/communication.png",
+              text: "Calls, video chats",
+              details: "Mobiles help us communicate by:<ul><li>Making phone calls to anyone, anywhere</li><li>Video chatting with face-to-face interaction</li><li>Sending instant text messages</li><li>Sharing photos and videos instantly</li><li>Group conversations with multiple people</li></ul>"
+            },
+            {
+              name: "Social Media",
+              icon: "https://img.icons8.com/color/96/000000/facebook-new.png",
+              text: "Facebook, Instagram",
+              details: "Social media on mobiles allows:<ul><li>Connecting with friends and family</li><li>Sharing life updates and photos</li><li>Discovering news and trends</li><li>Joining communities of interest</li><li>Staying in touch with current events</li></ul>"
+            },
+            {
+              name: "Transactions",
+              icon: "https://img.icons8.com/color/96/000000/mobile-payment.png",
+              text: "Payments & transfers",
+              details: "Mobile transactions help with:<ul><li>Paying for goods without cash</li><li>Transferring money to friends</li><li>Online shopping and purchases</li><li>Checking bank account balances</li><li>Paying bills from anywhere</li></ul>"
+            },
+            {
+              name: "Navigation",
+              icon: "navigation.webp",
+              text: "Maps & GPS",
+              details: "Mobile navigation provides:<ul><li>Turn-by-turn directions to any location</li><li>Real-time traffic updates</li><li>Finding nearby restaurants and services</li><li>Exploring new places when traveling</li><li>Location sharing with friends</li></ul>"
+            },
+            {
+              name: "Photography",
+              icon: "photo.webp",
+              text: "Photos & videos",
+              details: "Mobile photography enables:<ul><li>Capturing special moments instantly</li><li>Recording videos of events</li><li>Editing photos with built-in tools</li><li>Sharing memories immediately</li><li>Creating content for social media</li></ul>"
+            },
+            {
+              name: "Health",
+              icon: "https://img.icons8.com/color/96/000000/heart-health.png",
+              text: "Fitness & reminders",
+              details: "Mobile health features include:<ul><li>Tracking daily steps and activity</li><li>Monitoring heart rate and sleep</li><li>Setting medication reminders</li><li>Accessing health information</li><li>Connecting with healthcare providers</li></ul>"
+            },
+          ],
+        },
+      };
+
+      // Utility: create SVG element
+      function svg(tag, attrs = {}) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        return el;
+      }
+
+      // Render a panel (central device + use items + connecting lines)
+      function renderPanel(panelIdPrefix, data) {
+        const centralEl = document.getElementById(
+          panelIdPrefix === "central" ? "central" : panelIdPrefix + "Comp"
+        ); // fallback
+        // Actually we have IDs: centralComp, centralMob, casesComp, casesMob, overlayComp, overlayMob
+      }
+
+      // Proper render implementation:
+      function clearElement(el) {
+        el.innerHTML = "";
+      }
+
+      function draw(panelPrefix, containerSelector) {
+        // panelPrefix: 'Comp' or 'Mob'
+        const centralId = "central" + panelPrefix;
+        const casesId = "cases" + panelPrefix;
+        const overlayId = "overlay" + panelPrefix;
+        const panelId =
+          panelPrefix === "Comp" ? "panelComputer" : "panelMobile";
+        const panel = document.getElementById(panelId);
+        const central = document.getElementById(centralId);
+        const cases = document.getElementById(casesId);
+        const overlay = document.getElementById(overlayId);
+
+        // map prefix to data
+        const data = panelPrefix === "Comp" ? DATA.computer : DATA.mobile;
+
+        clearElement(central);
+        clearElement(cases);
+        // create central content
+        const img = document.createElement("img");
+        img.src = data.icon;
+        img.alt = data.title;
+        const label = document.createElement("h3");
+        label.textContent = data.title;
+        central.appendChild(img);
+        central.appendChild(label);
+
+        // create SVG overlay (clear and create new svg)
+        overlay.innerHTML = "";
+        const svgEl = svg("svg", {
+          width: "100%",
+          height: "100%",
+          viewBox: `0 0 ${panel.clientWidth} ${panel.clientHeight}`,
+          preserveAspectRatio: "none",
+        });
+        overlay.appendChild(svgEl);
+
+        const panelRect = panel.getBoundingClientRect();
+        const centerX = panel.clientWidth / 2;
+        const centerY = panel.clientHeight / 2;
+
+        // radius for use items (keep inside panel)
+        const radius =
+          Math.min(panel.clientWidth, panel.clientHeight) *
+          (window.innerWidth > 980 ? 0.38 : 0.32); // Smaller radius on mobile
+
+        // distribute use items evenly around circle but allow easy reading: use fixed angles
+        const uses = data.uses;
+        const angleOffset = (-90 * Math.PI) / 180; // start at top
+
+        uses.forEach((item, idx) => {
+          const angle = angleOffset + idx * ((2 * Math.PI) / uses.length);
+          const ux = centerX + Math.cos(angle) * radius;
+          const uy = centerY + Math.sin(angle) * radius;
+
+          // create use item card
+          const card = document.createElement("div");
+          card.className = "use-item";
+          card.style.left = ux + "px";
+          card.style.top = uy + "px";
+          card.innerHTML = `<img src="${item.icon}" alt="${item.name}"><h4>${item.name}</h4><p>${item.text}</p>`;
+          cases.appendChild(card);
+
+          // Add click event to show popup
+          card.addEventListener('click', () => {
+            showPopup(item);
+          });
+
+          // line from central center to card center using SVG line
+          // compute central coords relative to panel
+          const cRect = central.getBoundingClientRect();
+          const panelRectLocal = panel.getBoundingClientRect();
+          // central center coords relative to panel
+          const cx = cRect.left - panelRectLocal.left + cRect.width / 2;
+          const cy = cRect.top - panelRectLocal.top + cRect.height / 2;
+          // use-item center coords relative to panel (we placed by left/top center)
+          const ux_rel = ux;
+          const uy_rel = uy;
+          // Update line styles
+          const line = svg("line", {
+            x1: cx,
+            y1: cy,
+            x2: ux_rel,
+            y2: uy_rel,
+            stroke: "#cfe6ff",
+            "stroke-width": window.innerWidth > 980 ? 4 : 3, // Thinner lines on mobile
+            "stroke-linecap": "round",
+            opacity: 0.8,
+          });
+
+          // Update connection dots
+          const circle = svg("circle", {
+            cx: ux_rel,
+            cy: uy_rel,
+            r: window.innerWidth > 980 ? 3 : 2.5, // Smaller dots on mobile
+            fill: "#1a73e8",
+            opacity: 0.9,
+          });
+          svgEl.appendChild(line);
+          svgEl.appendChild(circle);
+        });
+      }
+
+      // Popup functionality
+      function showPopup(item) {
+        const popupOverlay = document.getElementById('popupOverlay');
+        const popupIcon = document.getElementById('popupIcon');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupContent = document.getElementById('popupContent');
+        
+        popupIcon.src = item.icon;
+        popupIcon.alt = item.name;
+        popupTitle.textContent = item.name;
+        popupContent.innerHTML = item.details;
+        
+        popupOverlay.classList.add('active');
+      }
+
+      function hidePopup() {
+        const popupOverlay = document.getElementById('popupOverlay');
+        popupOverlay.classList.remove('active');
+      }
+
+      // Initial render for both panels
+      function renderAll() {
+        // Only render the active panel
+        const activePanel = document.querySelector(".panel.active");
+        if (activePanel.id === "panelComputer") {
+          draw("Comp");
+        } else {
+          draw("Mob");
+        }
+      }
+
+      // Slight debounce for resize
+      let resizeTimer = null;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(renderAll, 120);
+      });
+
+      // Buttons logic
+      const btnComp = document.getElementById("btnComputer");
+      const btnMob = document.getElementById("btnMobile");
+      const panelComp = document.getElementById("panelComputer");
+      const panelMob = document.getElementById("panelMobile");
+
+      function setActive(kind) {
+        // Update buttons
+        if (kind === "computer") {
+          btnComp.classList.add("active");
+          btnMob.classList.remove("active");
+          // Show computer panel, hide mobile panel
+          panelComp.classList.add("active");
+          panelMob.classList.remove("active");
+          // Update shadow effects
+          panelComp.style.boxShadow = "0 12px 30px rgba(26,115,232,0.08)";
+          panelMob.style.boxShadow = "none";
+          // Render computer panel
+          draw("Comp");
+        } else {
+          btnMob.classList.add("active");
+          btnComp.classList.remove("active");
+          // Show mobile panel, hide computer panel
+          panelMob.classList.add("active");
+          panelComp.classList.remove("active");
+          // Update shadow effects
+          panelMob.style.boxShadow = "0 12px 30px rgba(26,115,232,0.08)";
+          panelComp.style.boxShadow = "none";
+          // Render mobile panel
+          draw("Mob");
+        }
+      }
+
+      btnComp.addEventListener("click", () => {
+        setActive("computer"); /* no content switch needed - both visible */
+      });
+      btnMob.addEventListener("click", () => {
+        setActive("mobile");
+      });
+
+      // Close popup when clicking close button or outside
+      document.getElementById('popupClose').addEventListener('click', hidePopup);
+      document.getElementById('popupOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          hidePopup();
+        }
+      });
+
+      // initial
+      setTimeout(() => {
+        panelComp.classList.add("active"); // Show computer panel initially
+        panelMob.classList.remove("active");
+        setActive("computer");
+      }, 50);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Email Guide - How Email Works</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: white;
+            padding: 40px 0 30px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .email-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .email-logo i {
+            font-size: 60px;
+            color: #1a73e8;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            font-weight: 300;
+        }
+        
+        /* PERFECT NAVIGATION TABS */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0 40px;
+            position: relative;
+        }
+        
+        .nav-tabs-wrapper {
+            background: white;
+            border-radius: 50px;
+            padding: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            display: inline-flex;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(26, 115, 232, 0.1);
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+            position: relative;
+            z-index: 2;
+            color: #555;
+            text-align: center;
+        }
+        
+        .nav-tab i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            color: #1a73e8;
+        }
+        
+        .nav-tab:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-tab.active {
+            color: white;
+        }
+        
+        .nav-tab.active i {
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .active-slider {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            height: calc(100% - 16px);
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            border-radius: 40px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+        }
+        
+        /* Main Content */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            color: #0d47a1;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #fbbc04;
+            display: inline-block;
+        }
+        
+        /* Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: #e8f0fe;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon i {
+            font-size: 28px;
+            color: #1a73e8;
+        }
+        
+        .card-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            color: #0d47a1;
+            margin-bottom: 15px;
+        }
+        
+        /* Steps */
+        .steps-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 25px;
+            flex-shrink: 0;
+        }
+        
+        .step-content h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+        
+        .step-visual {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #1a73e8;
+        }
+        
+        /* Visual Demo */
+        .demo-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .demo-visualization {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .demo-box {
+            width: 160px;
+            height: 120px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-box.active {
+            border-color: #1a73e8;
+            background: rgba(26, 115, 232, 0.05);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+        
+        .demo-box i {
+            font-size: 2rem;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        
+        .demo-arrow {
+            font-size: 2rem;
+            color: #fbbc04;
+            margin: 0 10px;
+        }
+        
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .demo-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .demo-btn:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+        
+        .demo-btn i {
+            margin-right: 8px;
+        }
+        
+        .demo-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .demo-progress {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            margin: 25px 0;
+            overflow: hidden;
+        }
+        
+        .demo-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #1a73e8, #fbbc04);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+        
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .stat-box {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #1a73e8, #fbbc04);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 30px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -38px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background: #1a73e8;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px #1a73e8;
+        }
+        
+        .timeline-year {
+            font-weight: 700;
+            color: #1a73e8;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-tabs-wrapper {
+                flex-wrap: wrap;
+                border-radius: 20px;
+                padding: 10px;
+            }
+            
+            .nav-tab {
+                min-width: 120px;
+                padding: 12px 20px;
+                margin: 2px;
+            }
+            
+            .active-slider {
+                display: none;
+            }
+            
+            .nav-tab.active {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-visualization {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .demo-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .step {
+                flex-direction: column;
+            }
+            
+            .step-number {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .nav-tab {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .nav-tab i {
+                margin-right: 5px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .nav-tabs-wrapper {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .nav-tab {
+                width: 100%;
+                justify-content: flex-start;
+                border-radius: 10px;
+                margin: 5px 0;
+            }
+            
+            .active-slider {
+                display: none;
+            }
+            
+            .nav-tab.active {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            }
+        }
+        
+        /* Simple Help */
+        .help-tip {
+            background: #e8f0fe;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #1a73e8;
+        }
+        
+        .help-tip h4 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .help-tip h4 i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="email-logo">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h1>How Email Works</h1>
+                <p class="subtitle">A simple guide to understand electronic mail - from sending to receiving</p>
+                
+                <!-- PERFECT NAVIGATION TABS -->
+                <div class="nav-container">
+                    <div class="nav-tabs-wrapper">
+                        <div class="active-slider" id="active-slider"></div>
+                        
+                        <div class="nav-tab active" data-tab="overview">
+                            <i class="fas fa-home"></i> Overview
+                        </div>
+                        
+                        <div class="nav-tab" data-tab="steps">
+                            <i class="fas fa-list-ol"></i> Step by Step
+                        </div>
+                        
+                        <div class="nav-tab" data-tab="demo">
+                            <i class="fas fa-play-circle"></i> Live Demo
+                        </div>
+                        
+                        <div class="nav-tab" data-tab="history">
+                            <i class="fas fa-history"></i> History
+                        </div>
+                        
+                        <div class="nav-tab" data-tab="tips">
+                            <i class="fas fa-lightbulb"></i> Tips
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="content-section active">
+            <h2 class="section-title">What is Email?</h2>
+            
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-mail-bulk"></i>
+                    </div>
+                    <h3 class="card-title">Electronic Mail</h3>
+                    <p>Email is a digital way to send messages and files to anyone with an internet connection. It's like sending a letter, but much faster and free!</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="card-title">Works Anytime</h3>
+                    <p>You don't need both people to be online at the same time. Send when you want, they'll get it when they check their email.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="card-title">Global & Instant</h3>
+                    <p>Send messages anywhere in the world instantly. Email travels at the speed of light through the internet.</p>
+                </div>
+            </div>
+            
+            <div class="help-tip">
+                <h4><i class="fas fa-info-circle"></i> Simple Explanation</h4>
+                <p>Think of email like sending a digital letter. You write it, put an address on it (@ symbol), and it gets delivered through internet "post offices" (servers) to the recipient's inbox.</p>
+            </div>
+            
+            <h2 class="section-title" style="margin-top: 40px;">Key Parts of an Email</h2>
+            
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-icon" style="background: #e8f0fe;">
+                        <i class="fas fa-user" style="color: #1a73e8;"></i>
+                    </div>
+                    <h3 class="card-title">Address Section</h3>
+                    <p><strong>From:</strong> Your email address<br>
+                    <strong>To:</strong> Recipient's address<br>
+                    <strong>Subject:</strong> What the email is about</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon" style="background: #e6f4ea;">
+                        <i class="fas fa-file-alt" style="color: #34a853;"></i>
+                    </div>
+                    <h3 class="card-title">Message Body</h3>
+                    <p>The main content of your email. Can be simple text or formatted with colors, images, and links. This is where you write your actual message.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon" style="background: #fce8e6;">
+                        <i class="fas fa-paperclip" style="color: #ea4335;"></i>
+                    </div>
+                    <h3 class="card-title">Attachments</h3>
+                    <p>You can attach files like photos, documents, or videos. These get sent along with your message for the recipient to download and open.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Step by Step Section -->
+        <section id="steps" class="content-section">
+            <h2 class="section-title">How Email Works - Simple Steps</h2>
+            
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>You Write & Send</h3>
+                        <p>You compose an email using Gmail, Outlook, or any email app, then click "Send".</p>
+                        <div class="step-visual">
+                            <strong>What happens:</strong> Your email app prepares your message with all its parts (address, subject, message, attachments).
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Goes to Your Email Server</h3>
+                        <p>Your message goes to your email provider's server (like Gmail's or Outlook's server).</p>
+                        <div class="step-visual">
+                            <strong>Like:</strong> Dropping a letter at your local post office. The server checks it's really from you.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Finds Recipient's Address</h3>
+                        <p>The server looks up where to send your email based on the recipient's address (the part after @).</p>
+                        <div class="step-visual">
+                            <strong>Example:</strong> For "person@gmail.com", it finds Google's email servers.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Travels to Recipient's Server</h3>
+                        <p>Your email travels through the internet to the recipient's email server.</p>
+                        <div class="step-visual">
+                            <strong>Like:</strong> A postal truck carrying letters between post offices.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Stored in Recipient's Inbox</h3>
+                        <p>The recipient's email server receives and stores your email in their inbox.</p>
+                        <div class="step-visual">
+                            <strong>What happens:</strong> The email waits here until the recipient checks their email.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h3>Recipient Reads It</h3>
+                        <p>When the recipient opens their email app, it downloads and shows your message.</p>
+                        <div class="step-visual">
+                            <strong>Final step:</strong> They can now read, reply, save, or delete your email.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-tip">
+                <h4><i class="fas fa-lightbulb"></i> Quick Summary</h4>
+                <p>Email travels from your computer → your email server → internet → recipient's server → their computer. The whole process usually takes just a few seconds!</p>
+            </div>
+        </section>
+        
+        <!-- Live Demo Section -->
+        <section id="demo" class="content-section">
+            <h2 class="section-title">See Email Travel in Action</h2>
+            <p style="margin-bottom: 25px;">Watch how an email travels from sender to recipient. Click "Start Journey" to begin.</p>
+            
+            <div class="demo-container">
+                <div class="demo-progress">
+                    <div class="demo-progress-bar" id="progress-bar"></div>
+                </div>
+                
+                <div class="demo-visualization">
+                    <div class="demo-box active" id="step1-box">
+                        <i class="fas fa-user-edit"></i>
+                        <div>You Write</div>
+                        <small>Email App</small>
+                    </div>
+                    
+                    <div class="demo-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <div class="demo-box" id="step2-box">
+                        <i class="fas fa-server"></i>
+                        <div>Your Server</div>
+                        <small>Gmail/Outlook</small>
+                    </div>
+                    
+                    <div class="demo-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <div class="demo-box" id="step3-box">
+                        <i class="fas fa-search"></i>
+                        <div>Find Address</div>
+                        <small>@ part lookup</small>
+                    </div>
+                    
+                    <div class="demo-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <div class="demo-box" id="step4-box">
+                        <i class="fas fa-exchange-alt"></i>
+                        <div>Travel Internet</div>
+                        <small>Server to Server</small>
+                    </div>
+                    
+                    <div class="demo-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <div class="demo-box" id="step5-box">
+                        <i class="fas fa-inbox"></i>
+                        <div>Their Inbox</div>
+                        <small>Stored on server</small>
+                    </div>
+                    
+                    <div class="demo-arrow"><i class="fas fa-arrow-right"></i></div>
+                    
+                    <div class="demo-box" id="step6-box">
+                        <i class="fas fa-user-check"></i>
+                        <div>They Read</div>
+                        <small>Opens email</small>
+                    </div>
+                </div>
+                
+                <div class="demo-controls">
+                    <button class="demo-btn" id="start-demo">
+                        <i class="fas fa-play"></i> Start Email Journey
+                    </button>
+                    <button class="demo-btn" id="reset-demo" disabled>
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="demo-btn" id="next-step" disabled>
+                        <i class="fas fa-step-forward"></i> Next Step
+                    </button>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <p><strong>Current Step:</strong> <span id="current-step-text">Ready to start</span></p>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">Each step shows what happens when you send an email</p>
+                </div>
+            </div>
+            
+            <div class="help-tip">
+                <h4><i class="fas fa-question-circle"></i> What You're Seeing</h4>
+                <p>This shows the journey of a typical email. In real life, this happens in seconds! The colored boxes light up to show where your email is at each moment.</p>
+            </div>
+        </section>
+        
+        <!-- History Section -->
+        <section id="history" class="content-section">
+            <h2 class="section-title">Email Through Time</h2>
+            
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="card-title">1971 - First Email</h3>
+                    <p>The first email was sent by Ray Tomlinson. He chose the @ symbol to separate user names from computer names - a standard still used today!</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="card-title">1976 - Royal Email</h3>
+                    <p>Queen Elizabeth II became the first monarch to send an email, showing how email was becoming important for everyone.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-satellite"></i>
+                    </div>
+                    <h3 class="card-title">1991 - Space Email</h3>
+                    <p>The first email from space was sent by the STS-43 mission crew, proving email could work anywhere!</p>
+                </div>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">1971</div>
+                    <p>First email sent by Ray Tomlinson</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">1976</div>
+                    <p>Queen Elizabeth II sends first royal email</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">1991</div>
+                    <p>First email sent from space</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">1996</div>
+                    <p>Hotmail launches - first free webmail service</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2004</div>
+                    <p>Gmail launches with 1GB free storage</p>
+                </div>
+            </div>
+            
+            <h2 class="section-title" style="margin-top: 40px;">Email Today</h2>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-number" id="daily-emails">306B</div>
+                    <div class="stat-label">Emails sent daily</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-number" id="email-users">4.3B</div>
+                    <div class="stat-label">Email users worldwide</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-number" id="work-email">28%</div>
+                    <div class="stat-label">Work time spent on email</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-number" id="mobile-email">65%</div>
+                    <div class="stat-label">Emails opened on mobile</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Tips Section -->
+        <section id="tips" class="content-section">
+            <h2 class="section-title">Email Tips & Best Practices</h2>
+            
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="card-title">Stay Safe</h3>
+                    <p><strong>Don't click suspicious links</strong> - If an email looks strange, don't click anything in it<br>
+                    <strong>Check sender address</strong> - Make sure it's from who it says it's from<br>
+                    <strong>Use strong passwords</strong> - Protect your email account</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="card-title">Write Better Emails</h3>
+                    <p><strong>Clear subject line</strong> - Say what the email is about<br>
+                    <strong>Be concise</strong> - Get to the point quickly<br>
+                    <strong>Check before sending</strong> - Review for typos and clarity<br>
+                    <strong>Use proper greeting</strong> - "Hi [Name]" is usually good</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3 class="card-title">Organize Your Inbox</h3>
+                    <p><strong>Use folders/labels</strong> - Organize emails by project or type<br>
+                    <strong>Unsubscribe</strong> - From newsletters you don't read<br>
+                    <strong>Archive old emails</strong> - Keep inbox clean<br>
+                    <strong>Set up filters</strong> - Automatically sort incoming mail</p>
+                </div>
+            </div>
+            
+            <div class="help-tip">
+                <h4><i class="fas fa-exclamation-triangle"></i> Common Email Problems & Solutions</h4>
+                <p><strong>Email not sent?</strong> Check internet connection and recipient address.<br>
+                <strong>Can't find an email?</strong> Use search or check spam folder.<br>
+                <strong>Getting too much spam?</strong> Use spam filters and don't share your email publicly.<br>
+                <strong>Attachment too big?</strong> Use cloud storage (Google Drive, Dropbox) and share the link instead.</p>
+            </div>
+            
+            <h2 class="section-title" style="margin-top: 40px;">Email vs Other Communication</h2>
+            
+            <div style="background: white; border-radius: 16px; padding: 30px; margin-top: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="color: #0d47a1; margin-bottom: 10px;"><i class="fas fa-envelope" style="color: #1a73e8;"></i> Email</h4>
+                        <p><strong>Best for:</strong> Formal communication, longer messages, attachments, records<br>
+                        <strong>Speed:</strong> Instant delivery, but reply can take time<br>
+                        <strong>Formality:</strong> Can be formal or casual</p>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #0d47a1; margin-bottom: 10px;"><i class="fas fa-comment" style="color: #34a853;"></i> Messaging</h4>
+                        <p><strong>Best for:</strong> Quick questions, instant replies, informal chats<br>
+                        <strong>Speed:</strong> Real-time conversation<br>
+                        <strong>Formality:</strong> Usually casual</p>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #0d47a1; margin-bottom: 10px;"><i class="fas fa-phone" style="color: #ea4335;"></i> Phone Call</h4>
+                        <p><strong>Best for:</strong> Urgent matters, complex discussions, personal touch<br>
+                        <strong>Speed:</strong> Immediate response<br>
+                        <strong>Formality:</strong> Can be formal or casual</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-logo">
+                <i class="fas fa-at"></i>
+            </div>
+            <p><strong>Simple Email Guide</strong> - Understanding email made easy</p>
+            <p style="margin-top: 10px;">Use the tabs above to explore different aspects of how email works</p>
+            <p style="margin-top: 5px; font-size: 0.8rem;">Made simple for everyone to understand</p>
+        </div>
+    </footer>
+
+    <script>
+        // Perfect Navigation Tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const sections = document.querySelectorAll('.content-section');
+            const activeSlider = document.getElementById('active-slider');
+            
+            // Set initial active slider position
+            const activeTab = document.querySelector('.nav-tab.active');
+            updateActiveSlider(activeTab);
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update active slider position with animation
+                    updateActiveSlider(this);
+                    
+                    // Show active section
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === tabId) {
+                            section.classList.add('active');
+                            
+                            // Auto-start demo when on demo tab
+                            if (tabId === 'demo') {
+                                setTimeout(() => {
+                                    if (currentStep === 0) {
+                                        startDemo();
+                                        
+                                        // Auto-advance through steps
+                                        let autoStep = 1;
+                                        const autoInterval = setInterval(() => {
+                                            if (autoStep < 6) {
+                                                autoStep++;
+                                                currentStep = autoStep;
+                                                updateDemo();
+                                                
+                                                if (autoStep === 6) {
+                                                    clearInterval(autoInterval);
+                                                    nextBtn.disabled = true;
+                                                    nextBtn.innerHTML = '<i class="fas fa-check"></i> Complete';
+                                                }
+                                            }
+                                        }, 1500);
+                                    }
+                                }, 300);
+                            }
+                        }
+                    });
+                });
+            });
+            
+            function updateActiveSlider(activeTab) {
+                const tabRect = activeTab.getBoundingClientRect();
+                const wrapperRect = activeTab.parentElement.getBoundingClientRect();
+                
+                activeSlider.style.width = `${tabRect.width}px`;
+                activeSlider.style.left = `${tabRect.left - wrapperRect.left}px`;
+            }
+            
+            // Email Journey Demo
+            const startBtn = document.getElementById('start-demo');
+            const resetBtn = document.getElementById('reset-demo');
+            const nextBtn = document.getElementById('next-step');
+            const progressBar = document.getElementById('progress-bar');
+            const demoBoxes = document.querySelectorAll('.demo-box');
+            const currentStepText = document.getElementById('current-step-text');
+            
+            const stepDescriptions = [
+                "Ready to start",
+                "You write and send an email from your email app",
+                "Your email goes to your email provider's server",
+                "The system finds where to send it based on the recipient's address",
+                "Your email travels through the internet between servers",
+                "The email arrives and is stored in the recipient's inbox",
+                "The recipient opens their email and reads your message"
+            ];
+            
+            let currentStep = 0;
+            
+            // Initialize
+            updateDemo();
+            
+            startBtn.addEventListener('click', function() {
+                startDemo();
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                if (currentStep < 6) {
+                    currentStep++;
+                    updateDemo();
+                }
+                
+                if (currentStep === 6) {
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = '<i class="fas fa-check"></i> Complete';
+                }
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                currentStep = 0;
+                updateDemo();
+                startBtn.disabled = false;
+                resetBtn.disabled = true;
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = '<i class="fas fa-step-forward"></i> Next Step';
+            });
+            
+            function startDemo() {
+                startBtn.disabled = true;
+                resetBtn.disabled = false;
+                nextBtn.disabled = false;
+                currentStep = 1;
+                updateDemo();
+            }
+            
+            function updateDemo() {
+                // Update progress bar
+                const progressPercent = (currentStep / 6) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Update boxes
+                demoBoxes.forEach((box, index) => {
+                    box.classList.remove('active');
+                    if (index < currentStep) {
+                        box.classList.add('active');
+                    }
+                });
+                
+                // Update step text
+                currentStepText.textContent = stepDescriptions[currentStep];
+                
+                // Auto-advance if at step 6 (complete)
+                if (currentStep === 6) {
+                    setTimeout(() => {
+                        currentStepText.textContent = "Email successfully delivered!";
+                    }, 1000);
+                }
+            }
+            
+            // Animate statistics
+            function animateStatistics() {
+                const stats = {
+                    'daily-emails': { target: 306, current: 0, step: 15.3, suffix: 'B' },
+                    'email-users': { target: 4.3, current: 0, step: 0.215, suffix: 'B' },
+                    'work-email': { target: 28, current: 0, step: 1.4, suffix: '%' },
+                    'mobile-email': { target: 65, current: 0, step: 3.25, suffix: '%' }
+                };
+                
+                for (const statId in stats) {
+                    const stat = stats[statId];
+                    let count = 0;
+                    const interval = setInterval(() => {
+                        count += stat.step;
+                        if (count >= stat.target) {
+                            count = stat.target;
+                            clearInterval(interval);
+                        }
+                        
+                        document.getElementById(statId).textContent = 
+                            count.toFixed(statId === 'email-users' ? 1 : 0) + stat.suffix;
+                    }, 50);
+                }
+            }
+            
+            // Start animation after page loads
+            setTimeout(animateStatistics, 500);
+            
+            // Update slider on window resize
+            window.addEventListener('resize', function() {
+                const activeTab = document.querySelector('.nav-tab.active');
+                updateActiveSlider(activeTab);
+            });
+        });
+    </script>
+</body>
+</html>

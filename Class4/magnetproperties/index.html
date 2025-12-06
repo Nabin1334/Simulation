@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetic and non-Magnetic Materials - Full Interactive Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <header>
+        <h1>🧲 Magnetic and 🚫non-Magnetic Materials Interactive Simulation</h1>
+        <button class="info-toggle" onclick="toggleInfo()">ℹ Info</button>
+    </header>
+    
+    <div id="simulation"></div>
+    
+    <div class="instructions">
+        🧲 <strong>Drag magnet</strong> to attract materials<br>
+        ✋ <strong>Drag items</strong> to separate them
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color magnetic-color"></div>
+            <span>Magnetic (Attracted)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color non-magnetic-color"></div>
+            <span>Non-Magnetic (Not Attracted)</span>
+        </div>
+    </div>
+    
+    <div class="info-panel" id="infoPanel">
+        <div class="magnetic-section">
+            <h3>🧲 Magnetic Materials</h3>
+            <ul>
+                <li>Iron Nail</li>
+                <li>Steel Screw</li>
+                <li>Steel Clip</li>
+                <li>Iron Key</li>
+                <li>Nickel Coin</li>
+                <li>Cobalt Sphere</li>
+            </ul>
+        </div>
+        
+        <div class="non-magnetic-section">
+            <h3>🚫 Non-Magnetic Materials</h3>
+            <ul>
+                <li>Plastic Bottle</li>
+                <li>Copper Wire</li>
+                <li>Aluminum Can</li>
+                <li>Wood Block</li>
+                <li>Glass Pane</li>
+                <li>Rubber Band</li>
+            </ul>
+        </div>
+    </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

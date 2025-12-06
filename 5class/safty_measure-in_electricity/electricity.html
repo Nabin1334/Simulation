@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electrical Safety for Kids</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Comic Sans MS", cursive, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        color: #333;
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        padding: 20px;
+      }
+
+      header {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        margin: -20px -20px 20px;
+        border-radius: 20px 20px 0 0;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+      }
+
+      .intro {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 0 20px;
+        font-size: 1.1rem;
+      }
+
+      .safety-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .safety-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        border: 3px solid #4ecdc4;
+        text-align: center;
+      }
+
+      .safety-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        color: #ff6b6b;
+        font-size: 1.3rem;
+      }
+
+      .card-title i {
+        margin-right: 10px;
+        font-size: 1.5rem;
+      }
+
+      .visualization-container {
+        height: 200px;
+        background-color: #f0f8ff;
+        border-radius: 10px;
+        margin: 20px 0;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #4ecdc4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .socket {
+        width: 120px;
+        height: 80px;
+        background: white;
+        border: 3px solid #444;
+        border-radius: 10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .socket-hole {
+        width: 20px;
+        height: 30px;
+        background: black;
+        border-radius: 5px;
+        position: absolute;
+      }
+
+      .hole-1 {
+        top: 25px;
+        left: 30px;
+      }
+
+      .hole-2 {
+        top: 25px;
+        right: 30px;
+      }
+
+      .hand-image {
+        position: absolute;
+        transition: all 0.5s ease, transform 0.35s ease;
+        width: 120px;
+        height: auto;
+        z-index: 2;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .hand-safe {
+        right: 40px;
+        top: -50px;
+      }
+
+      .hand-danger {
+        right: 40px;
+        top: 10px;
+      }
+
+      .lightning {
+        font-size: 40px;
+        color: yellow;
+        position: absolute;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 10;
+      }
+
+      .wire {
+        width: 200px;
+        height: 10px;
+        background: black;
+        position: relative;
+        z-index: 1;
+      }
+
+      .wire-exposed {
+        width: 50px;
+        height: 10px;
+        background: yellow;
+        position: absolute;
+        left: 75px;
+        animation: spark 1s infinite;
+      }
+
+      .tape {
+        width: 60px;
+        height: 20px;
+        background: #333;
+        position: absolute;
+        left: 70px;
+        top: -5px;
+        border-radius: 3px;
+        z-index: 1;
+      }
+
+      /* Updated for electric board (panel) in glove section */
+      .electric-board {
+        width: 150px;
+        height: 180px;
+        background: #888;
+        border: 3px solid #444;
+        border-radius: 5px;
+        position: relative;
+        z-index: 1;
+        background-image: url('https://www.saftgard.com/images/default-source/default-album/dsc00191_smaller11bca33bb5466d0890f9ff0000b1ecf4.jpg?sfvrsn=0&MaxWidth=500&MaxHeight=300&ScaleUp=false&Quality=High&Method=ResizeFitToAreaArguments&Signature=DAC1B38C60964373B93B62E91C1410FD6F3D6F89'); /* Real panel image as background */
+        background-size: cover;
+        background-position: center;
+      }
+
+      .glove-image {
+        position: absolute;
+        width: 100px;
+        height: auto;
+        z-index: 2;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: #4ecdc4;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      button:hover,
+      button:focus {
+        background: #ff6b6b;
+        transform: scale(1.05);
+        outline: none;
+      }
+
+      button.small {
+        padding: 8px 10px;
+        border-radius: 12px;
+      }
+
+      .dos-donts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .dos,
+      .donts {
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .dos {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        border: 3px solid #28a745;
+      }
+
+      .donts {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border: 3px solid #dc3545;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+      }
+
+      .dos .section-title {
+        color: #155724;
+      }
+
+      .donts .section-title {
+        color: #721c24;
+      }
+
+      ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      li {
+        margin-bottom: 10px;
+        padding-left: 25px;
+        position: relative;
+      }
+
+      .dos li:before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+      }
+
+      .donts li:before {
+        content: "✗";
+        color: #dc3545;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        background: #2c3e50;
+        color: white;
+        border-radius: 0 0 20px 20px;
+        margin: 20px -20px -20px;
+      }
+
+      .emergency {
+        background: #fff3cd;
+        border: 3px solid #ffc107;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      .emergency h3 {
+        color: #856404;
+        margin-bottom: 10px;
+      }
+
+      .status-text {
+        font-weight: bold;
+        margin-top: 10px;
+        font-size: 1.2rem;
+      }
+
+      .safe {
+        color: #28a745;
+      }
+
+      .danger {
+        color: #dc3545;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes spark {
+        0% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+        75% {
+          transform: translateX(-5px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      .shake {
+        animation: shake 0.5s ease-in-out;
+      }
+
+      .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+
+      @media (max-width: 768px) {
+        .dos-donts {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .hand-image,
+        .glove-image {
+          width: 100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Electrical Safety Guide</h1>
+        <p class="subtitle">Stay Safe Around Electricity!</p>
+      </header>
+
+      <section class="intro">
+        <p>
+          Electricity is very important in our daily life, but if not used
+          carefully, it can cause life-threatening accidents. Let's learn how to
+          stay safe around electricity!
+        </p>
+      </section>
+
+      <div class="safety-grid">
+        <div class="safety-card" data-card="socket">
+          <div class="card-title">
+            <i class="fas fa-plug" aria-hidden="true"></i>
+            <h3>Keep Away from Sockets</h3>
+          </div>
+          <p>
+            Never insert fingers or objects into electrical outlets. They are
+            not toys!
+          </p>
+          <div
+            class="visualization-container"
+            id="socket-viz"
+            aria-hidden="false"
+            tabindex="0"
+          >
+            <div class="socket" aria-hidden="true">
+              <div class="socket-hole hole-1"></div>
+              <div class="socket-hole hole-2"></div>
+            </div>
+            <div
+              class="lightning"
+              id="socket-lightning"
+              style="top: 30px; right: 60px"
+            >
+              ⚡
+            </div>
+          </div>
+          <div class="status-text" id="socket-status">
+            Status:
+            <span class="safe" id="socket-status-text" aria-live="polite"
+              >Safe</span
+            >
+          </div>
+          <div class="controls" role="group" aria-label="Socket controls">
+            <button
+              class="small"
+              data-action="safe"
+              data-target="socket"
+              title="Show the safe option"
+              aria-label="Show safe socket"
+            >
+              Safe Way
+            </button>
+            <button
+              class="small"
+              data-action="danger"
+              data-target="socket"
+              title="Show the dangerous option"
+              aria-label="Show dangerous socket"
+            >
+              Danger!
+            </button>
+            <button
+              class="small"
+              data-action="demo"
+              data-target="socket"
+              title="Auto demo toggle"
+              aria-pressed="false"
+              aria-label="Toggle demo for socket"
+            >
+              Auto Demo
+            </button>
+          </div>
+        </div>
+
+        <div class="safety-card" data-card="wire">
+          <div class="card-title">
+            <i class="fas fa-bolt" aria-hidden="true"></i>
+            <h3>Cover Bare Wires</h3>
+          </div>
+          <p>
+            Always cover bare wires with electrical tape. Exposed wires can
+            cause shocks.
+          </p>
+          <div class="visualization-container" id="wire-viz" tabindex="0">
+            <div class="wire" aria-hidden="true">
+              <div class="tape" id="wire-tape"></div>
+              <div
+                class="wire-exposed"
+                id="wire-exposed"
+                style="display: none"
+              ></div>
+            </div>
+            <div
+              class="lightning"
+              id="wire-lightning"
+              style="top: 50px; right: 60px; display: none"
+            >
+              ⚡
+            </div>
+          </div>
+          <div class="status-text" id="wire-status">
+            Status:
+            <span class="safe" id="wire-status-text" aria-live="polite"
+              >Protected</span
+            >
+          </div>
+          <div class="controls" role="group" aria-label="Wire controls">
+            <button
+              class="small"
+              data-action="safe"
+              data-target="wire"
+              title="Show the safe option"
+              aria-label="Show safe wire"
+            >
+              Safe Way
+            </button>
+            <button
+              class="small"
+              data-action="danger"
+              data-target="wire"
+              title="Show the dangerous option"
+              aria-label="Show dangerous wire"
+            >
+              Danger!
+            </button>
+            <button
+              class="small"
+              data-action="demo"
+              data-target="wire"
+              title="Auto demo toggle"
+              aria-pressed="false"
+              aria-label="Toggle demo for wire"
+            >
+              Auto Demo
+            </button>
+          </div>
+        </div>
+
+        <div class="safety-card" data-card="glove">
+          <div class="card-title">
+            <i class="fas fa-hand-paper" aria-hidden="true"></i>
+            <h3>Wear Protective Gear</h3>
+          </div>
+          <p>
+            Always wear rubber gloves when doing electrical work. Rubber doesn't
+            conduct electricity.
+          </p>
+          <div class="visualization-container" id="glove-viz" tabindex="0">
+            <div class="electric-board" aria-hidden="true"></div> <!-- Updated to electric-board -->
+            <div
+              class="lightning"
+              id="glove-lightning"
+              style="top: 50px; right: 60px; display: none"
+            >
+              ⚡
+            </div>
+          </div>
+          <div class="status-text" id="glove-status">
+            Status:
+            <span class="safe" id="glove-status-text" aria-live="polite"
+              >Protected</span
+            >
+          </div>
+          <div class="controls" role="group" aria-label="Glove controls">
+            <button
+              class="small"
+              data-action="safe"
+              data-target="glove"
+              title="Show the safe option"
+              aria-label="Show safe glove"
+            >
+              Safe Way
+            </button>
+            <button
+              class="small"
+              data-action="danger"
+              data-target="glove"
+              title="Show the dangerous option"
+              aria-label="Show dangerous glove"
+            >
+              Danger!
+            </button>
+            <button
+              class="small"
+              data-action="demo"
+              data-target="glove"
+              title="Auto demo toggle"
+              aria-pressed="false"
+              aria-label="Toggle demo for glove"
+            >
+              Auto Demo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="emergency">
+        <h3>Emergency Procedure</h3>
+        <p>
+          In case of a power cut, lightning, or fire, the main switch should be
+          turned off immediately!
+        </p>
+        <p>
+          If something electrical breaks, always call an adult or an electrician
+          to fix it.
+        </p>
+      </div>
+
+      <div class="dos-donts">
+        <div class="dos">
+          <h3 class="section-title">Do's ✅</h3>
+          <ul>
+            <li>Ask an adult for help with electrical devices</li>
+            <li>Keep electrical devices away from water</li>
+            <li>Tell an adult if you see damaged wires</li>
+            <li>Unplug devices by holding the plug, not the cord</li>
+            <li>Call an electrician if something breaks</li>
+            <li>Wear rubber gloves for electrical work</li>
+            <li>Cover bare wires with electrical tape</li>
+          </ul>
+        </div>
+
+        <div class="donts">
+          <h3 class="section-title">Don'ts ❌</h3>
+          <ul>
+            <li>Don't insert fingers into plugs or sockets</li>
+            <li>Don't use electrical devices with wet hands</li>
+            <li>Don't touch broken electrical equipment</li>
+            <li>Don't overload sockets with too many plugs</li>
+            <li>Don't fly kites near power lines</li>
+            <li>Don't climb trees near power lines</li>
+            <li>Don't use damaged electrical cords</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          Remember: Electricity is helpful but can be dangerous. Always be
+          careful and ask an adult for help!
+        </p>
+        <p>Science and Technology</p>
+      </footer>
+    </div>
+
+    <script>
+      // Updated image manager with real URLs
+      const IMAGES = {
+        socket: {
+          safe: {
+            src: "https://images.unsplash.com/photo-1583195769098-386c1f0c453c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            alt: "Safe hand away from socket",
+          },
+          danger: {
+            src: "socket.png", // Replaced placeholder with real (example; use a real search result if needed)
+            alt: "Dangerous finger pointing at socket",
+          },
+        },
+        wire: {
+          safe: {
+            src: "https://images.unsplash.com/photo-1583195765522-5508d0a8d61c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            alt: "Safe hand away from wire",
+          },
+          danger: {
+            src: "https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            alt: "Dangerous hand touching exposed wire",
+          },
+        },
+        glove: {
+          safe: {
+            src: "https://www.vdp.com/resources/resized/900x470/526/583.jpg", // Real safe glove on panel
+            alt: "Safe hand with rubber glove working on electrical panel",
+          },
+          danger: {
+            src: "https://www.shutterstock.com/image-vector/wet-hands-plugging-power-dangerous-260nw-2338935939.jpg", // Real danger illustration (bare/wet hand risk)
+            alt: "Dangerous bare hand near electrical danger",
+          },
+        },
+      };
+
+      const FALLBACK_SRC =
+        "data:image/svg+xml;utf8," +
+        encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect width="100%" height="100%" fill="#ddd"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#666" font-size="14">Image not available</text></svg>'
+        );
+
+      // Keep demo intervals so they can be toggled
+      const demoIntervals = {};
+
+      // Utility to create and insert an image element inside a viz container
+      function createVizImage(card, type, className, idSuffix) {
+        const viz = document.getElementById(`${card}-viz`);
+        if (!viz) return null;
+        const info = IMAGES[card] && IMAGES[card][type];
+        const img = document.createElement("img");
+        img.className = `${className}`;
+        img.alt = info ? info.alt : `${card} ${type}`;
+        img.id = `${card}-${type}${idSuffix ? "-" + idSuffix : ""}`;
+        img.setAttribute("role", "img");
+        img.style.display = "none";
+        img.style.pointerEvents = "none";
+
+        // preload
+        if (info && info.src) {
+          const p = new Image();
+          p.onload = () => {
+            img.src = info.src;
+          };
+          p.onerror = () => {
+            img.src = FALLBACK_SRC;
+          };
+          p.src = info.src;
+        } else {
+          img.src = FALLBACK_SRC;
+        }
+
+        viz.appendChild(img);
+        return img;
+      }
+
+      // Initialize images dynamically (replaces previous hard-coded tags)
+      function setupImages() {
+        // socket images
+        createVizImage("socket", "safe", "hand-image hand-safe", "img");
+        createVizImage("socket", "danger", "hand-image hand-danger", "img");
+
+        // wire images
+        createVizImage("wire", "safe", "hand-image", "img-safe");
+        createVizImage("wire", "danger", "hand-image", "img-danger");
+
+        // glove images (updated for electric board context)
+        createVizImage("glove", "safe", "glove-image", "img-safe");
+        createVizImage("glove", "danger", "glove-image", "img-danger");
+      }
+
+      // Basic UI functions that now operate on dynamically created elements
+      function showSafeSocket() {
+        toggleSocketImages(true);
+        document.getElementById("socket-lightning").style.opacity = "0";
+        updateStatus("socket", "Safe", "safe");
+      }
+      function showDangerSocket() {
+        toggleSocketImages(false);
+        document.getElementById("socket-lightning").style.opacity = "1";
+        updateStatus("socket", "Danger!", "danger");
+        flashAndShake(`${"socket"}-danger-img`);
+      }
+
+      function toggleSocketImages(useSafe) {
+        const safe = document.getElementById("socket-safe-img");
+        const danger = document.getElementById("socket-danger-img");
+        if (safe) safe.style.display = useSafe ? "block" : "none";
+        if (danger) danger.style.display = useSafe ? "none" : "block";
+      }
+
+      function showSafeWire() {
+        document.getElementById("wire-tape").style.display = "block";
+        document.getElementById("wire-exposed").style.display = "none";
+        setWireImages(true);
+        document.getElementById("wire-lightning").style.display = "none";
+        updateStatus("wire", "Protected", "safe");
+      }
+      function showDangerWire() {
+        document.getElementById("wire-tape").style.display = "none";
+        document.getElementById("wire-exposed").style.display = "block";
+        setWireImages(false);
+        document.getElementById("wire-lightning").style.display = "block";
+        updateStatus("wire", "Exposed!", "danger");
+        flashAndShake("wire-img-danger");
+      }
+
+      function setWireImages(useSafe) {
+        const safe = document.getElementById("wire-img-safe");
+        const danger = document.getElementById("wire-img-danger");
+        if (safe) safe.style.display = useSafe ? "block" : "none";
+        if (danger) danger.style.display = useSafe ? "none" : "block";
+      }
+
+      function showSafeGlove() {
+        setGloveImages(true);
+        document.getElementById("glove-lightning").style.display = "none";
+        updateStatus("glove", "Protected", "safe");
+      }
+      function showDangerGlove() {
+        setGloveImages(false);
+        document.getElementById("glove-lightning").style.display = "block";
+        updateStatus("glove", "No Protection!", "danger");
+        flashAndShake("glove-img-danger");
+      }
+
+      function setGloveImages(useSafe) {
+        const safe = document.getElementById("glove-img-safe");
+        const danger = document.getElementById("glove-img-danger");
+        if (safe) safe.style.display = useSafe ? "block" : "none";
+        if (danger) danger.style.display = useSafe ? "none" : "block";
+      }
+
+      function updateStatus(target, text, className) {
+        const el = document.getElementById(`${target}-status-text`);
+        if (!el) return;
+        el.textContent = text;
+        el.className = className;
+      }
+
+      function flashAndShake(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add("shake");
+        // quick pulse
+        el.style.transform = "scale(1.03)";
+        setTimeout(() => {
+          el.classList.remove("shake");
+          el.style.transform = "";
+        }, 600);
+      }
+
+      // Auto demo: toggles danger and safe every X ms
+      function startDemo(target, intervalMs = 1200) {
+        if (demoIntervals[target]) return;
+        const fn = () => {
+          if (target === "socket") {
+            const cur =
+              document.getElementById("socket-status-text").textContent;
+            if (cur === "Safe") showDangerSocket();
+            else showSafeSocket();
+          } else if (target === "wire") {
+            const cur = document.getElementById("wire-status-text").textContent;
+            if (cur === "Protected") showDangerWire();
+            else showSafeWire();
+          } else if (target === "glove") {
+            const cur =
+              document.getElementById("glove-status-text").textContent;
+            if (cur === "Protected") showDangerGlove();
+            else showSafeGlove();
+          }
+        };
+        // run immediately for responsiveness
+        fn();
+        demoIntervals[target] = setInterval(fn, intervalMs);
+        // set button pressed state
+        const btn = document.querySelector(
+          `button[data-action="demo"][data-target="${target}"]`
+        );
+        if (btn) {
+          btn.setAttribute("aria-pressed", "true");
+          btn.textContent = "Stop Demo";
+        }
+      }
+
+      function stopDemo(target) {
+        if (!demoIntervals[target]) return;
+        clearInterval(demoIntervals[target]);
+        delete demoIntervals[target];
+        const btn = document.querySelector(
+          `button[data-action="demo"][data-target="${target}"]`
+        );
+        if (btn) {
+          btn.setAttribute("aria-pressed", "false");
+          btn.textContent = "Auto Demo";
+        }
+        // ensure safe state when stopping
+        if (target === "socket") showSafeSocket();
+        if (target === "wire") showSafeWire();
+        if (target === "glove") showSafeGlove();
+      }
+
+      // Generic handler for control buttons (keyboard + mouse)
+      function handleControlClick(e) {
+        const action = e.currentTarget.getAttribute("data-action");
+        const target = e.currentTarget.getAttribute("data-target");
+        if (!action || !target) return;
+        if (action === "safe") {
+          if (target === "socket") showSafeSocket();
+          if (target === "wire") showSafeWire();
+          if (target === "glove") showSafeGlove();
+        } else if (action === "danger") {
+          if (target === "socket") showDangerSocket();
+          if (target === "wire") showDangerWire();
+          if (target === "glove") showDangerGlove();
+        } else if (action === "demo") {
+          // toggle
+          if (demoIntervals[target]) stopDemo(target);
+          else startDemo(target);
+        }
+      }
+
+      // Attach event listeners to controls and add keyboard support
+      function initControls() {
+        document.querySelectorAll("button[data-action]").forEach((btn) => {
+          btn.addEventListener("click", handleControlClick);
+          // keyboard: allow Enter and Space to trigger (for non-button elements in future)
+          btn.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              btn.click();
+            }
+          });
+        });
+
+        // Allow visualization containers to use arrow keys to step through demo for keyboard users
+        document.querySelectorAll(".visualization-container").forEach((v) => {
+          v.addEventListener("keydown", (ev) => {
+            const card =
+              v.parentElement && v.parentElement.getAttribute("data-card");
+            if (!card) return;
+            if (ev.key === "ArrowRight") {
+              // show danger
+              document
+                .querySelector(
+                  `button[data-target="${card}"][data-action="danger"]`
+                )
+                ?.click();
+            } else if (ev.key === "ArrowLeft") {
+              // show safe
+              document
+                .querySelector(
+                  `button[data-target="${card}"][data-action="safe"]`
+                )
+                ?.click();
+            } else if (ev.key === "d" || ev.key.toLowerCase() === "d") {
+              document
+                .querySelector(
+                  `button[data-target="${card}"][data-action="demo"]`
+                )
+                ?.click();
+            }
+          });
+        });
+      }
+
+      // Safe default initialization
+      function initDefaultState() {
+        showSafeSocket();
+        showSafeWire();
+        showSafeGlove();
+      }
+
+      // Run setup on DOM ready
+      window.addEventListener("DOMContentLoaded", () => {
+        setupImages();
+        initControls();
+        initDefaultState();
+      });
+    </script>
+  </body>
+</html>

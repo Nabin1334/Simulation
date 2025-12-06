@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound Wave Propagation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        color: white;
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      #container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      #ui-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .panel {
+        background: rgba(15, 22, 39, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        pointer-events: auto;
+      }
+
+      #info-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 300px;
+      }
+
+      #controls-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: 300px;
+      }
+
+      .section-title {
+        font-size: 16px;
+        margin: 15px 0 10px;
+        color: #4facfe;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 5px;
+      }
+
+      .control-group {
+        margin-bottom: 15px;
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        margin: 8px 0;
+      }
+
+      .control-label {
+        width: 100px;
+        font-size: 14px;
+      }
+
+      .control-slider {
+        flex: 1;
+        height: 6px;
+        -webkit-appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        outline: none;
+      }
+
+      .control-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #4facfe;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .control-slider::-webkit-slider-thumb:hover {
+        background: #00f2fe;
+      }
+
+      .control-value {
+        width: 40px;
+        text-align: right;
+        font-size: 14px;
+        margin-left: 10px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 10px;
+        background: rgba(79, 172, 254, 0.2);
+        border: 1px solid rgba(79, 172, 254, 0.5);
+        border-radius: 6px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn:hover {
+        background: rgba(79, 172, 254, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .btn.active {
+        background: rgba(79, 172, 254, 0.6);
+        box-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+      }
+
+      #instructions {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(15, 22, 39, 0.7);
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        max-width: 250px;
+      }
+
+      .legend {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 8px;
+      }
+
+      .label {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 20;
+      }
+
+      .arrow {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        pointer-events: none;
+        z-index: 20;
+      }
+
+      #loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        text-align: center;
+        z-index: 5;
+      }
+
+      /* Responsive Design */
+      
+      /* Tablet styles */
+      @media (max-width: 1024px) {
+        #info-panel {
+          width: 280px;
+        }
+        
+        #controls-panel {
+          width: 280px;
+        }
+        
+        #instructions {
+          max-width: 220px;
+          font-size: 13px;
+        }
+      }
+
+      /* Mobile styles */
+      @media (max-width: 768px) {
+        body {
+          overflow: auto;
+          height: auto;
+        }
+        
+        #container {
+          height: 60vh;
+          min-height: 400px;
+        }
+        
+        #ui-container {
+          position: static;
+          display: flex;
+          flex-direction: column;
+          padding: 10px;
+          gap: 15px;
+          height: auto;
+        }
+        
+        .panel {
+          position: static !important;
+          width: 100% !important;
+          max-width: 100%;
+          margin: 0;
+          padding: 15px;
+        }
+        
+        #info-panel {
+          order: 2;
+          margin-top: 0;
+        }
+        
+        #controls-panel {
+          order: 1;
+        }
+        
+        #instructions {
+          display: none;
+        }
+        
+        .section-title {
+          font-size: 15px;
+          margin: 12px 0 8px;
+        }
+        
+        .control-label {
+          width: 80px;
+          font-size: 13px;
+        }
+        
+        .control-value {
+          width: 35px;
+          font-size: 13px;
+        }
+        
+        .btn {
+          padding: 12px 8px;
+          font-size: 13px;
+          min-height: 44px; /* Better touch target */
+        }
+        
+        .label {
+          display: none; /* Hide labels on mobile for cleaner look */
+        }
+        
+        .arrow {
+          display: none; /* Hide arrows on mobile for cleaner look */
+        }
+      }
+      
+      /* Small mobile styles */
+      @media (max-width: 480px) {
+        #ui-container {
+          padding: 8px;
+        }
+        
+        .panel {
+          padding: 12px;
+          border-radius: 8px;
+        }
+        
+        #container {
+          height: 50vh;
+          min-height: 350px;
+        }
+        
+        .section-title {
+          font-size: 14px;
+        }
+        
+        .control-label {
+          width: 70px;
+          font-size: 12px;
+        }
+        
+        .control-row {
+          flex-wrap: wrap;
+        }
+        
+        .control-slider {
+          margin: 5px 0;
+        }
+        
+        .btn {
+          font-size: 12px;
+          padding: 10px 6px;
+        }
+      }
+      
+      /* Large desktop styles */
+      @media (min-width: 1200px) {
+        #info-panel {
+          width: 350px;
+        }
+        
+        #controls-panel {
+          width: 350px;
+        }
+        
+        #instructions {
+          max-width: 300px;
+          font-size: 15px;
+        }
+      }
+      
+      /* Touch device optimizations */
+      @media (hover: none) {
+        .btn:hover {
+          transform: none;
+        }
+        
+        .control-slider::-webkit-slider-thumb {
+          width: 24px;
+          height: 24px;
+        }
+      }
+      
+      /* Landscape mobile optimizations */
+      @media (max-height: 500px) and (orientation: landscape) {
+        #container {
+          height: 100vh;
+        }
+        
+        #ui-container {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 300px;
+          display: block;
+        }
+        
+        .panel {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="loading">Loading Sound Wave Visualization...</div>
+    </div>
+
+    <div id="ui-container">
+      <div id="info-panel" class="panel">
+        <h1
+          style="
+            font-size: 24px;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          "
+        >
+          Sound Wave Propagation
+        </h1>
+        <p>
+          This visualization demonstrates how sound waves propagate through air,
+          showing compression and rarefaction regions.
+        </p>
+
+        <div class="section-title">Diagram Elements</div>
+        <p>• Vibrating tuning fork creates sound waves</p>
+        <p>• Air layers vibrate back and forth</p>
+        <p>• Sound waves propagate through the medium</p>
+
+        <div class="section-title">Wave Properties</div>
+        <div class="legend">
+          <div class="legend-color" style="background: #ff4d4d"></div>
+          <span>Compression (High Pressure)</span>
+        </div>
+        <div class="legend">
+          <div class="legend-color" style="background: #4a9eff"></div>
+          <span>Rarefaction (Low Pressure)</span>
+        </div>
+      </div>
+
+      <div id="controls-panel" class="panel">
+        <div class="section-title">Wave Controls</div>
+
+        <div class="control-group">
+          <div class="control-row">
+            <div class="control-label">Frequency</div>
+            <input
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.1"
+              value="1"
+              class="control-slider"
+              id="frequency"
+            />
+            <div class="control-value" id="frequency-value">1.0</div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">Amplitude</div>
+            <input
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.1"
+              value="1"
+              class="control-slider"
+              id="amplitude"
+            />
+            <div class="control-value" id="amplitude-value">1.0</div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn" id="play-pause">Pause</button>
+          <button class="btn" id="reset">Reset</button>
+        </div>
+      </div>
+
+      <!-- Labels matching the original diagram -->
+      <div class="label" id="tuning-fork-label" style="top: 50%; left: 20%">
+        Vibrating tuning fork
+      </div>
+      <div class="label" id="wave-direction-label" style="top: 30%; left: 45%">
+        Direction of sound wave
+      </div>
+      <div
+        class="label"
+        id="vibration-direction-label"
+        style="top: 70%; left: 45%"
+      >
+        Direction of vibration of air layers
+      </div>
+      <div class="label" id="amplitude-label" style="top: 40%; left: 60%">
+        Amplitude
+      </div>
+      <div class="label" id="air-layers-label" style="top: 60%; left: 45%">
+        Vibrating air layers
+      </div>
+
+      <!-- Arrows for directions -->
+      <div
+        class="arrow"
+        id="wave-direction-arrow"
+        style="
+          border-width: 0 15px 15px 15px;
+          border-color: transparent transparent #ffcc00 transparent;
+          top: 28%;
+          left: 50%;
+          transform: translateX(-50%);
+        "
+      ></div>
+      <div
+        class="arrow"
+        id="vibration-direction-arrow"
+        style="
+          border-width: 0 8px 12px 8px;
+          border-color: transparent transparent #00ff99 transparent;
+          top: 68%;
+          left: 50%;
+          transform: translateX(-50%) rotate(90deg);
+        "
+      ></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Main variables
+      let scene, camera, renderer;
+      let tuningFork,
+        airLayers = [];
+      let isPlaying = true;
+      let time = 0;
+
+      // Wave parameters
+      let waveParams = {
+        frequency: 1.0,
+        amplitude: 1.0,
+      };
+
+      // Initialize the application
+      function init() {
+        // Remove loading text
+        document.getElementById("loading").style.display = "none";
+
+        // Create scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0e1a);
+
+        // Create camera
+        camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        camera.position.set(0, 0, 15);
+
+        // Create renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById("container").appendChild(renderer.domElement);
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7);
+        scene.add(directionalLight);
+
+        // Create tuning fork
+        createTuningFork();
+
+        // Create air layers
+        createAirLayers();
+
+        // Create image panel with preloaded image
+        createImagePanel();
+
+        // Add event listeners
+        setupControls();
+        window.addEventListener("resize", onWindowResize);
+        window.addEventListener("orientationchange", onWindowResize);
+
+        // Apply device optimizations
+        optimizeForTouch();
+        handleOrientation();
+        optimizeForMobile();
+
+        // Initial resize
+        onWindowResize();
+
+        // Start animation
+        animate();
+      }
+
+      // Create the tuning fork
+      function createTuningFork() {
+        const group = new THREE.Group();
+
+        // Base
+        const baseGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.5, 16);
+        const baseMaterial = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.rotation.x = Math.PI / 2;
+        group.add(base);
+
+        // Prongs
+        const prongGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 16);
+        const prongMaterial = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+
+        const leftProng = new THREE.Mesh(prongGeometry, prongMaterial);
+        leftProng.position.set(-0.5, 0, 0);
+        leftProng.rotation.x = Math.PI / 2;
+        group.add(leftProng);
+
+        const rightProng = new THREE.Mesh(prongGeometry, prongMaterial);
+        rightProng.position.set(0.5, 0, 0);
+        rightProng.rotation.x = Math.PI / 2;
+        group.add(rightProng);
+
+        // Position the tuning fork
+        group.position.set(-8, 0, 0);
+        scene.add(group);
+
+        tuningFork = group;
+      }
+
+      // Create air layers
+      function createAirLayers() {
+        const layerCount = 20;
+        const spacing = 0.8;
+
+        for (let i = 0; i < layerCount; i++) {
+          const layerGroup = new THREE.Group();
+
+          // Create multiple particles for each layer
+          const particleCount = 15;
+          for (let j = 0; j < particleCount; j++) {
+            const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const particleMaterial = new THREE.MeshPhongMaterial({
+              color: 0x4a9eff,
+              transparent: true,
+              opacity: 0.8,
+            });
+
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+            // Distribute particles vertically in the layer
+            const yPos = (j - particleCount / 2) * 0.3;
+            particle.position.set(0, yPos, 0);
+
+            layerGroup.add(particle);
+          }
+
+          // Position the layer extending from the tuning fork
+          const xPos = -7 + i * spacing;
+          layerGroup.position.set(xPos, 0, 0);
+
+          // Store initial position for animation
+          layerGroup.userData = {
+            initialX: xPos,
+            initialY: 0,
+            phase: Math.random() * Math.PI * 2,
+          };
+
+          scene.add(layerGroup);
+          airLayers.push(layerGroup);
+        }
+      }
+
+      // Create image panel with preloaded image
+      function createImagePanel() {
+        // Create image panel container
+        const imagePanel = document.createElement("div");
+        imagePanel.id = "image-panel";
+        imagePanel.className = "panel";
+        imagePanel.style.position = "absolute";
+        imagePanel.style.top = "120px";
+        imagePanel.style.right = "20px";
+        imagePanel.style.width = "300px";
+        imagePanel.style.zIndex = "10";
+
+        // Add title
+        const title = document.createElement("div");
+        title.className = "section-title";
+        title.textContent = "";
+        imagePanel.appendChild(title);
+
+        // Create image display
+        const imageDisplay = document.createElement("img");
+        imageDisplay.id = "preloaded-image";
+        imageDisplay.style.maxWidth = "100%";
+        imageDisplay.style.maxHeight = "250px";
+        imageDisplay.style.borderRadius = "8px";
+        imageDisplay.style.marginTop = "15px";
+        imageDisplay.style.border = "2px solid rgba(255, 255, 255, 0.1)";
+        imageDisplay.style.display = "block";
+
+        // Add description
+        const description = document.createElement("p");
+        description.style.marginTop = "15px";
+        description.style.fontSize = "14px";
+       
+
+        // Preload and set the image directly in code
+        // Using a base64 encoded simple diagram of sound waves
+        const imageData = "ear.webp"; // Replace with actual base64 data or URL of the image
+
+        imageDisplay.src = imageData;
+        imageDisplay.alt = "Sound Wave Propagation Diagram";
+
+        // Assemble the panel
+        imagePanel.appendChild(imageDisplay);
+        imagePanel.appendChild(description);
+
+        // Add to UI container
+        document.getElementById("ui-container").appendChild(imagePanel);
+      }
+
+      // Update tuning fork animation
+      function updateTuningFork() {
+        if (!tuningFork) return;
+
+        const vibration = Math.sin(time * 8) * 0.2 * waveParams.amplitude;
+
+        // Animate the prongs
+        const leftProng = tuningFork.children[1];
+        const rightProng = tuningFork.children[2];
+
+        leftProng.position.y = -vibration;
+        rightProng.position.y = vibration;
+      }
+
+      // Update air layers animation
+      function updateAirLayers() {
+        airLayers.forEach((layer, index) => {
+          const data = layer.userData;
+
+          // Calculate wave propagation
+          const wave =
+            Math.sin(
+              time * 8 * waveParams.frequency - index * 0.5 + data.phase
+            ) *
+            waveParams.amplitude *
+            0.3;
+
+          // Move the layer based on the wave
+          layer.position.y = data.initialY + wave;
+
+          // Change color based on position in wave
+          const colorValue = (wave + 1) / 2; // Normalize to 0-1
+          const hue = 0.7 - colorValue * 0.7; // Blue to red
+
+          // Update all particles in the layer
+          layer.children.forEach((particle) => {
+            particle.material.color.setHSL(hue, 1, 0.6);
+          });
+        });
+      }
+
+      // Set up UI controls
+      function setupControls() {
+        // Frequency control
+        const frequencySlider = document.getElementById("frequency");
+        const frequencyValue = document.getElementById("frequency-value");
+
+        frequencySlider.addEventListener("input", function () {
+          waveParams.frequency = parseFloat(this.value);
+          frequencyValue.textContent = this.value;
+        });
+
+        // Amplitude control
+        const amplitudeSlider = document.getElementById("amplitude");
+        const amplitudeValue = document.getElementById("amplitude-value");
+
+        amplitudeSlider.addEventListener("input", function () {
+          waveParams.amplitude = parseFloat(this.value);
+          amplitudeValue.textContent = this.value;
+        });
+
+        // Play/pause button
+        const playPauseBtn = document.getElementById("play-pause");
+        playPauseBtn.addEventListener("click", function () {
+          isPlaying = !isPlaying;
+          this.textContent = isPlaying ? "Pause" : "Play";
+          this.classList.toggle("active", !isPlaying);
+        });
+
+        // Reset button
+        const resetBtn = document.getElementById("reset");
+        resetBtn.addEventListener("click", function () {
+          time = 0;
+          waveParams.frequency = 1.0;
+          waveParams.amplitude = 1.0;
+
+          frequencySlider.value = 1.0;
+          amplitudeSlider.value = 1.0;
+
+          frequencyValue.textContent = "1.0";
+          amplitudeValue.textContent = "1.0";
+        });
+      }
+
+      // Handle window resize
+      function onWindowResize() {
+        const container = document.getElementById('container');
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        
+        camera.aspect = containerWidth / containerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(containerWidth, containerHeight);
+      }
+
+      // Optimize for touch devices
+      function optimizeForTouch() {
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouch) {
+          document.body.classList.add('touch-device');
+          
+          // Improve touch controls
+          const sliders = document.querySelectorAll('.control-slider');
+          sliders.forEach(slider => {
+            slider.addEventListener('touchstart', function(e) {
+              e.stopPropagation();
+            });
+          });
+          
+          // Optimize button interactions
+          const buttons = document.querySelectorAll('.btn');
+          buttons.forEach(button => {
+            button.addEventListener('touchstart', function(e) {
+              e.preventDefault();
+              this.click();
+            });
+          });
+        }
+      }
+
+      // Better orientation handling
+      function handleOrientation() {
+        window.addEventListener('orientationchange', function() {
+          setTimeout(() => {
+            onWindowResize();
+          }, 100); // Small delay to ensure dimensions are updated
+        });
+      }
+
+      // Performance optimization for mobile
+      function optimizeForMobile() {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          // Reduce particle count for better performance on mobile
+          airLayers.forEach(layer => {
+            if (layer.children.length > 8) {
+              // Reduce particle count for performance
+              while (layer.children.length > 8) {
+                const particle = layer.children.pop();
+                scene.remove(particle);
+              }
+            }
+          });
+        }
+      }
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        if (isPlaying) {
+          time += 0.016; // Approximately 60fps
+
+          updateTuningFork();
+          updateAirLayers();
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      // Start the application
+      init();
+    </script>
+  </body>
+</html>

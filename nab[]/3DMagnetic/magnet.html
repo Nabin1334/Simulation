@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Magnetic Field Visualization</title>
+    <link rel="stylesheet" href="magnet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <header>
+        <h1>3D Magnetic Field Visualization</h1>
+    </header>
+    
+    <div class="container">
+        <div id="canvas-container"></div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h2>Magnet Controls</h2>
+                <label for="strength">Magnetic Strength</label>
+                <input type="range" id="strength" min="50" max="200" value="100">
+                
+                <label for="rotationX">Rotation X</label>
+                <input type="range" id="rotationX" min="0" max="360" value="30">
+                
+                <label for="rotationY">Rotation Y</label>
+                <input type="range" id="rotationY" min="0" max="360" value="0">
+            </div>
+            
+            <div class="control-group">
+                <h2>Field Visualization</h2>
+                <label for="fieldLines">Number of Field Lines</label>
+                <input type="range" id="fieldLines" min="5" max="50" value="20">
+                
+                <label for="lineDetail">Field Line Detail</label>
+                <input type="range" id="lineDetail" min="10" max="100" value="50">
+                
+                <div class="field-strength">
+                    <span class="north">N</span>
+                    <input type="range" id="northSouth" min="0" max="100" value="50">
+                    <span class="south">S</span>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>• Drag to rotate the view</p>
+                <p>• Scroll to zoom in/out</p>
+                <p>• Adjust sliders to modify the magnetic field</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="magnet.js"></script>
+</body>
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Absorption: Ice Melting Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .simulation-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .canvas-container {
+            width: 100%;
+            height: 350px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #iceCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff9d00;
+            cursor: pointer;
+        }
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+        button {
+            background: #ff9d00;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background: #ffaa33;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .status-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .status-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .status-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .factors-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .factor {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .factor.active {
+            background: rgba(255, 157, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .factor h3 {
+            margin-bottom: 10px;
+            color: #ff9d00;
+            display: flex;
+            align-items: center;
+        }
+        .factor-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        .factor p {
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .impact-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .impact-level {
+            height: 100%;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .explanation h2 {
+            margin-bottom: 15px;
+        }
+        .explanation p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .phase-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            position: relative;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 0 20px;
+            align-items: center;
+        }
+        .phase-marker {
+            position: absolute;
+            top: -10px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 1s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1a2980;
+        }
+        .phase-label {
+            font-weight: bold;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Heat Absorption Factors</h1>
+            <p class="subtitle">Explore how different factors affect the absorption of solar heat and the melting of ice into water</p>
+        </header>
+        
+        <div class="content">
+            <div class="simulation-panel">
+                <h2>Ice Melting Simulation</h2>
+                <div class="canvas-container">
+                    <canvas id="iceCanvas"></canvas>
+                </div>
+                
+                <div class="phase-indicator">
+                    <div class="phase-label">Solid Ice</div>
+                    <div class="phase-label">Melting</div>
+                    <div class="phase-label">Liquid Water</div>
+                    <div class="phase-marker" id="phaseMarker">❄️</div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="sunIntensity">Sun Intensity</label>
+                        <input type="range" id="sunIntensity" min="0" max="100" value="50">
+                        <div class="value-display">
+                            <span>Low</span>
+                            <span id="sunValue">50%</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="surfaceArea">Surface Area</label>
+                        <input type="range" id="surfaceArea" min="1" max="10" value="5">
+                        <div class="value-display">
+                            <span>Small</span>
+                            <span id="areaValue">5 m²</span>
+                            <span>Large</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="materialColor">Material Color</label>
+                        <input type="range" id="materialColor" min="0" max="2" value="1">
+                        <div class="value-display">
+                            <span>Light</span>
+                            <span id="colorValue">Medium</span>
+                            <span>Dark</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="environmentTemp">Environment Temperature</label>
+                        <input type="range" id="environmentTemp" min="-10" max="30" value="15">
+                        <div class="value-display">
+                            <span>-10°C</span>
+                            <span id="envTempValue">15°C</span>
+                            <span>30°C</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <button id="startBtn">Start Simulation</button>
+                    <button id="resetBtn">Reset</button>
+                    <button id="pauseBtn">Pause</button>
+                </div>
+                
+                <div class="status-panel">
+                    <div class="status-box">
+                        <div class="status-label">Material State</div>
+                        <div class="status-value" id="stateValue">Ice</div>
+                    </div>
+                    <div class="status-box">
+                        <div class="status-label">Temperature</div>
+                        <div class="status-value" id="tempValue">-5°C</div>
+                    </div>
+                    <div class="status-box">
+                        <div class="status-label">Ice Remaining</div>
+                        <div class="status-value" id="iceValue">100%</div>
+                    </div>
+                    <div class="status-box">
+                        <div class="status-label">Water Formed</div>
+                        <div class="status-value" id="waterValue">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="factors-panel">
+                <h2>Factors Affecting Heat Absorption</h2>
+                
+                <div class="factor" id="factor1">
+                    <h3><span class="factor-icon">☀️</span> Solar Intensity</h3>
+                    <p>Higher intensity sunlight delivers more energy per unit area, increasing the rate of heat absorption.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact1"></div>
+                    </div>
+                </div>
+                
+                <div class="factor" id="factor2">
+                    <h3><span class="factor-icon">📏</span> Surface Area</h3>
+                    <p>Larger surface areas expose more material to radiation, allowing for greater total energy absorption.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact2"></div>
+                    </div>
+                </div>
+                
+                <div class="factor" id="factor3">
+                    <h3><span class="factor-icon">🎨</span> Material Color</h3>
+                    <p>Darker colors absorb more radiant energy while lighter colors reflect more, affecting heat absorption.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact3"></div>
+                    </div>
+                </div>
+                
+                <div class="factor" id="factor4">
+                    <h3><span class="factor-icon">🌡️</span> Environmental Temperature</h3>
+                    <p>Warmer surroundings transfer heat to the material through conduction and convection, accelerating melting.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact4"></div>
+                    </div>
+                </div>
+                
+                <div class="factor" id="factor5">
+                    <h3><span class="factor-icon">⏱️</span> Exposure Time</h3>
+                    <p>Longer exposure to heat sources allows more energy to be absorbed, increasing temperature over time.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact5"></div>
+                    </div>
+                </div>
+                
+                <div class="factor" id="factor6">
+                    <h3><span class="factor-icon">🧊</span> Material Properties</h3>
+                    <p>Different materials have varying specific heat capacities and thermal conductivities that affect how they absorb and transfer heat.</p>
+                    <div class="impact-bar">
+                        <div class="impact-level" id="impact6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h2>Understanding Heat Absorption</h2>
+            <p>Heat absorption is the process by which materials take in thermal energy from their surroundings. When solar radiation reaches a material like ice, several factors determine how efficiently that energy is absorbed and converted to heat:</p>
+            
+            <p><strong>Key Principles:</strong></p>
+            <ul>
+                <li>Dark surfaces absorb more radiation than light surfaces due to lower albedo (reflectivity)</li>
+                <li>Larger surface areas capture more incoming radiation</li>
+                <li>Direct, intense sunlight delivers more energy than diffuse light</li>
+                <li>Warmer environments reduce the temperature gradient, slowing heat loss</li>
+                <li>Phase changes (like ice melting) require significant energy without temperature change</li>
+            </ul>
+            
+            <p>In this simulation, you can adjust these factors to observe their impact on how quickly ice absorbs heat and transforms into water. Notice how the temperature remains constant during the phase change as energy is used to break molecular bonds rather than increase kinetic energy.</p>
+        </div>
+        
+        <footer>
+            <p>Educational Simulation | Heat Absorption & Phase Change | Physics Demonstration</p>
+        </footer>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('iceCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas dimensions
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Simulation variables
+        let simulationRunning = false;
+        let temperature = -5; // Starting temperature (°C)
+        let energyAbsorbed = 0; // Energy in joules
+        let timeElapsed = 0; // Time in seconds
+        let iceMass = 100; // Percentage of ice remaining
+        let waterMass = 0; // Percentage of water formed
+        let state = 'ice'; // ice, melting, water
+        
+        // DOM elements
+        const stateValue = document.getElementById('stateValue');
+        const tempValue = document.getElementById('tempValue');
+        const iceValue = document.getElementById('iceValue');
+        const waterValue = document.getElementById('waterValue');
+        const phaseMarker = document.getElementById('phaseMarker');
+        
+        const sunIntensity = document.getElementById('sunIntensity');
+        const surfaceArea = document.getElementById('surfaceArea');
+        const materialColor = document.getElementById('materialColor');
+        const environmentTemp = document.getElementById('environmentTemp');
+        
+        const sunValue = document.getElementById('sunValue');
+        const areaValue = document.getElementById('areaValue');
+        const colorValue = document.getElementById('colorValue');
+        const envTempValue = document.getElementById('envTempValue');
+        
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        
+        // Impact bars
+        const impact1 = document.getElementById('impact1');
+        const impact2 = document.getElementById('impact2');
+        const impact3 = document.getElementById('impact3');
+        const impact4 = document.getElementById('impact4');
+        const impact5 = document.getElementById('impact5');
+        const impact6 = document.getElementById('impact6');
+        
+        // Factor elements
+        const factor1 = document.getElementById('factor1');
+        const factor2 = document.getElementById('factor2');
+        const factor3 = document.getElementById('factor3');
+        const factor4 = document.getElementById('factor4');
+        const factor5 = document.getElementById('factor5');
+        const factor6 = document.getElementById('factor6');
+        
+        // Update slider value displays
+        sunIntensity.addEventListener('input', () => {
+            sunValue.textContent = `${sunIntensity.value}%`;
+            updateImpactBars();
+        });
+        
+        surfaceArea.addEventListener('input', () => {
+            areaValue.textContent = `${surfaceArea.value} m²`;
+            updateImpactBars();
+        });
+        
+        materialColor.addEventListener('input', () => {
+            const colors = ['Light', 'Medium', 'Dark'];
+            colorValue.textContent = colors[materialColor.value];
+            updateImpactBars();
+        });
+        
+        environmentTemp.addEventListener('input', () => {
+            envTempValue.textContent = `${environmentTemp.value}°C`;
+            updateImpactBars();
+        });
+        
+        // Update impact bars based on control values
+        function updateImpactBars() {
+            impact1.style.width = `${sunIntensity.value}%`;
+            impact2.style.width = `${(surfaceArea.value / 10) * 100}%`;
+            impact3.style.width = `${(materialColor.value / 2) * 100}%`;
+            impact4.style.width = `${((parseInt(environmentTemp.value) + 10) / 40) * 100}%`;
+            impact5.style.width = `${Math.min(100, timeElapsed / 2)}%`;
+            impact6.style.width = '70%'; // Fixed for material properties
+            
+            // Highlight active factors
+            factor1.classList.toggle('active', sunIntensity.value > 50);
+            factor2.classList.toggle('active', surfaceArea.value > 5);
+            factor3.classList.toggle('active', materialColor.value > 1);
+            factor4.classList.toggle('active', environmentTemp.value > 15);
+            factor5.classList.toggle('active', timeElapsed > 10);
+            factor6.classList.toggle('active', true); // Always active for material properties
+        }
+        
+        // Button event listeners
+        startBtn.addEventListener('click', () => {
+            simulationRunning = true;
+            animate();
+        });
+        
+        pauseBtn.addEventListener('click', () => {
+            simulationRunning = false;
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            simulationRunning = false;
+            temperature = -5;
+            energyAbsorbed = 0;
+            timeElapsed = 0;
+            iceMass = 100;
+            waterMass = 0;
+            state = 'ice';
+            updateDisplay();
+            drawScene();
+            updateImpactBars();
+        });
+        
+        // Update all display elements
+        function updateDisplay() {
+            stateValue.textContent = 
+                state === 'ice' ? 'Ice' : 
+                state === 'melting' ? 'Melting' : 'Water';
+            
+            tempValue.textContent = `${Math.round(temperature)}°C`;
+            iceValue.textContent = `${Math.round(iceMass)}%`;
+            waterValue.textContent = `${Math.round(waterMass)}%`;
+            
+            // Update phase marker position
+            let markerPosition;
+            let markerIcon;
+            
+            if (state === 'ice') {
+                markerPosition = 10;
+                markerIcon = '❄️';
+            } else if (state === 'melting') {
+                markerPosition = 10 + (waterMass / 100) * 40;
+                markerIcon = '💧';
+            } else {
+                markerPosition = 90;
+                markerIcon = '💧';
+            }
+            
+            phaseMarker.style.left = `${markerPosition}%`;
+            phaseMarker.textContent = markerIcon;
+        }
+        
+        // Draw the scene
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a2980');
+            gradient.addColorStop(1, '#26d0ce');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw sun
+            const sunIntensityValue = parseInt(sunIntensity.value) / 100;
+            const sunRadius = 50 + 20 * sunIntensityValue;
+            const sunX = canvas.width - 100;
+            const sunY = 100;
+            
+            // Sun glow
+            const sunGlow = ctx.createRadialGradient(sunX, sunY, sunRadius, sunX, sunY, sunRadius + 40);
+            sunGlow.addColorStop(0, `rgba(255, 221, 0, ${0.7 * sunIntensityValue})`);
+            sunGlow.addColorStop(1, 'rgba(255, 221, 0, 0)');
+            ctx.fillStyle = sunGlow;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunRadius + 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Sun body
+            const sunGradient = ctx.createRadialGradient(
+                sunX - 15, sunY - 15, 0, 
+                sunX, sunY, sunRadius
+            );
+            sunGradient.addColorStop(0, '#ffff00');
+            sunGradient.addColorStop(1, '#ff9900');
+            ctx.fillStyle = sunGradient;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw sun rays
+            ctx.strokeStyle = `rgba(255, 221, 0, ${0.6 * sunIntensityValue})`;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * Math.PI) / 6;
+                const startX = sunX + Math.cos(angle) * sunRadius;
+                const startY = sunY + Math.sin(angle) * sunRadius;
+                const endX = sunX + Math.cos(angle) * (sunRadius + 30);
+                const endY = sunY + Math.sin(angle) * (sunRadius + 30);
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+            
+            // Draw container
+            const containerWidth = 200;
+            const containerHeight = 180;
+            const containerX = (canvas.width - containerWidth) / 2;
+            const containerY = canvas.height - containerHeight - 50;
+            
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(containerX - 10, containerY - 10, containerWidth + 20, containerHeight + 20);
+            
+            ctx.fillStyle = '#ADD8E6';
+            ctx.fillRect(containerX, containerY, containerWidth, containerHeight);
+            
+            // Draw water
+            const waterHeight = (waterMass / 100) * containerHeight;
+            const waterY = containerY + containerHeight - waterHeight;
+            
+            if (waterMass > 0) {
+                ctx.fillStyle = '#87CEEB';
+                ctx.fillRect(containerX, waterY, containerWidth, waterHeight);
+                
+                // Draw water ripples
+                if (waterMass > 0 && waterMass < 100) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    for (let x = containerX; x < containerX + containerWidth; x += 10) {
+                        const offset = Math.sin(x * 0.1 + Date.now() * 0.005) * 3;
+                        if (x === containerX) {
+                            ctx.moveTo(x, waterY + offset);
+                        } else {
+                            ctx.lineTo(x, waterY + offset);
+                        }
+                    }
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw ice
+            const iceHeight = (iceMass / 100) * containerHeight;
+            const iceY = waterY - iceHeight;
+            
+            if (iceMass > 0) {
+                // Determine ice color based on material color setting
+                let iceColor;
+                if (materialColor.value == 0) {
+                    iceColor = '#F0F8FF'; // Light
+                } else if (materialColor.value == 1) {
+                    iceColor = '#E0F7FF'; // Medium
+                } else {
+                    iceColor = '#B0E0E6'; // Dark
+                }
+                
+                ctx.fillStyle = iceColor;
+                ctx.fillRect(containerX, iceY, containerWidth, iceHeight);
+                
+                // Draw ice crystals
+                ctx.strokeStyle = '#A0D0D6';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 15; i++) {
+                    const x = containerX + Math.random() * containerWidth;
+                    const y = iceY + Math.random() * iceHeight;
+                    drawIceCrystal(ctx, x, y, 4);
+                }
+                
+                // Draw melting effect at the bottom of the ice
+                if (temperature >= 0 && iceMass < 100) {
+                    ctx.fillStyle = 'rgba(135, 206, 250, 0.5)';
+                    ctx.fillRect(containerX, waterY - 5, containerWidth, 5);
+                    
+                    // Draw dripping water
+                    for (let i = 0; i < 5; i++) {
+                        const dripX = containerX + 20 + Math.random() * (containerWidth - 40);
+                        const dripLength = 5 + Math.random() * 10;
+                        ctx.beginPath();
+                        ctx.moveTo(dripX, waterY);
+                        ctx.lineTo(dripX - 2, waterY + dripLength);
+                        ctx.lineTo(dripX + 2, waterY + dripLength);
+                        ctx.closePath();
+                        ctx.fillStyle = '#87CEEB';
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            // Draw heat waves from sun to ice
+            if (sunIntensityValue > 0.3 && iceMass > 0) {
+                ctx.strokeStyle = `rgba(255, 165, 0, ${0.3 * sunIntensityValue})`;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                
+                ctx.beginPath();
+                ctx.moveTo(sunX, sunY);
+                ctx.lineTo(containerX + containerWidth / 2, iceY + iceHeight / 2);
+                ctx.stroke();
+                
+                ctx.setLineDash([]);
+            }
+            
+            // Draw labels
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Solar Radiation', sunX, sunY + sunRadius + 60);
+            ctx.fillText('Ice → Water Phase Change', canvas.width / 2, containerY - 20);
+        }
+        
+        // Draw an ice crystal
+        function drawIceCrystal(ctx, x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x + size/2, y - size/2);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x + size/2, y + size/2);
+            ctx.lineTo(x, y + size);
+            ctx.lineTo(x - size/2, y + size/2);
+            ctx.lineTo(x - size, y);
+            ctx.lineTo(x - size/2, y - size/2);
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
+        // Animation loop
+        function animate() {
+            if (!simulationRunning) return;
+            
+            // Calculate energy absorption based on controls
+            const intensityFactor = parseInt(sunIntensity.value) / 100;
+            const areaFactor = parseInt(surfaceArea.value) / 5;
+            const colorFactor = 0.5 + parseInt(materialColor.value) * 0.25; // 0.5, 0.75, 1.0
+            const envTemp = parseInt(environmentTemp.value);
+            
+            // Energy absorbed per frame (simplified model)
+            const energyPerFrame = 0.5 * intensityFactor * areaFactor * colorFactor;
+            energyAbsorbed += energyPerFrame;
+            timeElapsed += 0.1;
+            
+            if (iceMass > 0) {
+                if (temperature < 0) {
+                    // Heating ice
+                    const tempIncrease = energyPerFrame * 0.1;
+                    temperature += tempIncrease;
+                    
+                    // Environmental temperature effect
+                    if (envTemp > temperature) {
+                        temperature += (envTemp - temperature) * 0.01;
+                    }
+                    
+                    if (temperature >= 0) {
+                        temperature = 0;
+                        state = 'melting';
+                    }
+                } else {
+                    // Melting ice (phase change)
+                    const meltingRate = energyPerFrame * 0.5;
+                    iceMass = Math.max(0, iceMass - meltingRate);
+                    waterMass = 100 - iceMass;
+                    
+                    if (iceMass <= 0) {
+                        state = 'water';
+                        iceMass = 0;
+                        waterMass = 100;
+                    }
+                }
+            } else {
+                // Heating water
+                const tempIncrease = energyPerFrame * 0.05;
+                temperature += tempIncrease;
+                
+                // Environmental temperature effect
+                if (envTemp > temperature) {
+                    temperature += (envTemp - temperature) * 0.01;
+                }
+            }
+            
+            updateDisplay();
+            drawScene();
+            updateImpactBars();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Initial draw
+        drawScene();
+        updateDisplay();
+        updateImpactBars();
+    </script>
+</body>
+</html>

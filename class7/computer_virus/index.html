@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Virus Explained | Complete Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.2);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-top: 5px solid;
+        }
+        
+        .section-danger {
+            border-top-color: #ef4444;
+        }
+        
+        .section-info {
+            border-top-color: #3b82f6;
+        }
+        
+        .section-success {
+            border-top-color: #10b981;
+        }
+        
+        .section-warning {
+            border-top-color: #f59e0b;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e293b;
+        }
+        
+        h2 i {
+            font-size: 1.8rem;
+        }
+        
+        .content-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        
+        .content-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .content-visual {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .virus-logo {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .virus-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ef4444, 0 0 40px rgba(239, 68, 68, 0.3);
+            z-index: 10;
+        }
+        
+        .virus-spike {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 100px;
+            background-color: #dc2626;
+            transform-origin: top center;
+            border-radius: 4px;
+        }
+        
+        .virus-spike::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 16px solid #dc2626;
+        }
+        
+        .spike-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: rotate 25s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .virus-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .virus-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .virus-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .virus-card.worm {
+            border-left-color: #f59e0b;
+        }
+        
+        .virus-card.trojan {
+            border-left-color: #8b5cf6;
+        }
+        
+        .virus-card.ransomware {
+            border-left-color: #ec4899;
+        }
+        
+        .virus-card.spyware {
+            border-left-color: #06b6d4;
+        }
+        
+        .virus-card.adware {
+            border-left-color: #84cc16;
+        }
+        
+        .virus-card.boot {
+            border-left-color: #f97316;
+        }
+        
+        .virus-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: inherit;
+        }
+        
+        .virus-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .virus-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            display: none;
+        }
+        
+        .virus-card.active .virus-details {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .virus-card.active .toggle-details {
+            transform: rotate(180deg);
+        }
+        
+        .toggle-details {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .toggle-details:hover {
+            background-color: #f1f5f9;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #3b82f6;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        
+        .timeline-content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border: 4px solid #3b82f6;
+            border-radius: 50%;
+            top: 20px;
+            z-index: 1;
+        }
+        
+        .timeline-item:nth-child(odd)::after {
+            right: -12px;
+        }
+        
+        .timeline-item:nth-child(even)::after {
+            left: -12px;
+        }
+        
+        .timeline-year {
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .prevention-tips {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .tip-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-top: 4px solid #10b981;
+            transition: transform 0.3s;
+        }
+        
+        .tip-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tip-icon {
+            font-size: 2.8rem;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+        
+        .tip-card h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .statistics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ef4444;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 1rem;
+        }
+        
+        .highlight {
+            background-color: #fef3c7;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+            color: #92400e;
+        }
+        
+        .danger-text {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background-color: #dbeafe;
+            border-left: 5px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background-color: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 40px;
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .faq-section {
+            margin-top: 30px;
+        }
+        
+        .faq-item {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .faq-question {
+            background-color: #3b82f6;
+            color: white;
+            padding: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            background-color: white;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s, padding 0.3s;
+        }
+        
+        .faq-answer.open {
+            padding: 20px;
+            max-height: 500px;
+        }
+        
+        .virus-demo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+        
+        .demo-computer {
+            width: 300px;
+            height: 200px;
+            background-color: #1e293b;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .demo-screen {
+            width: 90%;
+            height: 70%;
+            background-color: #0f172a;
+            margin: 15px auto;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-virus {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .demo-message {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content-flex {
+                flex-direction: column;
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item::after {
+                left: 19px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            h2 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Computer Virus Explained</h1>
+            <p class="subtitle">A comprehensive guide to understanding computer viruses, their types, history, and prevention</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section class="section section-danger">
+            <h2><i class="fas fa-biohazard"></i> What is a Computer Virus?</h2>
+            <div class="content-flex">
+                <div class="content-text">
+                    <p>A computer virus is a type of malicious software (malware) that attaches itself to legitimate programs or files and spreads to other computers. Much like a biological virus, it needs a host to survive and can cause damage to your system.</p>
+                    
+                    <div class="info-box">
+                        <p><strong>Important Fact:</strong> The term "virus" was first academically defined in 1983 to describe self-replicating computer programs.</p>
+                    </div>
+                    
+                    <p>When activated, a computer virus can:</p>
+                    <ul style="padding-left: 20px; margin: 15px 0;">
+                        <li>Corrupt or delete your files</li>
+                        <li>Slow down your computer performance</li>
+                        <li>Steal personal information like passwords and financial data</li>
+                        <li>Take control of your system for malicious purposes</li>
+                        <li>Spread to other devices on your network</li>
+                    </ul>
+                    
+                    <div class="warning-box">
+                        <p><strong>Security Tip:</strong> Never open email attachments from unknown senders or download software from untrusted websites. These remain the most common infection vectors.</p>
+                    </div>
+                </div>
+                
+                <div class="content-visual">
+                    <div class="virus-logo">
+                        <div class="virus-core" id="virusCore"></div>
+                        <div class="spike-container" id="spikeContainer"></div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <h3 style="color: #dc2626;">Animated Virus Model</h3>
+                        <p>Visual representation of how viruses attach to systems</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section section-info">
+            <h2><i class="fas fa-viruses"></i> Types of Computer Viruses</h2>
+            <p>Here are the main types of computer viruses that users should be aware of:</p>
+            
+            <div class="virus-types">
+                <div class="virus-card worm">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-worm"></i></div>
+                    <h3>Worms</h3>
+                    <p>Self-replicating malware that spreads across networks without requiring user interaction.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through network vulnerabilities, email attachments, or instant messaging.</p>
+                        <p><strong>Damage caused:</strong> Consumes bandwidth, deletes files, installs backdoors.</p>
+                        <p><strong>Real example:</strong> The Morris Worm (1988) infected approximately 10% of internet-connected computers.</p>
+                        <p class="danger-text">Prevention: Keep systems updated with security patches.</p>
+                    </div>
+                </div>
+                
+                <div class="virus-card trojan">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-horse-head"></i></div>
+                    <h3>Trojans</h3>
+                    <p>Malware disguised as legitimate software to trick users into installation.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through software downloads, email attachments, or malicious websites.</p>
+                        <p><strong>Damage caused:</strong> Creates backdoors, steals data, downloads additional malware.</p>
+                        <p><strong>Real example:</strong> Zeus Trojan (2007) targeted banking information.</p>
+                        <p class="danger-text">Prevention: Only download software from official sources.</p>
+                    </div>
+                </div>
+                
+                <div class="virus-card ransomware">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-lock"></i></div>
+                    <h3>Ransomware</h3>
+                    <p>Encrypts files and demands payment (ransom) to restore access.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through phishing emails, exploit kits, or remote desktop attacks.</p>
+                        <p><strong>Damage caused:</strong> Data encryption, financial extortion, business disruption.</p>
+                        <p><strong>Real example:</strong> WannaCry (2017) affected 200,000+ computers across 150 countries.</p>
+                        <p class="danger-text">Prevention: Regular backups and network segmentation.</p>
+                    </div>
+                </div>
+                
+                <div class="virus-card spyware">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Spyware</h3>
+                    <p>Secretly monitors user activity to collect personal information.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through software bundles, malicious ads, or phishing.</p>
+                        <p><strong>Damage caused:</strong> Identity theft, financial fraud, privacy invasion.</p>
+                        <p class="danger-text">Prevention: Use privacy-focused browsers and anti-spyware tools.</p>
+                    </div>
+                </div>
+                
+                <div class="virus-card adware">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-ad"></i></div>
+                    <h3>Adware</h3>
+                    <p>Displays unwanted advertisements, often bundled with free software.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through software bundles, misleading installers, or malicious ads.</p>
+                        <p><strong>Damage caused:</strong> System slowdown, privacy concerns, exposure to more malware.</p>
+                        <p class="danger-text">Prevention: Read installation prompts carefully and use ad-blockers.</p>
+                    </div>
+                </div>
+                
+                <div class="virus-card boot">
+                    <button class="toggle-details" onclick="toggleVirusDetails(this)">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="virus-icon"><i class="fas fa-power-off"></i></div>
+                    <h3>Boot Sector Virus</h3>
+                    <p>Infects the master boot record, making removal difficult.</p>
+                    <div class="virus-details">
+                        <p><strong>How it spreads:</strong> Through infected removable media or downloads.</p>
+                        <p><strong>Damage caused:</strong> Prevents system boot, corrupts files, spreads to other media.</p>
+                        <p><strong>Real example:</strong> Stoned virus (1987) displayed "Your computer is now stoned" message.</p>
+                        <p class="danger-text">Prevention: Write-protect boot sectors and scan removable media.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section section-warning">
+            <h2><i class="fas fa-chart-line"></i> Virus Statistics</h2>
+            <p>Understanding the scale and impact of computer viruses:</p>
+            
+            <div class="statistics">
+                <div class="stat-card">
+                    <div class="stat-number">560,000+</div>
+                    <div class="stat-label">New malware samples detected daily</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">$6 trillion</div>
+                    <div class="stat-label">Estimated global cybercrime costs</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">43%</div>
+                    <div class="stat-label">Cyber attacks target small businesses</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">94%</div>
+                    <div class="stat-label">Malware delivered via email</div>
+                </div>
+            </div>
+            
+            <div class="virus-demo">
+                <h3 style="margin-bottom: 20px;">Virus Infection Simulation</h3>
+                <div class="demo-computer">
+                    <div class="demo-screen" id="demoScreen">
+                        <div class="demo-virus" id="demoVirus"></div>
+                    </div>
+                    <div class="demo-message" id="demoMessage">Computer Status: Normal</div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn" id="startDemo" style="padding: 10px 18px; background-color: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-play"></i> Start Simulation
+                    </button>
+                    <button class="btn" id="stopDemo" style="padding: 10px 18px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-stop"></i> Stop Simulation
+                    </button>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #64748b; text-align: center;">This simulation visually represents how viruses spread within a system.</p>
+            </div>
+        </section>
+        
+        <section class="section section-success">
+            <h2><i class="fas fa-shield-alt"></i> Protection & Prevention</h2>
+            <p>Essential practices to protect your computer from viruses:</p>
+            
+            <div class="prevention-tips">
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-shield-virus"></i></div>
+                    <h3>Use Antivirus Software</h3>
+                    <p>Install reputable antivirus software from trusted vendors and keep it updated with the latest definitions.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3>Regular Updates</h3>
+                    <p>Enable automatic updates for your operating system and applications to patch security vulnerabilities.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-user-shield"></i></div>
+                    <h3>Practice Safe Browsing</h3>
+                    <p>Avoid suspicious links, use strong unique passwords, and enable multi-factor authentication.</p>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-database"></i></div>
+                    <h3>Backup Your Data</h3>
+                    <p>Follow the 3-2-1 backup rule: 3 copies, 2 different media, 1 offsite location.</p>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Additional Tips:</strong> Enable your firewall, use a VPN on public Wi-Fi, and regularly review account activities for suspicious behavior.</p>
+            </div>
+        </section>
+        
+        <section class="section section-info">
+            <h2><i class="fas fa-history"></i> Virus History Timeline</h2>
+            <p>Significant moments in the history of computer viruses:</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1971 - Creeper</div>
+                        <p>First experimental virus created by Bob Thomas at BBN Technologies. Displayed "I'm the creeper, catch me if you can!" on ARPANET systems.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1982 - Elk Cloner</div>
+                        <p>Created by 15-year-old Rich Skrenta for Apple II systems. Spread via floppy disks and displayed a poem on the 50th boot.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1988 - Morris Worm</div>
+                        <p>Created by Robert Tappan Morris, a Cornell graduate student. Infected approximately 10% of internet-connected computers.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1999 - Melissa</div>
+                        <p>Macro virus that spread via email attachments. Caused an estimated $80 million in damage.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2004 - MyDoom</div>
+                        <p>Fastest-spreading email worm at the time. Caused an estimated $38 billion in damage.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2017 - WannaCry</div>
+                        <p>Global ransomware attack exploiting Windows SMB vulnerability. Affected 200,000+ computers across 150 countries.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section section-warning">
+            <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+            <div class="faq-section">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(0)">
+                        <span>How can I detect if my computer has a virus?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer" id="faq0">
+                        <p><strong>Common indicators include:</strong> Unusually slow performance, frequent crashes, unexpected pop-up ads, programs starting automatically, changed browser settings, and unfamiliar processes in Task Manager (Windows) or Activity Monitor (Mac). Run a full scan with updated antivirus software if you notice these symptoms.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(1)">
+                        <span>Are Apple devices immune to viruses?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer" id="faq1">
+                        <p><strong>No platform is immune.</strong> While macOS has historically had fewer viruses than Windows (due to market share and different security architectures), Mac malware does exist and is increasing. Always use security software regardless of your operating system.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(2)">
+                        <span>What should I do if I accidentally install malware?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer" id="faq2">
+                        <p><strong>Follow these steps:</strong> 1) Immediately disconnect from the internet, 2) Boot in Safe Mode, 3) Run a full antivirus scan, 4) Use malware removal tools, 5) Change all passwords from a clean device, 6) Restore from backup if available.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(3)">
+                        <span>How effective are free antivirus programs?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer" id="faq3">
+                        <p><strong>Free antivirus can provide basic protection</strong> but often lacks advanced features. Reputable free antivirus software can detect most widespread malware. However, paid versions typically offer better protection against zero-day threats, ransomware, and include additional features like firewalls and password managers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>Computer Virus Educational Website | Created with HTML, CSS & JavaScript</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">© 2023 Computer Security Education</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Create virus spikes for the logo
+        const spikeContainer = document.getElementById('spikeContainer');
+        const numSpikes = 12;
+        
+        for (let i = 0; i < numSpikes; i++) {
+            const spike = document.createElement('div');
+            spike.className = 'virus-spike';
+            spike.style.transform = `translate(-50%, -50%) rotate(${i * (360 / numSpikes)}deg) translateY(-90px)`;
+            spikeContainer.appendChild(spike);
+        }
+        
+        // Toggle virus details
+        function toggleVirusDetails(button) {
+            const virusCard = button.closest('.virus-card');
+            virusCard.classList.toggle('active');
+        }
+        
+        // Virus demo simulation
+        const demoVirus = document.getElementById('demoVirus');
+        const demoMessage = document.getElementById('demoMessage');
+        const startDemoBtn = document.getElementById('startDemo');
+        const stopDemoBtn = document.getElementById('stopDemo');
+        let demoInterval;
+        
+        startDemoBtn.addEventListener('click', function() {
+            if (demoInterval) return;
+            
+            demoMessage.textContent = 'Virus Detected! System Infected';
+            demoMessage.style.color = '#ef4444';
+            
+            // Show and animate virus
+            demoVirus.style.display = 'block';
+            demoVirus.style.left = '10px';
+            demoVirus.style.top = '10px';
+            demoVirus.style.backgroundColor = '#ef4444';
+            
+            let position = 0;
+            let infectionCount = 0;
+            demoInterval = setInterval(() => {
+                // Move virus in a pattern
+                const x = 10 + (position % 240);
+                const y = 10 + Math.sin(position * 0.05) * 40 + 40;
+                
+                demoVirus.style.left = `${x}px`;
+                demoVirus.style.top = `${y}px`;
+                
+                // Create "infection" effect occasionally
+                if (position % 25 === 0 && infectionCount < 8) {
+                    infectionCount++;
+                    const newVirus = document.createElement('div');
+                    newVirus.className = 'demo-virus';
+                    newVirus.style.left = `${Math.random() * 250}px`;
+                    newVirus.style.top = `${Math.random() * 120}px`;
+                    newVirus.style.backgroundColor = '#ef4444';
+                    newVirus.style.opacity = '0.7';
+                    newVirus.style.width = '15px';
+                    newVirus.style.height = '15px';
+                    document.getElementById('demoScreen').appendChild(newVirus);
+                    
+                    // Update message based on infection level
+                    if (infectionCount === 3) {
+                        demoMessage.textContent = 'Multiple Infections Detected';
+                    } else if (infectionCount === 6) {
+                        demoMessage.textContent = 'Critical System Infection';
+                    }
+                }
+                
+                position += 5;
+            }, 50);
+        });
+        
+        stopDemoBtn.addEventListener('click', function() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+                
+                // Remove all virus elements
+                document.querySelectorAll('.demo-virus').forEach(virus => {
+                    if (virus !== demoVirus) {
+                        virus.remove();
+                    }
+                });
+                
+                demoVirus.style.display = 'none';
+                demoMessage.textContent = 'System Clean - No Infections';
+                demoMessage.style.color = '#10b981';
+            }
+        });
+        
+        // FAQ toggle functionality
+        function toggleFaq(index) {
+            const answer = document.getElementById(`faq${index}`);
+            const icon = answer.previousElementSibling.querySelector('i');
+            
+            if (answer.classList.contains('open')) {
+                answer.classList.remove('open');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                // Close all other FAQs
+                document.querySelectorAll('.faq-answer').forEach((faq, i) => {
+                    if (i !== index && faq.classList.contains('open')) {
+                        faq.classList.remove('open');
+                        faq.previousElementSibling.querySelector('i').classList.remove('fa-chevron-up');
+                        faq.previousElementSibling.querySelector('i').classList.add('fa-chevron-down');
+                    }
+                });
+                
+                answer.classList.add('open');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+        
+        // Initialize with one virus card open
+        window.addEventListener('load', function() {
+            // Open the first virus card by default
+            document.querySelector('.virus-card').classList.add('active');
+        });
+    </script>
+</body>
+</html>

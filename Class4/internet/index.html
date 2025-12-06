@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Network Simulator</title>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <div class="header">
+      <h1>Simple Network Simulator</h1>
+      <p class="subtitle">
+        Watch how a mobile phone and laptop send messages to a server through a
+        router, like sending letters through a post office!
+      </p>
+    </div>
+
+    <div class="container">
+      <div class="network-diagram">
+        <!-- WiFi Signal Container -->
+        <div class="wifi-container" id="wifiContainer"></div>
+
+        <!-- Senders -->
+        <!-- Senders -->
+            <div class="senders-container">
+                <div class="device">
+                    <div class="device-role">Sender</div>
+                    <img src="./images/mobile.jpg" alt="Mobile Phone" class="device-icon" style="width: 120px; height: 90px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    <div class="device-label">Mobile Phone</div>
+                </div>
+                <div class="device">
+                    <div class="device-role">Sender</div>
+                    <img src="./images/laptop.jpg" alt="Laptop" class="device-icon" style="width: 120px; height: 90px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    <div class="device-label">Laptop</div>
+                </div>
+            </div>
+
+        <!-- Router -->
+        <div class="router-container">
+          <div class="router-real">
+            <img src="./images/router.jpg" alt="Router" style="width: 150px; height: 120px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+           
+          </div>
+          <div class="device-label">Router (Post Office)</div>
+        </div>
+
+        <!-- Receiver -->
+        <div class="receiver-container">
+          <div class="device-role">Receiver</div>
+          <div class="server-real">
+            <div class="server-panel">
+              <div class="server-light"></div>
+              <div class="server-slot"></div>
+              <div class="server-slot"></div>
+              <div class="server-slot"></div>
+            </div>
+          </div>
+          <div class="device-label">Server</div>
+        </div>
+
+        <!-- Connection Paths -->
+        <div class="connection-path" id="path-3"></div>
+        <div class="connection-path flow-reverse" id="path-4"></div>
+
+        <!-- Data Packets -->
+        <div class="data-packet" id="packet-1">M</div>
+        <div class="data-packet" id="packet-2">L</div>
+      </div>
+
+      <div class="controls">
+        <button id="start-btn">Start Simulation</button>
+        <button id="reset-btn">Reset</button>
+      </div>
+
+      <div class="explanation">
+ 
+    </div>
+
+   <script src="internet.js"></script>
+  </body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electric Circuit Simulator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      header {
+        text-align: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      h1 {
+        font-size: 2.8rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .content {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .circuit-container {
+        flex: 2;
+        min-width: 600px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      #circuit-canvas {
+        background: #0c0c2b;
+        border-radius: 10px;
+        width: 100%;
+        height: 400px;
+        cursor: pointer;
+      }
+
+      .info-panel {
+        flex: 1;
+        min-width: 300px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 15px;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .panel-section {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #4fc3f7;
+      }
+
+      .circuit-state {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .state-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #f44336;
+        box-shadow: 0 0 10px #f44336;
+      }
+
+      .state-indicator.active {
+        background: #4caf50;
+        box-shadow: 0 0 10px #4caf50;
+      }
+
+      .state-text {
+        font-size: 1.4rem;
+        font-weight: bold;
+      }
+
+      .state-text.open {
+        color: #f44336;
+      }
+
+      .state-text.closed {
+        color: #4caf50;
+      }
+
+      .controls {
+        display: flex;
+        gap: 15px;
+      }
+
+      button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #2196f3;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 0 #0d47a1;
+      }
+
+      button:hover {
+        background: #42a5f5;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0 #0d47a1;
+      }
+
+      button:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #0d47a1;
+      }
+
+      .instructions {
+        line-height: 1.6;
+      }
+
+      .instructions ul {
+        padding-left: 20px;
+        margin-top: 10px;
+      }
+
+      .instructions li {
+        margin-bottom: 8px;
+      }
+
+      .components {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .component {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .component-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #ff9800;
+      }
+
+      .component-desc {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .current-flow {
+        height: 4px;
+        background: linear-gradient(90deg, #ff9800, #ff5722);
+        border-radius: 2px;
+        margin-top: 10px;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .current-flow.active {
+        opacity: 1;
+        animation: flow 2s linear infinite;
+      }
+
+      @keyframes flow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .measurements {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+      }
+
+      .measurement {
+        text-align: center;
+      }
+
+      .measurement-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #4fc3f7;
+      }
+
+      footer {
+        text-align: center;
+        padding: 15px;
+        margin-top: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        width: 100%;
+      }
+
+      @media (max-width: 900px) {
+        .content {
+          flex-direction: column;
+        }
+
+        .circuit-container {
+          min-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>2D Electric Circuit Simulator</h1>
+        <p class="subtitle">
+          Interactive visualization of open and closed circuits with a switch
+          and dry cell
+        </p>
+      </header>
+
+      <div class="content">
+        <div class="circuit-container">
+          <h2>Circuit Diagram</h2>
+          <canvas id="circuit-canvas" width="800" height="400"></canvas>
+          <div class="measurements">
+            <div class="measurement">
+              <div>Current</div>
+              <div class="measurement-value" id="current-value">0.00 A</div>
+            </div>
+            <div class="measurement">
+              <div>Voltage</div>
+              <div class="measurement-value" id="voltage-value">1.50 V</div>
+            </div>
+            <div class="measurement">
+              <div>Resistance</div>
+              <div class="measurement-value" id="resistance-value">10.0 Ω</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="panel-section">
+            <h2>Circuit Status</h2>
+            <div class="circuit-state">
+              <div class="state-indicator"></div>
+              <div class="state-text open">Circuit Open - No Current Flow</div>
+            </div>
+            <div class="current-flow"></div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Controls</h2>
+            <div class="controls">
+              <button id="toggle-circuit">Toggle Switch</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h2>Circuit Components</h2>
+            <div class="components">
+              <div class="component">
+                <div class="component-name">Dry Cell</div>
+                <div class="component-desc">Power source (1.5V)</div>
+              </div>
+              <div class="component">
+                <div class="component-name">Switch</div>
+                <div class="component-desc">Controls current flow</div>
+              </div>
+              <div class="component">
+                <div class="component-name">Light Bulb</div>
+                <div class="component-desc">Visual indicator</div>
+              </div>
+              <div class="component">
+                <div class="component-name">Conducting Wires</div>
+                <div class="component-desc">Current pathway</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section instructions">
+            <h2>Instructions</h2>
+            <ul>
+              <li>
+                Click the "Toggle Switch" button or click directly on the switch
+                in the diagram to open/close the circuit
+              </li>
+              <li>
+                When the circuit is closed, current flows and the bulb lights up
+              </li>
+              <li>
+                When the circuit is open, no current flows and the bulb remains
+                off
+              </li>
+              <li>Observe how closing the circuit allows current to flow</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          Electric Circuit Visualization | Demonstrating Open and Closed
+          Circuits with Ohm's Law
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // Circuit state
+      let circuitClosed = false;
+      let current = 0;
+      const voltage = 1.5; // Volts
+      const resistance = 10; // Ohms
+
+      // Get canvas context
+      const canvas = document.getElementById("circuit-canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Component positions and dimensions
+      const components = {
+        battery: { x: 100, y: 200, width: 60, height: 80 },
+        switch: { x: 350, y: 200, width: 80, height: 40 },
+        bulb: { x: 600, y: 200, width: 60, height: 80 },
+        wires: {
+          top: { x: 100, y: 160, width: 600, height: 5 },
+          bottom: { x: 100, y: 240, width: 600, height: 5 },
+          left: { x: 100, y: 160, width: 5, height: 80 },
+          right: { x: 700, y: 160, width: 5, height: 80 },
+        },
+      };
+
+      // Animation control
+      let animationId = null;
+
+      // Draw the complete circuit (static parts)
+      function drawCircuit() {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw wires
+        drawWires();
+
+        // Draw components
+        drawBattery();
+        drawSwitch();
+        drawBulb();
+      }
+
+      // Draw all wires
+      function drawWires() {
+        ctx.fillStyle = "#333";
+
+        // Top wire
+        ctx.fillRect(
+          components.wires.top.x,
+          components.wires.top.y,
+          components.wires.top.width,
+          components.wires.top.height
+        );
+
+        // Bottom wire
+        ctx.fillRect(
+          components.wires.bottom.x,
+          components.wires.bottom.y,
+          components.wires.bottom.width,
+          components.wires.bottom.height
+        );
+
+        // Left wire
+        ctx.fillRect(
+          components.wires.left.x,
+          components.wires.left.y,
+          components.wires.left.width,
+          components.wires.left.height
+        );
+
+        // Right wire
+        ctx.fillRect(
+          components.wires.right.x,
+          components.wires.right.y,
+          components.wires.right.width,
+          components.wires.right.height
+        );
+
+        // Add wire connections
+        ctx.fillStyle = "#555";
+        ctx.beginPath();
+        ctx.arc(
+          components.wires.top.x,
+          components.wires.top.y + components.wires.top.height / 2,
+          8,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(
+          components.wires.top.x + components.wires.top.width,
+          components.wires.top.y + components.wires.top.height / 2,
+          8,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(
+          components.wires.bottom.x,
+          components.wires.bottom.y + components.wires.bottom.height / 2,
+          8,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(
+          components.wires.bottom.x + components.wires.bottom.width,
+          components.wires.bottom.y + components.wires.bottom.height / 2,
+          8,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      // Draw the battery
+      function drawBattery() {
+        const bat = components.battery;
+
+        // Battery body
+        ctx.fillStyle = "#333";
+        ctx.fillRect(bat.x, bat.y, bat.width, bat.height);
+
+        // Positive terminal
+        ctx.fillStyle = "#e53935";
+        ctx.fillRect(bat.x - 5, bat.y + 10, 10, 20);
+
+        // Negative terminal
+        ctx.fillStyle = "#1565c0";
+        ctx.fillRect(bat.x - 5, bat.y + bat.height - 30, 10, 20);
+
+        // Plus sign
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("+", bat.x + bat.width / 2 - 5, bat.y + 25);
+
+        // Minus sign
+        ctx.fillText("-", bat.x + bat.width / 2 - 5, bat.y + bat.height - 15);
+
+        // Label
+        ctx.font = "14px Arial";
+        ctx.fillText(
+          "Dry Cell",
+          bat.x + bat.width / 2 - 25,
+          bat.y + bat.height + 20
+        );
+      }
+
+      // Draw the switch
+      function drawSwitch() {
+        const sw = components.switch;
+
+        // Switch base
+        ctx.fillStyle = "#757575";
+        ctx.fillRect(sw.x, sw.y, sw.width, sw.height);
+
+        // Switch contacts
+        ctx.fillStyle = "#FFD700";
+        ctx.beginPath();
+        ctx.arc(sw.x + 20, sw.y + sw.height / 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(sw.x + sw.width - 20, sw.y + sw.height / 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Switch lever
+        ctx.strokeStyle = "#212121";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+
+        if (circuitClosed) {
+          // Closed position - lever connects the contacts
+          ctx.moveTo(sw.x + 20, sw.y + sw.height / 2);
+          ctx.lineTo(sw.x + sw.width - 20, sw.y + sw.height / 2);
+        } else {
+          // Open position - lever is angled
+          ctx.moveTo(sw.x + 20, sw.y + sw.height / 2);
+          ctx.lineTo(sw.x + 20 + 30, sw.y + sw.height / 2 - 20);
+        }
+
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = "#fff";
+        ctx.font = "14px Arial";
+        ctx.fillText("Switch", sw.x + sw.width / 2 - 20, sw.y + sw.height + 20);
+      }
+
+      // Draw a realistic bulb
+      function drawBulb() {
+        const bulb = components.bulb;
+        const centerX = bulb.x + bulb.width / 2;
+        const centerY = bulb.y + 30;
+
+        // Draw glow effect when bulb is on
+        if (circuitClosed) {
+          // Outer glow
+          const gradient = ctx.createRadialGradient(
+            centerX,
+            centerY,
+            0,
+            centerX,
+            centerY,
+            50
+          );
+          gradient.addColorStop(0, "rgba(255, 255, 200, 0.8)");
+          gradient.addColorStop(0.7, "rgba(255, 255, 150, 0.4)");
+          gradient.addColorStop(1, "rgba(255, 255, 100, 0)");
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Bulb glass (outer)
+        ctx.fillStyle = circuitClosed ? "#ffffcc" : "#f0f0f0";
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, 25, 35, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bulb glass (inner highlight)
+        ctx.fillStyle = circuitClosed
+          ? "rgba(255, 255, 255, 0.7)"
+          : "rgba(255, 255, 255, 0.5)";
+        ctx.beginPath();
+        ctx.ellipse(centerX - 8, centerY - 10, 10, 20, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bulb base (metal part)
+        ctx.fillStyle = "#b0b0b0";
+        ctx.beginPath();
+        ctx.moveTo(bulb.x + 10, bulb.y + 40);
+        ctx.lineTo(bulb.x + bulb.width - 10, bulb.y + 40);
+        ctx.lineTo(bulb.x + bulb.width - 5, bulb.y + bulb.height - 10);
+        ctx.lineTo(bulb.x + 5, bulb.y + bulb.height - 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Base screw threads
+        ctx.strokeStyle = "#909090";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(bulb.x + 10, bulb.y + 45);
+        ctx.lineTo(bulb.x + bulb.width - 10, bulb.y + 45);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bulb.x + 12, bulb.y + 50);
+        ctx.lineTo(bulb.x + bulb.width - 12, bulb.y + 50);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bulb.x + 8, bulb.y + 55);
+        ctx.lineTo(bulb.x + bulb.width - 8, bulb.y + 55);
+        ctx.stroke();
+
+        // Filament supports
+        ctx.strokeStyle = "#707070";
+        ctx.lineWidth = 2;
+
+        // Left support
+        ctx.beginPath();
+        ctx.moveTo(centerX - 10, centerY + 15);
+        ctx.lineTo(centerX - 5, centerY - 5);
+        ctx.stroke();
+
+        // Right support
+        ctx.beginPath();
+        ctx.moveTo(centerX + 10, centerY + 15);
+        ctx.lineTo(centerX + 5, centerY - 5);
+        ctx.stroke();
+
+        // Filament
+        ctx.strokeStyle = circuitClosed ? "#ffeb3b" : "#a0a0a0";
+        ctx.lineWidth = circuitClosed ? 3 : 2;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX - 5, centerY - 5);
+        ctx.lineTo(centerX, centerY);
+        ctx.lineTo(centerX + 5, centerY - 5);
+        ctx.stroke();
+
+        // Contact points at base
+        ctx.fillStyle = "#ffd700";
+        ctx.beginPath();
+        ctx.arc(bulb.x + 15, bulb.y + bulb.height - 5, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(
+          bulb.x + bulb.width - 15,
+          bulb.y + bulb.height - 5,
+          3,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+
+        // Label
+        ctx.fillStyle = "#fff";
+        ctx.font = "14px Arial";
+        ctx.fillText("Light Bulb", centerX - 25, bulb.y + bulb.height + 20);
+      }
+
+      // Draw current flow animation (electrons only — one-way from positive to negative)
+      function drawCurrentFlow(timeMs) {
+        const t = (timeMs || Date.now()) / 1000; // seconds
+
+        // Path coordinates (follow the full rectangular loop)
+        const topY = components.wires.top.y + 2;
+        const bottomY = components.wires.bottom.y + 2;
+        const leftX = components.wires.left.x + 2;
+        const rightX = components.wires.top.x + components.wires.top.width - 2;
+
+        // Build segments for the loop (top -> right -> bottom -> left)
+        const segments = [
+          { x1: leftX, y1: topY, x2: rightX, y2: topY }, // top
+          { x1: rightX, y1: topY, x2: rightX, y2: bottomY }, // right
+          { x1: rightX, y1: bottomY, x2: leftX, y2: bottomY }, // bottom
+          { x1: leftX, y1: bottomY, x2: leftX, y2: topY }, // left
+        ];
+
+        // Calculate segment lengths and cumulative lengths
+        const segLens = segments.map((s) =>
+          Math.hypot(s.x2 - s.x1, s.y2 - s.y1)
+        );
+        const cumLens = [];
+        let totalLen = 0;
+        for (let L of segLens) {
+          cumLens.push(totalLen);
+          totalLen += L;
+        }
+
+        // Helper: get point (x,y) on path given distance along path (0..totalLen)
+        function getPointOnPath(d) {
+          d = ((d % totalLen) + totalLen) % totalLen; // wrap
+          let segIndex = segLens.findIndex(
+            (L, i) => d >= cumLens[i] && d < cumLens[i] + L
+          );
+          if (segIndex === -1) segIndex = segLens.length - 1;
+          const seg = segments[segIndex];
+          const segStart = cumLens[segIndex];
+          const segLen = segLens[segIndex];
+          const localT = (d - segStart) / segLen;
+          const x = seg.x1 + (seg.x2 - seg.x1) * localT;
+          const y = seg.y1 + (seg.y2 - seg.y1) * localT;
+          return { x, y };
+        }
+
+        // Parameters: electrons only, all moving the same direction (one-way)
+        const numElectrons = 18;
+        const speedElectrons = 140; // px / sec
+        const eSpacing = totalLen / numElectrons;
+
+        // Draw electrons (negative charges) - blue - single direction around the loop
+        ctx.fillStyle = "#4fc3f7";
+        for (let i = 0; i < numElectrons; i++) {
+          const d = (t * speedElectrons + i * eSpacing) % totalLen;
+          const p = getPointOnPath(d);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Small legend text (electrons only)
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.font = "12px Arial";
+        ctx.fillText(
+          "Blue: electrons — one-way flow (positive → negative shown by marker direction)",
+          components.bulb.x - 230,
+          components.wires.top.y - 20
+        );
+      }
+
+      // Update measurements based on circuit state
+      function updateMeasurements() {
+        if (circuitClosed) {
+          // Calculate current using Ohm's Law: I = V / R
+          current = voltage / resistance;
+          document.getElementById("current-value").textContent =
+            current.toFixed(2) + " A";
+        } else {
+          current = 0;
+          document.getElementById("current-value").textContent = "0.00 A";
+        }
+      }
+
+      // Animation loop
+      function animate(time) {
+        drawCircuit();
+        if (circuitClosed) {
+          drawCurrentFlow(time || Date.now());
+          animationId = requestAnimationFrame(animate);
+        } else {
+          // no continuous animation when open; ensure any running loop is stopped
+          if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+          }
+        }
+      }
+
+      // Toggle circuit function
+      function toggleCircuit() {
+        circuitClosed = !circuitClosed;
+
+        // Update UI
+        if (circuitClosed) {
+          document.querySelector(".state-indicator").classList.add("active");
+          document.querySelector(".state-text").textContent =
+            "Circuit Closed - Current Flowing";
+          document.querySelector(".state-text").className = "state-text closed";
+          document.querySelector(".current-flow").classList.add("active");
+          // start animation
+          if (!animationId) animationId = requestAnimationFrame(animate);
+        } else {
+          document.querySelector(".state-indicator").classList.remove("active");
+          document.querySelector(".state-text").textContent =
+            "Circuit Open - No Current Flow";
+          document.querySelector(".state-text").className = "state-text open";
+          document.querySelector(".current-flow").classList.remove("active");
+          // stop animation
+          if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+          }
+          // redraw static state once
+          drawCircuit();
+        }
+
+        updateMeasurements();
+      }
+
+      // Check if click is on the switch
+      function isClickOnSwitch(x, y) {
+        const sw = components.switch;
+        return (
+          x >= sw.x &&
+          x <= sw.x + sw.width &&
+          y >= sw.y &&
+          y <= sw.y + sw.height
+        );
+      }
+
+      // Handle canvas clicks
+      canvas.addEventListener("click", (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        if (isClickOnSwitch(x, y)) {
+          toggleCircuit();
+        }
+      });
+
+      // Add event listeners for buttons
+      document
+        .getElementById("toggle-circuit")
+        .addEventListener("click", toggleCircuit);
+
+      // Initialize the circuit
+      drawCircuit();
+      updateMeasurements();
+      // (do not start animation until circuit is closed)
+    </script>
+  </body>
+</html>

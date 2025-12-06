@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Sun & Shadows - Interactive Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #1a2980, #26d0ce);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: #ffd166;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            height: 75vh;
+        }
+        
+        .visualization-section {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .visualization {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #scene-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .instructions h3 {
+            color: #4a9eff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .info-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .shadow-info {
+            margin-bottom: 20px;
+        }
+        
+        .shadow-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: #ffd166;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .shadow-info p {
+            line-height: 1.5;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .real-world-example {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        
+        .real-world-example h3 {
+            color: #4a9eff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1rem;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .control-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin-bottom: 12px;
+            color: #ffd166;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.1rem;
+        }
+        
+        .shadow-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            flex: 1;
+            padding: 10px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .control-btn:hover {
+            background: #2d8aff;
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.active {
+            background: #ff6b6b;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .time-indicator {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffd166;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 4px;
+        }
+        
+        .shadow-properties {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .shadow-properties h3 {
+            margin-bottom: 8px;
+            color: #4a9eff;
+            font-size: 1.1rem;
+        }
+        
+        .property {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .property-name {
+            font-weight: bold;
+        }
+        
+        .property-value {
+            color: #ffd166;
+        }
+        
+        .learning-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .learning-section h2 {
+            color: #ffd166;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .card h3 {
+            color: #4a9eff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .card p {
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .visualization-section {
+                height: 60vh;
+            }
+            
+            .info-panel {
+                max-height: 50vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .shadow-controls {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 5px;
+            }
+            
+            .main-content {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-sun"></i> Learn About Shadows in 3D</h1>
+            <p class="subtitle">An interactive tool to understand how sunlight creates different types of shadows. Perfect for students and curious minds!</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="visualization-section">
+                <div class="visualization">
+                    <div class="canvas-container">
+                        <div class="canvas-label">Interactive 3D Shadow Demonstration</div>
+                        <div id="scene-container"></div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h3><i class="fas fa-lightbulb"></i> How to Use This Tool</h3>
+                        <ul>
+                            <li><strong>Rotate View:</strong> Click and drag to look around the scene</li>
+                            <li><strong>Sun Position:</strong> Use the slider to move the sun from morning to evening</li>
+                            <li><strong>Weather:</strong> Adjust the slider to change from sunny to cloudy conditions</li>
+                            <li><strong>Shadow Types:</strong> Click buttons to see different shadow effects</li>
+                            <li><strong>Watch:</strong> See how shadows change in real-time!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="shadow-info" id="hard-shadow-info">
+                    <h2><i class="fas fa-sun"></i> Hard Shadows</h2>
+                    <p>Hard shadows have sharp, clear edges with a distinct boundary between light and dark areas. They occur when sunlight comes directly from a small, bright source like the sun on a clear day.</p>
+                    <div class="real-world-example">
+                        <h3><i class="fas fa-lightbulb"></i> When You See Hard Shadows</h3>
+                        <p>Look for hard shadows around noon on a sunny day. Your shadow will have very sharp edges and be directly beneath you or slightly to one side.</p>
+                    </div>
+                </div>
+                
+                <div class="shadow-info" id="soft-shadow-info" style="display: none;">
+                    <h2><i class="fas fa-cloud-sun"></i> Soft Shadows</h2>
+                    <p>Soft shadows have blurry, gradual edges that fade from light to dark. They happen when clouds scatter sunlight, creating a larger, diffused light source.</p>
+                    <div class="real-world-example">
+                        <h3><i class="fas fa-cloud"></i> When You See Soft Shadows</h3>
+                        <p>On cloudy or overcast days, shadows appear soft and fuzzy. The edges are less defined and the transition from shadow to light is gradual.</p>
+                    </div>
+                </div>
+                
+                <div class="shadow-info" id="contact-shadow-info" style="display: none;">
+                    <h2><i class="fas fa-shoe-prints"></i> Contact Shadows</h2>
+                    <p>Contact shadows are the dark areas right where objects touch surfaces. They make objects look like they're firmly planted instead of floating.</p>
+                    <div class="real-world-example">
+                        <h3><i class="fas fa-mountain"></i> When You See Contact Shadows</h3>
+                        <p>Look at your feet on a sunny day - you'll notice a darker area right under your shoes where they meet the ground. This is a contact shadow!</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-section">
+                        <h3><i class="fas fa-sliders-h"></i> Adjust the Scene</h3>
+                        <div class="slider-controls">
+                            <div class="slider-group">
+                                <div class="slider-label">
+                                    <span><i class="fas fa-sunrise"></i> Morning</span>
+                                    <span>Sun Position</span>
+                                    <span>Evening <i class="fas fa-sunset"></i></span>
+                                </div>
+                                <input type="range" id="sun-position" min="0" max="100" value="50">
+                                <div class="time-indicator" id="time-display">Noon - Short Shadows</div>
+                            </div>
+                            
+                            <div class="slider-group">
+                                <div class="slider-label">
+                                    <span><i class="fas fa-cloud"></i> Cloudy</span>
+                                    <span>Weather Conditions</span>
+                                    <span>Sunny <i class="fas fa-sun"></i></span>
+                                </div>
+                                <input type="range" id="cloud-cover" min="0" max="100" value="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3><i class="fas fa-adjust"></i> Shadow Types</h3>
+                        <div class="shadow-controls">
+                            <button class="control-btn active" id="hard-shadow-btn">
+                                <i class="fas fa-sun"></i> Hard Shadows
+                            </button>
+                            <button class="control-btn" id="soft-shadow-btn">
+                                <i class="fas fa-cloud"></i> Soft Shadows
+                            </button>
+                            <button class="control-btn" id="contact-shadow-btn">
+                                <i class="fas fa-shoe-prints"></i> Contact Shadows
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="shadow-properties">
+                        <h3><i class="fas fa-info-circle"></i> Current Shadow Properties</h3>
+                        <div class="property">
+                            <span class="property-name">Time of Day:</span>
+                            <span class="property-value" id="time-display-short">Noon</span>
+                        </div>
+                        <div class="property">
+                            <span class="property-name">Sun Height:</span>
+                            <span class="property-value" id="sun-height">High</span>
+                        </div>
+                        <div class="property">
+                            <span class="property-name">Shadow Length:</span>
+                            <span class="property-value" id="shadow-length">Short</span>
+                        </div>
+                        <div class="property">
+                            <span class="property-name">Shadow Type:</span>
+                            <span class="property-value" id="shadow-type">Hard</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="learning-section">
+            <h2><i class="fas fa-graduation-cap"></i> Shadow Science Explained</h2>
+            <div class="cards">
+                <div class="card">
+                    <h3><i class="fas fa-sun"></i> Light Travels in Straight Lines</h3>
+                    <p>Sunlight travels in straight lines from the sun to Earth. When these light rays hit an object like a person, they can't pass through, creating a shadow on the opposite side.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-compass"></i> Shadow Direction</h3>
+                    <p>Shadows always point away from the light source. In the morning, shadows point west. At noon, they're shortest. In the evening, shadows point east.</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-ruler-combined"></i> Shadow Size Changes</h3>
+                    <p>When the sun is low in the sky (morning/evening), shadows are long. When the sun is high (noon), shadows are short. Try moving the sun slider to see this!</p>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-cloud-sun"></i> Weather Effects</h3>
+                    <p>On cloudy days, shadows are softer because clouds scatter sunlight in many directions. On clear days, shadows have sharp, well-defined edges.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Interactive 3D Educational Tool | Learn how sunlight creates different shadow types with a human figure and objects</p>
+        </footer>
+    </div>
+
+    <script>
+        // Scene setup
+        const container = document.getElementById('scene-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue background
+        
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap; // Default to hard shadows
+        container.appendChild(renderer.domElement);
+
+        // Add orbit controls for user interaction
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaMove = {
+                x: e.clientX - previousMousePosition.x,
+                y: e.clientY - previousMousePosition.y
+            };
+            
+            // Rotate scene based on mouse movement
+            scene.rotation.y += deltaMove.x * 0.01;
+            scene.rotation.x += deltaMove.y * 0.01;
+            
+            // Limit vertical rotation
+            scene.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, scene.rotation.x));
+            
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        // Touch controls for mobile
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        });
+        
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length !== 1) return;
+            
+            const deltaMove = {
+                x: e.touches[0].clientX - previousMousePosition.x,
+                y: e.touches[0].clientY - previousMousePosition.y
+            };
+            
+            // Rotate scene based on touch movement
+            scene.rotation.y += deltaMove.x * 0.01;
+            scene.rotation.x += deltaMove.y * 0.01;
+            
+            // Limit vertical rotation
+            scene.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, scene.rotation.x));
+            
+            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        });
+        
+        container.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        // Directional light (sun)
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.set(0, 50, -50);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 500;
+        sunLight.shadow.camera.left = -100;
+        sunLight.shadow.camera.right = 100;
+        sunLight.shadow.camera.top = 100;
+        sunLight.shadow.camera.bottom = -100;
+        scene.add(sunLight);
+
+        // Add a visible sun object
+        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        sun.position.copy(sunLight.position);
+        scene.add(sun);
+
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x7cbd6c,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Human figure (simple)
+        const headGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffdbac });
+        const head = new THREE.Mesh(headGeometry, headMaterial);
+        head.position.set(0, 15, 0);
+        head.castShadow = true;
+        scene.add(head);
+
+        const bodyGeometry = new THREE.CylinderGeometry(4, 4, 10, 32);
+        const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x3498db });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.position.set(0, 8, 0);
+        body.castShadow = true;
+        scene.add(body);
+
+        const legGeometry = new THREE.CylinderGeometry(2, 2, 8, 32);
+        const legMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(-2, 2, 0);
+        leftLeg.castShadow = true;
+        scene.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(2, 2, 0);
+        rightLeg.castShadow = true;
+        scene.add(rightLeg);
+
+        // Objects: Box and Sphere
+        const boxGeometry = new THREE.BoxGeometry(10, 10, 10);
+        const boxMaterial = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
+        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+        box.position.set(20, 5, 0);
+        box.castShadow = true;
+        box.receiveShadow = true;
+        scene.add(box);
+
+        const sphereGeometry = new THREE.SphereGeometry(6, 32, 32);
+        const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x4a9eff });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(-20, 6, 0);
+        sphere.castShadow = true;
+        sphere.receiveShadow = true;
+        scene.add(sphere);
+
+        // Add a tree for better context
+        const trunkGeometry = new THREE.CylinderGeometry(2, 2, 10, 32);
+        const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunk.position.set(15, 5, 15);
+        trunk.castShadow = true;
+        scene.add(trunk);
+
+        const leavesGeometry = new THREE.SphereGeometry(6, 32, 32);
+        const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2E8B57 });
+        const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+        leaves.position.set(15, 11, 15);
+        leaves.castShadow = true;
+        scene.add(leaves);
+
+        // Camera position
+        camera.position.set(0, 20, 50);
+        camera.lookAt(0, 10, 0);
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Variables
+        let sunPosition = 50; // 0 morning, 100 evening
+        let cloudCover = 100; // 0 cloudy, 100 sunny
+        let shadowType = 'hard';
+
+        // Update sun position - FIXED: Now morning and evening are on opposite sides
+        function updateSunPosition() {
+            // Map slider position (0-100) to sun angle (-π/2 to π/2)
+            const angle = (sunPosition / 100 - 0.5) * Math.PI; // -π/2 to π/2
+            
+            // Calculate sun position in circular path
+            const radius = 70;
+            const xPos = radius * Math.sin(angle);
+            const yPos = Math.max(10, radius * Math.cos(angle));
+            
+            sunLight.position.set(xPos, yPos, 0);
+            sun.position.copy(sunLight.position);
+            sunLight.lookAt(0, 0, 0);
+        }
+
+        // Update shadow type
+        function updateShadowType() {
+            if (shadowType === 'hard') {
+                renderer.shadowMap.type = THREE.BasicShadowMap;
+                ambientLight.intensity = 0.3;
+            } else if (shadowType === 'soft') {
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                ambientLight.intensity = 0.5; // Softer ambient for diffusion
+            } else if (shadowType === 'contact') {
+                renderer.shadowMap.type = THREE.PCFShadowMap;
+                ambientLight.intensity = 0.2; // Darker ambient for stronger contact
+            }
+            renderer.shadowMap.needsUpdate = true;
+        }
+
+        // Simulate clouds by adjusting light intensity and color
+        function updateWeather() {
+            const sunniness = cloudCover / 100;
+            sunLight.intensity = 0.5 + 0.5 * sunniness;
+            sunLight.color.setHSL(0.1, sunniness, 0.5);
+            if (cloudCover < 50) {
+                scene.background = new THREE.Color(0xcccccc); // Gray for cloudy
+            } else {
+                scene.background = new THREE.Color(0x87CEEB); // Blue for sunny
+            }
+        }
+
+        // Event listeners
+        document.getElementById('sun-position').addEventListener('input', (e) => {
+            sunPosition = parseInt(e.target.value);
+            updateSunPosition();
+            updateTimeDisplay();
+        });
+
+        document.getElementById('cloud-cover').addEventListener('input', (e) => {
+            cloudCover = parseInt(e.target.value);
+            updateWeather();
+            updateShadowTypeBasedOnWeather();
+        });
+
+        document.getElementById('hard-shadow-btn').addEventListener('click', () => setShadowType('hard'));
+        document.getElementById('soft-shadow-btn').addEventListener('click', () => setShadowType('soft'));
+        document.getElementById('contact-shadow-btn').addEventListener('click', () => setShadowType('contact'));
+
+        function setShadowType(type) {
+            shadowType = type;
+            document.getElementById('hard-shadow-btn').classList.toggle('active', type === 'hard');
+            document.getElementById('soft-shadow-btn').classList.toggle('active', type === 'soft');
+            document.getElementById('contact-shadow-btn').classList.toggle('active', type === 'contact');
+
+            document.getElementById('hard-shadow-info').style.display = type === 'hard' ? 'block' : 'none';
+            document.getElementById('soft-shadow-info').style.display = type === 'soft' ? 'block' : 'none';
+            document.getElementById('contact-shadow-info').style.display = type === 'contact' ? 'block' : 'none';
+
+            document.getElementById('shadow-type').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+            updateShadowType();
+        }
+
+        function updateShadowTypeBasedOnWeather() {
+            if (cloudCover > 70) {
+                setShadowType('hard');
+            } else if (cloudCover > 30) {
+                setShadowType('soft');
+            } else {
+                setShadowType('contact');
+            }
+        }
+
+        function updateTimeDisplay() {
+            let timeText = 'Noon', heightText = 'High', lengthText = 'Short', timeDescription = 'Noon - Short Shadows';
+            if (sunPosition < 25) {
+                timeText = 'Morning';
+                heightText = 'Low';
+                lengthText = 'Long';
+                timeDescription = 'Morning - Long Shadows';
+            } else if (sunPosition > 75) {
+                timeText = 'Evening';
+                heightText = 'Low';
+                lengthText = 'Long';
+                timeDescription = 'Evening - Long Shadows';
+            }
+            document.getElementById('time-display').textContent = timeDescription;
+            document.getElementById('time-display-short').textContent = timeText;
+            document.getElementById('sun-height').textContent = heightText;
+            document.getElementById('shadow-length').textContent = lengthText;
+        }
+
+        // Initial setup
+        updateSunPosition();
+        updateWeather();
+        updateShadowType();
+        updateTimeDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunny's Sundial Adventure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .info-panel {
+            width: 350px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .viewer {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(to bottom, #4da0ff, #87ceeb);
+            overflow: hidden;
+        }
+        
+        h1 {
+            margin-bottom: 15px;
+            color: #ff6b6b;
+            text-align: center;
+            font-size: 28px;
+            text-shadow: 2px 2px 0 #ffd166;
+        }
+        
+        h2 {
+            margin: 20px 0 10px;
+            color: #4dabf7;
+            border-bottom: 2px dashed #4dabf7;
+            padding-bottom: 5px;
+        }
+        
+        p {
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(77, 171, 247, 0.1);
+            border-radius: 10px;
+            border: 2px solid #4dabf7;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4dabf7;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 20px;
+            border-radius: 10px;
+            background: #ffd166;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 18px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            background: #ff6b6b;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 0 #ff8e8e;
+        }
+        
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #ff8e8e;
+        }
+        
+        .button-active {
+            background: #ff9e4d;
+            box-shadow: 0 4px 0 #ffb870;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 214, 102, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            border: 2px dashed #ffd166;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .feature i {
+            margin-right: 10px;
+            color: #ff6b6b;
+            font-size: 18px;
+        }
+        
+        .time-display {
+            font-size: 22px;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: #4dabf7;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 0 #3a8fd4;
+        }
+        
+        #sundial-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .explanation {
+            background: rgba(255, 214, 102, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd166;
+        }
+        
+        .sun-position {
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: center;
+            color: #4dabf7;
+            font-weight: bold;
+        }
+        
+        .character {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .character img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #ffd166;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .speech-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            position: relative;
+            border: 2px solid #ffd166;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .info-panel {
+                width: 100%;
+                height: 45%;
+            }
+            
+            .viewer {
+                height: 55%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="info-panel">
+            <h1><i class="fas fa-sun"></i> Sunny's Sundial Adventure</h1>
+            
+            <div class="character">
+                <div class="speech-bubble">
+                    "Hi! I'm Sunny! Let's learn how people told time before clocks!"
+                </div>
+            </div>
+            
+            <div class="time-display">
+                <i class="fas fa-clock"></i> Time: <span id="current-time">12:00 PM</span>
+            </div>
+            
+            <div class="explanation">
+                A sundial uses the <span class="highlight">sun's shadow</span> to tell time! The triangle (called a <span class="highlight">gnomon</span>) casts a shadow on the numbers. When the sun moves, the shadow moves too!
+            </div>
+            
+            <h2><i class="fas fa-sliders-h"></i> Let's Play!</h2>
+            
+            <div class="control-group">
+                <label for="time-slider"><i class="fas fa-clock"></i> Time of Day</label>
+                <div class="slider-container">
+                    <input type="range" id="time-slider" min="6" max="18" step="0.1" value="12">
+                    <span class="value-display" id="time-value">12:00 PM</span>
+                </div>
+                <div class="sun-position">
+                    <i class="fas fa-sun"></i> Sun is: <span id="sun-position">High in the sky</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="latitude-slider"><i class="fas fa-globe-americas"></i> Where on Earth</label>
+                <div class="slider-container">
+                    <input type="range" id="latitude-slider" min="0" max="90" value="40">
+                    <span class="value-display" id="latitude-value">40°</span>
+                </div>
+                <p style="font-size: 14px; margin-top: 5px;">Move the slider to see how sundials work in different places!</p>
+            </div>
+            
+            <div class="buttons">
+                <button id="animate-btn"><i class="fas fa-play"></i> Watch the Day</button>
+                <button id="reset-btn"><i class="fas fa-sync-alt"></i> Reset View</button>
+            </div>
+            
+            <h2><i class="fas fa-lightbulb"></i> Did You Know?</h2>
+            
+            <div class="feature">
+                <i class="fas fa-history"></i>
+                <div>People used sundials over 3,500 years ago in ancient Egypt!</div>
+            </div>
+            
+            <div class="feature">
+                <i class="fas fa-compass"></i>
+                <div>Sundials need to point North to work correctly!</div>
+            </div>
+            
+            <div class="feature">
+                <i class="fas fa-cloud-sun"></i>
+                <div>Sundials don't work at night or on cloudy days!</div>
+            </div>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-gamepad"></i> How to Play</h3>
+                <ul>
+                    <li>Drag to look around the sundial</li>
+                    <li>Scroll to zoom in and out</li>
+                    <li>Move the Time slider to see the shadow move</li>
+                    <li>Click "Watch the Day" to see the sun move across the sky</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="viewer">
+            <canvas id="sundial-canvas"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script>
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(1, 9, 25);
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('sundial-canvas'),
+            antialias: true 
+        });
+        renderer.setSize(document.querySelector('.viewer').clientWidth, document.querySelector('.viewer').clientHeight);
+        renderer.shadowMap.enabled = true;
+        
+        // Add orbit controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        scene.add(ambientLight);
+        
+        const sunLight = new THREE.DirectionalLight(0xffffcc, 1);
+        sunLight.position.set(15, 15, 15);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        scene.add(sunLight);
+        
+        // Sundial components
+        const sundialGroup = new THREE.Group();
+        scene.add(sundialGroup);
+        
+        // Sundial base (dial plate) - make it colorful for kids
+        const baseGeometry = new THREE.CylinderGeometry(5, 5, 0.5, 32);
+        const baseMaterial = new THREE.MeshPhongMaterial({ color: 0xffd166 });
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.position.y = 0.25;
+        base.receiveShadow = true;
+        sundialGroup.add(base);
+        
+        // Gnomon (the part that casts the shadow) - make it stand out
+        const gnomonGeometry = new THREE.ConeGeometry(0.3, 4, 4);
+        const gnomonMaterial = new THREE.MeshPhongMaterial({ color: 0xff6b6b });
+        const gnomon = new THREE.Mesh(gnomonGeometry, gnomonMaterial);
+        gnomon.position.y = 2;
+        gnomon.castShadow = true;
+        sundialGroup.add(gnomon);
+        
+        // Hour markers - make them colorful and clear
+        for (let i = 0; i < 12; i++) {
+            const angle = (i * 30) * Math.PI / 180;
+            const markerLength = i % 3 === 0 ? 0.8 : 0.4;
+            const markerColor = i % 3 === 0 ? 0x4dabf7 : 0x06d6a0;
+            
+            const markerGeometry = new THREE.BoxGeometry(0.1, 0.05, markerLength);
+            const markerMaterial = new THREE.MeshPhongMaterial({ color: markerColor });
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            
+            marker.position.x = (4.5 - markerLength/2) * Math.sin(angle);
+            marker.position.z = (4.5 - markerLength/2) * Math.cos(angle);
+            marker.position.y = 0.5;
+            
+            marker.rotation.y = -angle;
+            sundialGroup.add(marker);
+            
+            // Add numbers for the hours - make them big and clear
+            if (i % 3 === 0) {
+                const hour = i === 0 ? 24 : i;
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 64;
+                canvas.height = 64;
+                context.fillStyle = '#4dabf7';
+                context.font = 'bold 40px Comic Sans MS';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(hour, 32, 32);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const numberMaterial = new THREE.SpriteMaterial({ map: texture });
+                const numberSprite = new THREE.Sprite(numberMaterial);
+                numberSprite.scale.set(1.2, 1.2, 1.2);
+                
+                numberSprite.position.x = 5.5 * Math.sin(angle);
+                numberSprite.position.z = 5.5 * Math.cos(angle);
+                numberSprite.position.y = 0.5;
+                
+                sundialGroup.add(numberSprite);
+            }
+        }
+        
+        // Shadow plane
+        const shadowGeometry = new THREE.PlaneGeometry(10, 10);
+        const shadowMaterial = new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.3 });
+        const shadowPlane = new THREE.Mesh(shadowGeometry, shadowMaterial);
+        shadowPlane.rotation.x = -Math.PI / 2;
+        shadowPlane.position.y = 0.01;
+        shadowPlane.receiveShadow = true;
+        sundialGroup.add(shadowPlane);
+        
+        // Ground plane - make it look like grass
+        const groundGeometry = new THREE.PlaneGeometry(50, 50);
+        const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x06d6a0 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.5;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // Add some colorful trees around the sundial for a friendly environment
+        function createTree(x, z) {
+            const treeGroup = new THREE.Group();
+            
+            // Tree trunk
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.3, 2, 8);
+            const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = 1;
+            treeGroup.add(trunk);
+            
+            // Tree top
+            const topGeometry = new THREE.ConeGeometry(1.5, 3, 8);
+            const topMaterial = new THREE.MeshPhongMaterial({ color: 0x2e8b57 });
+            const top = new THREE.Mesh(topGeometry, topMaterial);
+            top.position.y = 3;
+            treeGroup.add(top);
+            
+            treeGroup.position.set(x, 0, z);
+            scene.add(treeGroup);
+        }
+        
+        // Create some trees around the sundial
+        createTree(-8, -8);
+        createTree(10, -5);
+        createTree(-7, 10);
+        createTree(9, 8);
+        
+        // Create the visible sun - make it big, bright and friendly
+        const sunGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xffd166,
+            emissive: 0xffd166,
+            emissiveIntensity: 1
+        });
+        const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sunMesh);
+        
+        // Add a friendly face to the sun
+        function addSunFace(sun) {
+            const faceGroup = new THREE.Group();
+            
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye.position.set(-0.5, 0.3, 1.4);
+            faceGroup.add(leftEye);
+            
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye.position.set(0.5, 0.3, 1.4);
+            faceGroup.add(rightEye);
+            
+            // Smile
+            const smileCurve = new THREE.EllipseCurve(
+                0, 0,
+                0.7, 0.4,
+                0, Math.PI,
+                false,
+                0
+            );
+            const smilePoints = smileCurve.getPoints(10);
+            const smileGeometry = new THREE.BufferGeometry().setFromPoints(smilePoints);
+            const smileMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+            const smile = new THREE.Line(smileGeometry, smileMaterial);
+            smile.rotation.x = Math.PI / 2;
+            smile.position.set(0, -0.3, 1.4);
+            faceGroup.add(smile);
+            
+            sun.add(faceGroup);
+        }
+        
+        addSunFace(sunMesh);
+        
+        // Update sun position based on time and latitude
+        function updateSunPosition(hours, latitude) {
+            // Convert hours to sun angle (simplified model for children)
+            const hourAngle = (hours - 12) * 15;
+            const latRad = latitude * Math.PI / 180;
+            
+            // Calculate sun position (simplified celestial mechanics)
+            // MODIFIED: Create a more realistic sun path that rotates from lower position
+            const baseAltitude = Math.PI / 6; // 30 degrees base altitude
+            const altitudeVariation = Math.PI / 8; // 22.5 degrees variation
+            
+            // Create a smooth arc for the sun's path
+            const progress = (hours - 6) / 12; // 0 at 6am, 1 at 6pm
+            const altitude = baseAltitude + altitudeVariation * Math.sin(progress * Math.PI);
+            
+            // Calculate azimuth based on time of day
+            const azimuth = (progress - 0.5) * Math.PI; // -90° at 6am, 0° at noon, 90° at 6pm
+            
+            // Position the sun light and visible sun
+            const distance = 20;
+            sunLight.position.x = distance * Math.cos(altitude) * Math.sin(azimuth);
+            sunLight.position.y = distance * Math.sin(altitude);
+            sunLight.position.z = distance * Math.cos(altitude) * Math.cos(azimuth);
+            
+            // Position the visible sun at the same location as the light
+            sunMesh.position.copy(sunLight.position);
+            
+            // Update sun description based on position (child-friendly)
+            let sunDescription = "High in the sky";
+            let sunEmoji = "☀️";
+            
+            if (hours < 6 || hours > 18) {
+                sunDescription = "Sleeping below the horizon";
+                sunEmoji = "🌙";
+            } else if (hours < 8) {
+                sunDescription = "Waking up in the east";
+                sunEmoji = "🌅";
+            } else if (hours < 10) {
+                sunDescription = "Rising in the east";
+                sunEmoji = "🌄";
+            } else if (hours < 12) {
+                sunDescription = "Climbing high in the sky";
+                sunEmoji = "☀️";
+            } else if (hours < 14) {
+                sunDescription = "High in the sky at noon";
+                sunEmoji = "🔆";
+            } else if (hours < 16) {
+                sunDescription = "Starting to go down";
+                sunEmoji = "⛅";
+            } else if (hours < 18) {
+                sunDescription = "Setting in the west";
+                sunEmoji = "🌇";
+            }
+            
+            document.getElementById('sun-position').innerHTML = `${sunEmoji} ${sunDescription}`;
+            
+            // Update info display
+            document.getElementById('time-value').textContent = formatTime(hours);
+            document.getElementById('current-time').textContent = formatTime(hours);
+            document.getElementById('latitude-value').textContent = `${latitude}°`;
+            
+            // Adjust ambient light and sky color based on time of day
+            if (hours < 6 || hours > 18) {
+                // Night
+                ambientLight.intensity = 0.1;
+                scene.background = new THREE.Color(0x0a0a2a);
+            } else if (hours < 7 || hours > 17) {
+                // Dawn/Dusk
+                ambientLight.intensity = 0.4;
+                scene.background = new THREE.Color(0xffa07a);
+            } else {
+                // Day
+                ambientLight.intensity = 0.6;
+                scene.background = new THREE.Color(0x87CEEB);
+            }
+        }
+        
+        // Format time for display (child-friendly)
+        function formatTime(hours) {
+            const h = Math.floor(hours);
+            const m = Math.floor((hours - h) * 60);
+            const period = h >= 12 ? 'PM' : 'AM';
+            const displayHour = h % 12 === 0 ? 12 : h % 12;
+            
+            // Add some fun descriptions for kids
+            let timeDescription = "";
+            if (hours < 6) timeDescription = " (Bedtime!)";
+            else if (hours < 8) timeDescription = " (Good morning!)";
+            else if (hours < 12) timeDescription = " (Time to play!)";
+            else if (hours < 14) timeDescription = " (Lunch time!)";
+            else if (hours < 17) timeDescription = " (Afternoon fun!)";
+            else if (hours < 19) timeDescription = " (Dinner time!)";
+            else timeDescription = " (Time for bed!)";
+            
+            return `${displayHour}:${m.toString().padStart(2, '0')} ${period}${timeDescription}`;
+        }
+        
+        // Event listeners for controls
+        document.getElementById('time-slider').addEventListener('input', function(e) {
+            updateSunPosition(parseFloat(e.target.value), parseFloat(document.getElementById('latitude-slider').value));
+        });
+        
+        document.getElementById('latitude-slider').addEventListener('input', function(e) {
+            updateSunPosition(parseFloat(document.getElementById('time-slider').value), parseFloat(e.target.value));
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            controls.reset();
+            updateSunPosition(12, 40);
+            document.getElementById('time-slider').value = 12;
+            document.getElementById('latitude-slider').value = 40;
+        });
+        
+        let animationId = null;
+        document.getElementById('animate-btn').addEventListener('click', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                this.innerHTML = '<i class="fas fa-play"></i> Watch the Day';
+                this.classList.remove('button-active');
+            } else {
+                this.innerHTML = '<i class="fas fa-pause"></i> Stop Watching';
+                this.classList.add('button-active');
+                animateDay();
+            }
+        });
+        
+        // Animation function
+        function animateDay() {
+            const timeSlider = document.getElementById('time-slider');
+            let time = parseFloat(timeSlider.value);
+            
+            function update() {
+                time += 0.02;
+                if (time >= 18) time = 6;
+                
+                timeSlider.value = time;
+                updateSunPosition(time, parseFloat(document.getElementById('latitude-slider').value));
+                
+                animationId = requestAnimationFrame(update);
+            }
+            
+            animationId = requestAnimationFrame(update);
+        }
+        
+        // Initial setup
+        updateSunPosition(12, 40);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            camera.aspect = document.querySelector('.viewer').clientWidth / document.querySelector('.viewer').clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(document.querySelector('.viewer').clientWidth, document.querySelector('.viewer').clientHeight);
+        });
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

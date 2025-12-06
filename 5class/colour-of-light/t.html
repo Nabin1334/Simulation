@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Colors Through Prism</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: min(8vw, 48px);
+            background: linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #4b0082, #8b00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: min(4vw, 20px);
+            color: #ccc;
+        }
+        
+        .canvas-wrapper {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 20px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #prismCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        
+        .color-card {
+            padding: 12px 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: min(3.5vw, 16px);
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .steps {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .step-number {
+            background: white;
+            color: black;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-size: min(4vw, 18px);
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            font-size: min(3.5vw, 14px);
+            color: #ccc;
+        }
+        
+        /* Mobile First Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 10px 0;
+            }
+            
+            .colors-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 10px;
+            }
+            
+            .color-card {
+                padding: 10px 6px;
+                min-height: 60px;
+                font-size: 14px;
+            }
+            
+            .steps {
+                padding: 15px;
+            }
+            
+            .step {
+                padding: 12px;
+                margin: 12px 0;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .step-number {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .colors-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-card {
+                min-height: 55px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .colors-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌈 Colors of Light</h1>
+            <div class="subtitle">See how light splits into colors</div>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="prismCanvas"></canvas>
+        </div>
+        
+        <div class="colors-grid">
+            <div class="color-card" style="background:#ff0000; color:white; border-left: 4px solid #ff4444">
+                🔴 RED<br>Longest Wave
+            </div>
+            <div class="color-card" style="background:#ff8800; color:white; border-left: 4px solid #ffaa44">
+                🟠 ORANGE<br>Warm Light
+            </div>
+            <div class="color-card" style="background:#ffff00; color:black; border-left: 4px solid #ffff44">
+                🟡 YELLOW<br>Bright Energy
+            </div>
+            <div class="color-card" style="background:#00ff00; color:black; border-left: 4px solid #44ff44">
+                🟢 GREEN<br>Nature's Color
+            </div>
+            <div class="color-card" style="background:#0088ff; color:white; border-left: 4px solid #44aaff">
+                🔵 BLUE<br>Sky & Ocean
+            </div>
+            <div class="color-card" style="background:#4b0082; color:white; border-left: 4px solid #663399">
+                🟣 INDIGO<br>Deep Purple
+            </div>
+            <div class="color-card" style="background:#8b00ff; color:white; border-left: 4px solid #aa44ff">
+                🟣 VIOLET<br>Shortest Wave
+            </div>
+        </div>
+
+        <div class="steps">
+            <div class="step" style="border-left-color: #ffffff">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">White Light Enters</div>
+                    <div class="step-desc">White light contains all colors mixed together</div>
+                </div>
+            </div>
+            
+            <div class="step" style="border-left-color: #4ecdc4">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Light Bends in Glass</div>
+                    <div class="step-desc">Each color bends at different angles inside prism</div>
+                </div>
+            </div>
+            
+            <div class="step" style="border-left-color: #ff6b6b">
+                <div class="step-number">3</div>
+                <div class="step-content">AZSXC 
+                    <div class="step-title">Colors Separate</div>
+                    <div class="step-desc">Red bends least • Violet bends most</div>
+                </div>
+            </div>
+            
+            <div class="step" style="border-left-color: #ffeaa7">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Rainbow Appears</div>
+                    <div class="step-desc">Beautiful spectrum of light colors emerges</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize canvas with proper sizing
+        const canvas = document.getElementById('prismCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Rainbow colors data
+        const colors = [
+            { name: 'RED', value: '#ff0000', angle: -0.3 },
+            { name: 'ORANGE', value: '#ff8800', angle: -0.2 },
+            { name: 'YELLOW', value: '#ffff00', angle: -0.1 },
+            { name: 'GREEN', value: '#00ff00', angle: 0.0 },
+            { name: 'BLUE', value: '#0088ff', angle: 0.1 },
+            { name: 'INDIGO', value: '#4b0082', angle: 0.2 },
+            { name: 'VIOLET', value: '#8b00ff', angle: 0.3 }
+        ];
+
+        // Animation state
+        let state = {
+            phase: 0,
+            progress: 0
+        };
+
+        // Setup canvas size
+        function setupCanvas() {
+            const container = canvas.parentElement;
+            const width = container.clientWidth;
+            const height = Math.min(width * 0.6, 500);
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            return { width, height };
+        }
+
+        // Draw the complete scene
+        function drawScene() {
+            const { width, height } = setupCanvas();
+            
+            // Clear background
+            ctx.fillStyle = '#000011';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Calculate responsive sizes
+            const scale = Math.min(width / 800, 1);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Draw prism (triangle)
+            const prismSize = Math.min(width * 0.2, 150) * scale;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2 * scale;
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - prismSize);
+            ctx.lineTo(centerX - prismSize, centerY + prismSize * 0.6);
+            ctx.lineTo(centerX + prismSize, centerY + prismSize * 0.6);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw white light beam
+            if (state.phase >= 1) {
+                const beamProgress = Math.min(state.progress, 1);
+                const beamLength = beamProgress * (width * 0.3);
+                
+                // Light source
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(width * 0.1, centerY, 8 * scale, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Beam
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(width * 0.1, centerY - 6 * scale, beamLength, 12 * scale);
+                
+                // Label
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `${12 * scale}px Arial`;
+                ctx.fillText('White Light', width * 0.02, centerY + 40 * scale);
+            }
+            
+            // Draw light path THROUGH THE PRISM SCREEN
+            if (state.phase >= 1 && state.progress > 0.3) {
+                const pathProgress = Math.min((state.progress - 0.3) / 0.7, 1);
+                
+                // Draw light path INSIDE the prism (visible through the glass)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 3 * scale;
+                
+                // Light path that goes THROUGH the prism screen
+                ctx.beginPath();
+                // Entry point on left surface
+                const entryX = centerX - prismSize * 0.6;
+                const entryY = centerY;
+                ctx.moveTo(entryX, entryY);
+                
+                // Through the prism (visible inside the glass)
+                const bendX = centerX;
+                const bendY = centerY - prismSize * 0.3;
+                ctx.lineTo(bendX, bendY);
+                
+                // Exit point on right surface
+                const exitX = centerX + prismSize * 0.6;
+                const exitY = centerY;
+                ctx.lineTo(exitX, exitY);
+                ctx.stroke();
+                
+                // Draw entry point on prism surface
+                if (pathProgress > 0) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(entryX, entryY, 4 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw bending point inside prism (visible through glass)
+                if (pathProgress > 0.3) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(bendX, bendY, 4 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw exit point on prism surface
+                if (pathProgress > 0.6) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(exitX, exitY, 4 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw rainbow beams coming out from the exit point
+            if (state.phase >= 2) {
+                const rainbowProgress = Math.max(0, state.progress - 1);
+                const exitX = centerX + prismSize * 0.6;
+                const exitY = centerY;
+                
+                colors.forEach((color, index) => {
+                    const progress = Math.min(rainbowProgress * 2 - index * 0.1, 1);
+                    if (progress > 0) {
+                        const beamLength = progress * (width * 0.25);
+                        
+                        // Beam from exit point
+                        const endX = exitX + beamLength;
+                        const endY = exitY + color.angle * (height * 0.2) * progress;
+                        
+                        // Solid color beam
+                        ctx.strokeStyle = color.value;
+                        ctx.lineWidth = 5 * scale;
+                        ctx.lineCap = 'round';
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(exitX, exitY);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                        
+                        // Label
+                        if (progress > 0.5) {
+                            ctx.fillStyle = color.value;
+                            ctx.font = `${11 * scale}px Arial`;
+                            ctx.fillText(color.name, endX + 5 * scale, endY);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            // Update animation state
+            if (state.phase === 0) {
+                state.phase = 1;
+            } else if (state.phase === 1) {
+                state.progress += 0.012;
+                if (state.progress >= 1) {
+                    state.phase = 2;
+                }
+            } else if (state.phase === 2) {
+                state.progress += 0.01;
+                if (state.progress >= 2.5) {
+                    state.progress = 2.5;
+                }
+            }
+            
+            drawScene();
+            requestAnimationFrame(animate);
+        }
+
+        // Handle window resize
+        function handleResize() {
+            drawScene();
+        }
+
+        // Initialize everything
+        function init() {
+            setupCanvas();
+            window.addEventListener('resize', handleResize);
+            setTimeout(animate, 500);
+        }
+
+        // Start when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

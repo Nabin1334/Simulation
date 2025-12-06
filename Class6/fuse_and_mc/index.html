@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fuse vs MCB - Simple Guide</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f0f2f5;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      header {
+        text-align: center;
+        padding: 30px 20px;
+        background: linear-gradient(to right, #2c3e50, #4a6491);
+        color: white;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        padding: 40px;
+        flex-wrap: wrap;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+      }
+
+      .device-btn {
+        padding: 20px 40px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 220px;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .device-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .fuse-btn {
+        background: linear-gradient(to right, #e74c3c, #c0392b);
+        color: white;
+      }
+
+      .mcb-btn {
+        background: linear-gradient(to right, #3498db, #2980b9);
+        color: white;
+      }
+
+      .device-btn.active {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .content-area {
+        padding: 40px;
+        min-height: 600px;
+      }
+
+      .no-content {
+        text-align: center;
+        padding: 80px 20px;
+        color: #7f8c8d;
+      }
+
+      .no-content i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #bdc3c7;
+      }
+
+      .info-section {
+        display: none;
+        animation: fadeIn 0.5s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .info-section.active {
+        display: block;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .section-header h2 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .fuse-header h2 {
+        color: #e74c3c;
+      }
+
+      .mcb-header h2 {
+        color: #3498db;
+      }
+
+      .image-container {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .component-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #eee;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+      }
+
+      .mcb-specific-image {
+        max-width: 110%;
+        max-height: 450px;
+      }
+
+      .component-image:hover {
+        transform: scale(1.05);
+      }
+
+      .image-caption {
+        margin-top: 15px;
+        font-style: italic;
+        color: #666;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .info-card {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid;
+      }
+
+      .fuse-card {
+        border-left-color: #e74c3c;
+      }
+
+      .mcb-card {
+        border-left-color: #3498db;
+      }
+
+      .info-card h3 {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .info-card ul {
+        padding-left: 20px;
+      }
+
+      .info-card li {
+        margin-bottom: 8px;
+      }
+
+      .comparison-section {
+        background-color: #f8f9fa;
+        padding: 40px;
+        margin-top: 50px;
+        border-radius: 10px;
+      }
+
+      .comparison-section h3 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+        font-size: 1.8rem;
+      }
+
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 18px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      .comparison-table th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: 600;
+      }
+
+      .comparison-table tr:hover {
+        background-color: #f5f9ff;
+      }
+
+      .fuse-cell {
+        border-left: 4px solid #e74c3c;
+      }
+
+      .mcb-cell {
+        border-left: 4px solid #3498db;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px;
+        color: #7f8c8d;
+        border-top: 1px solid #eee;
+        background-color: #f8f9fa;
+      }
+
+      @media (max-width: 768px) {
+        .button-container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .device-btn {
+          width: 100%;
+          max-width: 300px;
+        }
+
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .component-image {
+          max-height: 250px;
+        }
+
+        .mcb-specific-image {
+          max-width: 115%;
+          max-height: 280px;
+        }
+      }
+
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .component-image {
+          max-height: 350px;
+        }
+
+        .mcb-specific-image {
+          max-width: 110%;
+          max-height: 400px;
+        }
+      }
+
+      @media (min-width: 1025px) {
+        .component-image {
+          max-height: 500px;
+        }
+
+        .mcb-specific-image {
+          max-width: 110%;
+          max-height: 550px;
+        }
+      }
+
+      @media (min-width: 1440px) {
+        .component-image {
+          max-height: 600px;
+        }
+
+        .mcb-specific-image {
+          max-width: 110%;
+          max-height: 650px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-bolt"></i> Fuse and MCB</h1>
+        <p class="subtitle">
+          Simple guide to understand electrical protection devices
+        </p>
+      </header>
+
+      <div class="button-container">
+        <button class="device-btn fuse-btn" id="fuseBtn">
+          <i class="fas fa-fire"></i> Show Fuse
+        </button>
+
+        <button class="device-btn mcb-btn" id="mcbBtn">
+          <i class="fas fa-toggle-on"></i> Show MCB
+        </button>
+      </div>
+
+      <div class="content-area" id="contentArea">
+        <div class="no-content" id="noContent">
+          <i class="fas fa-hand-point-up"></i>
+          <h3>Select a device to get started</h3>
+          <p>Click on either "Show Fuse" or "Show MCB" button above</p>
+        </div>
+
+        <!-- Fuse Information Section -->
+        <div class="info-section" id="fuseSection">
+          <div class="section-header fuse-header">
+            <h2><i class="fas fa-fire"></i> Electrical Fuse</h2>
+            <p>One-time circuit protection device</p>
+          </div>
+
+          <div class="image-container">
+            <img id="fuseImage" class="component-image" alt="Electrical Fuse" />
+            <p class="image-caption" id="fuseCaption"></p>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card fuse-card">
+              <h3><i class="fas fa-info-circle"></i> What is a Fuse?</h3>
+              <p>
+                A fuse is a simple safety device that protects electrical
+                circuits by breaking when too much current flows.
+              </p>
+              <p>
+                It contains a thin metal wire that melts when overloaded,
+                stopping electricity flow.
+              </p>
+            </div>
+
+            <div class="info-card fuse-card">
+              <h3><i class="fas fa-cogs"></i> How It Works</h3>
+              <ul>
+                <li>Electricity flows through fuse wire</li>
+                <li>Too much current heats the wire</li>
+                <li>Wire melts at designed temperature</li>
+                <li>Circuit breaks, stopping electricity</li>
+                <li>Fuse is destroyed - must be replaced</li>
+              </ul>
+            </div>
+
+            <div class="info-card fuse-card">
+              <h3><i class="fas fa-thumbs-up"></i> Advantages</h3>
+              <ul>
+                <li>Simple and cheap</li>
+                <li>Very fast response</li>
+                <li>No maintenance needed</li>
+                <li>Highly reliable</li>
+              </ul>
+            </div>
+
+            <div class="info-card fuse-card">
+              <h3><i class="fas fa-thumbs-down"></i> Disadvantages</h3>
+              <ul>
+                <li>One-time use only</li>
+                <li>Must be replaced after blowing</li>
+                <li>No visual indication</li>
+                <li>Cannot be used as switch</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- MCB Information Section -->
+        <div class="info-section" id="mcbSection">
+          <div class="section-header mcb-header">
+            <h2>
+              <i class="fas fa-toggle-on"></i> Miniature Circuit Breaker (MCB)
+            </h2>
+            <p>Reusable circuit protection device</p>
+          </div>
+
+          <div class="image-container">
+            <img
+              id="mcbImage"
+              class="component-image mcb-specific-image"
+              alt="MCB"
+            />
+            <p class="image-caption" id="mcbCaption"></p>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card mcb-card">
+              <h3><i class="fas fa-info-circle"></i> What is an MCB?</h3>
+              <p>
+                An MCB is an automatic switch that protects circuits by turning
+                off when it detects too much current.
+              </p>
+              <p>
+                Unlike a fuse, it can be reset and used again after tripping.
+              </p>
+            </div>
+
+            <div class="info-card mcb-card">
+              <h3><i class="fas fa-cogs"></i> How It Works</h3>
+              <ul>
+                <li>Switch is ON during normal operation</li>
+                <li>Bimetallic strip heats on overload</li>
+                <li>Strip bends, releasing trip mechanism</li>
+                <li>Switch moves to OFF position</li>
+                <li>Can be reset after fixing problem</li>
+              </ul>
+            </div>
+
+            <div class="info-card mcb-card">
+              <h3><i class="fas fa-thumbs-up"></i> Advantages</h3>
+              <ul>
+                <li>Reusable - can be reset</li>
+                <li>Clear ON/OFF indication</li>
+                <li>Can be used as manual switch</li>
+                <li>More convenient long-term</li>
+              </ul>
+            </div>
+
+            <div class="info-card mcb-card">
+              <h3><i class="fas fa-thumbs-down"></i> Disadvantages</h3>
+              <ul>
+                <li>More expensive initially</li>
+                <li>Slightly slower than fuse</li>
+                <li>More complex mechanism</li>
+                <li>Can be overridden</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div
+          class="comparison-section"
+          id="comparisonSection"
+          style="display: none"
+        >
+          <h3><i class="fas fa-exchange-alt"></i> Quick Comparison</h3>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Fuse</th>
+                <th>MCB</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Reusability</strong></td>
+                <td class="fuse-cell">One-time use</td>
+                <td class="mcb-cell">Reusable</td>
+              </tr>
+              <tr>
+                <td><strong>Cost</strong></td>
+                <td class="fuse-cell">Cheap initially</td>
+                <td class="mcb-cell">Expensive initially</td>
+              </tr>
+              <tr>
+                <td><strong>Convenience</strong></td>
+                <td class="fuse-cell">Less convenient</td>
+                <td class="mcb-cell">More convenient</td>
+              </tr>
+              <tr>
+                <td><strong>Best for</strong></td>
+                <td class="fuse-cell">Cars, old homes</td>
+                <td class="mcb-cell">Modern homes, offices</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer>
+        <p><i class="fas fa-bolt"></i> Fuse vs MCB Simple Guide</p>
+        <p style="margin-top: 10px; font-size: 0.9rem">
+          Click buttons to view information • Images loaded directly through
+          code
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // DOM Elements
+      const fuseBtn = document.getElementById("fuseBtn");
+      const mcbBtn = document.getElementById("mcbBtn");
+      const fuseSection = document.getElementById("fuseSection");
+      const mcbSection = document.getElementById("mcbSection");
+      const noContent = document.getElementById("noContent");
+      const comparisonSection = document.getElementById("comparisonSection");
+
+      // Image elements
+      const fuseImage = document.getElementById("fuseImage");
+      const mcbImage = document.getElementById("mcbImage");
+      const fuseCaption = document.getElementById("fuseCaption");
+      const mcbCaption = document.getElementById("mcbCaption");
+
+      // Direct image URLs (hardcoded in JavaScript)
+      // Replace these URLs with your own image URLs
+      const IMAGES = {
+        fuse: "fuse-box.webp",
+        mcb: "mcb.jpg",
+      };
+
+      // Captions for images
+      const CAPTIONS = {
+        fuse: "A typical electrical fuse - when it 'blows', it must be replaced",
+        mcb: "A modern MCB - can be reset after tripping",
+      };
+
+      // Initialize the page
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Page loaded. Setting up images...");
+
+        // Set images directly through JavaScript code
+        setImages();
+
+        // Set initial state
+        hideAllSections();
+        noContent.style.display = "block";
+        comparisonSection.style.display = "none";
+
+        // Set up event listeners
+        setupEventListeners();
+
+        // Show welcome in console
+        console.log("Ready! Click buttons to view fuse or MCB information.");
+      });
+
+      // Function to set images directly
+      function setImages() {
+        // Set fuse image and caption
+        fuseImage.src = IMAGES.fuse;
+        fuseCaption.textContent = CAPTIONS.fuse;
+
+        // Set MCB image and caption
+        mcbImage.src = IMAGES.mcb;
+        mcbCaption.textContent = CAPTIONS.mcb;
+
+        // Add error handling for images
+        fuseImage.onerror = function () {
+          console.error("Fuse image failed to load");
+          fuseCaption.textContent = "Fuse image (failed to load)";
+        };
+
+        mcbImage.onerror = function () {
+          console.error("MCB image failed to load");
+          mcbCaption.textContent = "MCB image (failed to load)";
+        };
+
+        console.log("Images set successfully");
+      }
+
+      // Set up event listeners
+      function setupEventListeners() {
+        // Button click events
+        fuseBtn.addEventListener("click", function () {
+          showSection("fuse");
+          console.log("Showing fuse information");
+        });
+
+        mcbBtn.addEventListener("click", function () {
+          showSection("mcb");
+          console.log("Showing MCB information");
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", function (event) {
+          // F key for Fuse
+          if (event.key === "f" || event.key === "F") {
+            showSection("fuse");
+            event.preventDefault();
+          }
+          // M key for MCB
+          else if (event.key === "m" || event.key === "M") {
+            showSection("mcb");
+            event.preventDefault();
+          }
+        });
+      }
+
+      // Show a specific section
+      function showSection(section) {
+        // Hide all sections first
+        hideAllSections();
+
+        // Remove active class from buttons
+        fuseBtn.classList.remove("active");
+        mcbBtn.classList.remove("active");
+
+        // Show selected section and activate button
+        if (section === "fuse") {
+          fuseSection.classList.add("active");
+          fuseBtn.classList.add("active");
+          noContent.style.display = "none";
+        } else if (section === "mcb") {
+          mcbSection.classList.add("active");
+          mcbBtn.classList.add("active");
+          noContent.style.display = "none";
+        }
+
+        // Show comparison section
+        comparisonSection.style.display = "block";
+
+        // Scroll to content
+        document.getElementById("contentArea").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+
+      // Hide all sections
+      function hideAllSections() {
+        fuseSection.classList.remove("active");
+        mcbSection.classList.remove("active");
+      }
+
+      // Function to easily update images (if you want to change them later)
+      function updateImages(
+        newFuseUrl,
+        newMcbUrl,
+        newFuseCaption,
+        newMcbCaption
+      ) {
+        if (newFuseUrl) {
+          IMAGES.fuse = newFuseUrl;
+          fuseImage.src = newFuseUrl;
+        }
+
+        if (newMcbUrl) {
+          IMAGES.mcb = newMcbUrl;
+          mcbImage.src = newMcbUrl;
+        }
+
+        if (newFuseCaption) {
+          CAPTIONS.fuse = newFuseCaption;
+          fuseCaption.textContent = newFuseCaption;
+        }
+
+        if (newMcbCaption) {
+          CAPTIONS.mcb = newMcbCaption;
+          mcbCaption.textContent = newMcbCaption;
+        }
+
+        console.log("Images updated successfully");
+      }
+
+      // Make update function available globally if needed
+      window.updateDeviceImages = updateImages;
+
+      // Log current image URLs (for debugging)
+      console.log("Current fuse image URL:", IMAGES.fuse);
+      console.log("Current MCB image URL:", IMAGES.mcb);
+
+      // Simple function to show current image URLs
+      function showCurrentImageUrls() {
+        console.log("=== Current Image URLs ===");
+        console.log("Fuse:", IMAGES.fuse);
+        console.log("MCB:", IMAGES.mcb);
+        console.log("========================");
+      }
+
+      // Make it available globally
+      window.showImageUrls = showCurrentImageUrls;
+    </script>
+  </body>
+</html>

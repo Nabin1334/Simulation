@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Categories Explained</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .intro {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .intro h2 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .category-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .filter-btn {
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .filter-btn.active {
+            background-color: #2575fc;
+            color: white;
+            border-color: #2575fc;
+        }
+        
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .category-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-header {
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .category-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .category-body {
+            padding: 20px;
+        }
+        
+        .category-description {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .examples {
+            margin-top: 15px;
+        }
+        
+        .examples h4 {
+            margin-bottom: 8px;
+            color: #2575fc;
+        }
+        
+        .examples ul {
+            padding-left: 20px;
+            color: #666;
+        }
+        
+        .examples li {
+            margin-bottom: 5px;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 3px 5px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .categories-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .category-filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 90%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Software & Its Categories</h1>
+            <p class="tagline">A comprehensive guide to understanding different types of software and their applications in the digital world.</p>
+        </header>
+        
+        <section class="intro">
+            <h2>What is Software?</h2>
+            <p><span class="highlight">Software</span> is a collection of instructions, data, or programs used to operate computers and execute specific tasks. It is the intangible component of a computer system that enables users to interact with the hardware. Without software, computers would be useless.</p>
+            <p>Software can be broadly classified into several categories based on its purpose and functionality. Understanding these categories helps in selecting the right tools for specific tasks and in comprehending the digital ecosystem.</p>
+        </section>
+        
+        <div class="category-filters">
+            <button class="filter-btn active" data-category="all">All Categories</button>
+            <button class="filter-btn" data-category="system">System Software</button>
+            <button class="filter-btn" data-category="application">Application Software</button>
+            <button class="filter-btn" data-category="development">Development Software</button>
+            <button class="filter-btn" data-category="malicious">Malicious Software</button>
+        </div>
+        
+        <div class="categories-container">
+            <!-- System Software -->
+            <div class="category-card" data-category="system">
+                <div class="category-header" style="background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="category-title">System Software</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">System software serves as a platform for running application software and manages computer hardware. It acts as an intermediary between users and the computer hardware.</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>Operating Systems:</strong> Windows, macOS, Linux, Android</li>
+                            <li><strong>Device Drivers:</strong> Graphics drivers, Printer drivers</li>
+                            <li><strong>Utilities:</strong> Disk cleaners, Antivirus software</li>
+                            <li><strong>Firmware:</strong> BIOS, UEFI</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Application Software -->
+            <div class="category-card" data-category="application">
+                <div class="category-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="category-title">Application Software</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">Application software is designed to help users perform specific tasks. These are the programs most people interact with directly on their computers and devices.</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>Productivity:</strong> Microsoft Office, Google Workspace</li>
+                            <li><strong>Communication:</strong> Slack, Zoom, WhatsApp</li>
+                            <li><strong>Entertainment:</strong> Spotify, Netflix, Games</li>
+                            <li><strong>Business:</strong> SAP, QuickBooks, Salesforce</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Development Software -->
+            <div class="category-card" data-category="development">
+                <div class="category-header" style="background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="category-title">Development Software</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">Development software provides tools for programmers and developers to create, debug, maintain, or support other software and applications.</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>IDEs:</strong> Visual Studio, IntelliJ IDEA, Eclipse</li>
+                            <li><strong>Text Editors:</strong> VS Code, Sublime Text, Atom</li>
+                            <li><strong>Version Control:</strong> Git, GitHub, GitLab</li>
+                            <li><strong>Debuggers:</strong> GDB, Chrome DevTools</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Malicious Software -->
+            <div class="category-card" data-category="malicious">
+                <div class="category-header" style="background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div class="category-title">Malicious Software (Malware)</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">Malicious software is designed to harm, exploit, or otherwise compromise computer systems, networks, and data without the user's consent.</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>Viruses:</strong> Self-replicating malware</li>
+                            <li><strong>Ransomware:</strong> Locks systems until ransom is paid</li>
+                            <li><strong>Spyware:</strong> Secretly monitors user activity</li>
+                            <li><strong>Trojans:</strong> Disguised as legitimate software</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Embedded Software -->
+            <div class="category-card" data-category="system">
+                <div class="category-header" style="background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="category-title">Embedded Software</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">Embedded software is specialized programming within hardware devices to control specific functions. It's often found in consumer electronics, cars, and appliances.</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>Consumer Electronics:</strong> Smart TVs, Digital cameras</li>
+                            <li><strong>Automotive:</strong> Engine control units, Infotainment systems</li>
+                            <li><strong>Medical Devices:</strong> Pacemakers, MRI machines</li>
+                            <li><strong>IoT Devices:</strong> Smart thermostats, Wearables</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cloud Software -->
+            <div class="category-card" data-category="application">
+                <div class="category-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="category-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div class="category-title">Cloud Software</div>
+                </div>
+                <div class="category-body">
+                    <p class="category-description">Cloud software is hosted on remote servers and accessed through the internet rather than installed on local devices. It's typically offered as a service (SaaS).</p>
+                    <div class="examples">
+                        <h4>Examples:</h4>
+                        <ul>
+                            <li><strong>Productivity Suites:</strong> Google Workspace, Microsoft 365</li>
+                            <li><strong>Storage:</strong> Dropbox, Google Drive, OneDrive</li>
+                            <li><strong>CRM:</strong> Salesforce, HubSpot</li>
+                            <li><strong>Communication:</strong> Slack, Microsoft Teams</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Category filtering functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const categoryCards = document.querySelectorAll('.category-card');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    // Show/hide cards based on filter
+                    categoryCards.forEach(card => {
+                        if (category === 'all' || card.getAttribute('data-category') === category) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Add animation to cards on page load
+            categoryCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            // Highlight important terms
+            const highlightTerms = ['software', 'hardware', 'applications', 'malware', 'programming'];
+            const paragraphs = document.querySelectorAll('.intro p, .category-description');
+            
+            paragraphs.forEach(paragraph => {
+                let html = paragraph.innerHTML;
+                highlightTerms.forEach(term => {
+                    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+                    html = html.replace(regex, `<span class="highlight">${term}</span>`);
+                });
+                paragraph.innerHTML = html;
+            });
+        });
+    </script>
+</body>
+</html>

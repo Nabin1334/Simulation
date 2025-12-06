@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Communication Types</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+        color: #333;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      header {
+        background: #1a2a6c;
+        color: white;
+        padding: 25px;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      header p {
+        font-size: 18px;
+        opacity: 0.9;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .scenario-selector {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .scenario-btn {
+        padding: 12px 25px;
+        margin: 0 10px;
+        background: #e9ecef;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .scenario-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .scenario-btn.active {
+        background: #1a2a6c;
+        color: white;
+      }
+
+      .content {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 20px;
+      }
+
+      .visualization {
+        flex: 2;
+        min-width: 500px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-right: 20px;
+        position: relative;
+        overflow: hidden;
+        min-height: 500px;
+      }
+
+      .info-panel {
+        flex: 1;
+        min-width: 300px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .info-panel h2 {
+        color: #1a2a6c;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #fdbb2d;
+      }
+
+      .info-panel p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .example-box {
+        background: rgba(253, 187, 45, 0.15);
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #fdbb2d;
+        margin-top: 20px;
+      }
+
+      .example-box strong {
+        color: #b21f1f;
+      }
+
+      .communication-scene {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      .person {
+        position: absolute;
+        width: 80px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.5s;
+      }
+
+      .person-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #3498db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .person-name {
+        font-weight: bold;
+        font-size: 14px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 3px 8px;
+        border-radius: 10px;
+      }
+
+      .thought-bubble {
+        position: absolute;
+        background: white;
+        border-radius: 20px;
+        padding: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        max-width: 150px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .thought-bubble:after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+      }
+
+      .speech-bubble {
+        position: absolute;
+        background: white;
+        border-radius: 15px;
+        padding: 8px 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        max-width: 120px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .speech-bubble:after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 8px solid transparent;
+      }
+
+      .media-device {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        font-size: 30px;
+      }
+
+      .media-label {
+        font-size: 12px;
+        margin-top: 5px;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .communication-line {
+        position: absolute;
+        height: 3px;
+        background: #3498db;
+        transform-origin: 0 0;
+        opacity: 0.7;
+      }
+
+      .message {
+        position: absolute;
+        background: #e74c3c;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        opacity: 0;
+        transition: all 0.5s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .details-panel {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        margin-top: 20px;
+      }
+
+      .details-panel h3 {
+        color: #1a2a6c;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #fdbb2d;
+      }
+
+      .communication-flow {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 10px;
+      }
+
+      .flow-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #3498db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: white;
+        font-size: 18px;
+      }
+
+      .flow-text {
+        flex: 1;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: white;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 900px) {
+        .content {
+          flex-direction: column;
+        }
+
+        .visualization {
+          margin-right: 0;
+          margin-bottom: 20px;
+          min-height: 400px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Real-Life Communication Types</h1>
+        <p>How people actually communicate in everyday situations</p>
+      </header>
+
+      <div class="scenario-selector">
+        <button class="scenario-btn active" data-scenario="intrapersonal">
+          Intrapersonal Communication
+        </button>
+        <button class="scenario-btn" data-scenario="interpersonal">
+          Interpersonal Communication
+        </button>
+        <button class="scenario-btn" data-scenario="mass">
+          Mass Communication
+        </button>
+      </div>
+
+      <div class="content">
+        <div class="visualization">
+          <div class="communication-scene" id="scene">
+            <!-- Scene will be generated by JavaScript -->
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h2 id="scenario-title">Intrapersonal Communication</h2>
+          <p id="scenario-description">
+            Internal dialogue and self-reflection happening within an
+            individual's mind.
+          </p>
+
+          <div class="example-box">
+            <p>
+              <strong>Real-Life Example:</strong>
+              <span id="scenario-example"
+                >A student thinking through a difficult math problem, weighing
+                different approaches before deciding on a solution.</span
+              >
+            </p>
+          </div>
+
+          <div class="details-panel">
+            <h3>Communication Flow</h3>
+            <div id="communication-flows">
+              <!-- Communication flows will be generated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Real-Life Communication Visualization | Based on Actual Communication
+        Patterns
+      </p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const scenarioButtons = document.querySelectorAll(".scenario-btn");
+        const scene = document.getElementById("scene");
+        const scenarioTitle = document.getElementById("scenario-title");
+        const scenarioDescription = document.getElementById(
+          "scenario-description"
+        );
+        const scenarioExample = document.getElementById("scenario-example");
+        const communicationFlows = document.getElementById(
+          "communication-flows"
+        );
+
+        // Track all timeouts so we can clear them
+        let activeTimeouts = [];
+
+        // Real-life communication scenarios
+        const scenarios = {
+          intrapersonal: {
+            title: "Intrapersonal Communication",
+            description:
+              "Internal dialogue and self-reflection happening within an individual's mind.",
+            example:
+              "A student thinking through a difficult math problem, weighing different approaches before deciding on a solution.",
+            elements: [
+              {
+                type: "person",
+                id: "student",
+                name: "Student",
+                x: 50,
+                y: 50,
+                icon: "🧑‍🎓",
+              },
+            ],
+            communications: [
+              {
+                from: "student",
+                to: "student",
+                type: "thought",
+                message: "How should I solve this problem?",
+                offsetX: -120,
+                offsetY: -80,
+              },
+              {
+                from: "student",
+                to: "student",
+                type: "thought",
+                message: "Maybe I should try the formula first",
+                offsetX: 120,
+                offsetY: -60,
+                delay: 2000,
+              },
+              {
+                from: "student",
+                to: "student",
+                type: "thought",
+                message: "No, let me think of another approach",
+                offsetX: -100,
+                offsetY: 80,
+                delay: 4000,
+              },
+            ],
+            flows: [
+              { icon: "🧠", text: "Internal thinking and reasoning process" },
+              { icon: "🤔", text: "Self-questioning and evaluation" },
+              {
+                icon: "💡",
+                text: "Reaching conclusions through self-reflection",
+              },
+            ],
+          },
+          interpersonal: {
+            title: "Interpersonal Communication",
+            description:
+              "Direct communication between a teacher and students in a classroom setting.",
+            example:
+              "A teacher explaining a concept to students, and students asking questions or responding.",
+            elements: [
+              {
+                type: "person",
+                id: "teacher",
+                name: "Teacher",
+                x: 50,
+                y: 20,
+                icon: "👩‍🏫",
+              },
+              {
+                type: "person",
+                id: "student1",
+                name: "Student 1",
+                x: 30,
+                y: 60,
+                icon: "🧑‍🎓",
+              },
+              {
+                type: "person",
+                id: "student2",
+                name: "Student 2",
+                x: 50,
+                y: 70,
+                icon: "👩‍🎓",
+              },
+              {
+                type: "person",
+                id: "student3",
+                name: "Student 3",
+                x: 70,
+                y: 60,
+                icon: "🧑‍🎓",
+              },
+            ],
+            communications: [
+              {
+                from: "teacher",
+                to: "student1",
+                type: "speech",
+                message: "Can anyone explain this concept?",
+                offsetX: 0,
+                offsetY: -60,
+                delay: 1000,
+              },
+              {
+                from: "student1",
+                to: "teacher",
+                type: "speech",
+                message: "Is it like what we learned yesterday?",
+                offsetX: 0,
+                offsetY: -60,
+                delay: 3000,
+              },
+              {
+                from: "teacher",
+                to: "student2",
+                type: "speech",
+                message: "Good question! Let's discuss further.",
+                offsetX: 0,
+                offsetY: -60,
+                delay: 5000,
+              },
+              {
+                from: "student3",
+                to: "teacher",
+                type: "speech",
+                message: "Can you give another example?",
+                offsetX: 0,
+                offsetY: -60,
+                delay: 7000,
+              },
+            ],
+            flows: [
+              {
+                icon: "🗣️",
+                text: "Teacher explains and students respond",
+              },
+              { icon: "👥", text: "Classroom discussion and Q&A" },
+              { icon: "🔄", text: "Two-way exchange of information" },
+            ],
+          },
+          mass: {
+            title: "Mass Communication",
+            description:
+              "One-to-many communication through media channels to large audiences.",
+            example:
+              "News station broadcasting to thousands of viewers simultaneously with no direct interaction.",
+            elements: [
+              {
+                type: "media",
+                id: "tv",
+                name: "TV News",
+                x: 50,
+                y: 20,
+                icon: "📺",
+              },
+              {
+                type: "person",
+                id: "viewer1",
+                name: "Viewer at Home",
+                x: 20,
+                y: 60,
+                icon: "👨‍💼",
+              },
+              {
+                type: "person",
+                id: "viewer2",
+                name: "Viewer at Cafe",
+                x: 50,
+                y: 70,
+                icon: "👩‍💼",
+              },
+              {
+                type: "person",
+                id: "viewer3",
+                name: "Viewer on Mobile",
+                x: 80,
+                y: 60,
+                icon: "👨‍🎓",
+              },
+            ],
+            communications: [
+              {
+                from: "tv",
+                to: "viewer1",
+                type: "message",
+                message: "Breaking News Alert",
+                offsetX: -40,
+                offsetY: 0,
+                delay: 1000,
+              },
+              {
+                from: "tv",
+                to: "viewer2",
+                type: "message",
+                message: "Weather Update",
+                offsetX: 0,
+                offsetY: -30,
+                delay: 2500,
+              },
+              {
+                from: "tv",
+                to: "viewer3",
+                type: "message",
+                message: "Sports Results",
+                offsetX: 40,
+                offsetY: 0,
+                delay: 4000,
+              },
+            ],
+            flows: [
+              {
+                icon: "📡",
+                text: "One-way transmission from source to audience",
+              },
+              {
+                icon: "👥",
+                text: "Reaches large, diverse audience simultaneously",
+              },
+              {
+                icon: "📺",
+                text: "No immediate feedback or interaction possible",
+              },
+            ],
+          },
+        };
+
+        // Initialize with intrapersonal communication
+        renderScenario("intrapersonal");
+
+        // Add event listeners to scenario buttons
+        scenarioButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const scenario = this.getAttribute("data-scenario");
+
+            // Update active button
+            scenarioButtons.forEach((btn) => btn.classList.remove("active"));
+            this.classList.add("active");
+
+            // Render scenario
+            renderScenario(scenario);
+          });
+        });
+
+        // Function to clear all timeouts and bubbles/messages
+        function clearScene() {
+          // Clear all timeouts
+          activeTimeouts.forEach((timeout) => clearTimeout(timeout));
+          activeTimeouts = [];
+          // Remove all bubbles/messages from scene
+          const bubbles = scene.querySelectorAll(
+            ".thought-bubble, .speech-bubble, .message, .communication-line"
+          );
+          bubbles.forEach((bubble) => bubble.remove());
+        }
+
+        // Function to render a communication scenario
+        function renderScenario(scenarioKey) {
+          clearScene(); // <-- Clear previous animations and bubbles/messages
+          const scenario = scenarios[scenarioKey];
+          scene.innerHTML = "";
+
+          // Update text content
+          scenarioTitle.textContent = scenario.title;
+          scenarioDescription.textContent = scenario.description;
+          scenarioExample.textContent = scenario.example;
+
+          // Create communication flows
+          communicationFlows.innerHTML = "";
+          scenario.flows.forEach((flow) => {
+            const flowElement = document.createElement("div");
+            flowElement.className = "communication-flow";
+            flowElement.innerHTML = `
+                        <div class="flow-icon">${flow.icon}</div>
+                        <div class="flow-text">${flow.text}</div>
+                    `;
+            communicationFlows.appendChild(flowElement);
+          });
+
+          // Create elements (people and media)
+          scenario.elements.forEach((element) => {
+            let elementDiv;
+
+            if (element.type === "person") {
+              elementDiv = document.createElement("div");
+              elementDiv.className = "person";
+              elementDiv.id = element.id;
+              elementDiv.style.left = `${element.x}%`;
+              elementDiv.style.top = `${element.y}%`;
+              elementDiv.innerHTML = `
+                            <div class="person-icon">${element.icon}</div>
+                            <div class="person-name">${element.name}</div>
+                        `;
+            } else if (element.type === "media") {
+              elementDiv = document.createElement("div");
+              elementDiv.className = "media-device";
+              elementDiv.id = element.id;
+              elementDiv.style.left = `calc(${element.x}% - 40px)`;
+              elementDiv.style.top = `calc(${element.y}% - 40px)`;
+              elementDiv.innerHTML = `
+                            <div>${element.icon}</div>
+                            <div class="media-label">${element.name}</div>
+                        `;
+            }
+
+            scene.appendChild(elementDiv);
+          });
+
+          // Create communication lines and messages
+          scenario.communications.forEach((comm) => {
+            const fromElement = document.getElementById(comm.from);
+            const toElement = document.getElementById(comm.to);
+
+            if (fromElement && toElement) {
+              const fromRect = fromElement.getBoundingClientRect();
+              const toRect = toElement.getBoundingClientRect();
+              const sceneRect = scene.getBoundingClientRect();
+
+              const fromX = fromRect.left + fromRect.width / 2 - sceneRect.left;
+              const fromY = fromRect.top + fromRect.height / 2 - sceneRect.top;
+              const toX = toRect.left + toRect.width / 2 - sceneRect.left;
+              const toY = toRect.top + toRect.height / 2 - sceneRect.top;
+
+              // For intrapersonal communication, create a circular thought process
+              if (scenarioKey === "intrapersonal") {
+                // Create thought bubbles
+                const timeout1 = setTimeout(() => {
+                  const thoughtBubble = document.createElement("div");
+                  thoughtBubble.className = "thought-bubble";
+                  thoughtBubble.textContent = comm.message;
+                  thoughtBubble.style.left = `${fromX + comm.offsetX}px`;
+                  thoughtBubble.style.top = `${fromY + comm.offsetY}px`;
+
+                  // Position the tail of the bubble
+                  if (comm.offsetX < 0) {
+                    thoughtBubble.style.transform = "translateX(-100%)";
+                    thoughtBubble.style.textAlign = "right";
+                    thoughtBubble.style.paddingRight = "15px";
+                    thoughtBubble.style.paddingLeft = "10px";
+                    thoughtBubble.style.borderTopRightRadius = "0";
+                  } else {
+                    thoughtBubble.style.paddingLeft = "15px";
+                    thoughtBubble.style.paddingRight = "10px";
+                    thoughtBubble.style.borderTopLeftRadius = "0";
+                  }
+
+                  scene.appendChild(thoughtBubble);
+
+                  // Show the bubble
+                  const timeout2 = setTimeout(() => {
+                    thoughtBubble.style.opacity = "1";
+                  }, 100);
+                  activeTimeouts.push(timeout2);
+
+                  // Hide the bubble after some time
+                  const timeout3 = setTimeout(() => {
+                    thoughtBubble.style.opacity = "0";
+                    const timeout4 = setTimeout(() => {
+                      if (thoughtBubble.parentNode) {
+                        thoughtBubble.parentNode.removeChild(thoughtBubble);
+                      }
+                    }, 500);
+                    activeTimeouts.push(timeout4);
+                  }, 3000);
+                  activeTimeouts.push(timeout3);
+                }, comm.delay || 0);
+                activeTimeouts.push(timeout1);
+              }
+              // For interpersonal communication, create speech bubbles and lines
+              else if (scenarioKey === "interpersonal") {
+                // Create communication line
+                const line = document.createElement("div");
+                line.className = "communication-line";
+
+                const dx = toX - fromX;
+                const dy = toY - fromY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+                line.style.width = `${distance}px`;
+                line.style.left = `${fromX}px`;
+                line.style.top = `${fromY}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+
+                scene.appendChild(line);
+
+                // Create speech bubble
+                const timeout1 = setTimeout(() => {
+                  const speechBubble = document.createElement("div");
+                  speechBubble.className = "speech-bubble";
+                  speechBubble.textContent = comm.message;
+
+                  // Position the bubble
+                  const bubbleX = fromX + dx / 2;
+                  const bubbleY = fromY + dy / 2;
+
+                  speechBubble.style.left = `${bubbleX}px`;
+                  speechBubble.style.top = `${bubbleY + comm.offsetY}px`;
+
+                  // Position the tail
+                  if (dx > 0) {
+                    speechBubble.style.transform = "translateX(-50%)";
+                    speechBubble.style.borderTopLeftRadius = "0";
+                  } else {
+                    speechBubble.style.transform = "translateX(-50%)";
+                    speechBubble.style.borderTopRightRadius = "0";
+                  }
+
+                  scene.appendChild(speechBubble);
+
+                  // Show the bubble
+                  const timeout2 = setTimeout(() => {
+                    speechBubble.style.opacity = "1";
+                  }, 100);
+                  activeTimeouts.push(timeout2);
+
+                  // Hide the bubble after some time
+                  const timeout3 = setTimeout(() => {
+                    speechBubble.style.opacity = "0";
+                    const timeout4 = setTimeout(() => {
+                      if (speechBubble.parentNode) {
+                        speechBubble.parentNode.removeChild(speechBubble);
+                      }
+                    }, 500);
+                    activeTimeouts.push(timeout4);
+                  }, 3000);
+                  activeTimeouts.push(timeout3);
+                }, comm.delay || 0);
+                activeTimeouts.push(timeout1);
+              }
+              // For mass communication, create messages
+              else if (scenarioKey === "mass") {
+                const timeout1 = setTimeout(() => {
+                  const message = document.createElement("div");
+                  message.className = "message";
+                  message.textContent = comm.message;
+
+                  const startX =
+                    fromRect.left + fromRect.width / 2 - sceneRect.left;
+                  const startY =
+                    fromRect.top + fromRect.height / 2 - sceneRect.top;
+                  const endX =
+                    toRect.left +
+                    toRect.width / 2 -
+                    sceneRect.left +
+                    comm.offsetX;
+                  const endY =
+                    toRect.top +
+                    toRect.height / 2 -
+                    sceneRect.top +
+                    comm.offsetY;
+
+                  message.style.left = `${startX}px`;
+                  message.style.top = `${startY}px`;
+
+                  scene.appendChild(message);
+
+                  // Animate the message
+                  const timeout2 = setTimeout(() => {
+                    message.style.opacity = "1";
+                    message.style.left = `${endX}px`;
+                    message.style.top = `${endY}px`;
+                  }, 100);
+                  activeTimeouts.push(timeout2);
+
+                  // Remove the message after animation
+                  const timeout3 = setTimeout(() => {
+                    message.style.opacity = "0";
+                    const timeout4 = setTimeout(() => {
+                      if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                      }
+                    }, 500);
+                    activeTimeouts.push(timeout4);
+                  }, 3000);
+                  activeTimeouts.push(timeout3);
+                }, comm.delay || 0);
+                activeTimeouts.push(timeout1);
+              }
+            }
+          });
+
+          // Restart animations after a cycle
+          const restartTimeout = setTimeout(() => {
+            renderScenario(scenarioKey);
+          }, 10000);
+          activeTimeouts.push(restartTimeout);
+        }
+      });
+    </script>
+  </body>
+</html>

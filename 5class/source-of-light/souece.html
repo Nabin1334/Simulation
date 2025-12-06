@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Light Sources: Natural and Man-Made</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+        color: white;
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      #container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      #header {
+        padding: 15px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      h1 {
+        font-size: 28px;
+        margin-bottom: 5px;
+        color: #ffcc00;
+      }
+
+      #subtitle {
+        font-size: 16px;
+        opacity: 0.8;
+      }
+
+      #content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      #sidebar {
+        width: 280px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-y: auto;
+      }
+
+      #viewer {
+        flex: 1;
+        position: relative;
+      }
+
+      .mode-toggle {
+        display: flex;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 5px;
+        margin-bottom: 25px;
+      }
+
+      .mode-btn {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        background: transparent;
+        border: none;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+      }
+
+      .mode-btn.active {
+        background: #4fc3f7;
+        color: #1a2a6c;
+      }
+
+      h2 {
+        font-size: 20px;
+        margin: 20px 0 15px;
+        color: #ffcc00;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 8px;
+      }
+
+      .light-item {
+        padding: 12px;
+        margin: 10px 0;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+      }
+
+      .light-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+      }
+
+      .light-item.active {
+        background: rgba(79, 195, 247, 0.2);
+        border-left: 3px solid #4fc3f7;
+      }
+
+      .light-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .light-description {
+        font-size: 14px;
+        opacity: 0.8;
+        line-height: 1.4;
+      }
+
+      #info-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 100;
+      }
+
+      #current-light {
+        font-size: 20px;
+        color: #ffcc00;
+        margin-bottom: 8px;
+      }
+
+      #light-description {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .instructions {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1>Light Sources</h1>
+        <div id="subtitle">Natural vs. Man-Made</div>
+      </div>
+
+      <div id="content">
+        <div id="sidebar">
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="natural-mode">
+              Natural Sources
+            </button>
+            <button class="mode-btn" id="manmade-mode">Man-Made Sources</button>
+          </div>
+
+          <div id="natural-sources">
+            <h2>Natural Light Sources</h2>
+            <div class="light-item active" data-light="sun">
+              <div class="light-name">Sun</div>
+              <div class="light-description">
+                Primary natural light source for Earth
+              </div>
+            </div>
+            <div class="light-item" data-light="stars">
+              <div class="light-name">Stars</div>
+              <div class="light-description">Distant suns emitting light</div>
+            </div>
+            <div class="light-item" data-light="lightning">
+              <div class="light-name">Lightning</div>
+              <div class="light-description">
+                Electrical discharge in atmosphere
+              </div>
+            </div>
+          </div>
+
+          <div id="manmade-sources" style="display: none">
+            <h2>Man-Made Light Sources</h2>
+            <div class="light-item" data-light="candle">
+              <div class="light-name">Candle</div>
+              <div class="light-description">Light from flame combustion</div>
+            </div>
+            <div class="light-item" data-light="torch">
+              <div class="light-name">Torch Light</div>
+              <div class="light-description">
+                Portable electric light source
+              </div>
+            </div>
+            <div class="light-item" data-light="led">
+              <div class="light-name">LED Light</div>
+              <div class="light-description">
+                Light from semiconductor diode
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="viewer">
+          <div class="instructions">Drag to rotate • Scroll to zoom</div>
+          <div id="info-panel">
+            <div id="current-light">Sun</div>
+            <div id="light-description">
+              The Sun is the star at the center of our Solar System. It is a
+              nearly perfect sphere of hot plasma, heated to incandescence by
+              nuclear fusion reactions in its core, radiating energy mainly as
+              visible light and infrared radiation.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import * as THREE from "three";
+      import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+      import { DragControls } from "three/examples/jsm/controls/DragControls.js";
+      // Scene setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        (window.innerWidth - 280) / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+      renderer.setSize(window.innerWidth - 280, window.innerHeight - 60);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.getElementById("viewer").appendChild(renderer.domElement);
+
+      // Add orbit controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      // Position camera
+      camera.position.set(0, 5, 10);
+
+      // Add ambient light
+      const ambientLight = new THREE.AmbientLight(0x333333);
+      scene.add(ambientLight);
+
+      // Create a floor
+      const floorGeometry = new THREE.PlaneGeometry(30, 30);
+      const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x2c3e50,
+        roughness: 0.8,
+        metalness: 0.2,
+      });
+      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -3;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Create a backdrop
+      const backdropGeometry = new THREE.PlaneGeometry(30, 15);
+      const backdropMaterial = new THREE.MeshStandardMaterial({
+        color: 0x34495e,
+        side: THREE.DoubleSide,
+      });
+      const backdrop = new THREE.Mesh(backdropGeometry, backdropMaterial);
+      backdrop.position.z = -10;
+      backdrop.position.y = 3;
+      backdrop.receiveShadow = true;
+      scene.add(backdrop);
+
+      // Create the Sun (natural light source)
+      function createSun() {
+        const sunGroup = new THREE.Group();
+
+        // Sun sphere
+        const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffff00,
+        });
+
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        sunGroup.add(sun);
+
+        // Add sun glow effect
+        const sunGlowGeometry = new THREE.SphereGeometry(2.3, 32, 32);
+        const sunGlowMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            glowColor: { value: new THREE.Color(0xffff00) },
+            viewVector: { value: camera.position },
+          },
+          vertexShader: `
+                    uniform vec3 viewVector;
+                    varying float intensity;
+                    void main() {
+                        vec3 vNormal = normalize(normalMatrix * normal);
+                        vec3 vNormel = normalize(normalMatrix * viewVector);
+                        intensity = pow(0.6 - dot(vNormal, vNormel), 2.0);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+          fragmentShader: `
+                    uniform vec3 glowColor;
+                    varying float intensity;
+                    void main() {
+                        vec3 glow = glowColor * intensity;
+                        gl_FragColor = vec4(glow, 1.0);
+                    }
+                `,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+        });
+
+        const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+        sunGroup.add(sunGlow);
+
+        // Add directional light from the sun
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.copy(sun.position);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunGroup.add(sunLight);
+
+        sunGroup.position.set(0, 3, 0);
+        sunGroup.userData = {
+          type: "natural",
+          name: "Sun",
+          description:
+            "The Sun is the star at the center of our Solar System. It is a nearly perfect sphere of hot plasma, heated to incandescence by nuclear fusion reactions in its core, radiating energy mainly as visible light and infrared radiation.",
+        };
+
+        return sunGroup;
+      }
+
+      function createStars() {
+        const starsGroup = new THREE.Group();
+
+        // Create multiple small stars
+        const starGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const starMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+        });
+
+        for (let i = 0; i < 50; i++) {
+          const star = new THREE.Mesh(starGeometry, starMaterial);
+          star.position.set(
+            (Math.random() - 0.5) * 20,
+            (Math.random() - 0.5) * 10 + 5,
+            (Math.random() - 0.5) * 10 - 5
+          );
+          starsGroup.add(star);
+        }
+
+        starsGroup.visible = false;
+        starsGroup.userData = {
+          type: "natural",
+          name: "Stars",
+          description:
+            "Stars are massive, luminous spheres of plasma held together by gravity. They produce light and energy through nuclear fusion in their cores. The stars we see at night are distant suns, many of which are much larger and brighter than our own Sun.",
+        };
+
+        return starsGroup;
+      }
+
+      function createLightning() {
+        const lightningGroup = new THREE.Group();
+
+        // Improved cloud
+        const cloudGroup = new THREE.Group();
+        const cloudGeometry = new THREE.SphereGeometry(1, 16, 16);
+        const cloudMaterial = new THREE.MeshStandardMaterial({
+          color: 0x444444,
+          roughness: 1,
+          metalness: 0,
+        });
+
+        // Create a larger, fluffier cloud
+        for (let i = 0; i < 15; i++) {
+          const cloudPart = new THREE.Mesh(cloudGeometry, cloudMaterial);
+          cloudPart.position.set(
+            (Math.random() - 0.5) * 2,
+            (Math.random() - 0.5) * 1.2,
+            (Math.random() - 0.5) * 1.2
+          );
+          cloudPart.scale.set(
+            0.6 + Math.random() * 0.7,
+            0.6 + Math.random() * 0.7,
+            0.6 + Math.random() * 0.7
+          );
+          cloudGroup.add(cloudPart);
+        }
+        cloudGroup.position.set(0, 5, 0);
+        lightningGroup.add(cloudGroup);
+
+        // Create lightning bolt
+        const lightningBoltGroup = new THREE.Group();
+
+        // Create main lightning path
+        const lightningPoints = [];
+        lightningPoints.push(new THREE.Vector3(0, 0, 0));
+        lightningPoints.push(new THREE.Vector3(0, -1, 0));
+        lightningPoints.push(new THREE.Vector3(0.3, -2, 0));
+        lightningPoints.push(new THREE.Vector3(-0.2, -3, 0));
+        lightningPoints.push(new THREE.Vector3(0.1, -4, 0));
+        lightningPoints.push(new THREE.Vector3(0, -5, 0));
+
+        const lightningGeometry = new THREE.BufferGeometry().setFromPoints(
+          lightningPoints
+        );
+        const lightningMaterial = new THREE.LineBasicMaterial({
+          color: 0x4fc3f7,
+          linewidth: 2,
+        });
+
+        const lightningBolt = new THREE.Line(
+          lightningGeometry,
+          lightningMaterial
+        );
+        lightningBoltGroup.add(lightningBolt);
+
+        // Add branches to the lightning
+        for (let i = 0; i < 5; i++) {
+          const branchPoints = [];
+          const startIndex =
+            Math.floor(Math.random() * (lightningPoints.length - 1)) + 1;
+          const startPoint = lightningPoints[startIndex].clone();
+
+          branchPoints.push(startPoint);
+
+          for (let j = 0; j < 2; j++) {
+            const endPoint = startPoint.clone();
+            endPoint.x += (Math.random() - 0.5) * 0.5;
+            endPoint.y -= Math.random() * 0.8;
+            branchPoints.push(endPoint);
+          }
+
+          const branchGeometry = new THREE.BufferGeometry().setFromPoints(
+            branchPoints
+          );
+          const branch = new THREE.Line(branchGeometry, lightningMaterial);
+          lightningBoltGroup.add(branch);
+        }
+
+        lightningBoltGroup.position.set(0, 4, 0);
+        lightningGroup.add(lightningBoltGroup);
+
+        // Add flash effect
+        const flashLight = new THREE.PointLight(0x4fc3f7, 0, 15);
+        flashLight.position.set(0, 2, 0);
+        lightningGroup.add(flashLight);
+
+        lightningGroup.position.set(0, 0, 0);
+        lightningGroup.visible = false;
+        lightningGroup.userData = {
+          type: "natural",
+          name: "Lightning",
+          description:
+            "Lightning is a naturally occurring electrostatic discharge during which two electrically charged regions in the atmosphere or ground temporarily equalize themselves, causing the instantaneous release of energy. This discharge produces a wide range of electromagnetic radiation, including light.",
+        };
+
+        return lightningGroup;
+      }
+
+      // Create man-made light sources
+      function createCandle() {
+        const candleGroup = new THREE.Group();
+
+        // Candle base
+        const baseGeometry = new THREE.CylinderGeometry(0.3, 0.4, 1.5, 16);
+        const baseMaterial = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          roughness: 0.8,
+          metalness: 0.1,
+        });
+
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        candleGroup.add(base);
+
+        // Candle wick
+        const wickGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.2, 8);
+        const wickMaterial = new THREE.MeshStandardMaterial({
+          color: 0x333333,
+        });
+
+        const wick = new THREE.Mesh(wickGeometry, wickMaterial);
+        wick.position.y = 0.9;
+        candleGroup.add(wick);
+
+        // Flame
+        const flameGroup = new THREE.Group();
+
+        // Flame outer shape
+        const flameGeometry = new THREE.ConeGeometry(0.15, 0.5, 16);
+        const flameMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffaa00,
+          transparent: true,
+          opacity: 0.8,
+        });
+
+        const flame = new THREE.Mesh(flameGeometry, flameMaterial);
+        flame.position.y = 0.25;
+        flameGroup.add(flame);
+
+        // Flame inner core
+        const coreGeometry = new THREE.ConeGeometry(0.08, 0.4, 16);
+        const coreMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffff00,
+          transparent: true,
+          opacity: 0.9,
+        });
+
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        core.position.y = 0.2;
+        flameGroup.add(core);
+
+        flameGroup.position.y = 1.1;
+        candleGroup.add(flameGroup);
+
+        // Candle light
+        const candleLight = new THREE.PointLight(0xffaa55, 1.2, 8);
+        candleLight.position.set(0, 1.1, 0);
+        candleGroup.add(candleLight);
+
+        candleGroup.position.set(0, -1.5, 0);
+        candleGroup.visible = false;
+        candleGroup.userData = {
+          type: "manmade",
+          name: "Candle",
+          description:
+            "A candle produces light through the combustion of a wax fuel and a woven wick. The heat of the flame vaporizes the fuel which then combines with oxygen in the atmosphere to ignite, forming a constant flame until the fuel is exhausted. This process produces both light and heat.",
+        };
+
+        return candleGroup;
+      }
+
+      function createTorch() {
+        const torchGroup = new THREE.Group();
+
+        // Torch handle
+        const handleGeometry = new THREE.CylinderGeometry(0.2, 0.25, 3, 16);
+        const handleMaterial = new THREE.MeshStandardMaterial({
+          color: 0x333333,
+          roughness: 0.8,
+          metalness: 0.2,
+        });
+
+        const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+        torchGroup.add(handle);
+
+        // Torch head
+        const headGeometry = new THREE.CylinderGeometry(0.4, 0.5, 0.8, 16);
+        const headMaterial = new THREE.MeshStandardMaterial({
+          color: 0x888888,
+          roughness: 0.6,
+          metalness: 0.4,
+        });
+
+        const head = new THREE.Mesh(headGeometry, headMaterial);
+        head.position.y = 1.9;
+        torchGroup.add(head);
+
+        // Light lens/glass with enhanced glow
+        const lensGeometry = new THREE.CylinderGeometry(0.35, 0.4, 0.2, 16);
+        const lensMaterial = new THREE.MeshPhysicalMaterial({
+          color: 0xffffff,
+          emissive: 0xffffaa,
+          emissiveIntensity: 0.3,
+          transmission: 0.8,
+          transparent: true,
+          opacity: 0.9,
+          roughness: 0.1,
+        });
+
+        const lens = new THREE.Mesh(lensGeometry, lensMaterial);
+        lens.position.y = 2.3;
+        torchGroup.add(lens);
+
+        // Enhanced light beam with glow effect
+        const beamGeometry = new THREE.ConeGeometry(0.8, 4, 16);
+        const beamMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            glowColor: { value: new THREE.Color(0xffffaa) },
+            viewVector: { value: camera.position },
+          },
+          vertexShader: `
+                    uniform vec3 viewVector;
+                    varying float intensity;
+                    void main() {
+                        vec3 vNormal = normalize(normalMatrix * normal);
+                        vec3 vNormel = normalize(normalMatrix * viewVector);
+                        intensity = pow(0.8 - dot(vNormal, vNormel), 2.0);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+          fragmentShader: `
+                    uniform vec3 glowColor;
+                    varying float intensity;
+                    void main() {
+                        vec3 glow = glowColor * intensity;
+                        gl_FragColor = vec4(glow, 1.0);
+                    }
+                `,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+        });
+
+        const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+        beam.position.y = 2.5;
+        beam.rotation.x = Math.PI;
+        torchGroup.add(beam);
+
+        // Secondary beam for additional glow
+        const beamGlowGeometry = new THREE.ConeGeometry(1.0, 5, 16);
+        const beamGlowMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffaa,
+          transparent: true,
+          opacity: 0.2,
+          side: THREE.BackSide,
+        });
+
+        const beamGlow = new THREE.Mesh(beamGlowGeometry, beamGlowMaterial);
+        beamGlow.position.y = 2.5;
+        beamGlow.rotation.x = Math.PI;
+        torchGroup.add(beamGlow);
+
+        // Torch light with enhanced properties
+        const torchLight = new THREE.SpotLight(
+          0xffffaa,
+          2.5,
+          20,
+          Math.PI / 6,
+          0.5,
+          1
+        );
+        torchLight.position.set(0, 2.3, 0);
+        torchLight.target.position.set(0, 2.3, -1);
+        torchLight.castShadow = true;
+        torchLight.shadow.mapSize.width = 1024;
+        torchLight.shadow.mapSize.height = 1024;
+        torchGroup.add(torchLight);
+        torchGroup.add(torchLight.target);
+
+        // Add a point light at the lens for additional glow
+        const lensLight = new THREE.PointLight(0xffffaa, 0.8, 5);
+        lensLight.position.set(0, 2.3, 0);
+        torchGroup.add(lensLight);
+
+        // Add glowing particles around the lens for enhanced effect
+        const particleCount = 15;
+        const particles = new THREE.Group();
+        const particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+        const particleMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffaa,
+          transparent: true,
+          opacity: 0.6,
+        });
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+          // Position particles in a spherical pattern around the lens
+          const radius = 0.3 + Math.random() * 0.2;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+
+          particle.position.x = radius * Math.sin(phi) * Math.cos(theta);
+          particle.position.y =
+            2.3 + radius * Math.sin(phi) * Math.sin(theta) * 0.5;
+          particle.position.z = radius * Math.cos(phi);
+
+          particles.add(particle);
+        }
+
+        torchGroup.add(particles);
+
+        torchGroup.position.set(0, -1.5, 0);
+        torchGroup.visible = false;
+        torchGroup.userData = {
+          type: "manmade",
+          name: "Torch Light",
+          description:
+            "A torch (or flashlight) is a portable hand-held electric light. The light source is typically an incandescent light bulb or light-emitting diode (LED). A typical torch consists of a light source mounted in a reflector, a transparent cover to protect the light source, a battery, and a switch. The focused beam allows for directed illumination.",
+        };
+
+        return torchGroup;
+      }
+
+      function createLEDLight() {
+        const ledGroup = new THREE.Group();
+
+        // LED array
+        const ledGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.05);
+        const ledMaterial = new THREE.MeshBasicMaterial({
+          color: 0x00ff00,
+        });
+
+        // Create multiple LEDs in a grid
+        for (let x = -1; x <= 1; x += 1) {
+          for (let y = -1; y <= 1; y += 1) {
+            const led = new THREE.Mesh(ledGeometry, ledMaterial);
+            led.position.set(x * 0.3, y * 0.3, 0);
+            ledGroup.add(led);
+          }
+        }
+
+        // Circuit board
+        const boardGeometry = new THREE.BoxGeometry(1.2, 1.2, 0.1);
+        const boardMaterial = new THREE.MeshStandardMaterial({
+          color: 0x114411,
+        });
+
+        const board = new THREE.Mesh(boardGeometry, boardMaterial);
+        board.position.z = -0.1;
+        ledGroup.add(board);
+
+        // Light
+        const ledLight = new THREE.PointLight(0x00ff00, 1, 8);
+        ledLight.position.set(0, 0, 0);
+        ledGroup.add(ledLight);
+
+        ledGroup.position.set(0, 0, 0);
+        ledGroup.visible = false;
+        ledGroup.userData = {
+          type: "manmade",
+          name: "LED Light",
+          description:
+            "A light-emitting diode (LED) is a semiconductor light source that emits light when current flows through it. Electrons in the semiconductor recombine with electron holes, releasing energy in the form of photons. LED lights are extremely energy-efficient, durable, and have a long lifespan compared to other lighting technologies.",
+        };
+
+        return ledGroup;
+      }
+
+      // Create all light sources
+      const sun = createSun();
+      scene.add(sun);
+
+      const stars = createStars();
+      scene.add(stars);
+
+      const lightning = createLightning();
+      scene.add(lightning);
+
+      const candle = createCandle();
+      scene.add(candle);
+
+      const torch = createTorch();
+      scene.add(torch);
+
+      const led = createLEDLight();
+      scene.add(led);
+
+      // Set up mode toggle
+      const naturalModeBtn = document.getElementById("natural-mode");
+      const manmadeModeBtn = document.getElementById("manmade-mode");
+      const naturalSources = document.getElementById("natural-sources");
+      const manmadeSources = document.getElementById("manmade-sources");
+
+      naturalModeBtn.addEventListener("click", () => {
+        naturalModeBtn.classList.add("active");
+        manmadeModeBtn.classList.remove("active");
+        naturalSources.style.display = "block";
+        manmadeSources.style.display = "none";
+
+        // Show first natural light
+        document.querySelector("#natural-sources .light-item").click();
+      });
+
+      manmadeModeBtn.addEventListener("click", () => {
+        manmadeModeBtn.classList.add("active");
+        naturalModeBtn.classList.remove("active");
+        naturalSources.style.display = "none";
+        manmadeSources.style.display = "block";
+
+        // Show first man-made light
+        document.querySelector("#manmade-sources .light-item").click();
+      });
+
+      // Set up light selection
+      const lightItems = document.querySelectorAll(".light-item");
+      const currentLightElement = document.getElementById("current-light");
+      const lightDescriptionElement =
+        document.getElementById("light-description");
+
+      let currentLight = "sun";
+
+      lightItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          // Update UI
+          lightItems.forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+
+          // Hide all lights
+          [sun, stars, lightning, candle, torch, led].forEach((light) => {
+            light.visible = false;
+          });
+
+          // Show selected light
+          currentLight = item.dataset.light;
+          switch (currentLight) {
+            case "sun":
+              sun.visible = true;
+              break;
+            case "stars":
+              stars.visible = true;
+              break;
+            case "lightning":
+              lightning.visible = true;
+              break;
+            case "candle":
+              candle.visible = true;
+              break;
+            case "torch":
+              torch.visible = true;
+              break;
+            case "led":
+              led.visible = true;
+              break;
+          }
+
+          // Update info panel
+          let lightObject;
+          switch (currentLight) {
+            case "sun":
+              lightObject = sun;
+              break;
+            case "stars":
+              lightObject = stars;
+              break;
+            case "lightning":
+              lightObject = lightning;
+              break;
+            case "candle":
+              lightObject = candle;
+              break;
+            case "torch":
+              lightObject = torch;
+              break;
+            case "led":
+              lightObject = led;
+              break;
+          }
+
+          currentLightElement.textContent = lightObject.userData.name;
+          lightDescriptionElement.textContent =
+            lightObject.userData.description;
+        });
+      });
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate the sun slowly
+        if (sun.visible) {
+          sun.rotation.y += 0.005;
+        }
+
+        // Make stars twinkle
+        if (stars.visible) {
+          stars.children.forEach((star, index) => {
+            star.scale.setScalar(
+              0.9 + 0.2 * Math.sin(Date.now() * 0.001 + index)
+            );
+          });
+        }
+
+        // Make lightning flash
+        if (lightning.visible) {
+          const flashIntensity = 0.5 + 0.5 * Math.sin(Date.now() * 0.02);
+          lightning.children[2].intensity = flashIntensity * 2;
+
+          // Make lightning bolt visible only during flashes
+          lightning.children[1].visible = flashIntensity > 0.7;
+        }
+
+        // Make candle flame flicker
+        if (candle.visible) {
+          const flicker = 0.9 + 0.2 * Math.sin(Date.now() * 0.01);
+          candle.children[2].scale.setScalar(flicker);
+          candle.children[3].intensity =
+            0.8 + 0.4 * Math.sin(Date.now() * 0.015);
+        }
+
+        // Make torch glow with dynamic effects
+        if (torch.visible) {
+          // Pulsing effect for the main light
+          const pulse = 0.95 + 0.05 * Math.sin(Date.now() * 0.005);
+          torch.children[5].intensity = 2.2 * pulse;
+
+          // Make particles float and glow
+          torch.children[7].children.forEach((particle, index) => {
+            const time = Date.now() * 0.001;
+            const float = Math.sin(time + index) * 0.05;
+            particle.position.y += float * 0.01;
+
+            // Pulsing opacity for particles
+            const particlePulse = 0.5 + 0.5 * Math.sin(time * 2 + index);
+            particle.material.opacity = 0.3 + 0.3 * particlePulse;
+          });
+
+          // Rotate particles slowly
+          torch.children[7].rotation.y += 0.005;
+        }
+
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = (window.innerWidth - 280) / (window.innerHeight - 60);
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth - 280, window.innerHeight - 60);
+      });
+
+      // Start animation
+      animate();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Sources Explorer</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #E0F7FA, #B3E5FC); 
+            font-family: 'Comic Sans MS', cursive, sans-serif; 
+            overflow: hidden;
+        }
+        #container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+        #info { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            color: #333; 
+            z-index: 100; 
+            background: rgba(255,255,255,0.9); 
+            padding: 15px; 
+            border-radius: 15px; 
+            max-width: 300px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid #FFC107;
+        }
+        #controls { 
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px; 
+            z-index: 100; 
+            background: rgba(255,255,255,0.9); 
+            padding: 15px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid #4CAF50;
+        }
+        button { 
+            margin: 5px; 
+            padding: 12px 15px; 
+            background: #FFEB3B; 
+            color: #333; 
+            border: 2px solid #FFC107; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover { 
+            background: #FFF176; 
+            transform: scale(1.05);
+        }
+        canvas { 
+            display: block; 
+        }
+        h3 {
+            color: #FF5722;
+            margin-top: 0;
+            text-align: center;
+        }
+        .highlight {
+            color: #E91E63;
+            font-weight: bold;
+        }
+        .instrument-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .instrument-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="info">
+            <h3>🎵 Sound Sources Explorer 🎵</h3>
+            <p>Click instruments to play real sounds. See the <span class="highlight">SOURCE</span> (vibrating part) move and make waves!</p>
+            <p>Every sound comes from something <span class="highlight">vibrating</span>!</p>
+            
+            <ul class="instrument-list">
+                <li><span class="highlight">🥁 Drum:</span> Skin vibrates</li>
+                <li><span class="highlight">🔔 Bell:</span> Metal body vibrates</li>
+                <li><span class="highlight">🎸 Guitar:</span> Strings vibrate</li>
+            </ul>
+            
+            <p style="text-align: center; margin-top: 15px; font-weight: bold;">Click directly on the instruments!</p>
+        </div>
+        <div id="controls">
+            <button onclick="playBell()">Ring Bell 🔔</button>
+            <button onclick="playGuitar()">Pluck Guitar 🎸</button>
+            <button onclick="playDrum()">Hit Drum 🥁</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let vibrations = []; // {x, y, radius, opacity, color}
+        let animations = { drumHit: 0, bellSwing: 0, guitarPluck: 0 }; // Animation states
+
+        // Create audio context for better sound control
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Instrument positions with more distance
+        const instrumentPositions = {
+            drum: { x: 150, y: canvas.height / 2 - 30 },
+            bell: { x: 450, y: canvas.height / 2 + 40 },
+            guitar: { x: canvas.width / 2 + 150, y: canvas.height / 2 + 50 }
+        };
+
+        // Play drum and animate source
+        function playDrum() {
+            playDrumSound();
+            animations.drumHit = 20;
+            addVibrations(instrumentPositions.drum.x, instrumentPositions.drum.y, '#D2B48C'); // From skin
+        }
+
+        // Play bell and animate source
+        function playBell() {
+            playBellSound();
+            animations.bellSwing = 40;
+            addVibrations(instrumentPositions.bell.x, instrumentPositions.bell.y, '#FFD700'); // From bell body
+        }
+
+        // Play guitar and animate source
+        function playGuitar() {
+            playGuitarSound();
+            animations.guitarPluck = 30;
+            addVibrations(instrumentPositions.guitar.x, instrumentPositions.guitar.y, '#8B4513'); // From strings
+        }
+
+        // Add vibration ripples from source
+        function addVibrations(x, y, color) {
+            for (let i = 0; i < 5; i++) {
+                vibrations.push({
+                    x: x,
+                    y: y,
+                    radius: i * 10,
+                    maxRadius: 250 + i * 30,
+                    opacity: 1,
+                    color: color
+                });
+            }
+        }
+
+        // Update vibrations and animations
+        function updateAnimations() {
+            if (animations.drumHit > 0) animations.drumHit--;
+            if (animations.bellSwing > 0) animations.bellSwing--;
+            if (animations.guitarPluck > 0) animations.guitarPluck--;
+
+            vibrations = vibrations.filter(vib => {
+                vib.radius += 2;
+                vib.opacity -= 0.01;
+                if (vib.radius > vib.maxRadius || vib.opacity <= 0) return false;
+                return true;
+            });
+        }
+
+        function drawVibrations() {
+            ctx.lineWidth = 3;
+            vibrations.forEach(vib => {
+                ctx.beginPath();
+                ctx.arc(vib.x, vib.y, vib.radius, 0, Math.PI * 2);
+                ctx.globalAlpha = vib.opacity;
+                ctx.strokeStyle = vib.color;
+                ctx.stroke();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw instruments with highlighted sources
+        function drawInstruments() {
+            // Background
+            ctx.fillStyle = '#E3F2FD';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw a stage/platform
+            ctx.fillStyle = '#795548';
+            ctx.fillRect(0, canvas.height / 2 + 150, canvas.width, canvas.height / 2 - 150);
+            
+            // Add some decorative elements
+            ctx.fillStyle = '#4CAF50';
+            for (let i = 0; i < 15; i++) {
+                ctx.beginPath();
+                ctx.arc(i * 80, canvas.height / 2 + 150, 30, 0, Math.PI, true);
+                ctx.fill();
+            }
+
+            // Drum: Focus on skin as source (LEFT SIDE)
+            const drumX = instrumentPositions.drum.x;
+            const drumY = instrumentPositions.drum.y;
+            
+            ctx.fillStyle = '#8B4513'; // Wood body
+            ctx.fillRect(drumX - 80, drumY - 20, 160, 100); // Sides
+            ctx.beginPath();
+            ctx.ellipse(drumX, drumY + 80, 80, 20, 0, 0, Math.PI * 2); // Bottom
+            ctx.fill();
+            
+            // Skin (source)
+            let skinOffset = 0;
+            if (animations.drumHit > 0) {
+                skinOffset = Math.sin(animations.drumHit * Math.PI / 10) * 5; // Vibrate
+            }
+            ctx.fillStyle = '#D2B48C';
+            ctx.beginPath();
+            ctx.ellipse(drumX, drumY - 20 + skinOffset, 80, 20 + skinOffset, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add drum pattern
+            ctx.strokeStyle = '#A0522D';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(drumX, drumY - 20, 60, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Stick
+            let stickY = drumY - 50;
+            if (animations.drumHit > 10) stickY += (20 - animations.drumHit) * 2;
+            ctx.fillStyle = '#A0522D';
+            ctx.fillRect(drumX, stickY, 10, 50);
+            
+            // Label source
+            ctx.font = 'bold 18px Comic Sans MS';
+            ctx.fillStyle = '#000';
+            ctx.fillText('SOURCE: Vibrating Skin', drumX - 100, drumY + 130);
+            ctx.font = '16px Comic Sans MS';
+            ctx.fillText('🥁 Drum', drumX - 30, drumY + 150);
+
+            // Bell: Focus on body vibration (MIDDLE)
+            const bellX = instrumentPositions.bell.x;
+            const bellY = instrumentPositions.bell.y;
+            
+            ctx.fillStyle = '#FFD700'; // Gold body (source)
+            ctx.beginPath();
+            ctx.moveTo(bellX, bellY - 100);
+            ctx.quadraticCurveTo(bellX - 50, bellY + 20, bellX, bellY + 20);
+            ctx.quadraticCurveTo(bellX + 50, bellY + 20, bellX, bellY - 100);
+            ctx.fill();
+            
+            // Vibration effect on body
+            if (animations.bellSwing > 0) {
+                ctx.globalAlpha = 0.5;
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(bellX, bellY - 100);
+                ctx.quadraticCurveTo(bellX - 50 + Math.sin(animations.bellSwing) * 5, bellY + 20, bellX, bellY + 20);
+                ctx.quadraticCurveTo(bellX + 50 - Math.sin(animations.bellSwing) * 5, bellY + 20, bellX, bellY - 100);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Clapper
+            let clapperAngle = 0;
+            if (animations.bellSwing > 0) {
+                clapperAngle = Math.sin(animations.bellSwing / 2) * Math.PI / 4;
+            }
+            ctx.save();
+            ctx.translate(bellX, bellY);
+            ctx.rotate(clapperAngle);
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(-5, 0, 10, 40);
+            ctx.beginPath();
+            ctx.arc(0, 45, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // Label source
+            ctx.font = 'bold 18px Comic Sans MS';
+            ctx.fillStyle = '#000';
+            ctx.fillText('SOURCE: Vibrating Metal Body', bellX - 100, bellY + 60);
+            ctx.font = '16px Comic Sans MS';
+            ctx.fillText('🔔 Bell', bellX - 20, bellY + 80);
+
+            // Guitar: Focus on strings as source (RIGHT SIDE)
+            const guitarX = instrumentPositions.guitar.x;
+            const guitarY = instrumentPositions.guitar.y;
+            
+            ctx.fillStyle = '#8B4513'; // Wood body
+            ctx.beginPath();
+            ctx.moveTo(guitarX, guitarY - 50);
+            ctx.lineTo(guitarX - 50, guitarY + 30);
+            ctx.lineTo(guitarX + 50, guitarY + 30);
+            ctx.lineTo(guitarX + 30, guitarY - 50);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add details to guitar body
+            ctx.strokeStyle = '#5D4037';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(guitarX, guitarY - 10, 20, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Neck
+            ctx.fillRect(guitarX + 30, guitarY - 150, 20, 180);
+            
+            // Strings (source)
+            ctx.strokeStyle = '#C0C0C0';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                let offset = 0;
+                if (animations.guitarPluck > 0) {
+                    offset = Math.sin((guitarX + animations.guitarPluck * 2) * 0.1 + i) * (animations.guitarPluck / 5); // Twang
+                }
+                ctx.beginPath();
+                ctx.moveTo(guitarX - 40, guitarY - 30 + i * 10);
+                ctx.lineTo(guitarX + 40 + offset, guitarY - 30 + i * 10);
+                ctx.stroke();
+            }
+            
+            // Pick hand
+            let pickX = guitarX + 50;
+            if (animations.guitarPluck > 15) pickX -= (30 - animations.guitarPluck) * 2;
+            ctx.fillStyle = '#FFC0CB';
+            ctx.fillRect(pickX, guitarY - 10, 20, 30);
+            
+            // Label source
+            ctx.font = 'bold 18px Comic Sans MS';
+            ctx.fillStyle = '#000';
+            ctx.fillText('SOURCE: Vibrating Strings', guitarX - 100, guitarY + 50);
+            ctx.font = '16px Comic Sans MS';
+            ctx.fillText('🎸 Guitar', guitarX - 30, guitarY + 70);
+
+            // General instructions
+            ctx.font = '18px Comic Sans MS';
+            ctx.fillStyle = '#333';
+            ctx.fillText('🎵 Click anywhere on an instrument to play and see the source vibrate! 🎵', 10, canvas.height - 40);
+            ctx.fillText('🌊 Waves show how sound travels from the source.', 10, canvas.height - 20);
+        }
+
+        // Sound generation functions
+        function playDrumSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function playBellSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 2);
+        }
+
+        function playGuitarSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(196.00, audioContext.currentTime); // G3
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 1.5);
+        }
+
+        // Click handler for instruments
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Drum area (LEFT)
+            if (x > instrumentPositions.drum.x - 80 && x < instrumentPositions.drum.x + 80 && 
+                y > instrumentPositions.drum.y - 50 && y < instrumentPositions.drum.y + 80) {
+                playDrum();
+                return;
+            }
+            // Bell area (MIDDLE)
+            if (x > instrumentPositions.bell.x - 50 && x < instrumentPositions.bell.x + 50 && 
+                y > instrumentPositions.bell.y - 100 && y < instrumentPositions.bell.y + 20) {
+                playBell();
+                return;
+            }
+            // Guitar area (RIGHT)
+            if (x > instrumentPositions.guitar.x - 50 && x < instrumentPositions.guitar.x + 70 && 
+                y > instrumentPositions.guitar.y - 150 && y < instrumentPositions.guitar.y + 30) {
+                playGuitar();
+                return;
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawInstruments();
+            updateAnimations();
+            drawVibrations();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Update positions on resize
+            instrumentPositions.drum.x = 150;
+            instrumentPositions.drum.y = canvas.height / 2 - 30;
+            instrumentPositions.bell.x = 450;
+            instrumentPositions.bell.y = canvas.height / 2 + 40;
+            instrumentPositions.guitar.x = canvas.width / 2 + 150;
+            instrumentPositions.guitar.y = canvas.height / 2 + 50;
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>

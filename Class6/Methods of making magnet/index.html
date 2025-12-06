@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realistic Magnet Lab - 3D Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #050505; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        
+        /* UI Overlay Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+        h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+        .subtitle { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+
+        /* Mode Switcher */
+        #mode-selector {
+            display: inline-flex;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 4px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+
+        .mode-btn {
+            padding: 8px 24px;
+            border-radius: 25px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+        }
+
+        .mode-btn:hover { color: white; }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Instructions Panel */
+        #instructions-panel {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            width: 280px;
+            background: rgba(20, 20, 20, 0.9);
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            color: #eee;
+            border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        
+        .step { margin-bottom: 8px; font-size: 14px; display: flex; align-items: start; }
+        .step-num { 
+            background: #444; color: white; width: 20px; height: 20px; 
+            border-radius: 50%; text-align: center; line-height: 20px; 
+            font-size: 12px; margin-right: 10px; flex-shrink: 0;
+        }
+
+        /* Microscope View */
+        #microscope-view {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle at center, #333, #000);
+            border: 3px solid #666;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+        }
+        #microscope-view::before {
+            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        #microscope-label {
+            position: absolute; bottom: 15px; color: #888; font-size: 10px; font-weight: bold; letter-spacing: 1px;
+            z-index: 2;
+        }
+
+        .domain-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+            width: 60%; height: 60%;
+        }
+        .arrow {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: bold; color: #555;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Controls */
+        #controls-wrapper {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            pointer-events: auto;
+        }
+
+        .control-group { 
+            display: none; 
+            gap: 15px; 
+            background: rgba(20, 20, 20, 0.8);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .control-group.visible { display: flex; animation: slideUp 0.3s ease-out; }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .action-btn {
+            background: #333;
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid #444;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .action-btn:hover { background: #444; transform: translateY(-2px); }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .btn-primary { background: #4CAF50; border-color: #4CAF50; color: white; }
+        .btn-primary:hover { background: #43A047; box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); }
+        
+        .btn-blue { background: #2196F3; border-color: #2196F3; }
+        .btn-blue:hover { background: #1E88E5; box-shadow: 0 0 15px rgba(33, 150, 243, 0.4); }
+
+        .btn-reset { color: #ff5252; background: transparent; border-color: transparent; }
+        .btn-reset:hover { background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.3); }
+
+        #status-toast {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 15px 30px;
+            border-radius: 8px; font-weight: bold; font-size: 18px;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <header>
+            <h1>MAGNET LAB</h1>
+            <div id="mode-selector">
+                <button class="mode-btn active" onclick="setMode('electromagnetic')">Electromagnetic</button>
+                <button class="mode-btn" onclick="setMode('stroking')">Single Touch</button>
+            </div>
+        </header>
+
+        <!-- Dynamic Instructions -->
+        <div id="instructions-panel">
+            <h3 style="margin:0 0 10px 0; color:#4CAF50;">How it works</h3>
+            <div id="instruction-text">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div id="microscope-view">
+            <div class="domain-grid" id="domain-container"></div>
+            <div id="microscope-label">INSIDE THE IRON</div>
+        </div>
+
+        <div id="status-toast">STATUS</div>
+
+        <div id="controls-wrapper">
+            <!-- EM Controls -->
+            <div id="em-controls" class="control-group visible">
+                <button id="switch-btn" class="action-btn btn-primary">
+                    <span>🔌</span> Toggle Switch
+                </button>
+                <button id="reset-em-btn" class="action-btn btn-reset">Reset Experiment</button>
+            </div>
+            <!-- Stroking Controls -->
+            <div id="stroke-controls" class="control-group">
+                <button id="stroke-btn" class="action-btn btn-blue">
+                    <span>🧲</span> Stroke Magnet
+                </button>
+                <button id="reset-stroke-btn" class="action-btn btn-reset">Reset Bar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // --- 1. SCENE SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+        scene.fog = new THREE.Fog(0x111111, 20, 80);
+
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 18, 25);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2 - 0.1;
+        controls.minDistance = 10;
+        controls.maxDistance = 50;
+
+        // --- 2. LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        // Main overhead light
+        const spotLight = new THREE.SpotLight(0xffeeb1, 1.2);
+        spotLight.position.set(10, 30, 10);
+        spotLight.angle = Math.PI / 6;
+        spotLight.penumbra = 0.3;
+        spotLight.castShadow = true;
+        spotLight.shadow.mapSize.width = 2048;
+        spotLight.shadow.mapSize.height = 2048;
+        scene.add(spotLight);
+
+        // Rim light for realism
+        const rimLight = new THREE.PointLight(0x4455ff, 0.5);
+        rimLight.position.set(-20, 10, -20);
+        scene.add(rimLight);
+
+        // --- 3. ASSETS & MATERIALS ---
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Materials
+        const ironMat = new THREE.MeshStandardMaterial({ color: 0x888899, metalness: 0.7, roughness: 0.4 });
+        const copperMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.9, roughness: 0.2 });
+        const plasticBlack = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+        const plasticRed = new THREE.MeshStandardMaterial({ color: 0xD32F2F, roughness: 0.5 });
+        const plasticBlue = new THREE.MeshStandardMaterial({ color: 0x1976D2, roughness: 0.5 });
+        const steelPinMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.1 });
+        const wireOffMat = new THREE.MeshStandardMaterial({ color: 0x1B5E20, roughness: 0.6 });
+        const wireOnMat = new THREE.MeshStandardMaterial({ color: 0x00E676, emissive: 0x004D40, roughness: 0.4 });
+
+        // Table Top
+        const tableGeo = new THREE.BoxGeometry(80, 2, 40);
+        const tableMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
+        const table = new THREE.Mesh(tableGeo, tableMat);
+        table.position.y = -1;
+        table.receiveShadow = true;
+        scene.add(table);
+
+        // Grid helper on table for "Lab" feel
+        const grid = new THREE.GridHelper(80, 40, 0x333333, 0x222222);
+        grid.position.y = 0.01;
+        scene.add(grid);
+
+        // ============================================
+        // SETUP 1: ELECTROMAGNET (Left Side)
+        // ============================================
+        const emGroup = new THREE.Group();
+        emGroup.position.set(-15, 0, 0);
+        scene.add(emGroup);
+
+        // -- 1. The Coil Nail --
+        const nailGroup = new THREE.Group();
+        emGroup.add(nailGroup);
+
+        // Shaft
+        const nailShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 12, 16), ironMat);
+        nailShaft.rotation.z = Math.PI / 2;
+        nailShaft.position.y = 2.5; 
+        nailShaft.castShadow = true;
+        nailGroup.add(nailShaft);
+        // Head
+        const nailHead = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.4, 16), ironMat);
+        nailHead.rotation.z = Math.PI / 2;
+        nailHead.position.set(-5.8, 2.5, 0);
+        nailGroup.add(nailHead);
+        // Tip
+        const nailTip = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.5, 16), ironMat);
+        nailTip.rotation.z = -Math.PI / 2;
+        nailTip.position.set(6.75, 2.5, 0);
+        nailGroup.add(nailTip);
+
+        // Coil (Helix)
+        const coilPoints = [];
+        const turns = 14;
+        const cRadius = 0.8;
+        const cLen = 10;
+        for (let i = 0; i <= 140; i++) {
+            const t = i / 140;
+            const angle = t * turns * Math.PI * 2;
+            const x = (t - 0.5) * cLen;
+            const y = Math.cos(angle) * cRadius + 2.5; 
+            const z = Math.sin(angle) * cRadius;
+            coilPoints.push(new THREE.Vector3(x, y, z));
+        }
+        const coilCurve = new THREE.CatmullRomCurve3(coilPoints);
+        const coilMesh = new THREE.Mesh(new THREE.TubeGeometry(coilCurve, 140, 0.12, 8, false), wireOffMat);
+        coilMesh.castShadow = true;
+        emGroup.add(coilMesh);
+
+        // -- 2. Battery --
+        const batteryGroup = new THREE.Group();
+        batteryGroup.position.set(-8, 1.5, 8);
+        emGroup.add(batteryGroup);
+        const batBody = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 6, 32), plasticBlack);
+        batBody.rotation.z = Math.PI / 2;
+        batBody.castShadow = true;
+        batteryGroup.add(batBody);
+        const batCap = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.6, 16), copperMat);
+        batCap.rotation.z = Math.PI / 2;
+        batCap.position.x = 3.3;
+        batteryGroup.add(batCap);
+        
+        // Battery Label
+        const cvs = document.createElement('canvas'); cvs.width=128; cvs.height=64;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle='#D32F2F'; ctx.fillRect(0,0,128,64);
+        ctx.fillStyle='white'; ctx.font='bold 40px Arial'; ctx.fillText('POWER', 10, 45);
+        const batTex = new THREE.CanvasTexture(cvs);
+        const batLabel = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.2), new THREE.MeshBasicMaterial({map:batTex}));
+        batLabel.rotation.x = -Math.PI/2; batLabel.position.y = 1.51;
+        batteryGroup.add(batLabel);
+
+        // -- 3. REALISTIC KNIFE SWITCH --
+        const switchGroup = new THREE.Group();
+        switchGroup.position.set(5, 0, 8);
+        emGroup.add(switchGroup);
+
+        // Base
+        const swBase = new THREE.Mesh(new THREE.BoxGeometry(6, 0.5, 3), plasticBlack);
+        swBase.position.y = 0.25; swBase.castShadow=true;
+        switchGroup.add(swBase);
+
+        // Contacts (Clips) - The part the knife goes into
+        const clipGeo = new THREE.BoxGeometry(0.5, 1, 0.8);
+        const clipL = new THREE.Mesh(clipGeo, copperMat);
+        clipL.position.set(-2, 0.8, 0);
+        switchGroup.add(clipL);
+        
+        const clipR = new THREE.Mesh(clipGeo, copperMat);
+        clipR.position.set(2, 0.8, 0);
+        switchGroup.add(clipR);
+
+        // The Lever Group (Pivot at Left Clip)
+        const pivotGroup = new THREE.Group();
+        pivotGroup.position.set(-2, 1.0, 0); // Pivot at top of left clip
+        switchGroup.add(pivotGroup);
+
+        // The Knife Blade
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.1, 0.6), copperMat);
+        blade.position.set(2.0, 0, 0); // Extends to right
+        pivotGroup.add(blade);
+
+        // Handle
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), plasticRed);
+        handle.rotation.z = -Math.PI / 2;
+        handle.position.set(4.8, 0, 0); // At end of blade
+        pivotGroup.add(handle);
+
+        // Initial State: Open (Rotated up)
+        pivotGroup.rotation.z = Math.PI / 4;
+
+        // -- 4. Wires --
+        function makeWire(path) {
+            const curve = new THREE.CatmullRomCurve3(path);
+            return new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.1, 8, false), wireOffMat);
+        }
+        // Coil Left -> Battery Left
+        const w1 = makeWire([new THREE.Vector3(-5, 2.5, 1), new THREE.Vector3(-8, 2.5, 4), new THREE.Vector3(-11, 1.5, 8)]);
+        // Coil Right -> Switch Right Contact
+        const w2 = makeWire([new THREE.Vector3(5, 2.5, 1), new THREE.Vector3(8, 2, 4), new THREE.Vector3(7, 0.5, 8)]);
+        // Switch Left Contact -> Battery Right
+        const w3 = makeWire([new THREE.Vector3(3, 0.5, 8), new THREE.Vector3(-5, 1.5, 8)]);
+        
+        emGroup.add(w1, w2, w3);
+        const allWires = [coilMesh, w1, w2, w3];
+
+        // -- 5. Pins (Steel) --
+        const emPins = [];
+        for(let i=0; i<10; i++) {
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8), steelPinMat);
+            // Scatter
+            pin.position.set(8 + (Math.random()-0.5)*4, 0.1, (Math.random()-0.5)*4);
+            pin.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+            pin.castShadow = true;
+            pin.userData = { homePos: pin.position.clone(), homeRot: pin.rotation.clone(), attached: false };
+            emGroup.add(pin);
+            emPins.push(pin);
+        }
+
+        // ============================================
+        // SETUP 2: STROKING (Right Side)
+        // ============================================
+        const strGroup = new THREE.Group();
+        strGroup.position.set(15, 0, 0);
+        scene.add(strGroup);
+
+        // Iron Bar (To be magnetized)
+        const barGeo = new THREE.BoxGeometry(10, 1, 3);
+        const ironBar = new THREE.Mesh(barGeo, ironMat);
+        ironBar.position.set(0, 0.5, 0); // Top surface at y=1.0
+        ironBar.castShadow = true;
+        ironBar.receiveShadow = true;
+        strGroup.add(ironBar);
+
+        // "Ghost" pins inside bar to show it's material
+        // (Visual flair only)
+
+        // The Magnet Tool (Real Bar Magnet Style)
+        const magnetTool = new THREE.Group();
+        magnetTool.position.set(-8, 5, 0); // Initial hover
+        strGroup.add(magnetTool);
+
+        // Visuals: A standard bar magnet (Red North, Blue South)
+        // Size: Hand-held, approx 4 units long, 1 unit wide
+        const mHalfGeo = new THREE.BoxGeometry(2, 0.6, 1);
+        
+        const mNorth = new THREE.Mesh(mHalfGeo, plasticRed);
+        mNorth.position.set(1, 0, 0);
+        magnetTool.add(mNorth);
+
+        const mSouth = new THREE.Mesh(mHalfGeo, plasticBlue);
+        mSouth.position.set(-1, 0, 0);
+        magnetTool.add(mSouth);
+
+        // Labels
+        function makeLabel(txt) {
+            const c = document.createElement('canvas'); c.width=64; c.height=64;
+            const x = c.getContext('2d'); x.fillStyle='white'; x.font='bold 40px Arial'; x.fillText(txt, 20, 45);
+            return new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.5), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c), transparent:true}));
+        }
+        const lblN = makeLabel('N'); lblN.position.set(1.5, 0.31, 0); lblN.rotation.x = -Math.PI/2; magnetTool.add(lblN);
+        const lblS = makeLabel('S'); lblS.position.set(-1.5, 0.31, 0); lblS.rotation.x = -Math.PI/2; magnetTool.add(lblS);
+
+        // Orient the tool for stroking (Angled)
+        // We want the North pole (Right end of local group) to touch the bar
+        // Rotate so N points down-ish
+        magnetTool.rotation.z = -Math.PI / 4; // 45 degrees
+
+        // Pins for Stroking
+        const strPins = [];
+        for(let i=0; i<10; i++) {
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 8), steelPinMat);
+            pin.position.set(7 + (Math.random()-0.5)*3, 0.1, (Math.random()-0.5)*4);
+            pin.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+            pin.castShadow = true;
+            pin.userData = { homePos: pin.position.clone(), homeRot: pin.rotation.clone(), attached: false };
+            strGroup.add(pin);
+            strPins.push(pin);
+        }
+
+        // ============================================
+        // LOGIC & ANIMATION
+        // ============================================
+
+        let mode = 'electromagnetic';
+        let switchClosed = false;
+        let strokeAnim = false;
+        let strokes = 0;
+        let strokeT = 0;
+        const maxStrokes = 10;
+
+        // Domain UI Arrow Generation
+        const domContainer = document.getElementById('domain-container');
+        const arrows = [];
+        for(let i=0; i<25; i++) {
+            const el = document.createElement('div');
+            el.className = 'arrow';
+            el.innerHTML = '↑';
+            domContainer.appendChild(el);
+            arrows.push(el);
+        }
+
+        function updateUI() {
+            // Update Instructions
+            const instr = document.getElementById('instruction-text');
+            if(mode === 'electromagnetic') {
+                instr.innerHTML = `
+                    <div class="step"><div class="step-num">1</div><div>Observe the circuit setup on the left.</div></div>
+                    <div class="step"><div class="step-num">2</div><div>Click <b>Toggle Switch</b> to close the circuit.</div></div>
+                    <div class="step"><div class="step-num">3</div><div>Current flows, aligning domains inside the nail.</div></div>
+                    <div class="step"><div class="step-num">4</div><div>The nail becomes a magnet and attracts pins!</div></div>
+                `;
+            } else {
+                instr.innerHTML = `
+                    <div class="step"><div class="step-num">1</div><div>We have an unmagnetized iron bar on the right.</div></div>
+                    <div class="step"><div class="step-num">2</div><div>Click <b>Stroke Magnet</b> to rub the bar.</div></div>
+                    <div class="step"><div class="step-num">3</div><div>The permanent magnet aligns the domains.</div></div>
+                    <div class="step"><div class="step-num">4</div><div>More strokes = Stronger Magnet. Try 10!</div></div>
+                `;
+            }
+        }
+
+        function updateDomains() {
+            let alignment = 0;
+            if (mode === 'electromagnetic') {
+                alignment = switchClosed ? 1 : 0;
+            } else {
+                alignment = strokes / maxStrokes;
+            }
+
+            arrows.forEach((a, i) => {
+                // Random noise decreases as alignment increases
+                if (Math.random() < alignment * 0.9) {
+                    a.style.transform = 'rotate(90deg)';
+                    a.style.color = mode === 'electromagnetic' ? '#00E676' : '#2196F3';
+                } else {
+                    const r = (i * 45 + Date.now()/100) % 360; // Pseudo random
+                    a.style.transform = `rotate(${r}deg)`;
+                    a.style.color = '#555';
+                }
+            });
+        }
+
+        // Camera Transitions
+        function moveCamera(targetPos, targetLookAt) {
+            const startPos = camera.position.clone();
+            const startLook = controls.target.clone();
+            let t = 0;
+            
+            function tick() {
+                t += 0.04;
+                if(t > 1) t = 1;
+                const ease = t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                
+                camera.position.lerpVectors(startPos, targetPos, ease);
+                controls.target.lerpVectors(startLook, targetLookAt, ease);
+                
+                if(t < 1) requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        window.setMode = function(m) {
+            mode = m;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[onclick="setMode('${m}')"]`).classList.add('active');
+
+            // UI
+            document.getElementById('em-controls').classList.toggle('visible', m === 'electromagnetic');
+            document.getElementById('stroke-controls').classList.toggle('visible', m === 'stroking');
+            
+            updateUI();
+            
+            // Camera Logic
+            if(m === 'electromagnetic') {
+                moveCamera(new THREE.Vector3(-15, 12, 20), new THREE.Vector3(-15, 0, 0));
+                document.getElementById('microscope-label').innerText = "INSIDE NAIL";
+            } else {
+                moveCamera(new THREE.Vector3(15, 12, 20), new THREE.Vector3(15, 0, 0));
+                document.getElementById('microscope-label').innerText = "INSIDE BAR";
+            }
+        };
+
+        // --- Interaction Logic ---
+
+        function showToast(msg) {
+            const t = document.getElementById('status-toast');
+            t.innerText = msg;
+            t.style.opacity = 1;
+            setTimeout(() => t.style.opacity = 0, 1500);
+        }
+
+        document.getElementById('switch-btn').addEventListener('click', () => {
+            switchClosed = !switchClosed;
+            const btn = document.getElementById('switch-btn');
+            
+            if(switchClosed) {
+                // Animate Switch Closing
+                pivotGroup.rotation.z = 0; // Flat
+                allWires.forEach(w => w.material = wireOnMat);
+                btn.classList.add('btn-primary');
+                btn.innerHTML = "<span>⚡</span> Switch ON";
+                showToast("CIRCUIT CLOSED");
+            } else {
+                // Animate Switch Opening
+                pivotGroup.rotation.z = Math.PI / 4; // Up
+                allWires.forEach(w => w.material = wireOffMat);
+                btn.classList.remove('btn-primary');
+                btn.innerHTML = "<span>🔌</span> Toggle Switch";
+                showToast("CIRCUIT OPEN");
+            }
+            updateDomains();
+        });
+
+        document.getElementById('reset-em-btn').addEventListener('click', () => {
+            if(switchClosed) document.getElementById('switch-btn').click();
+            emPins.forEach(p => {
+                p.position.copy(p.userData.homePos);
+                p.rotation.copy(p.userData.homeRot);
+                p.userData.attached = false;
+            });
+        });
+
+        document.getElementById('stroke-btn').addEventListener('click', () => {
+            if(strokeAnim) return;
+            strokeAnim = true;
+            strokeT = 0;
+            document.getElementById('stroke-btn').disabled = true;
+            document.getElementById('stroke-btn').style.opacity = 0.5;
+        });
+
+        document.getElementById('reset-stroke-btn').addEventListener('click', () => {
+            strokes = 0;
+            magnetTool.position.set(-8, 5, 0);
+            strPins.forEach(p => {
+                p.position.copy(p.userData.homePos);
+                p.rotation.copy(p.userData.homeRot);
+                p.userData.attached = false;
+            });
+            updateDomains();
+            showToast("BAR DEMAGNETIZED");
+        });
+
+        // --- PHYSICS LOOP ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // ============================================
+            // 1. ELECTROMAGNET PHYSICS
+            // ============================================
+            // Target: Tip of the nail. Local position in emGroup is roughly (6.75, 2.5, 0)
+            const nailTipLocal = new THREE.Vector3(6.75, 2.5, 0);
+
+            if (switchClosed) {
+                emPins.forEach(p => {
+                    const dist = p.position.distanceTo(nailTipLocal);
+                    
+                    if (dist < 8) { // Attraction range
+                        if (dist > 0.8) {
+                            // Flying towards magnet
+                            const dir = new THREE.Vector3().subVectors(nailTipLocal, p.position).normalize();
+                            const force = 0.4 / (dist * dist);
+                            p.position.add(dir.multiplyScalar(force));
+                            
+                            // Align orientation to point to magnet (Y-axis points to magnet)
+                            const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                            p.quaternion.slerp(targetQuat, 0.1);
+                        } else {
+                            // Attached / Collision
+                            p.userData.attached = true;
+                            // Keep it stuck at tip radius
+                            // Slight random jitter to clump naturally
+                            if(!p.userData.hasOffset) {
+                                p.userData.offset = new THREE.Vector3((Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5);
+                                p.userData.hasOffset = true;
+                            }
+                            // Stick position
+                            // p.position.copy(nailTipLocal).add(p.userData.offset); // Strict sticking
+                        }
+                    }
+                });
+            } else {
+                // Gravity
+                emPins.forEach(p => { 
+                    p.userData.attached = false;
+                    p.userData.hasOffset = false;
+                    if(p.position.y > 0.1) {
+                        p.position.y -= 0.1; 
+                        // Random tumble
+                        p.rotation.x += 0.05;
+                    } else {
+                        p.position.y = 0.1;
+                    }
+                });
+            }
+
+            // ============================================
+            // 2. STROKING ANIMATION
+            // ============================================
+            if(strokeAnim) {
+                strokeT += 0.02; 
+                let px = 0, py = 5;
+                
+                // Path Logic: Top surface y=1.0. 
+                // Magnet (-45 deg). Lowest point needs to touch y=1.0. 
+                // Center y=2.2 approximates touch.
+                
+                if(strokeT < 0.15) {
+                    // Descend
+                    const t = strokeT / 0.15;
+                    px = -8 + (4 * t); 
+                    py = 5 * (1-t) + 2.2 * t;
+                } else if(strokeT < 0.55) {
+                    // Slide across surface
+                    const t = (strokeT - 0.15) / 0.4;
+                    px = -4 + (8 * t);
+                    py = 2.2; 
+                } else if(strokeT < 0.7) {
+                    // Lift up
+                    const t = (strokeT - 0.55) / 0.15;
+                    px = 4 + (1*t);
+                    py = 2.2 + (2.8 * t); 
+                } else if(strokeT < 1.0) {
+                    // Return
+                    const t = (strokeT - 0.7) / 0.3;
+                    px = 5 - (13 * t); 
+                    py = 5;
+                } else {
+                    strokeAnim = false;
+                    strokes++;
+                    document.getElementById('stroke-btn').disabled = false;
+                    document.getElementById('stroke-btn').style.opacity = 1;
+                    updateDomains();
+                    showToast(`STROKES: ${strokes}/10`);
+                    px = -8; py = 5;
+                }
+                magnetTool.position.set(px, py, 0);
+            }
+
+            // ============================================
+            // 3. STROKING PHYSICS
+            // ============================================
+            // Target: End of bar. Local pos (5, 0.5, 0)
+            const barEndLocal = new THREE.Vector3(5, 0.5, 0);
+            const magStrength = strokes / maxStrokes;
+
+            if(magStrength > 0.1) {
+                strPins.forEach(p => {
+                    const dist = p.position.distanceTo(barEndLocal);
+                    
+                    if(dist < 6) { 
+                        if (dist > 0.6) {
+                            // Fly towards
+                            const dir = new THREE.Vector3().subVectors(barEndLocal, p.position).normalize();
+                            const force = (0.3 * magStrength) / (dist * 0.5); 
+                            p.position.add(dir.multiplyScalar(force));
+
+                            // Align orientation (Y-axis points to magnet)
+                            const targetQuat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                            p.quaternion.slerp(targetQuat, 0.1);
+                        } else {
+                            // Attach
+                            p.userData.attached = true;
+                            // Stop moving, maybe drift slightly to simulate cluster
+                            // Simple visual fix: do nothing, they stay where they stopped (clumped)
+                        }
+                    }
+                });
+            } else {
+                // Gravity
+                 strPins.forEach(p => { 
+                    p.userData.attached = false;
+                    if(p.position.y > 0.1) {
+                        p.position.y -= 0.1;
+                        p.rotation.x += 0.05;
+                    } else {
+                        p.position.y = 0.1;
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Init
+        setMode('electromagnetic'); // Start mode
+        animate();
+
+        // Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

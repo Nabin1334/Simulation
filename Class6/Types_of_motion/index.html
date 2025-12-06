@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Motion in Our Daily Lives - For 6th Graders</title>
+    <style>
+      /* Update these styles in the <style> section */
+      :root {
+        --primary: #2563eb;
+        --secondary: #64748b;
+        --bg: #ffffff;
+        --text: #1e293b;
+        --shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+      }
+
+      body {
+        background: var(--bg);
+        color: #222831; /* darker text for visibility */
+        min-height: 100vh;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+      }
+
+      header {
+        background: linear-gradient(to right, #1e40af, #1d4ed8);
+        padding: 2rem;
+        color: white;
+        box-shadow: 0 4px 6px var(--shadow);
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 6px;
+        color: #f8fafc;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+        color: #cbd5e1;
+      }
+
+      .wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .intro {
+        background-color: rgba(255, 255, 255, 0.02);
+        color: #e6eef8;
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+        line-height: 1.5;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      /* Mode selector (new) */
+      .mode-controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 14px 0;
+        background: #ffffff;
+        border: 1px solid #e6eef8;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px var(--shadow);
+        margin-bottom: 2rem;
+      }
+      .hidden {
+        display: none;
+      } /* hide non-active panels */
+      .mode-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #0f1724; /* updated color */
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .mode-btn:hover {
+        transform: translateY(-3px);
+      }
+      .mode-btn.active {
+        background: #0b63d6; /* updated active background */
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(11, 99, 214, 0.14);
+      }
+
+      .visualization-container {
+        display: block;
+        margin: 0 auto;
+        max-width: 1200px;
+      }
+
+      .motion-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .canvas-container {
+        width: 100%;
+        height: 500px;
+        background: linear-gradient(
+          180deg,
+          #fbfdff,
+          #f6f9fc
+        ); /* gradient background */
+        border: 1px solid #eef3f8; /* updated border */
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+
+      /* --- CHANGED STYLES: improve text contrast & professional look --- */
+      body {
+        background: var(--bg);
+        color: #222831; /* darker text for visibility */
+        min-height: 100vh;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        color: #0f1724; /* dark title */
+        margin-bottom: 16px;
+      }
+
+      .description {
+        color: #243b53; /* readable paragraph color */
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
+      .examples {
+        background-color: #ffffff;
+        color: #0f1724;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #edf2f7;
+      }
+
+      .examples h3 {
+        color: #0b63d6;
+        margin-bottom: 8px;
+        font-size: 1rem;
+      }
+
+      .mode-controls {
+        background: #ffffff;
+        border: 1px solid #e6eef8;
+      }
+      .mode-btn {
+        color: #0f1724;
+      }
+      .mode-btn.active {
+        background: #0b63d6;
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(11, 99, 214, 0.14);
+      }
+
+      .canvas-container {
+        background: linear-gradient(180deg, #fbfdff, #f6f9fc);
+        border: 1px solid #eef3f8;
+      }
+
+      .controls {
+        display: flex;
+        gap: 0.5rem; /* reduced gap for compactness */
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        flex-wrap: wrap; /* allow wrapping to next line if needed */
+      }
+
+      button.control {
+        padding: 0.5rem 1rem; /* reduced padding for smaller buttons */
+        border-radius: 6px;
+        font-weight: 500;
+        flex: 1 1 auto; /* allow buttons to grow and shrink */
+        min-width: 120px; /* minimum width for buttons */
+      }
+
+      /* Adjust the quiz section to fit better */
+      .quiz-section {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 10px;
+        background: rgba(
+          255,
+          255,
+          255,
+          0.1
+        ); /* slightly darker for visibility */
+        color: #dbeafe;
+        overflow: auto; /* allow scrolling if content overflows */
+        border: 1px solid rgba(255, 255, 255, 0.2); /* border for better visibility */
+      }
+
+      .quiz-question {
+        margin-bottom: 12px;
+        font-size: 1.1rem; /* increased font size for better readability */
+      }
+
+      .quiz-options {
+        display: flex;
+        flex-direction: column; /* stack options vertically */
+        gap: 8px; /* space between options */
+      }
+
+      .quiz-option {
+        padding: 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.2); /* background for options */
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .quiz-option:hover {
+        background: rgba(255, 255, 255, 0.3); /* highlight on hover */
+      }
+
+      .quiz-option.correct {
+        background: #4caf50; /* green for correct */
+        color: white;
+      }
+
+      .quiz-option.incorrect {
+        background: #ff9800; /* orange for incorrect */
+        color: white;
+      }
+
+      .quiz-result {
+        margin-top: 12px;
+        font-size: 1.2rem; /* increased font size for result */
+        font-weight: bold;
+      }
+
+      /* Responsive tweaks */
+      @media (max-width: 980px) {
+        .canvas-container {
+          height: 280px;
+        }
+        .controls {
+          flex-direction: column; /* stack buttons on smaller screens */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Motion in Our Daily Lives</h1>
+      <div class="subtitle">See How Objects Move Around Us!</div>
+    </header>
+
+    <div class="wrap">
+      <div class="intro">
+        <p>
+          Welcome to the world of motion! Explore
+          <strong>Linear Motion</strong> and
+          <strong>Curvilinear Motion</strong>. Use the buttons below to focus on
+          one motion type or view both.
+        </p>
+      </div>
+
+      <!-- New mode buttons -->
+      <div class="mode-controls" role="tablist" aria-label="Select motion view">
+        <button id="modeLinear" class="mode-btn active" aria-pressed="true">
+          Linear Motion
+        </button>
+        <button id="modeCurvi" class="mode-btn" aria-pressed="false">
+          Curvilinear Motion
+        </button>
+      </div>
+
+      <div class="visualization-container" id="vizContainer">
+        <!-- Linear Motion card -->
+        <div id="linear-card" class="motion-card">
+          <h2 class="card-title">Linear Motion</h2>
+          <div class="canvas-container" id="linear-container"></div>
+          <p class="description">
+            Linear motion is when an object moves in a straight line. The path
+            is direct without any curves.
+          </p>
+          <div class="examples">
+            <h3>Examples:</h3>
+            <ul>
+              <li>A car moving straight on a highway</li>
+              <li>A ball falling straight down</li>
+              <li>A person walking in a straight line</li>
+              <li>A train on straight tracks</li>
+              <li>An elevator moving up and down</li>
+            </ul>
+          </div>
+          <div class="controls">
+            <button id="start-linear" class="control">Start</button>
+            <button id="reset-linear" class="control secondary">Reset</button>
+            <button id="slow-linear" class="control secondary">Slow</button>
+          </div>
+        </div>
+
+        <!-- Curvilinear Motion card -->
+        <div id="curvilinear-card" class="motion-card">
+          <h2 class="card-title">Curvilinear Motion</h2>
+          <div class="canvas-container" id="curvilinear-container"></div>
+          <p class="description">
+            Curvilinear motion is when an object moves along a curved path. The
+            direction changes continuously.
+          </p>
+          <div class="examples">
+            <h3>Examples:</h3>
+            <ul>
+              <li>A roller coaster going through loops</li>
+              <li>A planet orbiting the sun</li>
+              <li>A basketball arcing toward the hoop</li>
+              <li>A swing moving back and forth</li>
+              <li>A car turning around a corner</li>
+            </ul>
+          </div>
+          <div class="controls">
+            <button id="start-curvilinear" class="control">Start</button>
+            <button id="reset-curvilinear" class="control secondary">
+              Reset
+            </button>
+            <button id="slow-curvilinear" class="control secondary">
+              Slow
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="comparison">
+        <h2>Comparison of Motion Types</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Linear Motion</th>
+              <th>Curvilinear Motion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Path Shape</td>
+              <td>Straight line</td>
+              <td>Curved line</td>
+            </tr>
+            <tr>
+              <td>Direction Change</td>
+              <td>No change in direction</td>
+              <td>Continuous change in direction</td>
+            </tr>
+            <tr>
+              <td>Speed</td>
+              <td>Can be constant or changing</td>
+              <td>Can be constant or changing</td>
+            </tr>
+            <tr>
+              <td>Examples</td>
+              <td>Elevator, bullet, sprinter</td>
+              <td>Ferris wheel, satellite, swinging pendulum</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quiz-section">
+        <h2>Test Your Knowledge!</h2>
+        <div class="quiz-question">
+          <p>1. A car moving straight on a highway is an example of:</p>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="true">Linear Motion</div>
+            <div class="quiz-option" data-correct="false">
+              Curvilinear Motion
+            </div>
+            <div class="quiz-option" data-correct="false">Circular Motion</div>
+            <div class="quiz-option" data-correct="false">Random Motion</div>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <p>2. Which of these is an example of curvilinear motion?</p>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="false">
+              A book sliding off a table
+            </div>
+            <div class="quiz-option" data-correct="true">
+              A basketball shot toward the hoop
+            </div>
+            <div class="quiz-option" data-correct="false">
+              A person running in a straight line
+            </div>
+            <div class="quiz-option" data-correct="false">
+              A train moving on straight tracks
+            </div>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <p>
+            3. What is the main difference between linear and curvilinear
+            motion?
+          </p>
+          <div class="quiz-options">
+            <div class="quiz-option" data-correct="false">
+              Linear motion is faster
+            </div>
+            <div class="quiz-option" data-correct="false">
+              Curvilinear motion is slower
+            </div>
+            <div class="quiz-option" data-correct="true">
+              Linear motion follows a straight path, curvilinear follows a
+              curved path
+            </div>
+            <div class="quiz-option" data-correct="false">
+              Linear motion is only horizontal
+            </div>
+          </div>
+        </div>
+
+        <div class="quiz-result" id="quiz-result"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p style="color: #9fb7d9">
+        Created for 6th Grade Science Education | Interactive Motion Visuals
+      </p>
+    </footer>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+      // Initialize Linear Motion Scene
+      const linearContainer = document.getElementById("linear-container");
+      const linearScene = new THREE.Scene();
+      const linearCamera = new THREE.PerspectiveCamera(
+        75,
+        linearContainer.clientWidth / linearContainer.clientHeight,
+        0.1,
+        1000
+      );
+      const linearRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      linearRenderer.setSize(
+        linearContainer.clientWidth,
+        linearContainer.clientHeight
+      );
+      linearRenderer.setClearColor(0x000000, 0);
+      linearContainer.appendChild(linearRenderer.domElement);
+
+      // Add lights to linear scene
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      linearScene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(10, 20, 15);
+      linearScene.add(directionalLight);
+
+      // Create a more realistic scene for linear motion - a road with a car
+      // Create road
+      const roadGeometry = new THREE.BoxGeometry(20, 0.1, 4);
+      const roadMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+      const road = new THREE.Mesh(roadGeometry, roadMaterial);
+      linearScene.add(road);
+
+      // Create road markings
+      const markingGeometry = new THREE.BoxGeometry(2, 0.11, 0.2);
+      const markingMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+      for (let i = -8; i <= 8; i += 4) {
+        const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+        marking.position.set(i, 0, 0);
+        linearScene.add(marking);
+      }
+
+      // Create a simple car
+      const carBodyGeometry = new THREE.BoxGeometry(2, 0.8, 1);
+      const carBodyMaterial = new THREE.MeshPhongMaterial({ color: 0x00a8ff });
+      const carBody = new THREE.Mesh(carBodyGeometry, carBodyMaterial);
+
+      const carTopGeometry = new THREE.BoxGeometry(1.2, 0.6, 1);
+      const carTopMaterial = new THREE.MeshPhongMaterial({ color: 0x00a8ff });
+      const carTop = new THREE.Mesh(carTopGeometry, carTopMaterial);
+      carTop.position.y = 0.7;
+
+      const wheelGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+      const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x222222 });
+
+      const wheel1 = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheel1.position.set(-0.6, -0.4, 0.6);
+      wheel1.rotation.z = Math.PI / 2;
+
+      const wheel2 = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheel2.position.set(0.6, -0.4, 0.6);
+      wheel2.rotation.z = Math.PI / 2;
+
+      const wheel3 = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheel3.position.set(-0.6, -0.4, -0.6);
+      wheel3.rotation.z = Math.PI / 2;
+
+      const wheel4 = new THREE.Mesh(wheelGeometry, wheelMaterial);
+      wheel4.position.set(0.6, -0.4, -0.6);
+      wheel4.rotation.z = Math.PI / 2;
+
+      const car = new THREE.Group();
+      car.add(carBody);
+      car.add(carTop);
+      car.add(wheel1);
+      car.add(wheel2);
+      car.add(wheel3);
+      car.add(wheel4);
+      car.position.set(-8, 0.5, 0);
+      linearScene.add(car);
+
+      // Create path indicator
+      const pathPoints = [];
+      for (let i = -8; i <= 8; i += 0.5) {
+        pathPoints.push(new THREE.Vector3(i, 0.1, 0));
+      }
+
+      const pathGeometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const pathMaterial = new THREE.LineBasicMaterial({
+        color: 0xffff00,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const pathLine = new THREE.Line(pathGeometry, pathMaterial);
+      linearScene.add(pathLine);
+
+      // Position camera for linear scene
+      linearCamera.position.set(0, 5, 8);
+      linearCamera.lookAt(0, 0, 0);
+
+      // Initialize Curvilinear Motion Scene
+      const curvilinearContainer = document.getElementById(
+        "curvilinear-container"
+      );
+      const curvilinearScene = new THREE.Scene();
+      const curvilinearCamera = new THREE.PerspectiveCamera(
+        75,
+        curvilinearContainer.clientWidth / curvilinearContainer.clientHeight,
+        0.1,
+        1000
+      );
+      const curvilinearRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+
+      curvilinearRenderer.setSize(
+        curvilinearContainer.clientWidth,
+        curvilinearContainer.clientHeight
+      );
+      curvilinearRenderer.setClearColor(0x000000, 0);
+      curvilinearContainer.appendChild(curvilinearRenderer.domElement);
+
+      // Add lights to curvilinear scene
+      curvilinearScene.add(ambientLight.clone());
+
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight2.position.set(10, 20, 15);
+      curvilinearScene.add(directionalLight2);
+
+      // Create a roller coaster scene for curvilinear motion
+      // Create track base
+      const trackBaseGeometry = new THREE.BoxGeometry(18, 0.5, 18);
+      const trackBaseMaterial = new THREE.MeshPhongMaterial({
+        color: 0x2ecc71,
+      });
+      const trackBase = new THREE.Mesh(trackBaseGeometry, trackBaseMaterial);
+      curvilinearScene.add(trackBase);
+
+      // Create curved track
+      const trackCurve = new THREE.EllipseCurve(
+        0,
+        0, // ax, aY
+        7,
+        4, // xRadius, yRadius
+        0,
+        2 * Math.PI, // aStartAngle, aEndAngle
+        false, // aClockwise
+        0 // aRotation
+      );
+
+      const trackPoints = trackCurve.getPoints(50);
+      const trackGeometry = new THREE.BufferGeometry().setFromPoints(
+        trackPoints
+      );
+      const trackMaterial = new THREE.LineBasicMaterial({
+        color: 0xe74c3c,
+        linewidth: 3,
+      });
+      const trackLine = new THREE.Line(trackGeometry, trackMaterial);
+      trackLine.rotation.x = Math.PI / 2;
+      trackLine.position.y = 1;
+      curvilinearScene.add(trackLine);
+
+      // Create a simple roller coaster car
+      const coasterCarGeometry = new THREE.BoxGeometry(1, 0.5, 0.8);
+      const coasterCarMaterial = new THREE.MeshPhongMaterial({
+        color: 0xe74c3c,
+      });
+      const coasterCar = new THREE.Mesh(coasterCarGeometry, coasterCarMaterial);
+      coasterCar.position.set(7, 1.25, 0);
+      curvilinearScene.add(coasterCar);
+
+      // Create wheels for the coaster car
+      const coasterWheelGeometry = new THREE.CylinderGeometry(
+        0.15,
+        0.15,
+        0.1,
+        16
+      );
+      const coasterWheelMaterial = new THREE.MeshPhongMaterial({
+        color: 0x222222,
+      });
+
+      const coasterWheel1 = new THREE.Mesh(
+        coasterWheelGeometry,
+        coasterWheelMaterial
+      );
+      coasterWheel1.position.set(-0.3, -0.3, 0.3);
+      coasterWheel1.rotation.z = Math.PI / 2;
+      coasterCar.add(coasterWheel1);
+
+      const coasterWheel2 = new THREE.Mesh(
+        coasterWheelGeometry,
+        coasterWheelMaterial
+      );
+      coasterWheel2.position.set(0.3, -0.3, 0.3);
+      coasterWheel2.rotation.z = Math.PI / 2;
+      coasterCar.add(coasterWheel2);
+
+      const coasterWheel3 = new THREE.Mesh(
+        coasterWheelGeometry,
+        coasterWheelMaterial
+      );
+      coasterWheel3.position.set(-0.3, -0.3, -0.3);
+      coasterWheel3.rotation.z = Math.PI / 2;
+      coasterCar.add(coasterWheel3);
+
+      const coasterWheel4 = new THREE.Mesh(
+        coasterWheelGeometry,
+        coasterWheelMaterial
+      );
+      coasterWheel4.position.set(0.3, -0.3, -0.3);
+      coasterWheel4.rotation.z = Math.PI / 2;
+      coasterCar.add(coasterWheel4);
+
+      // Position camera for curvilinear scene
+      curvilinearCamera.position.set(0, 8, 10);
+      curvilinearCamera.lookAt(0, 0, 0);
+
+      // Animation variables
+      let linearAnimationId = null;
+      let curvilinearAnimationId = null;
+      let linearTime = 0;
+      let curvilinearTime = 0;
+      let linearSpeed = 0.02;
+      let curvilinearSpeed = 0.02;
+
+      // Linear motion animation
+      function animateLinear() {
+        linearTime += linearSpeed;
+        const x = -8 + ((linearTime * 16) % 16);
+        car.position.set(x, 0.5, 0);
+
+        // Rotate wheels
+        car.children[2].rotation.x += linearSpeed * 5;
+        car.children[3].rotation.x += linearSpeed * 5;
+        car.children[4].rotation.x += linearSpeed * 5;
+        car.children[5].rotation.x += linearSpeed * 5;
+
+        linearRenderer.render(linearScene, linearCamera);
+        linearAnimationId = requestAnimationFrame(animateLinear);
+      }
+
+      // Curvilinear motion animation
+      function animateCurvilinear() {
+        curvilinearTime += curvilinearSpeed;
+        const x = 7 * Math.cos(curvilinearTime);
+        const z = 4 * Math.sin(curvilinearTime);
+        coasterCar.position.set(x, 1.25, z);
+
+        // Rotate the car to follow the curve
+        coasterCar.lookAt(
+          7 * Math.cos(curvilinearTime + 0.1),
+          1.25,
+          4 * Math.sin(curvilinearTime + 0.1)
+        );
+
+        // Rotate wheels
+        coasterCar.children[0].rotation.x += curvilinearSpeed * 5;
+        coasterCar.children[1].rotation.x += curvilinearSpeed * 5;
+        coasterCar.children[2].rotation.x += curvilinearSpeed * 5;
+        coasterCar.children[3].rotation.x += curvilinearSpeed * 5;
+
+        curvilinearRenderer.render(curvilinearScene, curvilinearCamera);
+        curvilinearAnimationId = requestAnimationFrame(animateCurvilinear);
+      }
+
+      // Control buttons
+      document
+        .getElementById("start-linear")
+        .addEventListener("click", function () {
+          if (!linearAnimationId) {
+            linearSpeed = 0.02;
+            animateLinear();
+          }
+        });
+
+      document
+        .getElementById("reset-linear")
+        .addEventListener("click", function () {
+          cancelAnimationFrame(linearAnimationId);
+          linearAnimationId = null;
+          linearTime = 0;
+          car.position.set(-8, 0.5, 0);
+          linearRenderer.render(linearScene, linearCamera);
+        });
+
+      document
+        .getElementById("slow-linear")
+        .addEventListener("click", function () {
+          linearSpeed = 0.005;
+        });
+
+      document
+        .getElementById("start-curvilinear")
+        .addEventListener("click", function () {
+          if (!curvilinearAnimationId) {
+            curvilinearSpeed = 0.02;
+            animateCurvilinear();
+          }
+        });
+
+      document
+        .getElementById("reset-curvilinear")
+        .addEventListener("click", function () {
+          cancelAnimationFrame(curvilinearAnimationId);
+          curvilinearAnimationId = null;
+          curvilinearTime = 0;
+          coasterCar.position.set(7, 1.25, 0);
+          curvilinearRenderer.render(curvilinearScene, curvilinearCamera);
+        });
+
+      document
+        .getElementById("slow-curvilinear")
+        .addEventListener("click", function () {
+          curvilinearSpeed = 0.005;
+        });
+
+      // Mode buttons logic: show only selected panel (Both / Linear / Curvilinear)
+      const modeLinear = document.getElementById("modeLinear");
+      const modeCurvi = document.getElementById("modeCurvi");
+      const linearCard = document.getElementById("linear-card");
+      const curviCard = document.getElementById("curvilinear-card");
+
+      function setMode(mode) {
+        // stop both animations first
+        cancelAnimationFrame(linearAnimationId);
+        cancelAnimationFrame(curvilinearAnimationId);
+        linearAnimationId = curvilinearAnimationId = null;
+
+        if (mode === "linear") {
+          linearCard.classList.remove("hidden");
+          curviCard.classList.add("hidden");
+          modeLinear.classList.add("active");
+          modeLinear.setAttribute("aria-pressed", "true");
+          modeCurvi.classList.remove("active");
+          modeCurvi.setAttribute("aria-pressed", "false");
+          // render linear scene once (idle)
+          linearRenderer.render(linearScene, linearCamera);
+        } else if (mode === "curvilinear") {
+          curviCard.classList.remove("hidden");
+          linearCard.classList.add("hidden");
+          modeCurvi.classList.add("active");
+          modeCurvi.setAttribute("aria-pressed", "true");
+          modeLinear.classList.remove("active");
+          modeLinear.setAttribute("aria-pressed", "false");
+          // render curvilinear scene once (idle)
+          curvilinearRenderer.render(curvilinearScene, curvilinearCamera);
+        }
+      }
+
+      modeLinear.addEventListener("click", () => setMode("linear"));
+      modeCurvi.addEventListener("click", () => setMode("curvilinear"));
+
+      // Quiz logic (keeps from original)
+      const quizOptions = document.querySelectorAll(".quiz-option");
+      const quizResult = document.getElementById("quiz-result");
+      let correctAnswers = 0;
+      const totalQuestions = 3;
+      quizOptions.forEach((option) => {
+        option.addEventListener("click", function () {
+          this.parentElement
+            .querySelectorAll(".quiz-option")
+            .forEach((opt) => opt.classList.remove("correct", "incorrect"));
+          if (this.getAttribute("data-correct") === "true") {
+            this.classList.add("correct");
+            correctAnswers++;
+          } else {
+            this.classList.add("incorrect");
+            this.parentElement
+              .querySelector('[data-correct="true"]')
+              .classList.add("correct");
+          }
+          this.parentElement
+            .querySelectorAll(".quiz-option")
+            .forEach((opt) => (opt.style.pointerEvents = "none"));
+          const answeredQuestions =
+            document.querySelectorAll(
+              '.quiz-option[style*="pointer-events: none"]'
+            ).length / 4;
+          if (answeredQuestions === totalQuestions) {
+            quizResult.textContent = `You got ${correctAnswers} out of ${totalQuestions} correct!`;
+            quizResult.style.color =
+              correctAnswers === totalQuestions ? "#4CAF50" : "#FF9800";
+          }
+        });
+      });
+
+      // Resize handling: update renderers & re-render current visible scenes
+      window.addEventListener("resize", function () {
+        // Linear
+        linearCamera.aspect =
+          linearContainer.clientWidth / linearContainer.clientHeight;
+        linearCamera.updateProjectionMatrix();
+        linearRenderer.setSize(
+          linearContainer.clientWidth,
+          linearContainer.clientHeight
+        );
+        // Curvilinear
+        curvilinearCamera.aspect =
+          curvilinearContainer.clientWidth / curvilinearContainer.clientHeight;
+        curvilinearCamera.updateProjectionMatrix();
+        curvilinearRenderer.setSize(
+          curvilinearContainer.clientWidth,
+          curvilinearContainer.clientHeight
+        );
+        // render visible
+        if (!linearCard.classList.contains("hidden"))
+          linearRenderer.render(linearScene, linearCamera);
+        if (!curviCard.classList.contains("hidden"))
+          curvilinearRenderer.render(curvilinearScene, curvilinearCamera);
+      });
+
+      // Initial render & default mode: show linear only
+      setMode("linear");
+      linearRenderer.render(linearScene, linearCamera);
+      curvilinearRenderer.render(curvilinearScene, curvilinearCamera);
+    </script>
+  </body>
+</html>

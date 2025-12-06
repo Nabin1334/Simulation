@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinhole Camera Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0c8ff;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .simulation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .camera-view {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #6ab1ff;
+            border-bottom: 2px solid #6ab1ff;
+            padding-bottom: 10px;
+        }
+        
+        #camera-canvas {
+            width: 100%;
+            height: 500px;
+            background: #0a1525;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: move;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .control-group h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .slider-container label {
+            min-width: 120px;
+            font-size: 0.9rem;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #2a3a7c;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #6ab1ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        button {
+            background: #3a6bc2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #2a5bb2;
+            transform: translateY(-2px);
+        }
+        
+        .info-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .info-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .info-box p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .component-list {
+            list-style-type: none;
+        }
+        
+        .component-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .component-list li:before {
+            content: "•";
+            color: #6ab1ff;
+            margin-right: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #a0c8ff;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pinhole Camera Simulation</h1>
+            <p class="subtitle">Experience how a simple camera without a lens creates images using just a tiny aperture</p>
+        </header>
+        
+        <div class="simulation-container">
+            <div class="camera-view">
+                <h2>Pinhole Camera Simulation</h2>
+                <canvas id="camera-canvas"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Camera Settings</h3>
+                        <div class="slider-container">
+                            <label for="pinhole-size">Pinhole Size:</label>
+                            <input type="range" id="pinhole-size" min="1" max="10" value="3">
+                        </div>
+                        <div class="slider-container">
+                            <label for="box-length">Box Length:</label>
+                            <input type="range" id="box-length" min="100" max="300" value="200">
+                        </div>
+                        <button id="reset-view">Reset View</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Light Control</h3>
+                        <div class="slider-container">
+                            <label for="light-intensity">Light Intensity:</label>
+                            <input type="range" id="light-intensity" min="1" max="10" value="7">
+                        </div>
+                        <div class="slider-container">
+                            <label for="rays-density">Rays Density:</label>
+                            <input type="range" id="rays-density" min="5" max="30" value="15">
+                        </div>
+                        <button id="toggle-rays">Toggle Light Rays</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Object Control</h3>
+                        <div class="slider-container">
+                            <label for="object-distance">Object Distance:</label>
+                            <input type="range" id="object-distance" min="50" max="300" value="150">
+                        </div>
+                        <div class="slider-container">
+                            <label for="object-height">Object Height:</label>
+                            <input type="range" id="object-height" min="20" max="100" value="60">
+                        </div>
+                        <button id="change-object">Change Object Shape</button>
+                    </div>
+                </div>
+                
+                <p>Drag the object to move it around. Adjust the sliders to change camera properties.</p>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>How a Pinhole Camera Works</h2>
+            <div class="info-content">
+                <div class="info-box">
+                    <h3>Basic Principle</h3>
+                    <p>A pinhole camera is a simple camera without a lens. It consists of a light-proof box with a small hole in one side. Light from a scene passes through this single point and projects an inverted image on the opposite side of the box.</p>
+                    <p>The image is always inverted because light travels in straight lines, and light from the top of the object passes through the pinhole to the bottom of the image, and vice versa.</p>
+                </div>
+                
+                <div class="info-box">
+                    <h3>Key Components</h3>
+                    <ul class="component-list">
+                        <li><strong>Light-tight box</strong> - Prevents unwanted light from entering</li>
+                        <li><strong>Pinhole aperture</strong> - A tiny hole that allows light to enter</li>
+                        <li><strong>Image screen</strong> - Surface where the inverted image forms</li>
+                        <li><strong>Object</strong> - The subject being photographed</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box">
+                    <h3>Characteristics</h3>
+                    <ul class="component-list">
+                        <li>Produces sharp but dim images</li>
+                        <li>Has infinite depth of field</li>
+                        <li>No lens distortion</li>
+                        <li>Image sharpness depends on pinhole size</li>
+                        <li>Longer exposure times needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Interactive 2D Simulation of Pinhole Camera Working Principle</p>
+        </footer>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('camera-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas dimensions
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        // Pinhole camera variables
+        let showRays = true;
+        let objectType = 'tree';
+        let objectX = canvas.width * 0.2;
+        let objectY = canvas.height / 2;
+        let isDragging = false;
+        let pinholeSize = 3;
+        let boxLength = 200;
+        let lightIntensity = 7;
+        let raysDensity = 15;
+        let objectDistance = 150;
+        let objectHeight = 60;
+        
+        // Draw the realistic pinhole camera
+        function drawCamera() {
+            // Clear canvas with a dark background
+            ctx.fillStyle = '#0a1525';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate positions based on canvas dimensions
+            const boxWidth = 80;
+            const boxHeight = 200;
+            const boxX = (canvas.width - boxWidth - boxLength) / 2;
+            const boxY = (canvas.height - boxHeight) / 2;
+            
+            // Draw camera box with perspective
+            drawCameraBox(boxX, boxY, boxWidth, boxHeight, boxLength);
+            
+            // Draw pinhole
+            const pinholeX = boxX + boxWidth;
+            const pinholeY = boxY + boxHeight / 2;
+            
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(pinholeX, pinholeY, pinholeSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw screen with subtle texture
+            drawScreen(boxX + boxWidth + boxLength, boxY, boxWidth, boxHeight);
+            
+            // Draw object with updated position based on distance
+            const objX = boxX - objectDistance;
+            const objY = objectY;
+            drawObject(objX, objY);
+            
+            // Draw light rays if enabled
+            if (showRays) {
+                drawLightRays(objX, objY, pinholeX, pinholeY, boxX + boxWidth + boxLength);
+            }
+            
+            // Draw labels with improved styling
+            drawLabels(boxX, boxY, boxWidth, boxHeight, boxLength, objX, objY);
+        }
+        
+        // Draw the camera box with perspective effect
+        function drawCameraBox(x, y, width, height, length) {
+            // Main box
+            ctx.fillStyle = '#2c2c2c';
+            ctx.fillRect(x, y, width, height);
+            
+            // Side panel with gradient for depth
+            const sideGradient = ctx.createLinearGradient(x + width, y, x + width + length, y);
+            sideGradient.addColorStop(0, '#3a3a3a');
+            sideGradient.addColorStop(1, '#2a2a2a');
+            
+            ctx.fillStyle = sideGradient;
+            ctx.fillRect(x + width, y, length, height);
+            
+            // Add subtle texture to the box
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + (width / 4) * i, y);
+                ctx.lineTo(x + (width / 4) * i, y + height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x, y + (height / 4) * i);
+                ctx.lineTo(x + width, y + (height / 4) * i);
+                ctx.stroke();
+            }
+        }
+        
+        // Draw the screen with a subtle texture
+        function drawScreen(x, y, width, height) {
+            // Screen background
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(x, y, width, height);
+            
+            // Screen surface with slight gradient
+            const screenGradient = ctx.createLinearGradient(x, y, x, y + height);
+            screenGradient.addColorStop(0, 'rgba(100, 100, 100, 0.3)');
+            screenGradient.addColorStop(0.5, 'rgba(150, 150, 150, 0.2)');
+            screenGradient.addColorStop(1, 'rgba(100, 100, 100, 0.3)');
+            
+            ctx.fillStyle = screenGradient;
+            ctx.fillRect(x, y, width, height);
+            
+            // Screen border
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, width, height);
+        }
+        
+        // Draw the object with different shapes
+        function drawObject(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            if (objectType === 'tree') {
+                // Draw realistic tree
+                // Trunk with texture
+                ctx.fillStyle = '#5D4037';
+                ctx.fillRect(-8, -objectHeight/2, 16, objectHeight);
+                
+                // Trunk texture
+                ctx.strokeStyle = '#4E342E';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(-6, -objectHeight/2 + 10 + i*12);
+                    ctx.lineTo(6, -objectHeight/2 + 10 + i*12);
+                    ctx.stroke();
+                }
+                
+                // Foliage with gradient
+                const foliageGradient = ctx.createRadialGradient(0, -objectHeight/2 - 10, 0, 0, -objectHeight/2 - 10, 35);
+                foliageGradient.addColorStop(0, '#4CAF50');
+                foliageGradient.addColorStop(1, '#2E7D32');
+                
+                ctx.fillStyle = foliageGradient;
+                ctx.beginPath();
+                ctx.arc(0, -objectHeight/2 - 10, 35, 0, Math.PI * 2);
+                ctx.fill();
+                
+            } else if (objectType === 'house') {
+                // Draw house
+                ctx.fillStyle = '#E53935';
+                ctx.fillRect(-25, -objectHeight/2, 50, objectHeight);
+                
+                // Roof
+                ctx.fillStyle = '#5D4037';
+                ctx.beginPath();
+                ctx.moveTo(-30, -objectHeight/2);
+                ctx.lineTo(0, -objectHeight/2 - 25);
+                ctx.lineTo(30, -objectHeight/2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Window
+                ctx.fillStyle = '#81D4FA';
+                ctx.fillRect(-15, -objectHeight/2 + 15, 12, 15);
+                ctx.fillRect(3, -objectHeight/2 + 15, 12, 15);
+                
+                // Door
+                ctx.fillStyle = '#5D4037';
+                ctx.fillRect(-8, -objectHeight/2 + 30, 16, 30);
+                
+            } else if (objectType === 'person') {
+                // Draw person
+                // Head
+                ctx.fillStyle = '#FFCCBC';
+                ctx.beginPath();
+                ctx.arc(0, -objectHeight/2 - 10, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Body
+                ctx.fillStyle = '#2196F3';
+                ctx.fillRect(-10, -objectHeight/2 + 5, 20, 30);
+                
+                // Arms
+                ctx.fillRect(-18, -objectHeight/2 + 10, 8, 20);
+                ctx.fillRect(10, -objectHeight/2 + 10, 8, 20);
+                
+                // Legs
+                ctx.fillRect(-12, -objectHeight/2 + 35, 8, 25);
+                ctx.fillRect(4, -objectHeight/2 + 35, 8, 25);
+            }
+            
+            ctx.restore();
+        }
+        
+        // Draw realistic light rays
+        function drawLightRays(objX, objY, pinholeX, pinholeY, screenX) {
+            // Set ray properties based on light intensity
+            const rayAlpha = lightIntensity / 10;
+            const numRays = Math.floor(raysDensity / 2);
+            
+            // Draw rays from different points on the object
+            for (let i = 0; i <= numRays; i++) {
+                // Calculate point on object
+                const t = i / numRays;
+                const pointY = objY - objectHeight/2 + (objectHeight * t);
+                
+                // Ray from object to pinhole
+                ctx.strokeStyle = `rgba(255, 255, 100, ${rayAlpha})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(objX, pointY);
+                ctx.lineTo(pinholeX, pinholeY);
+                ctx.stroke();
+                
+                // Calculate where the ray hits the screen (inverted)
+                const screenY = pinholeY + (pinholeY - pointY) * (boxLength / (pinholeX - objX));
+                
+                // Ray from pinhole to screen
+                ctx.strokeStyle = `rgba(255, 200, 50, ${rayAlpha})`;
+                ctx.beginPath();
+                ctx.moveTo(pinholeX, pinholeY);
+                ctx.lineTo(screenX, screenY);
+                ctx.stroke();
+                
+                // Draw point on screen where ray hits (brighter for more rays)
+                if (i % 2 === 0) {
+                    ctx.fillStyle = `rgba(255, 165, 0, ${rayAlpha * 0.8})`;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw the inverted image on the screen
+            drawInvertedImage(objX, objY, screenX, pinholeX, pinholeY);
+        }
+        
+        // Draw the inverted image on the screen
+        function drawInvertedImage(objX, objY, screenX, pinholeX, pinholeY) {
+            ctx.save();
+            
+            // Calculate scaling factor for the inverted image
+            const scale = boxLength / (pinholeX - objX);
+            
+            // Set the origin to the pinhole projection point on the screen
+            const screenCenterY = pinholeY;
+            
+            // Draw the inverted object
+            ctx.translate(screenX, screenCenterY);
+            ctx.scale(-scale, -scale);
+            ctx.translate(-objX, -objY);
+            
+            // Reduce opacity for the projected image
+            ctx.globalAlpha = 0.6;
+            
+            // Draw the object (will be inverted due to negative scaling)
+            drawObject(objX, objY);
+            
+            ctx.restore();
+        }
+        
+        // Draw labels with improved styling
+        function drawLabels(boxX, boxY, boxWidth, boxHeight, boxLength, objX, objY) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            
+            // Object label
+            ctx.fillText('Object', objX, objY - objectHeight/2 - 20);
+            
+            // Pinhole label
+            ctx.fillText('Pinhole', boxX + boxWidth, boxY - 20);
+            
+            // Screen label
+            ctx.fillText('Screen', boxX + boxWidth + boxLength, boxY - 20);
+            
+            // Camera box label
+            ctx.fillText('Camera Box', boxX + boxWidth/2, boxY - 20);
+            
+            // Add measurement indicators
+            ctx.strokeStyle = '#6ab1ff';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 3]);
+            
+            // Object distance indicator
+            ctx.beginPath();
+            ctx.moveTo(objX, boxY + boxHeight + 30);
+            ctx.lineTo(boxX + boxWidth, boxY + boxHeight + 30);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#6ab1ff';
+            ctx.font = '14px Arial';
+            ctx.fillText(
+                `Object Distance: ${objectDistance}px`, 
+                (objX + boxX + boxWidth) / 2, 
+                boxY + boxHeight + 50
+            );
+            
+            // Box length indicator
+            ctx.beginPath();
+            ctx.moveTo(boxX + boxWidth, boxY + boxHeight + 80);
+            ctx.lineTo(boxX + boxWidth + boxLength, boxY + boxHeight + 80);
+            ctx.stroke();
+            
+            ctx.fillText(
+                `Box Length: ${boxLength}px`, 
+                boxX + boxWidth + boxLength/2, 
+                boxY + boxHeight + 100
+            );
+            
+            ctx.setLineDash([]);
+        }
+        
+        // Handle mouse events for dragging the object
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calculate object position
+            const boxWidth = 80;
+            const boxX = (canvas.width - boxWidth - boxLength) / 2;
+            const objX = boxX - objectDistance;
+            
+            // Check if mouse is over the object
+            if (Math.abs(mouseX - objX) < 50 && Math.abs(mouseY - objectY) < objectHeight) {
+                isDragging = true;
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                objectY = e.clientY - rect.top;
+                
+                // Keep object within reasonable bounds
+                const minY = 100;
+                const maxY = canvas.height - 100;
+                objectY = Math.max(minY, Math.min(maxY, objectY));
+                
+                drawCamera();
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+        
+        // Control event listeners
+        document.getElementById('pinhole-size').addEventListener('input', (e) => {
+            pinholeSize = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('box-length').addEventListener('input', (e) => {
+            boxLength = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('light-intensity').addEventListener('input', (e) => {
+            lightIntensity = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('rays-density').addEventListener('input', (e) => {
+            raysDensity = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('object-distance').addEventListener('input', (e) => {
+            objectDistance = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('object-height').addEventListener('input', (e) => {
+            objectHeight = parseInt(e.target.value);
+            drawCamera();
+        });
+        
+        document.getElementById('reset-view').addEventListener('click', () => {
+            objectY = canvas.height / 2;
+            pinholeSize = 3;
+            boxLength = 200;
+            lightIntensity = 7;
+            raysDensity = 15;
+            objectDistance = 150;
+            objectHeight = 60;
+            
+            // Reset sliders to default values
+            document.getElementById('pinhole-size').value = pinholeSize;
+            document.getElementById('box-length').value = boxLength;
+            document.getElementById('light-intensity').value = lightIntensity;
+            document.getElementById('rays-density').value = raysDensity;
+            document.getElementById('object-distance').value = objectDistance;
+            document.getElementById('object-height').value = objectHeight;
+            
+            drawCamera();
+        });
+        
+        document.getElementById('toggle-rays').addEventListener('click', () => {
+            showRays = !showRays;
+            drawCamera();
+        });
+        
+        document.getElementById('change-object').addEventListener('click', () => {
+            const objects = ['tree', 'house', 'person'];
+            const currentIndex = objects.indexOf(objectType);
+            objectType = objects[(currentIndex + 1) % objects.length];
+            drawCamera();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            drawCamera();
+        });
+        
+        // Initial draw
+        drawCamera();
+    </script>
+</body>
+</html>

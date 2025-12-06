@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Checker with Tape Diagrams</title>
+    <link rel="stylesheet" href="multiple.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Multiple Checker with Tape Diagrams</h1>
+        
+        <div class="instructions">
+            <p>Enter two numbers to check if the first number is a multiple of the second number. 
+            The tape diagram will visually show the relationship between the numbers.</p>
+        </div>
+        
+        <div class="counter">Number correct: <span id="correct-count">0</span></div>
+        
+        <div class="input-area">
+            <div>
+                <label for="number1">First Number:</label>
+                <input type="number" id="number1" min="1" max="100" value="12">
+            </div>
+            <div>
+                <label for="number2">Second Number:</label>
+                <input type="number" id="number2" min="1" max="100" value="3">
+            </div>
+            <button id="check-button">Check Multiple</button>
+        </div>
+        
+        <div id="sketch-holder"></div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="multiple.js"></script>
+</body>
+</html>

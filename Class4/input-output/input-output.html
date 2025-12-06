@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Input/Output System</title>
+   <link rel="stylesheet" href="input-output.css">
+</head>3
+<body>
+    <!-- <div id="loading-screen">
+        <div class="loading-text">🖥️ Booting Computer System...</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div id="boot-status">Initializing hardware...</div>
+    </div> -->
+
+    <div id="container">
+        <!-- 3D Scene will be rendered here -->
+    </div>
+
+    <!-- Desktop Screen Interface -->
+    <div id="desktop-screen">
+        <div id="desktop-header">
+            <div>🖥️ Computer Desktop - Input/Output System</div>
+            <button class="close-btn" onclick="closeDesktop()">×</button>
+        </div>
+        <div id="desktop-content">
+            <!-- Text Editor Window -->
+            <div class="window">
+                <div class="window-header">
+                    <span>📝 Text Editor</span>
+                </div>
+                <div class="window-content">
+                    <textarea id="text-editor" placeholder="Type your text here... This is a real text editor that responds to keyboard input!"></textarea>
+                </div>
+            </div>
+
+            <!-- Calculator Window -->
+            <div class="window">
+                <div class="window-header">
+                    <span>🧮 Calculator</span>
+                </div>
+                <div class="window-content">
+                    <div id="calculator">
+                        <div id="calc-display">0</div>
+                        <button class="calc-button" onclick="clearCalculator()">C</button>
+                        <button class="calc-button" onclick="deleteLast()">⌫</button>
+                        <button class="calc-button operator" onclick="appendToCalc('/')" >÷</button>
+                        <button class="calc-button operator" onclick="appendToCalc('*')">×</button>
+                        <button class="calc-button" onclick="appendToCalc('7')">7</button>
+                        <button class="calc-button" onclick="appendToCalc('8')">8</button>
+                        <button class="calc-button" onclick="appendToCalc('9')">9</button>
+                        <button class="calc-button operator" onclick="appendToCalc('-')">−</button>
+                        <button class="calc-button" onclick="appendToCalc('4')">4</button>
+                        <button class="calc-button" onclick="appendToCalc('5')">5</button>
+                        <button class="calc-button" onclick="appendToCalc('6')">6</button>
+                        <button class="calc-button operator" onclick="appendToCalc('+')">+</button>
+                        <button class="calc-button" onclick="appendToCalc('1')">1</button>
+                        <button class="calc-button" onclick="appendToCalc('2')">2</button>
+                        <button class="calc-button" onclick="appendToCalc('3')">3</button>
+                        <button class="calc-button operator" onclick="calculateResult()" style="grid-row: span 2;">=</button>
+                        <button class="calc-button" onclick="appendToCalc('0')" style="grid-column: span 2;">0</button>
+                        <button class="calc-button" onclick="appendToCalc('.')">.</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File System Window -->
+            <div class="window">
+                <div class="window-header">
+                    <span>📁 File System</span>
+                </div>
+                <div class="window-content">
+                    <div id="file-system">
+                        <div class="file-item" onclick="openFile('document')">
+                            <div class="file-icon">📄</div>
+                            <div>Document</div>
+                        </div>
+                        <div class="file-item" onclick="openFile('image')">
+                            <div class="file-icon">🖼️</div>
+                            <div>Image</div>
+                        </div>
+                        <div class="file-item" onclick="openFile('music')">
+                            <div class="file-icon">🎵</div>
+                            <div>Music</div>
+                        </div>
+                        <div class="file-item" onclick="openFile('video')">
+                            <div class="file-icon">🎬</div>
+                            <div>Video</div>
+                        </div>
+                        <div class="file-item" onclick="openFile('folder')">
+                            <div class="file-icon">📂</div>
+                            <div>Folder</div>
+                        </div>
+                        <div class="file-item" onclick="openFile('program')">
+                            <div class="file-icon">⚙️</div>
+                            <div>Program</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Virtual Keyboard -->
+    <div id="virtual-keyboard">
+        <div class="keyboard-row">
+            <button class="key">1</button>
+            <button class="key">2</button>
+            <button class="key">3</button>
+            <button class="key">4</button>
+            <button class="key">5</button>
+            <button class="key">6</button>
+            <button class="key">7</button>
+            <button class="key">8</button>
+            <button class="key">9</button>
+            <button class="key">0</button>
+            <button class="key wide">⌫</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key">Q</button>
+            <button class="key">W</button>
+            <button class="key">E</button>
+            <button class="key">R</button>
+            <button class="key">T</button>
+            <button class="key">Y</button>
+            <button class="key">U</button>
+            <button class="key">I</button>
+            <button class="key">O</button>
+            <button class="key">P</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key">A</button>
+            <button class="key">S</button>
+            <button class="key">D</button>
+            <button class="key">F</button>
+            <button class="key">G</button>
+            <button class="key">H</button>
+            <button class="key">J</button>
+            <button class="key">K</button>
+            <button class="key">L</button>
+            <button class="key wide">Enter</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key">Z</button>
+            <button class="key">X</button>
+            <button class="key">C</button>
+            <button class="key">V</button>
+            <button class="key">B</button>
+            <button class="key">N</button>
+            <button class="key">M</button>
+            <button class="key">,</button>
+            <button class="key">.</button>
+            <button class="key">?</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key space">Space</button>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="controls-panel">
+        <h2>🎛️ System Controls</h2>
+        
+        <div class="control-group">
+            <h4>💻 Monitor Controls:</h4>
+            <button class="control-btn" onclick="powerOnMonitor()">🔌 Power On</button>
+            <button class="control-btn danger" onclick="powerOffMonitor()">⏻ Power Off</button>
+            <button class="control-btn" onclick="openDesktop()">🖥️ Open Desktop</button>
+        </div>
+
+        <div class="control-group">
+            <h4>⌨️ Input Devices:</h4>
+            <button class="control-btn" onclick="toggleVirtualKeyboard()">⌨️ Virtual Keyboard</button>
+            <button class="control-btn" onclick="testMouseClick()">🖱️ Test Mouse</button>
+        </div>
+
+        <div class="control-group">
+            <h4>🔊 Audio Output:</h4>
+            <button class="control-btn success" onclick="playSystemSound()">🔊 System Beep</button>
+            <button class="control-btn success" onclick="playMusic()">🎵 Play Music</button>
+            <button class="control-btn danger" onclick="stopAllAudio()">🔇 Stop Audio</button>
+        </div>
+
+        <div class="control-group">
+            <h4>⚙️ System:</h4>
+            <button class="control-btn" onclick="bootSystem()">🚀 Boot System</button>
+            <button class="control-btn danger" onclick="shutdownSystem()">🔻 Shutdown</button>
+        </div>
+    </div>
+
+    <!-- Audio Visualizer -->
+    <div id="audio-visualizer">
+        <h4 style="color: white; margin-bottom: 10px; font-size: 12px;">🎵 Audio Output</h4>
+        <div id="visualizer-container"></div>
+    </div>
+
+    <!-- System Status -->
+    <div id="system-status">
+        <div class="status-item">
+            <span class="status-label">CPU Usage:</span>
+            <span class="status-value" id="cpu-usage">0%</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Memory:</span>
+            <span class="status-value" id="memory-usage">512MB</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">System Status:</span>
+            <span class="status-value" id="system-state">Ready</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Input Device:</span>
+            <span class="status-value" id="active-input">None</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Output Device:</span>
+            <span class="status-value" id="active-output">None</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Last Action:</span>
+            <span class="status-value" id="last-action">System Started</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+    <script src="input-output.js"></script>
+</body>
+</html>

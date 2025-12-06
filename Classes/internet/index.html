@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internet Transmission </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Internet Data Transmission Simulation</h1>
+    <p class="description">Visualization of data packets traveling from sender to receiver through different network mediums</p>
+    
+    <div class="controls">
+        <button id="fiber-btn">Fiber Optic</button>
+        <button id="copper-btn">Copper Cable</button>
+        <button id="wireless-btn">Wireless</button>
+        <button id="satellite-btn">Satellite</button>
+        <button id="add-packet-btn">Add Data Packet</button>
+    </div>
+    
+    <div class="container">
+        <div id="canvas-container"></div>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <div>Packets Sent</div>
+            <div id="sent-value" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+            <div>Packets Received</div>
+            <div id="received-value" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+            <div>Packet Loss</div>
+            <div id="loss-value" class="stat-value">0%</div>
+        </div>
+        <div class="stat-box">
+            <div>Transmission Speed</div>
+            <div id="speed-value" class="stat-value">0 Mbps</div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="color-box" style="background: #4fc3f7;"></div>
+            <span>Data Packets</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #ff5252;"></div>
+            <span>Corrupted Packets</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #69f0ae;"></div>
+            <span>ACK Packets</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="internet.js"></script>
+</body>
+</html>

@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound Pollution Visualization</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+        color: #fff;
+        min-height: 100vh;
+        overflow-x: hidden;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        padding: 20px 0;
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      @media (max-width: 900px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .visualization-container {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        height: 500px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #canvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .info-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .info-panel h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #4fc3f7;
+      }
+
+      .info-section {
+        margin-bottom: 25px;
+      }
+
+      .info-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: #81d4fa;
+      }
+
+      .info-section p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .upload-area {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .upload-drop {
+        flex: 1 1 auto;
+        min-height: 90px;
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        transition: background 0.15s ease, border-color 0.15s ease;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .upload-drop.dragover {
+        background: rgba(79, 195, 247, 0.06);
+        border-color: #4fc3f7;
+      }
+
+      .upload-controls {
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn-upload {
+        background: #2196f3;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .preview-thumb {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .image-url {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.2);
+        color: #fff;
+      }
+
+      .image-selection {
+        display: none;
+      }
+
+      .image-label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .control-btn {
+        background: #2196f3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        flex: 1;
+        min-width: 140px;
+      }
+
+      .control-btn:hover {
+        background: #0d8bf2;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+      }
+
+      .control-btn.active {
+        background: #ff5722;
+      }
+
+      .slider-container {
+        margin: 20px 0;
+      }
+
+      .slider-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .slider {
+        width: 100%;
+        height: 10px;
+        -webkit-appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #4fc3f7;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .stat-box {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4fc3f7;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .solution-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .solution-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #4fc3f7;
+      }
+
+      .solutions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .solution-card {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+      }
+
+      .solution-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .solution-card h3 {
+        color: #81d4fa;
+        margin-bottom: 10px;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px 0;
+        margin-top: 40px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
+
+      .health-indicator {
+        height: 10px;
+        background: linear-gradient(to right, #4caf50, #ffc107, #f44336);
+        border-radius: 5px;
+        margin-top: 10px;
+        position: relative;
+      }
+
+      .health-marker {
+        position: absolute;
+        top: -5px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        transition: left 0.5s ease;
+      }
+
+      .sound-source-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .sound-source-btn {
+        background: #9c27b0;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .sound-source-btn:hover {
+        background: #7b1fa2;
+      }
+
+      .sound-source-btn.active {
+        background: #e91e63;
+      }
+
+      .sound-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .sound-toggle {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .sound-toggle:hover {
+        background: #388e3c;
+      }
+
+      .sound-toggle.muted {
+        background: #f44336;
+      }
+
+      .sound-status {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .sound-description {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-top: 5px;
+        font-style: italic;
+      }
+      
+      .audio-info {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Sound Pollution Visualization</h1>
+        <p class="subtitle">
+          Select an environment and visualize how sound pollution affects
+          different areas. Each environment has unique sound characteristics.
+        </p>
+      </header>
+
+      <div class="content">
+        <div class="visualization-container" id="viz-container">
+          <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="info-panel">
+          <h2>Understanding Sound Pollution</h2>
+
+          <div class="info-section">
+            <h3>Select Environment</h3>
+            <p>Each environment has distinct sound characteristics:</p>
+            <ul>
+              <li>
+                <strong>City:</strong> Traffic hum, distant sirens, crowd noise
+              </li>
+              <li>
+                <strong>Construction:</strong> Jackhammer, drilling, heavy
+                machinery
+              </li>
+              <li>
+                <strong>Traffic:</strong> Engine rumble, horns, tire noise
+              </li>
+              <li>
+                <strong>Quiet Zone:</strong> Gentle breeze, occasional birds
+              </li>
+            </ul>
+          </div>
+
+          <div class="info-section">
+            <h3>What is Sound Pollution?</h3>
+            <p>
+              Sound pollution refers to harmful or annoying levels of noise that
+              disrupt our environment. Common sources include traffic,
+              construction, industrial activities, and loud social events.
+            </p>
+          </div>
+
+          <div class="info-section">
+            <h3>Health Impacts</h3>
+            <p>
+              Prolonged exposure to noise pollution can cause hearing loss,
+              increased stress, sleep disturbances, hypertension, and
+              cardiovascular problems. It also affects concentration and
+              productivity.
+            </p>
+            <div class="health-indicator">
+              <div class="health-marker" id="health-marker"></div>
+            </div>
+          </div>
+
+          <div class="sound-controls">
+            <button class="sound-toggle" id="sound-toggle">Mute Sound</button>
+            <div class="sound-status" id="sound-status">Sound is playing</div>
+          </div>
+
+          <div class="sound-source-controls">
+            <button class="sound-source-btn active" id="btn-add-source">
+              Add Sound Source
+            </button>
+            <button class="sound-source-btn" id="btn-clear-sources">
+              Clear Sources
+            </button>
+          </div>
+
+          <div class="slider-container">
+            <div class="slider-label">
+              <span>Noise Level</span>
+              <span id="noise-value">70 dB</span>
+            </div>
+            <input
+              type="range"
+              min="30"
+              max="120"
+              value="70"
+              class="slider"
+              id="noise-slider"
+            />
+          </div>
+
+          <div class="controls">
+            <button class="control-btn active" id="btn-city">City</button>
+            <button class="control-btn" id="btn-construction">
+              Construction
+            </button>
+            <button class="control-btn" id="btn-traffic">Traffic</button>
+            <button class="control-btn" id="btn-quiet">Quiet Zone</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat-box">
+              <div class="stat-value" id="db-value">70 dB</div>
+              <div class="stat-label">Noise Level</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="health-value">45%</div>
+              <div class="stat-label">Health Impact</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stress-value">Medium</div>
+              <div class="stat-label">Stress Level</div>
+            </div>
+          </div>
+          
+          <div class="audio-info">
+            <p><strong>Audio Source:</strong> All sounds are from Pixabay's free sound library</p>
+            <p><strong>Note:</strong> For the best experience, allow audio autoplay in your browser</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="solution-section">
+        <h2>Solutions to Reduce Sound Pollution</h2>
+        <div class="solutions">
+          <div class="solution-card">
+            <h3>Urban Planning</h3>
+            <p>
+              Create green buffers between residential areas and noise sources.
+              Implement zoning regulations to separate noisy industrial areas
+              from quiet zones.
+            </p>
+          </div>
+          <div class="solution-card">
+            <h3>Noise Barriers</h3>
+            <p>
+              Install sound-absorbing materials and barriers along highways and
+              near construction sites to reduce noise propagation.
+            </p>
+          </div>
+          <div class="solution-card">
+            <h3>Public Awareness</h3>
+            <p>
+              Educate communities about the harmful effects of noise pollution
+              and promote quieter alternatives in daily life.
+            </p>
+          </div>
+          <div class="solution-card">
+            <h3>Technology Solutions</h3>
+            <p>
+              Develop and use quieter machinery, vehicles, and equipment.
+              Implement noise-canceling technologies in buildings.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>Sound Pollution Visualization | Educational Purpose</p>
+      </footer>
+    </div>
+
+    <script>
+      // Canvas setup
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size
+      function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+      }
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // Visualization variables
+      let noiseLevel = 70;
+      let environment = "city";
+      let soundWaves = [];
+      let backgroundImage = null;
+      let isAddingSoundSource = false;
+      let isSoundMuted = false;
+
+      // Audio context and sources
+      let audioContext = null;
+      let bufferSources = [];
+      let gainNodes = [];
+      let soundIntervals = [];
+
+      // Predefined images (using placeholder images)
+     const images = {
+        city: "trafico-urbano-nocturno_Kunak.webp",
+        construction: "contaminacion_acustica_2.webp",
+        traffic: "4256.webp",
+        quiet: "20220801_170531.webp",
+      };
+
+      // Audio files for each environment (using direct links to Pixabay audio)
+     const audioFiles = {
+
+        city: "crowded-city-sound-427085.mp3",
+        construction: "hammer-drill-300505.mp3",
+        traffic: "traffic-67743.mp3",
+        quiet: "",
+      };
+      // Initialize environment with image
+      function initEnvironment(env, imgSrc = null) {
+        environment = env;
+        soundWaves = [];
+
+        const src = imgSrc || images[env] || null;
+        if (!src) {
+          backgroundImage = null;
+          addEnvironmentSoundSources();
+          return;
+        }
+        backgroundImage = new Image();
+        backgroundImage.crossOrigin = "anonymous";
+        backgroundImage.onload = function () {
+          addEnvironmentSoundSources();
+        };
+        backgroundImage.onerror = function () {
+          console.error("Failed to load background image:", src);
+          backgroundImage = null;
+          addEnvironmentSoundSources();
+        };
+        backgroundImage.src = src;
+
+        // Start the appropriate sound for the environment
+        startEnvironmentSound();
+      }
+
+      // Add sound sources based on environment
+      function addEnvironmentSoundSources() {
+        soundWaves = []; // Clear existing sources
+
+        if (environment === "city") {
+          // City environment - multiple sound sources representing urban noise
+          soundWaves.push({
+            x: canvas.width / 2,
+            y: canvas.height * 0.8,
+            radius: 5,
+            maxRadius: 200,
+            speed: 2,
+            alpha: 0.7,
+            color: "#FF5722",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.3,
+            y: canvas.height * 0.7,
+            radius: 5,
+            maxRadius: 150,
+            speed: 1.8,
+            alpha: 0.6,
+            color: "#FF5722",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.7,
+            y: canvas.height * 0.6,
+            radius: 5,
+            maxRadius: 180,
+            speed: 2.2,
+            alpha: 0.5,
+            color: "#FF5722",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.2,
+            y: canvas.height * 0.5,
+            radius: 5,
+            maxRadius: 120,
+            speed: 1.5,
+            alpha: 0.4,
+            color: "#FF5722",
+          });
+        } else if (environment === "construction") {
+          // Construction environment - heavy machinery sounds
+          soundWaves.push({
+            x: canvas.width * 0.5,
+            y: canvas.height * 0.7,
+            radius: 5,
+            maxRadius: 250,
+            speed: 3,
+            alpha: 0.8,
+            color: "#FF9800",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.7,
+            y: canvas.height * 0.6,
+            radius: 5,
+            maxRadius: 180,
+            speed: 2.5,
+            alpha: 0.7,
+            color: "#FF9800",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.3,
+            y: canvas.height * 0.5,
+            radius: 5,
+            maxRadius: 220,
+            speed: 2.8,
+            alpha: 0.6,
+            color: "#FF9800",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.6,
+            y: canvas.height * 0.4,
+            radius: 5,
+            maxRadius: 190,
+            speed: 2.3,
+            alpha: 0.5,
+            color: "#FF9800",
+          });
+        } else if (environment === "traffic") {
+          // Traffic environment - multiple vehicle sounds
+          for (let i = 0; i < 5; i++) {
+            soundWaves.push({
+              x: 100 + i * 150,
+              y: canvas.height * 0.8,
+              radius: 5,
+              maxRadius: 150,
+              speed: 2.5,
+              alpha: 0.6,
+              color: "#F44336",
+            });
+          }
+          for (let i = 0; i < 3; i++) {
+            soundWaves.push({
+              x: 80 + i * 200,
+              y: canvas.height * 0.6,
+              radius: 5,
+              maxRadius: 120,
+              speed: 2.2,
+              alpha: 0.5,
+              color: "#F44336",
+            });
+          }
+          for (let i = 0; i < 2; i++) {
+            soundWaves.push({
+              x: 150 + i * 300,
+              y: canvas.height * 0.4,
+              radius: 5,
+              maxRadius: 100,
+              speed: 1.8,
+              alpha: 0.4,
+              color: "#F44336",
+            });
+          }
+        } else if (environment === "quiet") {
+          // Quiet environment - minimal sound
+          soundWaves.push({
+            x: canvas.width / 2,
+            y: canvas.height * 0.7,
+            radius: 5,
+            maxRadius: 50,
+            speed: 0.5,
+            alpha: 0.3,
+            color: "#4CAF50",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.3,
+            y: canvas.height * 0.6,
+            radius: 5,
+            maxRadius: 40,
+            speed: 0.4,
+            alpha: 0.2,
+            color: "#4CAF50",
+          });
+          soundWaves.push({
+            x: canvas.width * 0.7,
+            y: canvas.height * 0.5,
+            radius: 5,
+            maxRadius: 35,
+            speed: 0.3,
+            alpha: 0.15,
+            color: "#4CAF50",
+          });
+        } else {
+          // Default environment
+          soundWaves.push({
+            x: canvas.width / 2,
+            y: canvas.height * 0.75,
+            radius: 5,
+            maxRadius: 100,
+            speed: 1.2,
+            alpha: 0.6,
+            color: "#FF5722",
+          });
+        }
+
+        // Adjust based on current noise level
+        soundWaves.forEach((wave) => {
+          wave.speed = 0.5 + (noiseLevel / 120) * 3;
+          wave.maxRadius = 50 + (noiseLevel / 120) * 200;
+          wave.alpha = 0.3 + (noiseLevel / 120) * 0.7;
+        });
+      }
+
+      // Initialize audio context
+      function initAudio() {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+        }
+      }
+
+      // Load audio from URL or path
+      async function loadAudio(url) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          return audioBuffer;
+        } catch (e) {
+          console.error('Error loading audio:', e);
+          return null;
+        }
+      }
+
+      // Start environment-specific sound
+      async function startEnvironmentSound() {
+        if (isSoundMuted) return;
+
+        // Stop any existing sounds
+        stopAllSounds();
+
+        // Initialize audio if needed
+        initAudio();
+
+        // Get the audio URL for the current environment
+        const audioUrl = audioFiles[environment];
+        if (!audioUrl) {
+          console.error("No audio URL found for environment:", environment);
+          return;
+        }
+
+        const buffer = await loadAudio(audioUrl);
+        if (!buffer) {
+          console.error("Failed to load audio for environment:", environment);
+          return; // If load fails, no sound
+        }
+
+        // Create and play the buffer source
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+
+        const gain = audioContext.createGain();
+        gain.gain.value = 0.1 + (noiseLevel / 120) * 0.4; // Base volume adjusted by noise level
+        gain.baseGain = gain.gain.value;
+
+        source.connect(gain);
+        gain.connect(audioContext.destination);
+        source.start();
+
+        bufferSources.push(source);
+        gainNodes.push(gain);
+      }
+
+      // Stop all sounds
+      function stopAllSounds() {
+        // Stop buffer sources
+        bufferSources.forEach((src) => {
+          try {
+            src.stop();
+          } catch (e) {}
+          try {
+            src.disconnect();
+          } catch (e) {}
+        });
+        bufferSources = [];
+        // Disconnect gains
+        gainNodes.forEach((g) => {
+          try {
+            g.disconnect();
+          } catch (e) {}
+        });
+        gainNodes = [];
+        // Clear intervals if any (though not used now)
+        soundIntervals.forEach((interval) => clearInterval(interval));
+        soundIntervals = [];
+      }
+
+      // Toggle sound on/off
+      function toggleSound() {
+        isSoundMuted = !isSoundMuted;
+        const toggleBtn = document.getElementById("sound-toggle");
+        const statusEl = document.getElementById("sound-status");
+
+        if (isSoundMuted) {
+          stopAllSounds();
+          toggleBtn.textContent = "Unmute Sound";
+          toggleBtn.classList.add("muted");
+          statusEl.textContent = "Sound is muted";
+        } else {
+          toggleBtn.textContent = "Mute Sound";
+          toggleBtn.classList.remove("muted");
+          statusEl.textContent = "Sound is playing";
+          startEnvironmentSound();
+        }
+      }
+
+      // Draw the environment
+      function drawEnvironment() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (backgroundImage && backgroundImage.complete) {
+          const imgAspect = backgroundImage.width / backgroundImage.height;
+          const canvasAspect = canvas.width / canvas.height;
+          let renderableWidth, renderableHeight, xStart, yStart;
+          if (imgAspect > canvasAspect) {
+            renderableHeight = canvas.height;
+            renderableWidth =
+              backgroundImage.width *
+              (renderableHeight / backgroundImage.height);
+            xStart = (canvas.width - renderableWidth) / 2;
+            yStart = 0;
+          } else {
+            renderableWidth = canvas.width;
+            renderableHeight =
+              backgroundImage.height *
+              (renderableWidth / backgroundImage.width);
+            xStart = 0;
+            yStart = (canvas.height - renderableHeight) / 2;
+          }
+          ctx.drawImage(
+            backgroundImage,
+            xStart,
+            yStart,
+            renderableWidth,
+            renderableHeight
+          );
+          ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } else {
+          ctx.fillStyle = "rgba(0,0,0,0.25)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Draw sound waves in all directions. Scale visual intensity by sound factor.
+        const soundFactor = isSoundMuted
+          ? 0.12
+          : Math.max(0.05, noiseLevel / 120);
+        soundWaves.forEach((wave) => {
+          ctx.beginPath();
+          ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = wave.color;
+          ctx.globalAlpha = Math.max(0.04, wave.alpha * soundFactor);
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+
+          wave.radius += wave.speed * soundFactor;
+          if (wave.radius > wave.maxRadius) {
+            wave.radius = 5;
+          }
+        });
+      }
+
+      // Animation loop
+      function animate() {
+        drawEnvironment();
+        requestAnimationFrame(animate);
+      }
+
+      // Initialize with city environment
+      initEnvironment("city");
+      animate();
+
+      // Update stats based on environment and noise level
+      function updateStats() {
+        let db, health, stress;
+
+        if (environment === "city") {
+          db = 70 + (noiseLevel - 70);
+          health = 45 + (noiseLevel - 70) * 1.5;
+          stress =
+            noiseLevel < 75 ? "Medium" : noiseLevel < 85 ? "High" : "Very High";
+        } else if (environment === "construction") {
+          db = 85 + (noiseLevel - 70);
+          health = 65 + (noiseLevel - 70) * 1.5;
+          stress =
+            noiseLevel < 80
+              ? "High"
+              : noiseLevel < 90
+              ? "Very High"
+              : "Extreme";
+        } else if (environment === "traffic") {
+          db = 80 + (noiseLevel - 70);
+          health = 55 + (noiseLevel - 70) * 1.5;
+          stress =
+            noiseLevel < 75 ? "Medium" : noiseLevel < 85 ? "High" : "Very High";
+        } else if (environment === "quiet") {
+          db = 45 + (noiseLevel - 70) * 0.3;
+          health = 15 + (noiseLevel - 70) * 0.5;
+          stress =
+            noiseLevel < 60 ? "Low" : noiseLevel < 70 ? "Medium" : "High";
+        } else {
+          db = 70 + (noiseLevel - 70) * 0.6;
+          health = 40 + (noiseLevel - 70) * 1.2;
+          stress =
+            noiseLevel < 70 ? "Medium" : noiseLevel < 85 ? "High" : "Very High";
+        }
+
+        db = Math.max(30, Math.min(120, db));
+        health = Math.max(0, Math.min(100, health));
+
+        document.getElementById("db-value").textContent =
+          Math.round(db) + " dB";
+        document.getElementById("health-value").textContent =
+          Math.round(health) + "%";
+        document.getElementById("stress-value").textContent = stress;
+
+        const healthMarker = document.getElementById("health-marker");
+        if (healthMarker) healthMarker.style.left = health + "%";
+
+        // Update sound volume based on noise level
+        if (!isSoundMuted) {
+          const factor = noiseLevel / 70;
+          gainNodes.forEach((gainNode) => {
+            if (gainNode && gainNode.gain) {
+              const base =
+                typeof gainNode.baseGain === "number"
+                  ? gainNode.baseGain
+                  : gainNode.gain.value;
+              gainNode.gain.value = Math.min(1, base * factor);
+            }
+          });
+        }
+      }
+
+      // Add sound source on canvas click
+      canvas.addEventListener("click", (e) => {
+        if (!isAddingSoundSource) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        soundWaves.push({
+          x: x,
+          y: y,
+          radius: 5,
+          maxRadius: 150 + (noiseLevel / 120) * 100,
+          speed: 0.5 + (noiseLevel / 120) * 3,
+          alpha: 0.3 + (noiseLevel / 120) * 0.7,
+          color: "#FF5722",
+        });
+      });
+
+      // Event listeners for environment buttons
+      document.getElementById("btn-city").addEventListener("click", () => {
+        setActiveButton("btn-city");
+        initEnvironment("city");
+        updateStats();
+      });
+
+      document
+        .getElementById("btn-construction")
+        .addEventListener("click", () => {
+          setActiveButton("btn-construction");
+          initEnvironment("construction");
+          updateStats();
+        });
+
+      document.getElementById("btn-traffic").addEventListener("click", () => {
+        setActiveButton("btn-traffic");
+        initEnvironment("traffic");
+        updateStats();
+      });
+
+      document.getElementById("btn-quiet").addEventListener("click", () => {
+        setActiveButton("btn-quiet");
+        initEnvironment("quiet");
+        updateStats();
+      });
+
+      // Event listener for noise slider
+      document.getElementById("noise-slider").addEventListener("input", (e) => {
+        noiseLevel = parseInt(e.target.value);
+        document.getElementById("noise-value").textContent = noiseLevel + " dB";
+        updateStats();
+
+        soundWaves.forEach((wave) => {
+          wave.speed = 0.5 + (noiseLevel / 120) * 3;
+          wave.maxRadius = 50 + (noiseLevel / 120) * 200;
+          wave.alpha = 0.3 + (noiseLevel / 120) * 0.7;
+        });
+
+        // Update volume without restarting
+        if (!isSoundMuted) {
+          const factor = noiseLevel / 70;
+          gainNodes.forEach((gainNode) => {
+            gainNode.gain.value = Math.min(1, gainNode.baseGain * factor);
+          });
+        }
+      });
+
+      // Event listeners for sound source controls
+      document
+        .getElementById("btn-add-source")
+        .addEventListener("click", () => {
+          isAddingSoundSource = !isAddingSoundSource;
+          const btn = document.getElementById("btn-add-source");
+          if (isAddingSoundSource) {
+            btn.classList.add("active");
+            btn.textContent = "Adding Sound Sources...";
+            canvas.style.cursor = "crosshair";
+          } else {
+            btn.classList.remove("active");
+            btn.textContent = "Add Sound Source";
+            canvas.style.cursor = "default";
+          }
+        });
+
+      document
+        .getElementById("btn-clear-sources")
+        .addEventListener("click", () => {
+          soundWaves = [];
+          addEnvironmentSoundSources();
+        });
+
+      // Event listener for sound toggle
+      document
+        .getElementById("sound-toggle")
+        .addEventListener("click", toggleSound);
+
+      function setActiveButton(activeId) {
+        document.querySelectorAll(".control-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        if (!activeId) return;
+        const el = document.getElementById(activeId);
+        if (el) el.classList.add("active");
+      }
+
+      // Initial stats update
+      updateStats();
+    </script>
+  </body>
+</html>

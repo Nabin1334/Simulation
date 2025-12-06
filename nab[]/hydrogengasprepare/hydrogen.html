@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrogen Gas Preparation Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <link rel="stylesheet" href="hydrogen.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Laboratory Preparation of Hydrogen Gas</h1>
+            <p class="subtitle">Interactive Simulation of the Reaction Between Zinc and Dilute Acid</p>
+        </header>
+        
+        <main>
+            <div id="canvas-container"></div>
+            
+            <div class="controls">
+                <button id="start-btn">Start Reaction</button>
+                <button id="reset-btn">Reset Experiment</button>
+                <button id="info-btn">Show Info</button>
+            </div>
+            
+            <div class="instructions">
+                <h2>About the Experiment</h2>
+                <p>This simulation demonstrates the laboratory preparation of hydrogen gas by reacting granulated zinc with dilute hydrochloric acid. The chemical reaction is:</p>
+                <p class="chemical-equation">Zn + 2HCl → ZnCl₂ + H₂↑</p>
+                
+                <div class="apparatus-list">
+                    <h2>Apparatus Components</h2>
+                    <div class="apparatus-items">
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #8d6e63;"></div>
+                            <span>Woulfe's Bottle</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #78909c;"></div>
+                            <span>Thistle Funnel</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #ffb74d;"></div>
+                            <span>Granulated Zinc</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #4fc3f7;"></div>
+                            <span>Dilute Acid</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #a1887f;"></div>
+                            <span>Delivery Tube</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #4db6ac;"></div>
+                            <span>Water Trough</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #e0e0e0;"></div>
+                            <span>Gas Jar</span>
+                        </div>
+                        <div class="apparatus-item">
+                            <div class="color-box" style="background-color: #90a4ae;"></div>
+                            <span>Beehive Shelf</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="experiment-info">
+                    <h2>How It Works</h2>
+                    <p>When dilute hydrochloric acid is added to granulated zinc in the Woulfe's bottle, hydrogen gas is produced. The gas travels through the delivery tube and is collected in the gas jar by downward displacement of water.</p>
+                    <p>Click "Start Reaction" to begin the simulation and observe the production of hydrogen gas bubbles.</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Created with p5.js | Laboratory Preparation of Hydrogen Gas Simulation</p>
+        </footer>
+    </div>
+
+    <script src="sketch.js"></script>
+    <script src="hydrogen.js"></script>
+</body>
+</html>

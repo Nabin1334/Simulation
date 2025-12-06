@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decimal Addition with Base 10 Blocks</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Decimal Addition with Base 10 Blocks</h1>
+            <p class="subtitle">Visualize decimal addition using Base 10 blocks</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="number" step="0.001" id="decimal1" value="0.000" min="0" max="9.999">
+                    <span>+</span>
+                    <input type="number" step="0.001" id="decimal2" value="0.000" min="0" max="9.999">
+                </div>
+                <button id="add-button">Add Decimals</button>
+                <button id="reset-button">Reset</button>
+                <div class="scale-controls">
+                    <button id="zoom-in">Zoom In</button>
+                    <button id="zoom-out">Zoom Out</button>
+                </div>
+            </div>
+            
+            <div class="visualization-section">
+                <div id="canvas-container"></div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74c3c;"></div>
+                        <span>Ones (1.0)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3498db;"></div>
+                        <span>Tenths (0.1)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #2ecc71;"></div>
+                        <span>Hundredths (0.01)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #f39c12;"></div>
+                        <span>Thousandths (0.001)</span>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How It Works</h3>
+                    <ol>
+                        <li>Enter two decimal numbers (up to 3 decimal places)</li>
+                        <li>Click "Add Decimals" to see the visualization</li>
+                        <li>Each number is represented using Base 10 blocks</li>
+                        <li>Blocks are combined and regrouped when needed</li>
+                        <li>The final result is shown after regrouping</li>
+                        <li>Use "Zoom In" and "Zoom Out" to adjust the visualization size</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Decimal Addition Visualizer - MVP Implementation</p>
+        </footer>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>

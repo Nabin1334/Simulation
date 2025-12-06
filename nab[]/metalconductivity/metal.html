@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Conductivity Simulation</title>
+    <link rel="stylesheet" href="metal.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Electrical Conductivity Simulation</h1>
+            <p>Test different materials to see which ones conduct electricity</p>
+        </header>
+        
+        <div class="simulation-area">
+            <div id="circuit-container">
+                <!-- Circuit will be drawn here by JavaScript -->
+            </div>
+            <div class="controls">
+                <button id="switch-btn" class="switch off" disabled aria-pressed="false">
+                    <span>🔴</span> Switch Off
+                </button>
+            </div>
+            
+            <div class="materials-panel">
+                <h2>Test Materials</h2>
+                <div class="materials-grid">
+                    <div class="material conductor" data-material="copper">
+                        <div class="material-icon">Cu</div>
+                        <div class="material-name">Copper</div>
+                    </div>
+                    <div class="material conductor" data-material="iron">
+                        <div class="material-icon">Fe</div>
+                        <div class="material-name">Iron</div>
+                    </div>
+                    <div class="material conductor" data-material="aluminium">
+                        <div class="material-icon">Al</div>
+                        <div class="material-name">Aluminium</div>
+                    </div>
+                    <div class="material conductor" data-material="lead">
+                        <div class="material-icon">Pb</div>
+                        <div class="material-name">Lead</div>
+                    </div>
+                    <div class="material insulator" data-material="paper">
+                        <div class="material-icon">📄</div>
+                        <div class="material-name">Paper</div>
+                    </div>
+                    <div class="material insulator" data-material="sulphur">
+                        <div class="material-icon">S</div>
+                        <div class="material-name">Sulphur</div>
+                    </div>
+                    <div class="material insulator" data-material="wood">
+                        <div class="material-icon">🪵</div>
+                        <div class="material-name">Wood</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <h2>Results</h2>
+            <div class="results-table">
+                <div class="results-column">
+                    <h3>Conductors</h3>
+                    <ul id="conductors-list">
+                        <li>Copper</li>
+                        <li>Iron</li>
+                        <li>Aluminium</li>
+                        <li>lead</li>
+                    </ul>
+                </div>
+                <div class="results-column">
+                    <h3>Insulators</h3>
+                    <ul id="insulators-list">
+                        <li>Paper</li>
+                        <li>Sulphur</li>
+                        <li>Wood</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions</h3>
+            <p>Click on a material to test it in the circuit. The bulb will light up if the material conducts electricity.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="metal.js"></script>
+</body>
+</html>
