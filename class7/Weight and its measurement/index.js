@@ -1,0 +1,402 @@
+
+        import * as THREE from 'three';
+
+        // --- CONFIGURATION ---
+        const SCALE_SENSITIVITY = 0.05;
+        const BEAM_LENGTH = 8;
+        const CHAIN_LENGTH = 3.5;
+        const MAX_TILT = 0.35; // radians (approx 20 degrees)
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        // Soft studio lighting environment
+        scene.background = new THREE.Color(0xf0f2f5);
+        scene.fog = new THREE.Fog(0xf0f2f5, 15, 40);
+
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 5, 16);
+        camera.lookAt(0, 1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // --- LIGHTS ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(5, 10, 8);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        scene.add(mainLight);
+
+        // --- MATERIALS ---
+        const matGold = new THREE.MeshStandardMaterial({ 
+            color: 0xffcc00, 
+            roughness: 0.3, 
+            metalness: 0.6 
+        });
+        const matSilver = new THREE.MeshStandardMaterial({ 
+            color: 0xdce1e3, 
+            roughness: 0.2, 
+            metalness: 0.8 
+        });
+        const matWood = new THREE.MeshStandardMaterial({ 
+            color: 0x8b5a2b, 
+            roughness: 0.8 
+        });
+        const matBase = new THREE.MeshStandardMaterial({ 
+            color: 0x2c3e50, 
+            roughness: 0.5 
+        });
+        const matChain = new THREE.LineBasicMaterial({ color: 0x333333, linewidth: 2 });
+
+        // --- BUILD SCALE OBJECTS ---
+        
+        // 1. Base
+        const baseGroup = new THREE.Group();
+        const basePlate = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.8, 0.5, 64), matBase);
+        basePlate.position.y = 0.25;
+        basePlate.receiveShadow = true;
+        baseGroup.add(basePlate);
+        
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.6, 6.5, 32), matSilver);
+        pillar.position.y = 3.25;
+        pillar.castShadow = true;
+        baseGroup.add(pillar);
+        
+        // Decorative cap
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(0.4), matGold);
+        cap.position.y = 6.5;
+        baseGroup.add(cap);
+
+        scene.add(baseGroup);
+
+        // 2. The Beam (Pivot point at 0, 6, 0)
+        const pivotHeight = 6.0;
+        const beamGroup = new THREE.Group();
+        beamGroup.position.set(0, pivotHeight, 0);
+        scene.add(beamGroup);
+
+        const beamGeo = new THREE.BoxGeometry(BEAM_LENGTH, 0.5, 0.4);
+        const beam = new THREE.Mesh(beamGeo, matWood);
+        beam.castShadow = true;
+        beamGroup.add(beam);
+
+        // Beam center detail
+        const beamCenter = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.45, 16), matGold);
+        beamCenter.rotation.x = Math.PI / 2;
+        beamGroup.add(beamCenter);
+
+        // Anchors (where chains attach)
+        const leftAnchor = new THREE.Object3D();
+        leftAnchor.position.set(-BEAM_LENGTH/2 + 0.2, 0, 0);
+        beamGroup.add(leftAnchor);
+
+        const rightAnchor = new THREE.Object3D();
+        rightAnchor.position.set(BEAM_LENGTH/2 - 0.2, 0, 0);
+        beamGroup.add(rightAnchor);
+
+        // 3. Pans & Chains (Dynamic)
+        // We create the pans as independent objects in the scene. 
+        // In the animation loop, we will move them to align with the beam.
+        
+        function createPan(color) {
+            const group = new THREE.Group();
+            
+            // The Dish
+            const dish = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.6, 1.2, 0.5, 32, 1, true), 
+                new THREE.MeshStandardMaterial({ 
+                    color: color, 
+                    side: THREE.DoubleSide,
+                    metalness: 0.2,
+                    roughness: 0.5
+                })
+            );
+            dish.position.y = 0;
+            dish.castShadow = true;
+            dish.receiveShadow = true;
+            
+            // Physical bottom
+            const bottom = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.1, 32), new THREE.MeshStandardMaterial({ color: color }));
+            bottom.position.y = -0.25;
+            bottom.castShadow = true;
+            group.add(dish);
+            group.add(bottom);
+
+            return group;
+        }
+
+        const leftPan = createPan(0xff6b6b);
+        const rightPan = createPan(0x0abde3);
+        scene.add(leftPan);
+        scene.add(rightPan);
+
+        // Chains (Visual Lines)
+        // We use BufferGeometry so we can update vertices every frame
+        function createChainLines() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(3 * 2 * 3); // 3 lines, 2 points each, 3 coords
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            return new THREE.LineSegments(geometry, matChain);
+        }
+
+        const leftChains = createChainLines();
+        const rightChains = createChainLines();
+        scene.add(leftChains);
+        scene.add(rightChains);
+
+        // 4. Floor (Invisible catcher for shadows)
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = 0;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+
+        // --- HELPERS FOR BLOCKS ---
+
+        // Function to create texture with number
+        function createNumberTexture(num, colorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = colorHex;
+            ctx.fillRect(0, 0, 128, 128);
+            
+            // Border
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(5, 5, 118, 118);
+
+            // Text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 80px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(num, 64, 64);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            return tex;
+        }
+
+        const blocks = [];
+
+        window.addWeight = (side, weight) => {
+            const isLeft = side === 'left';
+            
+            // Block styling
+            const size = weight === 2 ? 0.9 : 0.7; // Size varies by weight
+            const baseColor = isLeft ? '#ee5253' : '#0abde3';
+            const texture = createNumberTexture(weight, baseColor);
+
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            // Apply texture to all sides
+            const mat = new THREE.MeshStandardMaterial({ map: texture });
+            
+            const block = new THREE.Mesh(geometry, mat);
+            block.castShadow = true;
+            block.receiveShadow = true;
+
+            // Physics Data
+            block.userData = {
+                side: side,
+                weight: weight,
+                // Random position scatter on the pan
+                offsetX: (Math.random() - 0.5) * 1.5, 
+                offsetZ: (Math.random() - 0.5) * 1.5,
+                // We will calculate Y dynamically based on how many blocks are there
+                stackIndex: 0
+            };
+
+            // Calculate stack index
+            const countOnSide = blocks.filter(b => b.userData.side === side).length;
+            block.userData.stackIndex = countOnSide;
+
+            // Initial visual position (will be overridden by animate loop immediately)
+            scene.add(block);
+            blocks.push(block);
+
+            updatePhysicsState(side, weight);
+        };
+
+        window.resetSim = () => {
+            // Remove blocks
+            blocks.forEach(b => scene.remove(b));
+            blocks.length = 0;
+            
+            // Reset Physics
+            currentAngle = 0;
+            angularVelocity = 0;
+            leftTotalWeight = 0;
+            rightTotalWeight = 0;
+            
+            updateUI();
+        };
+
+
+        // --- PHYSICS ENGINE ---
+
+        let currentAngle = 0;
+        let angularVelocity = 0;
+        let leftTotalWeight = 0;
+        let rightTotalWeight = 0;
+
+        function updatePhysicsState(side, weight) {
+            if (side === 'left') leftTotalWeight += weight;
+            else rightTotalWeight += weight;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('score-left').innerText = leftTotalWeight;
+            document.getElementById('score-right').innerText = rightTotalWeight;
+            
+            const display = document.getElementById('status-display');
+            if (leftTotalWeight === rightTotalWeight) {
+                display.innerText = "Balanced";
+                display.style.color = "#2ecc71"; // Green
+            } else if (leftTotalWeight > rightTotalWeight) {
+                display.innerText = "Left is Heavier";
+                display.style.color = "#ee5253"; // Red
+            } else {
+                display.innerText = "Right is Heavier";
+                display.style.color = "#0abde3"; // Blue
+            }
+        }
+
+        // --- ANIMATION LOOP ---
+
+        function updateChains(anchorPos, panPos, lineObj) {
+            // We want 3 lines forming a tripod shape or just 2 lines for simplicity
+            // Let's do a simple triangle shape: 
+            // 1 point at Anchor, 2 points at Pan rim
+            
+            const positions = lineObj.geometry.attributes.position.array;
+            
+            // Top point (Anchor)
+            const ax = anchorPos.x;
+            const ay = anchorPos.y;
+            const az = anchorPos.z;
+
+            // Pan rim points (approximate)
+            const py = panPos.y + 0.5; // Top of pan dish
+            
+            // Line 1: Anchor to Left Rim
+            positions[0] = ax; positions[1] = ay; positions[2] = az;
+            positions[3] = panPos.x - 1.2; positions[4] = py; positions[5] = panPos.z;
+            
+            // Line 2: Anchor to Right Rim
+            positions[6] = ax; positions[7] = ay; positions[8] = az;
+            positions[9] = panPos.x + 1.2; positions[10] = py; positions[11] = panPos.z;
+
+            // Line 3: Anchor to Front/Back Rim (visual depth)
+            positions[12] = ax; positions[13] = ay; positions[14] = az;
+            positions[15] = panPos.x; positions[16] = py; positions[17] = panPos.z + 1.2;
+
+            lineObj.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // --- 1. PHYSICS CALCULATION (Harmonic Oscillator) ---
+            
+            // Determine the "Force" trying to twist the beam
+            // Difference in weight creates torque
+            const weightDiff = rightTotalWeight - leftTotalWeight;
+            
+            // Target angle: heavier side goes down. 
+            // If Right is heavier, Diff is positive. Right goes down -> Rotation is negative Z.
+            // Scale factor 0.08 determines how much it tilts per weight unit
+            let targetAngle = -weightDiff * 0.08; 
+            
+            // Clamp target angle to physical limits
+            targetAngle = Math.max(-MAX_TILT, Math.min(MAX_TILT, targetAngle));
+
+            // Spring Physics:
+            // Acceleration = (Distance to Target) * SpringStrength - (Friction)
+            const k = 0.05; // Spring stiffness (lower = slower wobble)
+            const damping = 0.94; // Friction (lower = stops faster, 1.0 = wobbles forever)
+            
+            const acceleration = (targetAngle - currentAngle) * k;
+            angularVelocity += acceleration;
+            angularVelocity *= damping; // Apply friction
+            currentAngle += angularVelocity;
+
+            // Apply rotation to beam
+            beamGroup.rotation.z = currentAngle;
+
+            // --- 2. UPDATE PANS & CHAINS ---
+            
+            // Get world position of anchors after beam rotation
+            const lAnchorPos = new THREE.Vector3();
+            leftAnchor.getWorldPosition(lAnchorPos);
+            
+            const rAnchorPos = new THREE.Vector3();
+            rightAnchor.getWorldPosition(rAnchorPos);
+
+            // Set Pan Positions
+            // Pans hang directly below anchors due to gravity. 
+            // x and z match anchor, y is lower by CHAIN_LENGTH
+            leftPan.position.set(lAnchorPos.x, lAnchorPos.y - CHAIN_LENGTH, lAnchorPos.z);
+            rightPan.position.set(rAnchorPos.x, rAnchorPos.y - CHAIN_LENGTH, rAnchorPos.z);
+
+            // Draw Chains
+            updateChains(lAnchorPos, leftPan.position, leftChains);
+            updateChains(rAnchorPos, rightPan.position, rightChains);
+
+            // --- 3. UPDATE BLOCKS ---
+            blocks.forEach(block => {
+                const isLeft = block.userData.side === 'left';
+                const panPos = isLeft ? leftPan.position : rightPan.position;
+                
+                // Base Y inside the pan dish
+                const panFloorY = panPos.y + 0.2; 
+                
+                // Simple stacking logic
+                // Each block sits on top of the previous roughly
+                // block.userData.weight determines height roughly (0.7 or 0.9)
+                const blockSize = block.geometry.parameters.height;
+                
+                // We use stackIndex to stack them upwards so they don't clip too much
+                // A better approach for a simple sim:
+                // Grid or random spread? Let's do random spread on floor, then stack if > 3
+                
+                let x = panPos.x + block.userData.offsetX;
+                let z = panPos.z + block.userData.offsetZ;
+                let y = panFloorY + (blockSize/2);
+
+                // If we have many blocks, stack them up visually
+                if (block.userData.stackIndex > 3) {
+                    y += blockSize * 0.8; // Move up one layer
+                    // Center the upper blocks more
+                    x = panPos.x + (block.userData.offsetX * 0.5);
+                }
+
+                block.position.set(x, y, z);
+                
+                // Rotate blocks slightly with the wobble to feel "in" the pan, 
+                // but generally they stay upright relative to the flat bottom of the pan
+                block.rotation.z = currentAngle * 0.5; 
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
