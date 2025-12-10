@@ -3,9 +3,465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Distance and  Displacement</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .visual-frame {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .path-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .path-btn {
+            padding: 10px 20px;
+            background: #e9ecef;
+            border: 2px solid #adb5bd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+        }
+        
+        .path-btn:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+        
+        .path-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .measurements {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(to right, #fff8e1, #e8f4f8);
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .measurement {
+            text-align: center;
+            padding: 20px;
+            min-width: 200px;
+        }
+        
+        .measurement.distance {
+            border-right: 2px dashed #e0e0e0;
+        }
+        
+        .measurement-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .distance .measurement-title {
+            color: #e74c3c;
+        }
+        
+        .displacement .measurement-title {
+            color: #3498db;
+        }
+        
+        .value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .distance .value {
+            color: #e74c3c;
+            text-shadow: 0 2px 5px rgba(231, 76, 60, 0.1);
+        }
+        
+        .displacement .value {
+            color: #3498db;
+            text-shadow: 0 2px 5px rgba(52, 152, 219, 0.1);
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .comparison {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 10px;
+        }
+        
+        .key-difference {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .difference-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #9b59b6;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+        }
+        
+        .legend-text {
+            font-weight: 600;
+        }
+        
+        .example-section {
+            margin-top: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .example-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .example-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .example-card.distance-ex {
+            border-left-color: #e74c3c;
+        }
+        
+        .example-card.displacement-ex {
+            border-left-color: #3498db;
+        }
+        
+        .example-card h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .measurements {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .measurement.distance {
+                border-right: none;
+                border-bottom: 2px dashed #e0e0e0;
+                padding-bottom: 30px;
+            }
+            
+            .comparison {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+        
+        .axis-label {
+            position: absolute;
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .distance-label {
+            position: absolute;
+            font-weight: bold;
+            color: #e74c3c;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .displacement-label {
+            position: absolute;
+            font-weight: bold;
+            color: #3498db;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .point-label {
+            position: absolute;
+            font-weight: bold;
+            color: #2c3e50;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 2px solid;
+            font-size: 0.9rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    
-</body>  
+    <div class="container">
+        <header>
+            <h1>Distance and Displacement </h1>
+            <p class="subtitle">Visualizing both concepts simultaneously to understand their relationship</p>
+        </header>
+        
+        <div class="visual-frame" id="visualFrame">
+            <canvas id="physicsCanvas"></canvas>
+        </div>
+        
+        <div class="controls">
+            <h3>Choose Path Type</h3>
+            <div class="path-buttons">
+                <div class="path-btn active" data-path="lshape">L-Shape Path</div>
+                <div class="path-btn" data-path="ushape">U-Shape Path</div>
+                <div class="path-btn" data-path="triangle">Triangle Path</div>
+                <div class="path-btn" data-path="zigzag">Zigzag Path</div>
+                <div class="path-btn" data-path="circuit">Circuit Path</div>
+                <div class="path-btn" data-path="custom">Custom Path</div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Customize Path</h3>
+                <div style="display: flex; gap: 20px; margin-top: 15px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Path Complexity</label>
+                        <input type="range" id="complexity" min="1" max="5" value="3" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Path Length</label>
+                        <input type="range" id="length" min="1" max="5" value="3" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="measurements">
+            <div class="measurement distance">
+                <div class="measurement-title">
+                    <i class="fas fa-road"></i> Distance
+                </div>
+                <div class="value" id="distanceValue">25.0</div>
+                <div style="color: #666; margin-bottom: 10px;">Total path length</div>
+                <div class="formula" id="distanceFormula">
+                    d = d₁ + d₂ + d₃
+                </div>
+                <div class="formula">
+                    d = 10m + 5m + 10m = 25m
+                </div>
+            </div>
+            
+            <div class="measurement displacement">
+                <div class="measurement-title">
+                    <i class="fas fa-arrow-right"></i> Displacement
+                </div>
+                <div class="value" id="displacementValue">5.0</div>
+                <div style="color: #666; margin-bottom: 10px;">Straight line distance</div>
+                <div class="formula" id="displacementFormula">
+                    Δx = x₂ - x₁
+                </div>
+                <div class="formula">
+                    Δx = 5m South
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison">
+            <div class="key-difference">
+                Distance is always ≥ Displacement
+            </div>
+            <div>
+                <span style="color: #666;">Ratio: </span>
+                <span class="difference-value" id="ratioValue">5.0</span>
+                <span style="color: #666;"> times longer</span>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e74c3c;"></div>
+                <div class="legend-text">Distance Path</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3498db; border: 2px dashed #3498db;"></div>
+                <div class="legend-text">Displacement Line</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2ecc71; border-radius: 50%;"></div>
+                <div class="legend-text">Start Point</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e74c3c; border-radius: 50%;"></div>
+                <div class="legend-text">End Point</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f39c12; border-radius: 50%;"></div>
+                <div class="legend-text">Mid Points</div>
+            </div>
+        </div>
+        
+        <div class="example-section">
+            <h3 class="example-title">Understanding Through Examples</h3>
+            <div class="example-grid">
+                <div class="example-card distance-ex">
+                    <h4><i class="fas fa-ruler-combined"></i> Distance Examples</h4>
+                    <p><strong>Car Odometer:</strong> Shows total distance traveled regardless of direction.</p>
+                    <p><strong>Running Track:</strong> Each lap adds to distance even if you return to start.</p>
+                    <p><strong>Hiking Trail:</strong> Winding trail length is the distance.</p>
+                </div>
+                
+                <div class="example-card displacement-ex">
+                    <h4><i class="fas fa-bullseye"></i> Displacement Examples</h4>
+                    <p><strong>GPS Navigation:</strong> Shows straight-line distance to destination.</p>
+                    <p><strong>Airplane Route:</strong> Direct "as the crow flies" distance matters most.</p>
+                    <p><strong>Position Change:</strong> Net movement from starting point.</p>
+                </div>
+                
+                <div class="example-card">
+                    <h4><i class="fas fa-lightbulb"></i> Key Insight</h4>
+                    <p>Distance and displacement are equal only when the path is a straight line.</p>
+                    <p>In circular motion, displacement can be zero while distance keeps increasing.</p>
+                    <p>Displacement has direction (vector), distance doesn't (scalar).</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Physics Visualization Tool</strong> | Distance and Displacement </p>
+            <p>Distance = Total Path Length | Displacement = Straight Line from Start to End</p>
+        </footer>
+    </div>
+
+    <script src="index.js"></script>
+</body>
 </html>
