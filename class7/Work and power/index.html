@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Work and Power</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .header {
+        width: 100%;
+        background: linear-gradient(to right, #6fa8dc, #3c78d8);
+        color: white;
+        text-align: center;
+        padding: 20px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: 2px;
+      }
+
+      .container {
+        padding: 40px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .simulation-box {
+        position: relative;
+        width: 800px;
+        height: 500px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      #three-container {
+        width: 100%;
+        height: 100%;
+      }
+
+      .sidebar {
+        width: 250px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .input-group,
+      .output-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .input-group label,
+      .output-group label {
+        font-size: 14px;
+        color: #555;
+        font-weight: bold;
+      }
+
+      .input-field {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .output-display {
+        padding: 10px 12px;
+        border-radius: 4px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        background-color: #e0f2f7;
+        color: #007bff;
+      }
+
+      .output-display.large {
+        font-size: 24px;
+        padding: 15px 12px;
+        background-color: #d1e3ff;
+        color: #000;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-around;
+        margin-top: auto;
+        gap: 10px;
+      }
+
+      button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        flex-grow: 1;
+      }
+
+      #start-btn {
+        background-color: #28a745; /* Green for start */
+        color: white;
+      }
+      #stop-btn {
+        background-color: #dc3545; /* Red for stop */
+        color: white;
+      }
+      #reset-btn {
+        background-color: #007bff;
+        color: white;
+      }
+
+      button:hover:not(:disabled) {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        color: #666;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Overlay labels */
+      .scene-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+        pointer-events: none;
+      }
+
+      .distance-moved-label {
+        background-color: #ffc107;
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      /* Formula display */
+      .formula-display {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+
+      .formula-display p {
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 14px;
+      }
+
+      @media (max-width: 1200px) {
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .simulation-box {
+          width: 90vw;
+          height: 400px;
+        }
+        .sidebar {
+          width: 90vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>WORK AND POWER</h1>
+    </div>
+
+    <div class="container">
+      <div class="simulation-box">
+        <div id="three-container"></div>
+        <div class="scene-overlay">
+          <div class="distance-label-container">
+            <div class="distance-moved-label">DISTANCE MOVED</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="formula-display">
+          <p>Work (J) = Force (N) × Distance (m)</p>
+          <p>Power (W) = Work (J) ÷ Time (s)</p>
+        </div>
+
+        <div class="input-group">
+          <label for="force-input">Force (N)</label>
+          <input
+            type="number"
+            id="force-input"
+            class="input-field"
+            value="10"
+            step="0.1"
+            min="0"
+          />
+        </div>
+        <div class="input-group">
+          <label for="time-input">Time (s)</label>
+          <input
+            type="number"
+            id="time-input"
+            class="input-field"
+            value="5"
+            step="0.1"
+            min="0.1"
+          />
+        </div>
+        <div class="input-group">
+          <label for="distance-input">Distance (m)</label>
+          <input
+            type="number"
+            id="distance-input"
+            class="input-field"
+            value="2"
+            step="0.1"
+            min="0"
+          />
+        </div>
+
+        <div class="output-group">
+          <label>Work (J)</label>
+          <div id="work-output" class="output-display large">0.00</div>
+        </div>
+        <div class="output-group">
+          <label>Power (W)</label>
+          <div id="power-output" class="output-display large">0.00</div>
+        </div>
+
+        <div class="controls">
+          <button id="start-btn">START</button>
+          <button id="stop-btn" disabled>STOP</button>
+          <button id="reset-btn">RESET</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="index.js">
+    </script>
+  </body>
+</html>

@@ -5,1577 +5,214 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Friction Minimization</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to bottom, #e0f2fe, #fff);
+            margin: 0;
             padding: 20px;
+            color: #333;
         }
-
-        header {
+        h1 {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 40px 30px;
-            background: rgba(22, 33, 62, 0.95);
-            border-radius: 25px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(76, 201, 240, 0.3);
+            color: #1e40af;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        #simulation {
+            width: 100%;
+            height: 300px;
+            border: 3px solid #333;
+            border-radius: 10px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(to bottom, #87ceeb 0%, #e0f7fa 100%);
+            margin: 20px 0;
         }
-
-        header::before {
+        #track {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            height: 20px;
+            background: #444;
+        }
+        #vehicle {
+            position: absolute;
+            bottom: 45px;
+            left: 20px;
+            width: 120px;
+            height: 70px;
+            transition: none;
+        }
+        .wheel {
+            position: absolute;
+            width: 34px;
+            height: 34px;
+            background: radial-gradient(circle at 30% 30%, #fff, #333);
+            border-radius: 50%;
+            border: 4px solid #111;
+            bottom: -12px;
+        }
+        .wheel::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee, #7209b7);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; height: 12px;
+            background: #666;
+            border-radius: 50%;
         }
-
-        h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee, #7209b7, #f72585);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 5px 15px rgba(76, 201, 240, 0.3);
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            from { text-shadow: 0 5px 15px rgba(76, 201, 240, 0.3); }
-            to { text-shadow: 0 5px 25px rgba(243, 104, 224, 0.5); }
-        }
-
-        .subtitle {
-            font-size: 1.4rem;
-            color: #a5b4fc;
-            max-width: 900px;
-            margin: 0 auto;
-            line-height: 1.8;
-            font-weight: 300;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        @media (max-width: 1200px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .simulation-section {
-            background: rgba(22, 33, 62, 0.95);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(76, 201, 240, 0.3);
-            backdrop-filter: blur(20px);
-        }
-
-        .controls-section {
-            background: rgba(22, 33, 62, 0.95);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(76, 201, 240, 0.3);
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        h2 {
-            font-size: 2.2rem;
-            margin-bottom: 25px;
-            color: #4cc9f0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(67, 97, 238, 0.5);
-        }
-
-        h2 i {
-            font-size: 2rem;
-        }
-
-        .simulation-container {
-            width: 100%;
-            height: 600px;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            background: #000;
-            border: 3px solid rgba(76, 201, 240, 0.4);
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
-        }
-
-        #scene3d {
-            width: 100%;
-            height: 100%;
-        }
-
-        .stats-overlay {
+        .wheel::after {
+            content: '';
             position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(10, 15, 35, 0.9);
-            padding: 25px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(76, 201, 240, 0.4);
-            z-index: 100;
-            min-width: 300px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 20px; height: 2px;
+            background: #999;
         }
-
-        .stats-title {
-            color: #4cc9f0;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stat-item {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .stat-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #cdd6ff;
-        }
-
-        .stat-value {
-            color: #4cc9f0;
-            font-weight: bold;
-            font-size: 1.2rem;
-            font-family: 'Courier New', monospace;
-        }
-
-        .progress-bar {
+        #wheel1 { left: 15px; }
+        #wheel2 { right: 15px; }
+        #body {
             width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            margin-top: 5px;
-            overflow: hidden;
+            height: 50px;
+            background: linear-gradient(#3b82f6, #1e40af);
+            border-radius: 10px 10px 5px 5px;
+            position: relative;
         }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee);
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.5s ease;
+        #body::before {
+            content: "Car";
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
         }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 180px;
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .rough { background: #dc3545; color: white; }
+        .smooth { background: #fd7e14; color: white; }
+        .lubricated { background: #20c997; color: white; }
+        .ball-bearing { background: #4361ee; color: white; }
+        .reset { background: #6c757d; color: white; }
 
-        .methods-grid {
+        .info-panel {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .method-card {
-            background: rgba(30, 35, 56, 0.9);
-            border-radius: 15px;
-            padding: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .method-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .method-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-            border-color: rgba(76, 201, 240, 0.4);
-        }
-
-        .method-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .method-card.active {
-            background: rgba(67, 97, 238, 0.2);
-            border-color: #4361ee;
-            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.3);
-        }
-
-        .method-card.active::before {
-            transform: scaleX(1);
-        }
-
-        .method-icon {
-            font-size: 2.8rem;
-            margin-bottom: 20px;
-            display: block;
-            text-align: center;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .method-name {
-            font-weight: bold;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            text-align: center;
-            color: #ffffff;
-        }
-
-        .method-desc {
-            font-size: 0.95rem;
-            color: #a5b4fc;
-            text-align: center;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .method-coefficient {
-            text-align: center;
-            font-weight: bold;
-            color: #4cc9f0;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            padding: 5px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 5px;
-        }
-
-        .control-group {
-            margin-bottom: 25px;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-weight: 500;
-            color: #cdd6ff;
-            font-size: 1.1rem;
-        }
-
-        .slider-container {
-            width: 100%;
-            position: relative;
-        }
-
-        .slider {
-            width: 100%;
-            height: 15px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(90deg, #0f3460, #4361ee);
-            border-radius: 10px;
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #4cc9f0;
-            cursor: pointer;
-            border: 4px solid #ffffff;
-            box-shadow: 0 0 15px rgba(76, 201, 240, 0.8);
-            transition: all 0.2s ease;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(76, 201, 240, 1);
-        }
-
-        .slider-value {
-            position: absolute;
-            top: -30px;
-            background: rgba(76, 201, 240, 0.9);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transform: translateX(-50%);
-            display: none;
-        }
-
-        .slider:hover .slider-value {
-            display: block;
-        }
-
-        .control-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #7209b7, #4361ee);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             gap: 15px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(114, 9, 183, 0.4);
-            background: linear-gradient(135deg, #8338ec, #4cc9f0);
-        }
-
-        .force-indicator {
-            background: rgba(30, 35, 56, 0.9);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 20px;
-        }
-
-        .force-title {
+            margin: 20px 0;
             text-align: center;
-            margin-bottom: 20px;
-            color: #4cc9f0;
-            font-weight: bold;
-            font-size: 1.2rem;
         }
-
-        .force-visual {
-            height: 25px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .force-applied {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #f72585);
-            border-radius: 12px;
-            width: 50%;
-            transition: width 1s ease;
-        }
-
-        .force-friction {
-            height: 100%;
-            background: linear-gradient(90deg, #4cc9f0, #4361ee);
-            border-radius: 12px;
-            width: 25%;
-            transition: width 1s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .force-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #a5b4fc;
-        }
-
-        .examples-section {
-            background: rgba(22, 33, 62, 0.95);
-            border-radius: 25px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(76, 201, 240, 0.3);
-            backdrop-filter: blur(20px);
-        }
-
-        .examples-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .example-card {
-            background: rgba(30, 35, 56, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            border-left: 6px solid;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .example-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .example-card h4 {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            color: #ffffff;
-        }
-
-        .example-card p {
-            line-height: 1.7;
-            color: #cdd6ff;
-            margin-bottom: 20px;
-        }
-
-        .example-icon {
-            font-size: 2.5rem;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(76, 201, 240, 0.1);
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            background: rgba(22, 33, 62, 0.95);
-            border-radius: 25px;
-            color: #a5b4fc;
-            font-size: 1rem;
-            border: 1px solid rgba(76, 201, 240, 0.3);
-            backdrop-filter: blur(20px);
-        }
-
-        .real-life-indicator {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(67, 97, 238, 0.9);
-            color: white;
-            padding: 10px 20px;
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
             border-radius: 10px;
+            border-left: 5px solid #4361ee;
+        }
+        .big-number {
+            font-size: 32px;
             font-weight: bold;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: #1e40af;
         }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .simulation-container {
-                height: 400px;
-            }
-            
-            .stats-overlay {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin-top: 20px;
-                min-width: auto;
-            }
-            
-            .methods-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .oil-drop {
+            position: absolute;
+            width: 8px;
+            height: 12px;
+            background: #ffd43b;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            animation: drip 3s infinite;
         }
-
-        @media (max-width: 480px) {
-            .methods-grid {
-                grid-template-columns: 1fr;
-            }
+        @keyframes drip {
+            0% { transform: translateY(-50px) rotate(-45deg); opacity: 0; }
+            70% { opacity: 1; }
+            100% { transform: translateY(200px) rotate(-45deg); opacity: 0; }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 0.5s linear infinite;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-atom"></i> Real-Life 3D Friction Simulation</h1>
-            <p class="subtitle">Experience realistic physics and visualization of friction minimization techniques used in engineering, manufacturing, and everyday life. See how different methods affect motion efficiency with accurate real-world physics.</p>
-        </header>
+        <h1> Friction Minimization</h1>
+        <p style="text-align:center; font-size:18px;">
+            See how ball bearings dramatically reduce friction compared to sliding!
+        </p>
 
-        <div class="main-content">
-            <section class="simulation-section">
-                <h2><i class="fas fa-cube"></i> Real-Time 3D Simulation</h2>
-                <div class="simulation-container">
-                    <div id="scene3d"></div>
-                    <div class="real-life-indicator">
-                        <i class="fas fa-check-circle"></i>
-                        Real Physics Simulation Active
-                    </div>
-                    <div class="stats-overlay">
-                        <div class="stats-title">
-                            <i class="fas fa-chart-line"></i>
-                            Real-Time Physics Data
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">
-                                <i class="fas fa-tools"></i>
-                                <span>Current Method:</span>
-                            </div>
-                            <div id="currentMethod" class="stat-value">Default Surface</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">
-                                <i class="fas fa-weight-hanging"></i>
-                                <span>Friction Coefficient (μ):</span>
-                            </div>
-                            <div id="frictionCoefficient" class="stat-value">0.50</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">
-                                <i class="fas fa-tachometer-alt"></i>
-                                <span>Velocity:</span>
-                            </div>
-                            <div id="velocityValue" class="stat-value">0.00 m/s</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">
-                                <i class="fas fa-bolt"></i>
-                                <span>Energy Loss:</span>
-                            </div>
-                            <div id="energyLoss" class="stat-value">75%</div>
-                        </div>
-                        <div class="progress-bar">
-                            <div id="efficiencyBar" class="progress-fill" style="width: 25%"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="force-indicator">
-                    <div class="force-title">Force Distribution Visualization</div>
-                    <div class="force-visual">
-                        <div id="forceApplied" class="force-applied" style="width: 50%"></div>
-                        <div id="forceFriction" class="force-friction" style="width: 25%"></div>
-                    </div>
-                    <div class="force-labels">
-                        <span><i class="fas fa-long-arrow-alt-right" style="color: #ff6b6b"></i> Applied Force: <span id="appliedForceDisplay">50 N</span></span>
-                        <span><i class="fas fa-long-arrow-alt-left" style="color: #4cc9f0"></i> Friction Force: <span id="frictionForceDisplay">25 N</span></span>
-                    </div>
-                </div>
-            </section>
-
-            <section class="controls-section">
-                <h2><i class="fas fa-sliders-h"></i> Real-World Controls</h2>
-                
-                <div class="control-group">
-                    <div class="control-label">
-                        <span><i class="fas fa-cogs"></i> Friction Reduction Technology</span>
-                        <span>Effectiveness</span>
-                    </div>
-                    <div class="methods-grid">
-                        <div class="method-card active" data-method="default">
-                            <div class="method-icon">
-                                <i class="fas fa-mountain" style="color: #8B4513"></i>
-                            </div>
-                            <div class="method-name">Default Surface</div>
-                            <div class="method-desc">Rough concrete-like surface with natural friction</div>
-                            <div class="method-coefficient">μ = 0.50</div>
-                        </div>
-                        <div class="method-card" data-method="polishing">
-                            <div class="method-icon">
-                                <i class="fas fa-gem" style="color: #C0C0C0"></i>
-                            </div>
-                            <div class="method-name">Polished Metal</div>
-                            <div class="method-desc">Machined smooth surface like automotive parts</div>
-                            <div class="method-coefficient">μ = 0.15</div>
-                        </div>
-                        <div class="method-card" data-method="lubrication">
-                            <div class="method-icon">
-                                <i class="fas fa-oil-can" style="color: #4cc9f0"></i>
-                            </div>
-                            <div class="method-name">Industrial Lubricant</div>
-                            <div class="method-desc">Engine oil or grease used in machinery</div>
-                            <div class="method-coefficient">μ = 0.08</div>
-                        </div>
-                        <div class="method-card" data-method="bearings">
-                            <div class="method-icon">
-                                <i class="fas fa-cogs" style="color: #FF6B6B"></i>
-                            </div>
-                            <div class="method-name">Steel Ball Bearings</div>
-                            <div class="method-desc">Precision bearings like in skateboards</div>
-                            <div class="method-coefficient">μ = 0.002</div>
-                        </div>
-                        <div class="method-card" data-method="wheels">
-                            <div class="method-icon">
-                                <i class="fas fa-tire" style="color: #FFD166"></i>
-                            </div>
-                            <div class="method-name">Rubber Wheels</div>
-                            <div class="method-desc">Vehicle wheels with pneumatic tires</div>
-                            <div class="method-coefficient">μ = 0.015</div>
-                        </div>
-                        <div class="method-card" data-method="airCushion">
-                            <div class="method-icon">
-                                <i class="fas fa-wind" style="color: #A5B4FC"></i>
-                            </div>
-                            <div class="method-name">Air Cushion/Hover</div>
-                            <div class="method-desc">Industrial air floatation systems</div>
-                            <div class="method-coefficient">μ = 0.001</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span><i class="fas fa-texture"></i> Surface Texture</span>
-                        <span id="surfaceTextureValue">Concrete</span>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="1" max="7" value="4" class="slider" id="surfaceSlider">
-                        <div class="slider-value">Concrete</div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span><i class="fas fa-hand-paper"></i> Applied Force</span>
-                        <span id="forceValueDisplay">50 N</span>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="10" max="200" value="50" class="slider" id="forceSlider">
-                        <div class="slider-value">50 N</div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="control-label">
-                        <span><i class="fas fa-weight"></i> Object Weight</span>
-                        <span id="weightValueDisplay">100 kg</span>
-                    </div>
-                    <div class="slider-container">
-                        <input type="range" min="10" max="500" value="100" class="slider" id="weightSlider">
-                        <div class="slider-value">100 kg</div>
-                    </div>
-                </div>
-
-                <button class="control-btn" id="startEngine">
-                    <i class="fas fa-play"></i> Start Engine Simulation
-                </button>
-                
-                <button class="control-btn" id="resetBtn" style="background: linear-gradient(135deg, #4361ee, #4cc9f0);">
-                    <i class="fas fa-redo"></i> Reset Simulation
-                </button>
-            </section>
+        <div id="simulation">
+            <div id="track"></div>
+            <div id="vehicle">
+                <div id="body"></div>
+                <div id="wheel1" class="wheel"></div>
+                <div id="wheel2" class="wheel"></div>
+            </div>
         </div>
 
-        <section class="examples-section">
-            <h2><i class="fas fa-industry"></i> Real-World Applications</h2>
-            <div class="examples-grid">
-                <div class="example-card" style="border-left-color: #8B4513;">
-                    <div class="example-icon">
-                        <i class="fas fa-car" style="color: #8B4513"></i>
-                    </div>
-                    <h4>Automotive Industry</h4>
-                    <p>Car engines use multiple friction reduction methods simultaneously: polished piston rings (μ=0.15), oil lubrication (μ=0.08), and bearing surfaces (μ=0.002) to achieve 85% mechanical efficiency.</p>
-                    <div class="method-coefficient">Combined μ ≈ 0.01-0.05</div>
-                </div>
-                
-                <div class="example-card" style="border-left-color: #C0C0C0;">
-                    <div class="example-icon">
-                        <i class="fas fa-robot" style="color: #C0C0C0"></i>
-                    </div>
-                    <h4>Industrial Robotics</h4>
-                    <p>Precision robots use linear guides with ball bearings (μ=0.002) and special coatings to minimize friction, allowing for accurate positioning with minimal energy consumption.</p>
-                    <div class="method-coefficient">Typical μ = 0.001-0.003</div>
-                </div>
-                
-                <div class="example-card" style="border-left-color: #4cc9f0;">
-                    <div class="example-icon">
-                        <i class="fas fa-plane" style="color: #4cc9f0"></i>
-                    </div>
-                    <h4>Aerospace Engineering</h4>
-                    <p>Aircraft landing gear combines wheel systems (μ=0.015) with hydraulic systems and special lubricants to handle massive loads while minimizing friction during takeoff and landing.</p>
-                    <div class="method-coefficient">Optimized μ = 0.01-0.02</div>
-                </div>
-                
-                <div class="example-card" style="border-left-color: #FF6B6B;">
-                    <div class="example-icon">
-                        <i class="fas fa-train" style="color: #FF6B6B"></i>
-                    </div>
-                    <h4>High-Speed Rail</h4>
-                    <p>Maglev trains use magnetic levitation (μ≈0) while traditional high-speed trains use specially designed wheel-rail interfaces with optimized profiles and lubrication.</p>
-                    <div class="method-coefficient">Magnetic μ ≈ 0.0001</div>
-                </div>
-            </div>
-        </section>
+        <div class="controls">
+            <button class="rough" onclick="start('rough')">Rough Surface<br><small>No wheels (μ = 0.80)</small></button>
+            <button class="smooth" onclick="start('smooth')">Smooth Sliding<br><small>Polished (μ = 0.40)</small></button>
+            <button class="lubricated" onclick="start('lubricated')">Lubricated<br><small>Oil/Grease (μ = 0.05)</small></button>
+            <button class="ball-bearing" onclick="start('bearing')">Ball Bearings!<br><small>Rolling (μ = 0.002)</small></button>
+            <button class="reset" onclick="reset()">Reset</button>
+        </div>
 
-        <footer>
-            <p><i class="fas fa-cube"></i> Real-Life 3D Friction Minimization Simulation | Built with Three.js & Real Physics</p>
-            <p>This simulation uses actual physics equations: F_friction = μ × N, where N = m × g (mass × gravity)</p>
-            <p>Adjust parameters to see how real engineering solutions reduce energy loss in mechanical systems.</p>
-        </footer>
+        <div class="info-panel">
+            <div class="info-card">
+                <div>Current Mode</div>
+                <div style="font-size:20px; font-weight:bold;" id="mode">Ready</div>
+            </div>
+            <div class="info-card">
+                <div>Friction Coefficient (μ)</div>
+                <div class="big-number" id="mu">—</div>
+            </div>
+            <div class="info-card">
+                <div>Distance Traveled</div>
+                <div class="big-number" id="distance">0.0 m</div>
+            </div>
+            <div class="info-card">
+                <div>Time Elapsed</div>
+                <div class="big-number" id="time">0.0 s</div>
+            </div>
+        </div>
+
+        <div style="margin-top:30px; line-height:1.8; background:#f0f8ff; padding:20px; border-radius:10px;">
+            <h3>Why Ball Bearings Are Amazing</h3>
+            <ul>
+                <li>Convert <strong>sliding friction</strong> → <strong>rolling friction</strong> (50–1000× lower)</li>
+                <li>Real ball bearings can have μ as low as <strong>0.001–0.002</strong></li>
+                <li>Wheels spin smoothly thanks to tiny steel balls inside</li>
+                <li>Used in cars, bikes, hard drives, skateboards, and machines everywhere!</li>
+            </ul>
+        </div>
     </div>
 
-    <!-- Three.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- OrbitControls for camera control -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-    <!-- GLTFLoader for 3D models -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
-    <!-- Improved materials -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.min.js"></script>
-
-    <script>
-        // Realistic 3D Simulation with Real Physics
-        let scene, camera, renderer, controls;
-        let block, surface, environment;
-        let currentMethod = 'default';
-        let frictionCoefficient = 0.5;
-        let appliedForce = 50;
-        let objectWeight = 100; // kg
-        let surfaceType = 4; // Concrete by default
-        let engineRunning = false;
-        let lastTime = 0;
-        let velocity = 0;
-        let positionX = 0;
-        let animationId = null;
-        
-        // Real-world surface properties
-        const surfaceTypes = [
-            { name: "Sandpaper", roughness: 2.0, color: 0x8B4513, friction: 1.0 },
-            { name: "Rough Wood", roughness: 1.5, color: 0x8B4513, friction: 0.8 },
-            { name: "Asphalt", roughness: 1.2, color: 0x333333, friction: 0.7 },
-            { name: "Concrete", roughness: 1.0, color: 0x808080, friction: 0.6 },
-            { name: "Steel", roughness: 0.8, color: 0xC0C0C0, friction: 0.5 },
-            { name: "Polished Granite", roughness: 0.4, color: 0x696969, friction: 0.3 },
-            { name: "Glass", roughness: 0.1, color: 0x87CEEB, friction: 0.1 }
-        ];
-        
-        // Real-world method configurations
-        const methods = {
-            default: { 
-                name: "Default Surface", 
-                baseCoefficient: 0.5, 
-                color: 0x8B4513,
-                contact: 1.0,
-                efficiency: 0.25
-            },
-            polishing: { 
-                name: "Polished Metal", 
-                baseCoefficient: 0.15, 
-                color: 0xC0C0C0,
-                contact: 0.4,
-                efficiency: 0.75
-            },
-            lubrication: { 
-                name: "Industrial Lubricant", 
-                baseCoefficient: 0.08, 
-                color: 0x4cc9f0,
-                contact: 0.2,
-                efficiency: 0.85
-            },
-            bearings: { 
-                name: "Steel Ball Bearings", 
-                baseCoefficient: 0.002, 
-                color: 0xFF6B6B,
-                contact: 0.01,
-                efficiency: 0.98
-            },
-            wheels: { 
-                name: "Rubber Wheels", 
-                baseCoefficient: 0.015, 
-                color: 0xFFD166,
-                contact: 0.05,
-                efficiency: 0.92
-            },
-            airCushion: { 
-                name: "Air Cushion/Hover", 
-                baseCoefficient: 0.001, 
-                color: 0xA5B4FC,
-                contact: 0.001,
-                efficiency: 0.99
-            }
-        };
-
-        // Initialize the 3D scene with realistic details
-        function initRealistic3DScene() {
-            // Create scene with realistic lighting
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0f1a);
-            
-            // Create camera with realistic FOV
-            camera = new THREE.PerspectiveCamera(60, 
-                document.getElementById('scene3d').clientWidth / 
-                document.getElementById('scene3d').clientHeight, 
-                0.1, 2000
-            );
-            camera.position.set(8, 12, 15);
-            
-            // Create high-quality renderer
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true,
-                alpha: true,
-                powerPreference: "high-performance"
-            });
-            renderer.setSize(
-                document.getElementById('scene3d').clientWidth,
-                document.getElementById('scene3d').clientHeight
-            );
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.2;
-            renderer.outputEncoding = THREE.sRGBEncoding;
-            document.getElementById('scene3d').appendChild(renderer.domElement);
-            
-            // Add advanced controls
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.minDistance = 5;
-            controls.maxDistance = 50;
-            controls.maxPolarAngle = Math.PI * 0.8;
-            
-            // Add realistic lighting
-            setupRealisticLighting();
-            
-            // Create environment
-            createRealisticEnvironment();
-            
-            // Create the main object
-            createRealisticObject();
-            
-            // Create the surface
-            createRealisticSurface();
-            
-            // Handle window resize
-            window.addEventListener('resize', onWindowResize);
-            
-            // Start animation
-            animate();
-        }
-        
-        // Setup realistic lighting
-        function setupRealisticLighting() {
-            // Main directional light (sun)
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            sunLight.position.set(20, 30, 10);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 4096;
-            sunLight.shadow.mapSize.height = 4096;
-            sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 100;
-            sunLight.shadow.camera.left = -30;
-            sunLight.shadow.camera.right = 30;
-            sunLight.shadow.camera.top = 30;
-            sunLight.shadow.camera.bottom = -30;
-            sunLight.shadow.bias = -0.0001;
-            scene.add(sunLight);
-            
-            // Fill light
-            const fillLight = new THREE.DirectionalLight(0x4cc9f0, 0.3);
-            fillLight.position.set(-10, 10, -10);
-            scene.add(fillLight);
-            
-            // Ambient light
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-            scene.add(ambientLight);
-            
-            // Rim light for object definition
-            const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
-            rimLight.position.set(0, 5, -10);
-            scene.add(rimLight);
-            
-            // Add some point lights for highlights
-            const pointLight1 = new THREE.PointLight(0x4cc9f0, 0.8, 50);
-            pointLight1.position.set(5, 10, 5);
-            scene.add(pointLight1);
-            
-            const pointLight2 = new THREE.PointLight(0xff6b6b, 0.6, 50);
-            pointLight2.position.set(-5, 8, -5);
-            scene.add(pointLight2);
-        }
-        
-        // Create realistic environment
-        function createRealisticEnvironment() {
-            environment = new THREE.Group();
-            
-            // Add floor grid
-            const gridHelper = new THREE.GridHelper(40, 40, 0x444444, 0x222222);
-            gridHelper.position.y = -1;
-            environment.add(gridHelper);
-            
-            // Add some environment objects
-            const wallGeometry = new THREE.BoxGeometry(30, 10, 1);
-            const wallMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x2c3e50,
-                roughness: 0.8,
-                metalness: 0.2
-            });
-            const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
-            backWall.position.set(0, 4, -15);
-            backWall.receiveShadow = true;
-            environment.add(backWall);
-            
-            scene.add(environment);
-        }
-        
-        // Create realistic object
-        function createRealisticObject() {
-            const objectGroup = new THREE.Group();
-            
-            // Main body (steel crate)
-            const bodyGeometry = new THREE.BoxGeometry(3, 2, 4);
-            const bodyMaterial = new THREE.MeshStandardMaterial({ 
-                color: methods.default.color,
-                roughness: 0.4,
-                metalness: 0.8,
-                envMapIntensity: 1.0
-            });
-            
-            block = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            block.castShadow = true;
-            block.receiveShadow = true;
-            block.position.y = 1;
-            objectGroup.add(block);
-            
-            // Add some details to make it look real
-            addObjectDetails(objectGroup);
-            
-            scene.add(objectGroup);
-        }
-        
-        // Add realistic details to object
-        function addObjectDetails(objectGroup) {
-            // Metal frame details
-            const frameGeometry = new THREE.BoxGeometry(3.2, 0.2, 4.2);
-            const frameMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x333333,
-                roughness: 0.6,
-                metalness: 0.9
-            });
-            
-            // Top frame
-            const topFrame = new THREE.Mesh(frameGeometry, frameMaterial);
-            topFrame.position.set(0, 2.1, 0);
-            objectGroup.add(topFrame);
-            
-            // Bottom frame
-            const bottomFrame = new THREE.Mesh(frameGeometry, frameMaterial);
-            bottomFrame.position.set(0, -0.1, 0);
-            objectGroup.add(bottomFrame);
-            
-            // Add warning stripes
-            const stripeGeometry = new THREE.BoxGeometry(0.1, 2, 0.3);
-            const stripeMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0xff6b6b,
-                emissive: 0xff0000,
-                emissiveIntensity: 0.1
-            });
-            
-            for (let i = 0; i < 4; i++) {
-                const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
-                stripe.position.set(1.5, 1, -1.5 + i);
-                objectGroup.add(stripe);
-            }
-            
-            // Add weight label
-            const labelGeometry = new THREE.PlaneGeometry(1, 0.5);
-            const labelMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.9
-            });
-            const label = new THREE.Mesh(labelGeometry, labelMaterial);
-            label.position.set(0, 2.2, 1.8);
-            label.rotation.x = -Math.PI / 2;
-            objectGroup.add(label);
-        }
-        
-        // Create realistic surface
-        function createRealisticSurface() {
-            const surfaceGroup = new THREE.Group();
-            
-            // Main surface plane
-            const surfaceGeometry = new THREE.PlaneGeometry(20, 15);
-            const surfaceMaterial = new THREE.MeshStandardMaterial({ 
-                color: surfaceTypes[3].color,
-                roughness: surfaceTypes[3].roughness,
-                metalness: 0.1
-            });
-            
-            surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
-            surface.rotation.x = -Math.PI / 2;
-            surface.position.y = 0;
-            surface.receiveShadow = true;
-            surfaceGroup.add(surface);
-            
-            // Add surface texture based on type
-            updateSurfaceTexture();
-            
-            scene.add(surfaceGroup);
-        }
-        
-        // Update surface texture based on type
-        function updateSurfaceTexture() {
-            const currentSurface = surfaceTypes[surfaceType - 1];
-            
-            // Update surface material
-            surface.material.color.setHex(currentSurface.color);
-            surface.material.roughness = currentSurface.roughness;
-            
-            // Update friction coefficient based on surface and method
-            updateFrictionCoefficient();
-        }
-        
-        // Update friction coefficient
-        function updateFrictionCoefficient() {
-            const currentSurface = surfaceTypes[surfaceType - 1];
-            const method = methods[currentMethod];
-            
-            // Realistic friction calculation: method coefficient × surface friction factor
-            frictionCoefficient = method.baseCoefficient * currentSurface.friction;
-            
-            // Update display
-            document.getElementById('frictionCoefficient').textContent = frictionCoefficient.toFixed(3);
-            updateForceVisualization();
-        }
-        
-        // Update method visualization
-        function updateMethodVisualization() {
-            // Update object color
-            block.material.color.setHex(methods[currentMethod].color);
-            
-            // Clear existing method objects
-            if (block.methodObjects) {
-                block.methodObjects.forEach(obj => obj.parent.remove(obj));
-            }
-            
-            block.methodObjects = [];
-            
-            // Add method-specific visual elements
-            switch(currentMethod) {
-                case 'lubrication':
-                    createLubricationEffect();
-                    break;
-                    
-                case 'bearings':
-                    createBearingsEffect();
-                    break;
-                    
-                case 'wheels':
-                    createWheelsEffect();
-                    break;
-                    
-                case 'airCushion':
-                    createAirCushionEffect();
-                    break;
-            }
-            
-            // Update friction coefficient
-            updateFrictionCoefficient();
-        }
-        
-        // Create lubrication effect
-        function createLubricationEffect() {
-            // Oil slick on surface
-            const oilGeometry = new THREE.CylinderGeometry(8, 10, 0.1, 32);
-            const oilMaterial = new THREE.MeshPhysicalMaterial({ 
-                color: 0x4cc9f0,
-                transmission: 0.9,
-                thickness: 0.5,
-                roughness: 0.1,
-                metalness: 0.1,
-                transparent: true,
-                opacity: 0.7
-            });
-            const oilSlick = new THREE.Mesh(oilGeometry, oilMaterial);
-            oilSlick.position.set(0, 0.05, 0);
-            oilSlick.rotation.x = Math.PI / 2;
-            scene.add(oilSlick);
-            block.methodObjects.push(oilSlick);
-            
-            // Oil droplets on object
-            for (let i = 0; i < 20; i++) {
-                const dropletGeometry = new THREE.SphereGeometry(0.1 + Math.random() * 0.1, 8, 8);
-                const dropletMaterial = new THREE.MeshPhysicalMaterial({ 
-                    color: 0x4cc9f0,
-                    transmission: 0.95,
-                    roughness: 0.05,
-                    metalness: 0.2,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const droplet = new THREE.Mesh(dropletGeometry, dropletMaterial);
-                droplet.position.set(
-                    (Math.random() - 0.5) * 2,
-                    1 + Math.random() * 1.5,
-                    (Math.random() - 0.5) * 3
-                );
-                block.add(droplet);
-                block.methodObjects.push(droplet);
-            }
-        }
-        
-        // Create bearings effect
-        function createBearingsEffect() {
-            // Create bearing assembly under object
-            const bearingGeometry = new THREE.CylinderGeometry(2, 2, 0.5, 32);
-            const bearingMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0xFF6B6B,
-                roughness: 0.3,
-                metalness: 0.9
-            });
-            const bearing = new THREE.Mesh(bearingGeometry, bearingMaterial);
-            bearing.position.set(0, 0.25, 0);
-            block.add(bearing);
-            block.methodObjects.push(bearing);
-            
-            // Add ball bearings
-            for (let i = 0; i < 8; i++) {
-                const ballGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-                const ballMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0xffffff,
-                    roughness: 0.1,
-                    metalness: 1.0
-                });
-                const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-                const angle = (i / 8) * Math.PI * 2;
-                ball.position.set(
-                    Math.cos(angle) * 1.5,
-                    0.5,
-                    Math.sin(angle) * 1.5
-                );
-                bearing.add(ball);
-                block.methodObjects.push(ball);
-            }
-        }
-        
-        // Create wheels effect
-        function createWheelsEffect() {
-            // Create wheel assembly
-            const wheelPositions = [
-                { x: -1.2, z: -1.8 },
-                { x: 1.2, z: -1.8 },
-                { x: -1.2, z: 1.8 },
-                { x: 1.2, z: 1.8 }
-            ];
-            
-            wheelPositions.forEach((pos, index) => {
-                // Wheel
-                const wheelGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 16);
-                const wheelMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x333333,
-                    roughness: 0.8,
-                    metalness: 0.2
-                });
-                const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
-                wheel.position.set(pos.x, 0.3, pos.z);
-                wheel.rotation.z = Math.PI / 2;
-                block.add(wheel);
-                block.methodObjects.push(wheel);
-                
-                // Wheel hub
-                const hubGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.32, 8);
-                const hubMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0xFFD166,
-                    roughness: 0.3,
-                    metalness: 0.8
-                });
-                const hub = new THREE.Mesh(hubGeometry, hubMaterial);
-                hub.position.set(pos.x, 0.3, pos.z);
-                hub.rotation.z = Math.PI / 2;
-                block.add(hub);
-                block.methodObjects.push(hub);
-                
-                // Axle
-                const axleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8);
-                const axleMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x888888,
-                    roughness: 0.5,
-                    metalness: 0.8
-                });
-                const axle = new THREE.Mesh(axleGeometry, axleMaterial);
-                axle.position.set(pos.x, 0.3, pos.z);
-                axle.rotation.x = Math.PI / 2;
-                block.add(axle);
-                block.methodObjects.push(axle);
-            });
-        }
-        
-        // Create air cushion effect
-        function createAirCushionEffect() {
-            // Air cushion base
-            const cushionGeometry = new THREE.CylinderGeometry(3, 4, 0.5, 32);
-            const cushionMaterial = new THREE.MeshPhysicalMaterial({ 
-                color: 0xA5B4FC,
-                transmission: 0.9,
-                roughness: 0.1,
-                thickness: 1,
-                transparent: true,
-                opacity: 0.6
-            });
-            const cushion = new THREE.Mesh(cushionGeometry, cushionMaterial);
-            cushion.position.set(0, 0.25, 0);
-            block.add(cushion);
-            block.methodObjects.push(cushion);
-            
-            // Air flow particles
-            for (let i = 0; i < 50; i++) {
-                const particleGeometry = new THREE.SphereGeometry(0.05 + Math.random() * 0.1, 8, 8);
-                const particleMaterial = new THREE.MeshBasicMaterial({ 
-                    color: 0xA5B4FC,
-                    transparent: true,
-                    opacity: 0.7
-                });
-                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-                particle.position.set(
-                    (Math.random() - 0.5) * 6,
-                    -0.5 + Math.random() * 0.5,
-                    (Math.random() - 0.5) * 6
-                );
-                cushion.add(particle);
-                block.methodObjects.push(particle);
-            }
-            
-            // Lift the object
-            block.position.y = 2;
-        }
-        
-        // Physics update
-        function updatePhysics(deltaTime) {
-            if (!engineRunning) return;
-            
-            // Real physics calculations
-            const gravity = 9.81; // m/s²
-            const normalForce = objectWeight * gravity; // N
-            
-            // Calculate friction force (F_friction = μ × N)
-            const frictionForce = frictionCoefficient * normalForce;
-            
-            // Calculate net force
-            const netForce = appliedForce - frictionForce;
-            
-            // Calculate acceleration (F = m × a)
-            const acceleration = netForce / objectWeight;
-            
-            // Update velocity (v = u + a × t)
-            velocity += acceleration * deltaTime;
-            
-            // Apply damping (air resistance)
-            velocity *= 0.99;
-            
-            // Update position
-            positionX += velocity * deltaTime;
-            
-            // Boundary check
-            if (positionX > 6 || positionX < -6) {
-                velocity *= -0.8; // Bounce with energy loss
-                positionX = Math.max(-6, Math.min(6, positionX));
-            }
-            
-            // Update object position
-            block.position.x = positionX;
-            
-            // Animate method-specific elements
-            animateMethodElements(deltaTime);
-            
-            // Update displays
-            updateDisplays(frictionForce, normalForce);
-        }
-        
-        // Animate method-specific elements
-        function animateMethodElements(deltaTime) {
-            const time = Date.now() * 0.001;
-            
-            switch(currentMethod) {
-                case 'bearings':
-                    // Rotate bearings
-                    if (block.methodObjects) {
-                        block.methodObjects.forEach(obj => {
-                            if (obj.geometry && obj.geometry.type === 'SphereGeometry') {
-                                obj.rotation.x += velocity * 5 * deltaTime;
-                                obj.rotation.z += velocity * 3 * deltaTime;
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'wheels':
-                    // Rotate wheels
-                    if (block.methodObjects) {
-                        block.methodObjects.forEach(obj => {
-                            if (obj.geometry && obj.geometry.type === 'CylinderGeometry' && 
-                                obj.geometry.parameters.radiusTop === 0.6) {
-                                obj.rotation.x += velocity * 2 * deltaTime;
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'airCushion':
-                    // Animate air particles
-                    if (block.methodObjects) {
-                        block.methodObjects.forEach((obj, index) => {
-                            if (obj.geometry && obj.geometry.type === 'SphereGeometry') {
-                                obj.position.y = -0.5 + Math.sin(time * 5 + index) * 0.3;
-                                obj.position.x += Math.sin(time + index) * 0.05;
-                                obj.position.z += Math.cos(time + index) * 0.05;
-                            }
-                        });
-                    }
-                    break;
-            }
-        }
-        
-        // Update displays
-        function updateDisplays(frictionForce, normalForce) {
-            // Update stats
-            document.getElementById('currentMethod').textContent = methods[currentMethod].name;
-            document.getElementById('velocityValue').textContent = Math.abs(velocity).toFixed(2) + " m/s";
-            
-            // Calculate efficiency
-            const efficiency = (1 - frictionCoefficient) * 100;
-            const energyLoss = 100 - efficiency;
-            
-            document.getElementById('energyLoss').textContent = energyLoss.toFixed(1) + "%";
-            document.getElementById('efficiencyBar').style.width = efficiency + "%";
-            
-            // Update force displays
-            document.getElementById('appliedForceDisplay').textContent = appliedForce.toFixed(0) + " N";
-            document.getElementById('frictionForceDisplay').textContent = frictionForce.toFixed(1) + " N";
-            
-            // Update force visualization
-            const maxForce = 200;
-            const appliedWidth = (appliedForce / maxForce) * 100;
-            const frictionWidth = (frictionForce / maxForce) * 100;
-            
-            document.getElementById('forceApplied').style.width = appliedWidth + "%";
-            document.getElementById('forceFriction').style.width = frictionWidth + "%";
-        }
-        
-        // Update force visualization
-        function updateForceVisualization() {
-            const normalForce = objectWeight * 9.81;
-            const frictionForce = frictionCoefficient * normalForce;
-            const maxForce = 200;
-            
-            const appliedWidth = (appliedForce / maxForce) * 100;
-            const frictionWidth = (frictionForce / maxForce) * 100;
-            
-            document.getElementById('forceApplied').style.width = appliedWidth + "%";
-            document.getElementById('forceFriction').style.width = frictionWidth + "%";
-            document.getElementById('frictionForceDisplay').textContent = frictionForce.toFixed(1) + " N";
-        }
-        
-        // Handle window resize
-        function onWindowResize() {
-            camera.aspect = document.getElementById('scene3d').clientWidth / 
-                           document.getElementById('scene3d').clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(
-                document.getElementById('scene3d').clientWidth,
-                document.getElementById('scene3d').clientHeight
-            );
-        }
-        
-        // Animation loop
-        function animate(currentTime) {
-            animationId = requestAnimationFrame(animate);
-            
-            // Calculate delta time
-            if (lastTime === 0) lastTime = currentTime;
-            const deltaTime = (currentTime - lastTime) * 0.001; // Convert to seconds
-            lastTime = currentTime;
-            
-            // Update physics
-            updatePhysics(deltaTime);
-            
-            // Update controls
-            controls.update();
-            
-            // Render scene
-            renderer.render(scene, camera);
-        }
-        
-        // Initialize UI controls
-        function initRealisticControls() {
-            // Method selection
-            document.querySelectorAll('.method-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove active class
-                    document.querySelectorAll('.method-card').forEach(c => {
-                        c.classList.remove('active');
-                    });
-                    
-                    // Add active class
-                    this.classList.add('active');
-                    
-                    // Update method
-                    currentMethod = this.dataset.method;
-                    updateMethodVisualization();
-                });
-            });
-            
-            // Surface slider
-            const surfaceSlider = document.getElementById('surfaceSlider');
-            const surfaceValue = document.getElementById('surfaceTextureValue');
-            const surfaceTooltip = surfaceSlider.nextElementSibling;
-            
-            surfaceSlider.addEventListener('input', function() {
-                surfaceType = parseInt(this.value);
-                const surface = surfaceTypes[surfaceType - 1];
-                
-                surfaceValue.textContent = surface.name;
-                surfaceTooltip.textContent = surface.name;
-                surfaceTooltip.style.left = ((surfaceType - 1) / 6 * 100) + '%';
-                
-                updateSurfaceTexture();
-            });
-            
-            // Force slider
-            const forceSlider = document.getElementById('forceSlider');
-            const forceValue = document.getElementById('forceValueDisplay');
-            const forceTooltip = forceSlider.nextElementSibling;
-            
-            forceSlider.addEventListener('input', function() {
-                appliedForce = parseInt(this.value);
-                forceValue.textContent = appliedForce + " N";
-                forceTooltip.textContent = appliedForce + " N";
-                forceTooltip.style.left = ((appliedForce - 10) / 190 * 100) + '%';
-                
-                updateForceVisualization();
-            });
-            
-            // Weight slider
-            const weightSlider = document.getElementById('weightSlider');
-            const weightValue = document.getElementById('weightValueDisplay');
-            const weightTooltip = weightSlider.nextElementSibling;
-            
-            weightSlider.addEventListener('input', function() {
-                objectWeight = parseInt(this.value);
-                weightValue.textContent = objectWeight + " kg";
-                weightTooltip.textContent = objectWeight + " kg";
-                weightTooltip.style.left = ((objectWeight - 10) / 490 * 100) + '%';
-                
-                updateForceVisualization();
-            });
-            
-            // Start engine button
-            document.getElementById('startEngine').addEventListener('click', function() {
-                engineRunning = !engineRunning;
-                if (engineRunning) {
-                    this.innerHTML = '<i class="fas fa-pause"></i> Stop Engine';
-                    this.style.background = 'linear-gradient(135deg, #ff6b6b, #f72585)';
-                } else {
-                    this.innerHTML = '<i class="fas fa-play"></i> Start Engine';
-                    this.style.background = 'linear-gradient(135deg, #7209b7, #4361ee)';
-                    velocity = 0;
-                }
-            });
-            
-            // Reset button
-            document.getElementById('resetBtn').addEventListener('click', function() {
-                // Reset physics
-                engineRunning = false;
-                velocity = 0;
-                positionX = 0;
-                block.position.x = 0;
-                
-                // Reset UI
-                document.getElementById('startEngine').innerHTML = '<i class="fas fa-play"></i> Start Engine';
-                document.getElementById('startEngine').style.background = 'linear-gradient(135deg, #7209b7, #4361ee)';
-                
-                // Reset sliders
-                surfaceSlider.value = 4;
-                surfaceType = 4;
-                surfaceValue.textContent = "Concrete";
-                
-                forceSlider.value = 50;
-                appliedForce = 50;
-                forceValue.textContent = "50 N";
-                
-                weightSlider.value = 100;
-                objectWeight = 100;
-                weightValue.textContent = "100 kg";
-                
-                // Reset method
-                document.querySelectorAll('.method-card').forEach(c => {
-                    c.classList.remove('active');
-                });
-                document.querySelector('[data-method="default"]').classList.add('active');
-                currentMethod = 'default';
-                
-                // Reset camera
-                camera.position.set(8, 12, 15);
-                controls.update();
-                
-                // Update visualization
-                updateMethodVisualization();
-                updateForceVisualization();
-            });
-        }
-        
-        // Initialize everything
-        window.addEventListener('load', function() {
-            initRealistic3DScene();
-            initRealisticControls();
-            updateMethodVisualization();
-        });
+    <script src="index.js"></script>
     </script>
 </body>
 </html>
