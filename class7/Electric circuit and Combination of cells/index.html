@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Circuit Experiment - Cells in Series</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e6f2ff 0%, #f0f8ff 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .experiment-container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            border: 2px solid #2c3e50;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: #555;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .materials-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .materials-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .materials-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .material-item {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .material-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        .material-icon {
+            font-size: 1.2rem;
+            color: #3498db;
+        }
+
+        .experiment-setup {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .circuit-row {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .circuit-label {
+            width: 120px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .circuit-diagram {
+            flex: 1;
+            position: relative;
+            height: 180px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #bdc3c7;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .circuit-diagram canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .circuit-controls {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .bulb-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bulb-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .bulb-visual {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ecf0f1;
+            border: 3px solid #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bulb-visual.off {
+            background: #ecf0f1;
+            border-color: #bdc3c7;
+            box-shadow: none;
+        }
+
+        .bulb-visual.on-normal {
+            background: radial-gradient(circle at 30% 30%, #ffeb3b, #ff9800);
+            border-color: #ff9800;
+            box-shadow: 0 0 15px #ffeb3b, 0 0 30px rgba(255, 235, 59, 0.3);
+        }
+
+        .bulb-visual.on-bright {
+            background: radial-gradient(circle at 30% 30%, #ffff00, #ff6600);
+            border-color: #ff6600;
+            box-shadow: 0 0 20px #ffff00, 0 0 40px rgba(255, 255, 0, 0.4);
+        }
+
+        .bulb-visual.on-very-bright {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff3300);
+            border-color: #ff3300;
+            box-shadow: 0 0 25px #ffff00, 0 0 50px rgba(255, 255, 0, 0.6), 0 0 70px rgba(255, 200, 0, 0.4);
+        }
+
+        .bulb-filament {
+            width: 20px;
+            height: 20px;
+            position: relative;
+        }
+
+        .bulb-filament.off::before,
+        .bulb-filament.off::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 20px;
+            background: #95a5a6;
+            border-radius: 2px;
+        }
+
+        .bulb-filament.off::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .bulb-filament.off::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .bulb-filament.on-normal::before,
+        .bulb-filament.on-normal::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 20px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .bulb-filament.on-normal::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .bulb-filament.on-normal::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .bulb-filament.on-bright::before,
+        .bulb-filament.on-bright::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 20px;
+            background: #ffff99;
+            border-radius: 2px;
+        }
+
+        .bulb-filament.on-bright::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .bulb-filament.on-bright::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .bulb-filament.on-very-bright::before,
+        .bulb-filament.on-very-bright::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 20px;
+            background: #ffffcc;
+            border-radius: 2px;
+        }
+
+        .bulb-filament.on-very-bright::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .bulb-filament.on-very-bright::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .switch-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch-btn {
+            padding: 10px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 0 #2980b9;
+        }
+
+        .switch-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #2980b9;
+        }
+
+        .switch-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2980b9;
+        }
+
+        .switch-btn.off {
+            background: #e74c3c;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+
+        .switch-btn.off:hover {
+            background: #c0392b;
+            box-shadow: 0 6px 0 #c0392b;
+        }
+
+        .switch-btn.off:active {
+            box-shadow: 0 2px 0 #c0392b;
+        }
+
+        .instructions {
+            background: #e8f4fc;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 20px;
+        }
+
+        .instructions h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .instructions ol {
+            padding-left: 25px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .instructions strong {
+            color: #e74c3c;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 992px) {
+            .circuit-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .circuit-label {
+                width: 100%;
+            }
+            
+            .circuit-controls {
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .experiment-container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .materials-list {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .material-item {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .circuit-diagram {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="experiment-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Electric Circuit Experiment</h1>
+            <p>Effect of Number of Cells on Bulb Brightness - Series Connection</p>
+        </div>
+
+        <!-- Materials Required -->
+        <div class="materials-section">
+            <h2>Materials Required</h2>
+            <div class="materials-list">
+                <div class="material-item">
+                    <span class="material-icon">🔌</span>
+                    <span>Conducting Wire</span>
+                </div>
+                <div class="material-item">
+                    <span class="material-icon">🔋</span>
+                    <span>Few Dry Cells</span>
+                </div>
+                <div class="material-item">
+                    <span class="material-icon">💡</span>
+                    <span>Bulb</span>
+                </div>
+                <div class="material-item">
+                    <span class="material-icon">⚡</span>
+                    <span>Switch</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h2>Procedure</h2>
+            <ol>
+                <li>Connect bulbs in the circuits of <strong>one cell</strong>, <strong>two cells</strong> and <strong>three cells</strong> as shown in the circuits below.</li>
+                <li>Click the <strong>Toggle Switch</strong> button to open/close each circuit.</li>
+                <li>Observe the brightness of the bulb in each circuit configuration.</li>
+                <li>Notice how adding more cells in series increases the bulb brightness.</li>
+            </ol>
+        </div>
+
+        <!-- Circuit Diagrams -->
+        <div class="experiment-setup">
+            <!-- Circuit with 1 Cell -->
+            <div class="circuit-row">
+                <div class="circuit-label">Circuit (a): 1 Cell</div>
+                <div class="circuit-diagram">
+                    <div class="canvas-container">
+                        <canvas id="circuit1" width="600" height="180"></canvas>
+                    </div>
+                </div>
+                <div class="circuit-controls">
+                    <div class="bulb-indicator">
+                        <div class="bulb-label">Bulb Status</div>
+                        <div class="bulb-visual off" id="bulb1">
+                            <div class="bulb-filament off" id="filament1"></div>
+                        </div>
+                    </div>
+                    <div class="switch-control">
+                        <div class="switch-label">Switch</div>
+                        <button class="switch-btn" id="switch1">Toggle Switch</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circuit with 2 Cells -->
+            <div class="circuit-row">
+                <div class="circuit-label">Circuit (b): 2 Cells</div>
+                <div class="circuit-diagram">
+                    <div class="canvas-container">
+                        <canvas id="circuit2" width="600" height="180"></canvas>
+                    </div>
+                </div>
+                <div class="circuit-controls">
+                    <div class="bulb-indicator">
+                        <div class="bulb-label">Bulb Status</div>
+                        <div class="bulb-visual off" id="bulb2">
+                            <div class="bulb-filament off" id="filament2"></div>
+                        </div>
+                    </div>
+                    <div class="switch-control">
+                        <div class="switch-label">Switch</div>
+                        <button class="switch-btn" id="switch2">Toggle Switch</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circuit with 3 Cells -->
+            <div class="circuit-row">
+                <div class="circuit-label">Circuit (c): 3 Cells</div>
+                <div class="circuit-diagram">
+                    <div class="canvas-container">
+                        <canvas id="circuit3" width="600" height="180"></canvas>
+                    </div>
+                </div>
+                <div class="circuit-controls">
+                    <div class="bulb-indicator">
+                        <div class="bulb-label">Bulb Status</div>
+                        <div class="bulb-visual off" id="bulb3">
+                            <div class="bulb-filament off" id="filament3"></div>
+                        </div>
+                    </div>
+                    <div class="switch-control">
+                        <div class="switch-label">Switch</div>
+                        <button class="switch-btn" id="switch3">Toggle Switch</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Electric Circuit Experiment | Demonstrating Series Connection of Cells | Physics Educational Tool</p>
+        </div>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

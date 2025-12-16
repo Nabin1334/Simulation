@@ -1,403 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Lightning with Three.js</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #000;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 100;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        #controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            background: rgba(0,0,0,0.7);
-            padding: 15px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        button {
-            background: #0066ff;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        button:hover {
-            background: #0055dd;
-        }
-        input[type="range"] {
-            width: 150px;
-            margin: 5px 0;
-        }
-        label {
-            display: block;
-            margin: 8px 0 3px 0;
-        }
-    </style>
-</head>
-<body>
-    <div id="info">
-        Click and drag to rotate camera<br>
-        Scroll to zoom<br>
-        Spacebar to trigger lightning
-    </div>
-    <div id="controls">
-        <label>Lightning Color:</label>
-        <input type="color" id="colorPicker" value="#00aaff">
-        
-        <label>Intensity: <span id="intensityValue">2.0</span></label>
-        <input type="range" id="intensitySlider" min="0.1" max="5" step="0.1" value="2">
-        
-        <label>Branching: <span id="branchValue">3</span></label>
-        <input type="range" id="branchSlider" min="0" max="6" step="1" value="3">
-        
-        <label>Bolt Count: <span id="boltValue">3</span></label>
-        <input type="range" id="boltSlider" min="1" max="10" step="1" value="3">
-        
-        <button id="autoToggle">Auto Mode: ON</button>
-        <button id="triggerBtn">Trigger Lightning</button>
-    </div>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Lightning Simulation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-    
-    <script>
-        // Scene setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
 
-        // Controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
+      canvas {
+        display: block;
+      }
 
-        // Camera position
-        camera.position.set(0, 2, 10);
-        controls.update();
+      #controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+        max-width: 320px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0x222222);
-        scene.add(ambientLight);
+      h2 {
+        margin-top: 0;
+        color: #4fc3f7;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+      }
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(5, 10, 7);
-        scene.add(directionalLight);
+      .control-group {
+        margin-bottom: 20px;
+      }
 
-        // Ground
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x222233,
-            roughness: 0.8,
-            metalness: 0.2
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        scene.add(ground);
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #ccc;
+        font-size: 14px;
+      }
 
-        // Lightning properties
-        let lightningBolts = [];
-        let autoMode = true;
-        let lightningCount = 0;
+      input[type="range"] {
+        width: 100%;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+      }
 
-        // Lightning bolt class
-        class LightningBolt {
-            constructor(start, end, color = 0x00aaff, intensity = 2, maxBranches = 3, branchProbability = 0.3) {
-                this.start = start.clone();
-                this.end = end.clone();
-                this.color = color;
-                this.intensity = intensity;
-                this.maxBranches = maxBranches;
-                this.branchProbability = branchProbability;
-                this.segments = [];
-                this.mesh = null;
-                this.lifetime = 0;
-                this.duration = 0.5 + Math.random() * 0.3;
-                this.flickerSpeed = 20 + Math.random() * 30;
-                
-                this.createBolt();
-            }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #4fc3f7;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(79, 195, 247, 0.8);
+      }
 
-            createBoltSegment(start, end, depth = 0) {
-                const segment = {
-                    start: start.clone(),
-                    end: end.clone(),
-                    points: this.generateLightningPath(start, end),
-                    mesh: null,
-                    opacity: 1
-                };
-                
-                this.createSegmentMesh(segment);
-                this.segments.push(segment);
+      button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #4fc3f7, #2196f3);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 5px;
+        font-weight: bold;
+        transition: all 0.3s;
+      }
 
-                // Create branches
-                if (depth < this.maxBranches && Math.random() < this.branchProbability) {
-                    const midPoint = new THREE.Vector3().lerpVectors(start, end, 0.3 + Math.random() * 0.4);
-                    const direction = new THREE.Vector3().subVectors(end, start).normalize();
-                    
-                    // Random perpendicular direction
-                    const branchDir = new THREE.Vector3(
-                        Math.random() - 0.5,
-                        Math.random() - 0.5,
-                        Math.random() - 0.5
-                    ).cross(direction).normalize();
-                    
-                    const branchLength = new THREE.Vector3().subVectors(end, start).length() * 
-                                       (0.3 + Math.random() * 0.4);
-                    const branchEnd = midPoint.clone().add(
-                        branchDir.multiplyScalar(branchLength)
-                    );
-                    
-                    this.createBoltSegment(midPoint, branchEnd, depth + 1);
-                }
-            }
+      button:hover {
+        background: linear-gradient(135deg, #29b6f6, #1976d2);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
+      }
 
-            generateLightningPath(start, end) {
-                const points = [start];
-                const segments = 8 + Math.floor(Math.random() * 8);
-                const deviation = 0.3;
-                
-                for (let i = 1; i < segments; i++) {
-                    const t = i / (segments - 1);
-                    const point = new THREE.Vector3().lerpVectors(start, end, t);
-                    
-                    // Add random deviation
-                    point.x += (Math.random() - 0.5) * deviation;
-                    point.y += (Math.random() - 0.5) * deviation;
-                    point.z += (Math.random() - 0.5) * deviation;
-                    
-                    points.push(point);
-                }
-                
-                points.push(end);
-                return points;
-            }
+      button:active {
+        transform: translateY(0);
+      }
 
-            createSegmentMesh(segment) {
-                const geometry = new THREE.BufferGeometry().setFromPoints(segment.points);
-                const material = new THREE.LineBasicMaterial({
-                    color: this.color,
-                    transparent: true,
-                    opacity: 0.8 * this.intensity,
-                    linewidth: 1
-                });
-                
-                segment.mesh = new THREE.Line(geometry, material);
-                scene.add(segment.mesh);
-            }
+      #stats {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
 
-            createBolt() {
-                this.createBoltSegment(this.start, this.end, 0);
-                
-                // Create flash effect
-                const flashGeometry = new THREE.SphereGeometry(0.5, 8, 8);
-                const flashMaterial = new THREE.MeshBasicMaterial({
-                    color: this.color,
-                    transparent: true,
-                    opacity: 0.3 * this.intensity
-                });
-                
-                this.flash = new THREE.Mesh(flashGeometry, flashMaterial);
-                this.flash.position.copy(this.end);
-                scene.add(this.flash);
-            }
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+        align-items: center;
+      }
 
-            update(delta) {
-                this.lifetime += delta;
-                
-                // Calculate fade
-                let visibility = 1;
-                if (this.lifetime > this.duration * 0.7) {
-                    visibility = 1 - ((this.lifetime - this.duration * 0.7) / (this.duration * 0.3));
-                }
-                
-                // Flicker effect
-                const flicker = 0.7 + 0.3 * Math.sin(this.lifetime * this.flickerSpeed);
-                visibility *= flicker;
-                
-                // Update segments
-                this.segments.forEach(segment => {
-                    if (segment.mesh) {
-                        segment.mesh.material.opacity = visibility * 0.8 * this.intensity;
-                    }
-                });
-                
-                // Update flash
-                if (this.flash) {
-                    const flashSize = 0.3 + 0.7 * Math.sin(this.lifetime * 15);
-                    this.flash.scale.set(flashSize, flashSize, flashSize);
-                    this.flash.material.opacity = visibility * 0.2 * this.intensity;
-                }
-                
-                return this.lifetime < this.duration;
-            }
+      .stat-value {
+        color: #4fc3f7;
+        font-weight: bold;
+        font-size: 16px;
+      }
 
-            dispose() {
-                this.segments.forEach(segment => {
-                    if (segment.mesh) {
-                        scene.remove(segment.mesh);
-                        segment.mesh.geometry.dispose();
-                        segment.mesh.material.dispose();
-                    }
-                });
-                
-                if (this.flash) {
-                    scene.remove(this.flash);
-                    this.flash.geometry.dispose();
-                    this.flash.material.dispose();
-                }
-            }
-        }
+      .instructions {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        border-radius: 8px;
+        color: #ccc;
+        font-size: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      }
 
-        // Function to create a new lightning strike
-        function createLightningStrike() {
-            const boltCount = parseInt(document.getElementById('boltSlider').value);
-            const color = document.getElementById('colorPicker').value;
-            const intensity = parseFloat(document.getElementById('intensitySlider').value);
-            const maxBranches = parseInt(document.getElementById('branchSlider').value);
-            
-            const hexColor = parseInt(color.replace('#', '0x'));
-            
-            for (let i = 0; i < boltCount; i++) {
-                // Random start and end points
-                const startX = (Math.random() - 0.5) * 20;
-                const startY = 15 + Math.random() * 10;
-                const startZ = (Math.random() - 0.5) * 20;
-                
-                const endX = startX + (Math.random() - 0.5) * 8;
-                const endY = 0;
-                const endZ = startZ + (Math.random() - 0.5) * 8;
-                
-                const start = new THREE.Vector3(startX, startY, startZ);
-                const end = new THREE.Vector3(endX, endY, endZ);
-                
-                const bolt = new LightningBolt(
-                    start, 
-                    end, 
-                    hexColor, 
-                    intensity, 
-                    maxBranches
-                );
-                
-                lightningBolts.push(bolt);
-                lightningCount++;
-                
-                // Update info
-                document.getElementById('info').innerHTML = 
-                    `Lightning strikes: ${lightningCount}<br>` +
-                    `Active bolts: ${lightningBolts.length}<br>` +
-                    `Click and drag to rotate camera<br>` +
-                    `Scroll to zoom<br>` +
-                    `Spacebar to trigger lightning`;
-            }
-        }
+      .audio-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
 
-        // Auto lightning trigger
-        let autoTimer = 0;
-        const autoInterval = 2 + Math.random() * 3;
+      .audio-btn {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+        background: rgba(79, 195, 247, 0.2);
+        border: 1px solid rgba(79, 195, 247, 0.3);
+      }
 
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const delta = 0.016; // Approximate 60fps delta
-            
-            controls.update();
-            
-            // Auto mode lightning
-            if (autoMode) {
-                autoTimer += delta;
-                if (autoTimer >= autoInterval) {
-                    createLightningStrike();
-                    autoTimer = 0;
-                }
-            }
-            
-            // Update and remove expired bolts
-            for (let i = lightningBolts.length - 1; i >= 0; i--) {
-                const bolt = lightningBolts[i];
-                const isAlive = bolt.update(delta);
-                
-                if (!isAlive) {
-                    bolt.dispose();
-                    lightningBolts.splice(i, 1);
-                }
-            }
-            
-            renderer.render(scene, camera);
-        }
+      .audio-btn.active {
+        background: #4fc3f7;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h2>⚡ Lightning </h2>
 
-        // Event listeners
-        document.getElementById('triggerBtn').addEventListener('click', createLightningStrike);
-        
-        document.getElementById('autoToggle').addEventListener('click', () => {
-            autoMode = !autoMode;
-            document.getElementById('autoToggle').textContent = 
-                `Auto Mode: ${autoMode ? 'ON' : 'OFF'}`;
-        });
+      <div class="control-group">
+        <label for="flashRate"
+          >Flash Rate: <span id="flashRateValue">2.0</span>/s</label
+        >
+        <input
+          type="range"
+          id="flashRate"
+          min="0.1"
+          max="5"
+          step="0.1"
+          value="2.0"
+        />
+      </div>
 
-        document.getElementById('colorPicker').addEventListener('input', (e) => {
-            // Update existing bolts color? Could implement if needed
-        });
+      <div class="control-group">
+        <label for="intensity"
+          >Intensity: <span id="intensityValue">8.0</span></label
+        >
+        <input
+          type="range"
+          id="intensity"
+          min="1"
+          max="15"
+          step="0.5"
+          value="8.0"
+        />
+      </div>
 
-        document.getElementById('intensitySlider').addEventListener('input', (e) => {
-            document.getElementById('intensityValue').textContent = e.target.value;
-        });
+      <div class="control-group">
+        <label for="branches"
+          >Branches: <span id="branchesValue">5</span></label
+        >
+        <input type="range" id="branches" min="0" max="15" step="1" value="5" />
+      </div>
 
-        document.getElementById('branchSlider').addEventListener('input', (e) => {
-            document.getElementById('branchValue').textContent = e.target.value;
-        });
+      <button id="strikeButton">⚡ Strike Now!</button>
+      <button id="megaStrike">💥 Mega Strike!</button>
 
-        document.getElementById('boltSlider').addEventListener('input', (e) => {
-            document.getElementById('boltValue').textContent = e.target.value;
-        });
+      <div class="audio-controls">
+        <button id="audioBtn" class="audio-btn active">🔊 Sound On</button>
+        <button id="volumeBtn" class="audio-btn">🔈 Low</button>
+      </div>
 
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                createLightningStrike();
-            }
-        });
+      <div id="stats">
+        <div class="stat">
+          <span>Total Strikes:</span>
+          <span class="stat-value" id="strikeCount">0</span>
+        </div>
+        <div class="stat">
+          <span>Temperature:</span>
+          <span class="stat-value" id="temperature">30,000°C</span>
+        </div>
+        <div class="stat">
+          <span>Voltage:</span>
+          <span class="stat-value" id="voltage">1 Billion V</span>
+        </div>
+        <div class="stat">
+          <span>Current Flash:</span>
+          <span class="stat-value" id="currentFlash">None</span>
+        </div>
+      </div>
+    </div>
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+    <div class="instructions">
+      Drag to rotate • Scroll to zoom • Right-click to pan
+    </div>
 
-        // Start animation
-        animate();
-
-        // Create initial lightning
-        setTimeout(() => {
-            createLightningStrike();
-        }, 1000);
+    <script src="index.js">
+   
     </script>
-</body>
+  </body>
 </html>
