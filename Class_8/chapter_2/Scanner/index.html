@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner - An Input Device</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #e8f4fc;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .slide-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .slide {
+            display: none;
+            text-align: center;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        .slide-number {
+            width: 35px;
+            height: 35px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .slide-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .slide-image-container {
+            width: 100%;
+            background: #2c3e50;
+            border-radius: 10px;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            border: 2px solid #1a2530;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide-image {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            display: none;
+        }
+        
+        .slide-description {
+            color: #555;
+            line-height: 1.5;
+            font-size: 15px;
+            padding: 0 10px;
+            text-align: center;
+        }
+        
+        .slide-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .slide-nav {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-btn:hover {
+            background: #2980b9;
+        }
+        
+        .nav-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .slide-indicator {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .scanner-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            margin-top: 20px;
+        }
+        
+        .scanner-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .scanner-display {
+            width: 100%;
+            height: 180px;
+            background: #2c3e50;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #1a2530;
+            margin-bottom: 15px;
+        }
+        
+        .scanner-bed {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .scanner-glass {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(44, 62, 80, 0.5);
+            z-index: 1;
+        }
+        
+        .scanner-light {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, transparent, #3498db, transparent);
+            box-shadow: 0 0 15px #3498db;
+            z-index: 2;
+            opacity: 0;
+        }
+        
+        .document-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            z-index: 0;
+        }
+        
+        .document-text {
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .scanner-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .scanner-btn {
+            padding: 12px 25px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 140px;
+        }
+        
+        .scanner-btn:hover {
+            background: #2980b9;
+        }
+        
+        .scanner-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .scanner-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .reset-btn {
+            background: #e74c3c;
+        }
+        
+        .reset-btn:hover {
+            background: #c0392b;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-top: 15px;
+            padding: 12px;
+            background: #e8f4fc;
+            border-radius: 8px;
+        }
+        
+        .info-section {
+            background: #e8f4fc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .info-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .info-text {
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        .scanning {
+            animation: scan 2s linear;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .slide-image-container {
+                max-height: 300px;
+            }
+            
+            .slide-image {
+                max-height: 280px;
+            }
+            
+            .scanner-display {
+                height: 160px;
+            }
+            
+            .scanner-btn {
+                min-width: 120px;
+                padding: 10px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .slide-image-container {
+                max-height: 250px;
+            }
+            
+            .slide-image {
+                max-height: 230px;
+            }
+            
+            .scanner-display {
+                height: 140px;
+            }
+            
+            .document-display {
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                padding: 10px;
+            }
+            
+            .scanner-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .scanner-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Scanner </h1>
+            <p class="subtitle">Learn how a scanner converts physical documents into digital format</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Slide 1 -->
+            <div class="slide-container">
+                <div class="slide active" id="slide1">
+                    <div class="slide-number">1</div>
+                    <div class="slide-title">What is a Scanner?</div>
+                    
+                    <div class="slide-image-container" id="slide1ImageContainer">
+                        <!-- Image will be loaded by JavaScript -->
+                    </div>
+                    
+                    <div class="slide-description">
+                        A scanner is an <strong>input device</strong> that converts physical documents, 
+                        photos, or text into digital format. It takes pictures from paper and creates 
+                        computer files that can be stored, edited, and shared.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slide-container">
+                <div class="slide" id="slide2">
+                    <div class="slide-number">2</div>
+                    <div class="slide-title">How Scanners Work</div>
+                    
+                    <div class="slide-image-container" id="slide2ImageContainer">
+                        <!-- Image will be loaded by JavaScript -->
+                    </div>
+                    
+                    <div class="slide-description">
+                        Scanners use <strong>light sensors</strong> and <strong>OCR technology</strong> 
+                        (Optical Character Recognition) to capture images. The scanner light moves 
+                        across the document, and sensors convert the light reflections into digital data.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide Navigation -->
+            <div class="slide-controls">
+                <div class="slide-nav">
+                    <button class="nav-btn" id="prevSlide" disabled>←</button>
+                    <button class="nav-btn" id="nextSlide">→</button>
+                </div>
+                <div class="slide-indicator" id="slideIndicator">Slide 1 of 2</div>
+            </div>
+            
+            <!-- Scanner Simulation -->
+            <div class="scanner-section">
+                <div class="scanner-title">Try the Scanner Simulation</div>
+                
+                <div class="scanner-display">
+                    <div class="scanner-bed">
+                        <div class="scanner-glass"></div>
+                        <div class="scanner-light" id="scannerLight"></div>
+                        
+                        <div class="document-display">
+                            <div class="document-text" id="documentText">
+                                Document ready for scanning
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-message" id="statusMessage">
+                    Ready to scan - Click "Start Scan" below
+                </div>
+                
+                <div class="scanner-controls">
+                    <button class="scanner-btn" id="scanBtn">
+                        Start Scan
+                    </button>
+                    
+                    <button class="scanner-btn reset-btn" id="resetBtn">
+                        Reset Scanner
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Information Section -->
+            <div class="info-section">
+                <div class="info-title">📚 </div>
+                <div class="info-text">
+                    • A scanner is an <strong>input device</strong> - it sends data to the computer<br>
+                    • It converts physical documents into <strong>digital format</strong><br>
+                    • Uses <strong>OCR technology</strong> to recognize text<br>
+                    • Creates <strong>soft copies</strong> that can be stored on computers<br>
+                    • Most common type is the <strong>flatbed scanner</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

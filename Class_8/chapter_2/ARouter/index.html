@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Router</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            color: #1a2980;
+            margin-bottom: 5px;
+        }
+        
+        .definition-box {
+            background: #f8f9fa;
+            border-left: 5px solid #1a2980;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .definition-box p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .visualization-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        #router-image-container {
+            width: 100%;
+            height: 500px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        #router-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .education-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #1a2980;
+        }
+        
+        .info-card h3 {
+            color: #1a2980;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-card h3 i {
+            color: #26d0ce;
+        }
+        
+        .info-card ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-card li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .router-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .router-type {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: transform 0.3s;
+        }
+        
+        .router-type:hover {
+            transform: translateY(-5px);
+            border-color: #1a2980;
+        }
+        
+        .router-type h4 {
+            color: #1a2980;
+            margin-bottom: 10px;
+        }
+        
+        .router-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .router-btn {
+            padding: 12px 25px;
+            background: #1a2980;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        
+        .router-btn:hover {
+            background: #26d0ce;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .router-btn.active {
+            background: #26d0ce;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        footer {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .learning-objectives {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .objective {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .objective:hover {
+            transform: translateY(-5px);
+        }
+        
+        .objective i {
+            font-size: 2rem;
+            color: #1a2980;
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            background: #fffacd;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .ip-address-display {
+            background: #34495e;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            #router-image-container {
+                height: 400px;
+            }
+            
+            .router-types {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .title-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .router-types {
+                grid-template-columns: 1fr;
+            }
+            
+            .image-caption {
+                font-size: 1rem;
+                padding: 12px 15px;
+            }
+            
+            #router-image-container {
+                height: 300px;
+            }
+            
+            .router-navigation {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .router-btn {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .learning-objectives {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .definition-box p {
+                font-size: 1rem;
+            }
+            
+            .main-content {
+                gap: 15px;
+            }
+            
+            .visualization-section,
+            .education-section {
+                padding: 15px;
+            }
+            
+            #router-image-container {
+                height: 250px;
+            }
+            
+            .info-card {
+                padding: 15px;
+            }
+            
+            .info-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .image-caption {
+                bottom: 15px;
+                font-size: 0.9rem;
+                padding: 10px 12px;
+            }
+            
+            footer {
+                padding: 15px;
+            }
+            
+            .objective {
+                padding: 15px;
+            }
+            
+            .objective h4 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            #router-image-container {
+                height: 200px;
+            }
+            
+            .router-type h4 {
+                font-size: 0.9rem;
+            }
+            
+            .router-type p {
+                font-size: 0.8rem;
+            }
+            
+            .router-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <i class="fas fa-network-wired" style="font-size: 3rem; color: #1a2980;"></i>
+                <div>
+                    <h1>Router</h1>
+                    <p style="color: #666; font-size: 1.1rem;">Interactive Educational Visualization</p>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <p><i class="fas fa-quote-left" style="color: #1a2980; margin-right: 10px;"></i>
+                A <span class="highlight">router</span> is a network connecting device that helps to connect different wired or wireless networks. 
+                A router helps to send data from one network to another. It works on the principle of <span class="highlight">IP (Internet Protocol) address</span>. 
+                Nowadays <span class="highlight">DSL</span> and <span class="highlight">Optical fibre</span> routers are more popular in the market. 
+                Routers are mainly of two types: <span class="highlight">wired</span> and <span class="highlight">wireless</span>.
+                <i class="fas fa-quote-right" style="color: #1a2980; margin-left: 10px;"></i></p>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="visualization-section">
+                <h2><i class="fas fa-images"></i> Router Images</h2>
+                <div id="router-image-container">
+                    <img id="router-image" src="" alt="Router Image">
+                    <div class="image-caption" id="image-caption"></div>
+                </div>
+                
+                <!-- Router type navigation buttons -->
+                <div class="router-navigation">
+                    <button class="router-btn active" data-type="wireless">
+                        <i class="fas fa-wifi"></i> Wireless Router
+                    </button>
+                    <button class="router-btn" data-type="wired">
+                        <i class="fas fa-ethernet"></i> Wired Router
+                    </button>
+                    <button class="router-btn" data-type="dsl">
+                        <i class="fas fa-broadcast-tower"></i> DSL Router
+                    </button>
+                    <button class="router-btn" data-type="fiber">
+                        <i class="fas fa-lightbulb"></i> Fiber Router
+                    </button>
+                </div>
+            </div>
+            
+            <div class="education-section">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> How Routers Work</h3>
+                    <p>Routers operate at the <span class="highlight">Network Layer (Layer 3)</span> of the OSI model and use IP addresses to route data packets.</p>
+                    
+                    <div class="ip-address-display">
+                        Current IP Routing Table: 192.168.1.0/24 → 192.168.2.0/24
+                    </div>
+                    
+                    <ul>
+                        <li><strong>Receives</strong> data packets from connected devices</li>
+                        <li><strong>Reads</strong> destination IP address in packet header</li>
+                        <li><strong>Consults</strong> routing table to find best path</li>
+                        <li><strong>Forwards</strong> packet to next hop or destination</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-network-wired"></i> Router Types</h3>
+                    <div class="router-types">
+                        <div class="router-type">
+                            <h4><i class="fas fa-ethernet"></i> Wired Router</h4>
+                            <p>Uses Ethernet cables for connections. More stable and secure.</p>
+                        </div>
+                        <div class="router-type">
+                            <h4><i class="fas fa-wifi"></i> Wireless Router</h4>
+                            <p>Uses Wi-Fi signals for connections. Provides mobility.</p>
+                        </div>
+                        <div class="router-type">
+                            <h4><i class="fas fa-broadcast-tower"></i> DSL Router</h4>
+                            <p>Connects to telephone lines for internet access.</p>
+                        </div>
+                        <div class="router-type">
+                            <h4><i class="fas fa-lightbulb"></i> Fiber Router</h4>
+                            <p>Uses optical fiber for ultra-high speed internet.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-cogs"></i> Key Components</h3>
+                    <ul>
+                        <li><strong>CPU/Routing Processor</strong> - Makes routing decisions</li>
+                        <li><strong>RAM</strong> - Stores routing tables and active connections</li>
+                        <li><strong>Flash Memory</strong> - Stores operating system (firmware)</li>
+                        <li><strong>Ethernet Ports</strong> - For wired connections (LAN)</li>
+                        <li><strong>WAN Port</strong> - Connects to modem/internet</li>
+                        <li><strong>Antennas</strong> - For wireless signal transmission</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> Router Functions</h3>
+                    <ul>
+                        <li><strong>Inter-network Communication</strong> - Connects different networks</li>
+                        <li><strong>Packet Forwarding</strong> - Moves data between networks</li>
+                        <li><strong>Path Selection</strong> - Chooses optimal route</li>
+                        <li><strong>Traffic Control</strong> - Manages network congestion</li>
+                        <li><strong>Security</strong> - Firewall and access control</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="learning-objectives">
+            <div class="objective">
+                <i class="fas fa-eye"></i>
+                <h4>Visual Learning</h4>
+                <p>See different router types and understand their functions</p>
+            </div>
+            <div class="objective">
+                <i class="fas fa-hand-pointer"></i>
+                <h4>Interactive Exploration</h4>
+                <p>Click buttons to view different router images</p>
+            </div>
+            <div class="objective">
+                <i class="fas fa-project-diagram"></i>
+                <h4>Educational Content</h4>
+                <p>Learn router components, functions, and working principles</p>
+            </div>
+            <div class="objective">
+                <i class="fas fa-graduation-cap"></i>
+                <h4>Comprehensive Learning</h4>
+                <p>Complete educational tool for understanding network routers</p>
+            </div>
+        </div>
+        
+        <footer>
+       
+            <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                <i class="fas fa-images"></i> 
+                <i class="fas fa-mobile-alt"></i> 
+                <i class="fas fa-info-circle"></i> 
+            </p>
+        </footer>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>
