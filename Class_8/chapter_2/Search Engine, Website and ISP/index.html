@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Technology Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+        }
+
+        /* Container for all sections */
+        .scroll-container {
+            position: relative;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Each section takes full screen */
+        .section {
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Section Backgrounds */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .website-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .isp-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .visualization-section {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .footer-section {
+            background: linear-gradient(135deg, #a3bded 0%, #6991c7 100%);
+            color: white;
+        }
+
+        /* Section Content */
+        .section-content {
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.3);
+        }
+
+        /* Hero Section */
+        .hero-title {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Search Engine Section */
+        .search-engines {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .search-engine-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .search-engine-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .search-engine-card.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .search-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .search-name {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .search-desc {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* Website Section */
+        .website-categories {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .category-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .websites-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .website-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .website-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .website-card.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .website-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            height: 70px;
+            width: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+
+        .website-name {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .website-type {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* ISP Section */
+        .isp-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .isp-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 35px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .isp-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .isp-card.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .isp-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .isp-name {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .isp-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .isp-metric {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Visualization Section */
+        .visualization-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .network-diagram {
+            width: 100%;
+            max-width: 800px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .network-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .node-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 5;
+            transform-origin: 0 0;
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .control-btn.primary {
+            background: white;
+            color: #333;
+        }
+
+        .control-btn.primary:hover {
+            background: #f0f0f0;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .browser-header {
+            background: #2d3748;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .browser-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .control-close { background: #ff5f57; }
+        .control-minimize { background: #ffbd2e; }
+        .control-maximize { background: #28ca42; }
+
+        .url-bar {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .browser-content {
+            padding: 40px;
+            color: #333;
+            min-height: 200px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .result-title {
+            color: #1a0dab;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-url {
+            color: #006621;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .result-desc {
+            color: #545454;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .footer-stats {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-stat {
+            text-align: center;
+        }
+
+        .footer-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .footer-label {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 25px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes movePacket {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(var(--tx)) translateY(var(--ty)); }
+        }
+
+        /* Scroll Down Indicator */
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-down i {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .section-title {
+                font-size: 2.8rem;
+            }
+            
+            .search-engines,
+            .websites-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.3rem;
+            }
+            
+            .section-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .search-engines,
+            .websites-grid,
+            .isp-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-stats,
+            .footer-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .nav-dots {
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .category-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .tech-item {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-container" id="scrollContainer">
+        <!-- Navigation Dots -->
+        <div class="nav-dots">
+            <div class="dot active" data-section="0"></div>
+            <div class="dot" data-section="1"></div>
+            <div class="dot" data-section="2"></div>
+            <div class="dot" data-section="3"></div>
+            <div class="dot" data-section="4"></div>
+            <div class="dot" data-section="5"></div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="section hero-section" id="section0">
+            <div class="scroll-down">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <h1 class="hero-title">Web Technology Explorer</h1>
+                <p class="hero-subtitle">Discover how Search Engines, Websites, and Internet Providers work together to bring you the web</p>
+                
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">5.6B</div>
+                        <div class="stat-label">Daily Searches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">1.7B</div>
+                        <div class="stat-label">Websites Online</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5.3B</div>
+                        <div class="stat-label">Internet Users</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Engine Section -->
+        <section class="section search-section" id="section1">
+            <div class="section-content">
+                <h2 class="section-title">
+                    <i class="fas fa-search"></i>
+                    Search Engines
+                </h2>
+                <p class="section-subtitle">
+                    Search engines help you find information by crawling, indexing, and ranking billions of web pages. 
+                    Choose a search engine to see how it works.
+                </p>
+                
+                <div class="search-engines">
+                    <div class="search-engine-card active" data-engine="google">
+                        <div class="search-icon" style="background: linear-gradient(135deg, #4285F4, #34A853, #FBBC05, #EA4335);">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <h3 class="search-name">Google</h3>
+                        <p class="search-desc">Most popular search engine with 92% market share</p>
+                    </div>
+                    
+                    <div class="search-engine-card" data-engine="bing">
+                        <div class="search-icon" style="background: linear-gradient(135deg, #008373, #00A4EF);">
+                            <i class="fab fa-microsoft"></i>
+                        </div>
+                        <h3 class="search-name">Bing</h3>
+                        <p class="search-desc">Microsoft's search engine with AI-powered results</p>
+                    </div>
+                    
+                    <div class="search-engine-card" data-engine="duckduckgo">
+                        <div class="search-icon" style="background: linear-gradient(135deg, #DE5833, #D95333);">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="search-name">DuckDuckGo</h3>
+                        <p class="search-desc">Privacy-focused search that doesn't track you</p>
+                    </div>
+                </div>
+                
+                <div class="search-process" style="margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+                        <div style="width: 100%; height: 3px; background: rgba(255, 255, 255, 0.3); position: absolute; top: 25px;"></div>
+                        
+                        <div style="text-align: center; z-index: 10;">
+                            <div style="width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #333;">
+                                <i class="fas fa-spider"></i>
+                            </div>
+                            <div style="font-weight: 600;">Crawling</div>
+                        </div>
+                        
+                        <div style="text-align: center; z-index: 10;">
+                            <div style="width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #333;">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div style="font-weight: 600;">Indexing</div>
+                        </div>
+                        
+                        <div style="text-align: center; z-index: 10;">
+                            <div style="width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #333;">
+                                <i class="fas fa-sort-amount-down"></i>
+                            </div>
+                            <div style="font-weight: 600;">Ranking</div>
+                        </div>
+                        
+                        <div style="text-align: center; z-index: 10;">
+                            <div style="width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #333;">
+                                <i class="fas fa-list-ol"></i>
+                            </div>
+                            <div style="font-weight: 600;">Results</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Website Section -->
+        <section class="section website-section" id="section2">
+            <div class="section-content">
+                <h2 class="section-title">
+                    <i class="fas fa-globe"></i>
+                    Websites
+                </h2>
+                <p class="section-subtitle">
+                    Websites are hosted on servers worldwide and delivered to your browser through the internet. 
+                    Select a website to learn more about it.
+                </p>
+                
+                <div class="website-categories">
+                    <button class="category-btn active" data-category="all">All Websites</button>
+                    <button class="category-btn" data-category="social">Social Media</button>
+                    <button class="category-btn" data-category="tech">Technology</button>
+                    <button class="category-btn" data-category="education">Education</button>
+                </div>
+                
+                <div class="websites-grid">
+                    <div class="website-card active" data-website="google" data-category="tech">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #4285F4, #34A853);">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <h3 class="website-name">Google</h3>
+                        <p class="website-type">Search Engine</p>
+                    </div>
+                    
+                    <div class="website-card" data-website="youtube" data-category="social">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #FF0000, #CC0000);">
+                            <i class="fab fa-youtube"></i>
+                        </div>
+                        <h3 class="website-name">YouTube</h3>
+                        <p class="website-type">Video Platform</p>
+                    </div>
+                    
+                    <div class="website-card" data-website="wikipedia" data-category="education">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #000000, #636466);">
+                            <i class="fab fa-wikipedia-w"></i>
+                        </div>
+                        <h3 class="website-name">Wikipedia</h3>
+                        <p class="website-type">Encyclopedia</p>
+                    </div>
+                    
+                    <div class="website-card" data-website="amazon" data-category="tech">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #FF9900, #FFAD33);">
+                            <i class="fab fa-amazon"></i>
+                        </div>
+                        <h3 class="website-name">Amazon</h3>
+                        <p class="website-type">E-commerce</p>
+                    </div>
+                    
+                    <div class="website-card" data-website="twitter" data-category="social">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #1DA1F2, #1A91DA);">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <h3 class="website-name">Twitter</h3>
+                        <p class="website-type">Social Media</p>
+                    </div>
+                    
+                    <div class="website-card" data-website="github" data-category="tech">
+                        <div class="website-icon" style="background: linear-gradient(135deg, #181717, #333333);">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h3 class="website-name">GitHub</h3>
+                        <p class="website-type">Code Hosting</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px; background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <h3 style="margin-bottom: 15px;">How Websites Work</h3>
+                    <p>Websites are built with HTML, CSS, and JavaScript, stored on servers, and delivered to your browser through your internet connection.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ISP Section -->
+        <section class="section isp-section" id="section3">
+            <div class="section-content">
+                <h2 class="section-title">
+                    <i class="fas fa-wifi"></i>
+                    Internet Providers
+                </h2>
+                <p class="section-subtitle">
+                    Internet Service Providers (ISPs) connect you to the worldwide web through various technologies.
+                    Choose your connection type to see how it affects speed.
+                </p>
+                
+                <div class="isp-options">
+                    <div class="isp-card active" data-isp="fiber">
+                        <div class="isp-icon" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="isp-name">Fiber Optic</h3>
+                        <p style="margin-bottom: 20px;">Uses light to transmit data at incredible speeds with minimal delay.</p>
+                        
+                        <div class="isp-details">
+                            <div class="isp-metric">
+                                <div class="metric-value">1 Gbps</div>
+                                <div class="metric-label">Download Speed</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">12ms</div>
+                                <div class="metric-label">Latency</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">99.9%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">$80/mo</div>
+                                <div class="metric-label">Average Cost</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="isp-card" data-isp="cable">
+                        <div class="isp-icon" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+                            <i class="fas fa-tv"></i>
+                        </div>
+                        <h3 class="isp-name">Cable Internet</h3>
+                        <p style="margin-bottom: 20px;">Uses existing cable TV lines to provide fast internet service.</p>
+                        
+                        <div class="isp-details">
+                            <div class="isp-metric">
+                                <div class="metric-value">200 Mbps</div>
+                                <div class="metric-label">Download Speed</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">28ms</div>
+                                <div class="metric-label">Latency</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">99.5%</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                            <div class="isp-metric">
+                                <div class="metric-value">$50/mo</div>
+                                <div class="metric-label">Average Cost</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #333;">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div style="font-weight: 600;">Your Device</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #333;">
+                                <i class="fas fa-router"></i>
+                            </div>
+                            <div style="font-weight: 600;">Router</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #333;">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div style="font-weight: 600;">ISP Network</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #333;">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div style="font-weight: 600;">Internet</div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #333;">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div style="font-weight: 600;">Website</div>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 20px; opacity: 0.9;">Data travels this path when you visit a website</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Section -->
+        <section class="section visualization-section" id="section4">
+            <div class="section-content">
+                <h2 class="section-title">
+                    <i class="fas fa-project-diagram"></i>
+                    Live Visualization
+                </h2>
+                <p class="section-subtitle">
+                    See how your selected search engine, website, and internet provider work together in real-time.
+                </p>
+                
+                <div class="visualization-container">
+                    <div class="network-diagram" id="networkDiagram">
+                        <!-- Network nodes will be generated here -->
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="control-btn primary" id="startSimulation">
+                            <i class="fas fa-play-circle"></i>
+                            Start Simulation
+                        </button>
+                        <button class="control-btn" id="performSearch">
+                            <i class="fas fa-search"></i>
+                            Perform Search
+                        </button>
+                        <button class="control-btn" id="resetSimulation">
+                            <i class="fas fa-redo"></i>
+                            Reset
+                        </button>
+                    </div>
+                    
+                    <div class="browser-window">
+                        <div class="browser-header">
+                            <div class="browser-control control-close"></div>
+                            <div class="browser-control control-minimize"></div>
+                            <div class="browser-control control-maximize"></div>
+                            <div class="url-bar" id="urlBar">https://www.google.com</div>
+                        </div>
+                        
+                        <div class="browser-content">
+                            <div id="loadingScreen" class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading search results through your internet connection...</p>
+                            </div>
+                            
+                            <div id="defaultContent">
+                                <h3 style="margin-bottom: 20px;">Web Technology Visualizer</h3>
+                                <p>Select options from the previous sections and click "Perform Search" to see how everything works together.</p>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 2rem; color: #4285F4; margin-bottom: 10px;">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <div style="font-weight: 600;" id="selectedSearchEngine">Google</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 2rem; color: #FF0000; margin-bottom: 10px;">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        <div style="font-weight: 600;" id="selectedWebsite">YouTube</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 2rem; color: #8B5CF6; margin-bottom: 10px;">
+                                            <i class="fas fa-wifi"></i>
+                                        </div>
+                                        <div style="font-weight: 600;" id="selectedISP">Fiber Optic</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="searchResults" style="display: none;">
+                                <h3 style="margin-bottom: 20px;">Search Results for "how web technology works"</h3>
+                                
+                                <div class="result-item">
+                                    <div class="result-title">How the Internet Works - Complete Guide</div>
+                                    <div class="result-url">https://www.webtechnologyguide.com</div>
+                                    <div class="result-desc">Learn how search engines, websites, and ISPs work together to deliver content to your device.</div>
+                                </div>
+                                
+                                <div class="result-item">
+                                    <div class="result-title">Understanding Internet Infrastructure</div>
+                                    <div class="result-url">https://www.internetsociety.org</div>
+                                    <div class="result-desc">The internet is a global network of cables, servers, and data centers that connect billions of devices.</div>
+                                </div>
+                                
+                                <div class="result-item">
+                                    <div class="result-title">Web Technology Explained</div>
+                                    <div class="result-url">https://developer.mozilla.org</div>
+                                    <div class="result-desc">From DNS lookup to HTTP requests, understand the journey of data across the internet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer Section -->
+        <section class="section footer-section" id="section5">
+            <div class="section-content">
+                <h2 class="section-title">Web Technology Explained</h2>
+                <p class="section-subtitle">
+                    You've explored how search engines, websites, and internet providers work together 
+                    to bring you the modern web experience.
+                </p>
+                
+                <div class="footer-content">
+                    <div class="footer-stats">
+                        <div class="footer-stat">
+                            <div class="footer-number">130T+</div>
+                            <div class="footer-label">Web Pages Indexed</div>
+                        </div>
+                        <div class="footer-stat">
+                            <div class="footer-number">750K+</div>
+                            <div class="footer-label">ISPs Worldwide</div>
+                        </div>
+                        <div class="footer-stat">
+                            <div class="footer-number">3.2B</div>
+                            <div class="footer-label">Daily Google Searches</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-stack">
+                        <div class="tech-item">
+                            <i class="fas fa-search" style="color: #4285F4;"></i>
+                            <span>Search Engines</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-globe" style="color: #FF0000;"></i>
+                            <span>Websites</span>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-wifi" style="color: #8B5CF6;"></i>
+                            <span>Internet Providers</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; max-width: 600px;">
+                        <p>
+                            This interactive explorer demonstrates how the three pillars of web technology 
+                            work together. Search engines find information, websites provide content, 
+                            and internet providers deliver it to your device.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

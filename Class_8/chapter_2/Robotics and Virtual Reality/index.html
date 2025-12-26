@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics and Virtual Reality</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0a192f;
+            color: #e6f1ff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(to right, #64ffda, #4cc9f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8892b0;
+            margin-bottom: 30px;
+        }
+        
+        /* Section Navigation Buttons */
+        .section-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .section-btn {
+            padding: 15px 30px;
+            background-color: #112240;
+            border: 2px solid #233554;
+            color: #a8b2d1;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-btn:hover {
+            background-color: #1e2a47;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-btn.active {
+            background-color: #233554;
+            color: #64ffda;
+            border-color: #64ffda;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+        
+        /* Section Content */
+        .section-content {
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-box {
+            background-color: #112240;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid #233554;
+        }
+        
+        .section-title {
+            color: #64ffda;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-align: center;
+            border-bottom: 2px solid #233554;
+            padding-bottom: 15px;
+        }
+        
+        /* Image Slider Styles */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 40px auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 500px;
+        }
+        
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        .slide-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 25, 47, 0.85);
+            padding: 20px;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+        
+        .slide-info h3 {
+            color: #64ffda;
+            margin-bottom: 8px;
+            font-size: 1.4rem;
+        }
+        
+        .slide-info p {
+            color: #a8b2d1;
+            font-size: 1rem;
+        }
+        
+        .slider-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .slider-btn {
+            background-color: #233554;
+            color: #64ffda;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .slider-btn:hover {
+            background-color: #64ffda;
+            color: #0a192f;
+            transform: scale(1.1);
+        }
+        
+        .dots-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #233554;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background-color: #64ffda;
+            transform: scale(1.2);
+        }
+        
+        /* Definition Styles */
+        .definition-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .definition-box {
+            flex: 1;
+            min-width: 300px;
+            background-color: #0a192f;
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid #233554;
+            transition: transform 0.3s ease;
+        }
+        
+        .definition-box:hover {
+            transform: translateY(-5px);
+        }
+        
+        .definition-title {
+            color: #4cc9f0;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+        
+        .definition-content {
+            color: #a8b2d1;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+        
+        .definition-content p {
+            margin-bottom: 15px;
+        }
+        
+        /* Comparison Section */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .comparison-card {
+            background-color: #0a192f;
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid #233554;
+            transition: transform 0.3s ease;
+        }
+        
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .comparison-title {
+            color: #64ffda;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .comparison-list {
+            list-style-type: none;
+        }
+        
+        .comparison-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #233554;
+            color: #a8b2d1;
+            display: flex;
+            align-items: center;
+            font-size: 1.05rem;
+        }
+        
+        .comparison-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .comparison-list li i {
+            margin-right: 15px;
+            color: #64ffda;
+            font-size: 1.1rem;
+        }
+        
+        /* Info Box */
+        .info-box {
+            background-color: #0a192f;
+            border-left: 4px solid #4cc9f0;
+            padding: 25px;
+            margin: 40px 0 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .info-title {
+            color: #4cc9f0;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid #233554;
+            color: #8892b0;
+        }
+        
+        .highlight {
+            color: #64ffda;
+            font-weight: 600;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .section-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .slider-container {
+                height: 400px;
+            }
+            
+            .slider {
+                height: 400px;
+            }
+            
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section-nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+            
+            .slider-container {
+                height: 300px;
+            }
+            
+            .slider {
+                height: 300px;
+            }
+            
+            .slide-info {
+                padding: 15px;
+            }
+            
+            .slide-info h3 {
+                font-size: 1.1rem;
+            }
+            
+            .slide-info p {
+                font-size: 0.9rem;
+            }
+            
+            .content-box {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Robotics & Virtual Reality</h1>
+            <p class="subtitle">Explore Modern Technologies</p>
+            
+            <!-- Section Navigation Buttons -->
+            <div class="section-nav">
+                <button class="section-btn active" data-section="robotics">
+                    <i class="fas fa-robot"></i>
+                    Robotics
+                </button>
+                <button class="section-btn" data-section="vr">
+                    <i class="fas fa-vr-cardboard"></i>
+                    Virtual Reality
+                </button>
+                <button class="section-btn" data-section="comparison">
+                    <i class="fas fa-balance-scale"></i>
+                    Comparison
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Robotics Section -->
+        <section id="robotics" class="section-content active">
+            <div class="content-box">
+                <h2 class="section-title">
+                    <i class="fas fa-robot"></i>
+                    Robotics
+                </h2>
+                
+                <!-- Robotics Image Slider -->
+                <div class="slider-container" id="robotics-slider-container">
+                    <div class="slider" id="robotics-slider">
+                        <!-- Slides will be added by JavaScript -->
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button class="slider-btn prev-btn" data-slider="robotics">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="dots-container" id="robotics-dots">
+                            <!-- Dots will be added by JavaScript -->
+                        </div>
+                        
+                        <button class="slider-btn next-btn" data-slider="robotics">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Robotics Definitions -->
+                <div class="definition-container">
+                    <div class="definition-box">
+                        <h3 class="definition-title">What is Robotics?</h3>
+                        <div class="definition-content">
+                            <p>Robotics is an interdisciplinary branch of computer science and engineering that involves the design, construction, operation, and use of robots. The goal of robotics is to design machines that can help and assist humans in various tasks.</p>
+                            <p>Robotics integrates fields such as mechanical engineering, electrical engineering, computer engineering, and mathematics to create machines that can perform tasks autonomously or with minimal human intervention.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="definition-box">
+                        <h3 class="definition-title">Key Components</h3>
+                        <div class="definition-content">
+                            <p><strong>Hardware:</strong> The physical structure of a robot that can be shaped by humans and physically touched. This includes mechanical parts, sensors, actuators, and power systems.</p>
+                            <p><strong>Software:</strong> The computer programming that gives robots the capacity to perform tasks automatically. This includes algorithms, control systems, and artificial intelligence.</p>
+                            <p><strong>Applications:</strong> Robots are used in manufacturing, healthcare, agriculture, logistics, exploration, education, and security to perform tasks that are dangerous, repetitive, or require precision beyond human capabilities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Virtual Reality Section -->
+        <section id="vr" class="section-content">
+            <div class="content-box">
+                <h2 class="section-title">
+                    <i class="fas fa-vr-cardboard"></i>
+                    Virtual Reality
+                </h2>
+                
+                <!-- VR Image Slider -->
+                <div class="slider-container" id="vr-slider-container">
+                    <div class="slider" id="vr-slider">
+                        <!-- Slides will be added by JavaScript -->
+                    </div>
+                    
+                    <div class="slider-controls">
+                        <button class="slider-btn prev-btn" data-slider="vr">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="dots-container" id="vr-dots">
+                            <!-- Dots will be added by JavaScript -->
+                        </div>
+                        
+                        <button class="slider-btn next-btn" data-slider="vr">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- VR Definitions -->
+                <div class="definition-container">
+                    <div class="definition-box">
+                        <h3 class="definition-title">What is Virtual Reality?</h3>
+                        <div class="definition-content">
+                            <p>Virtual Reality (VR) refers to a computer-generated simulation of a three-dimensional environment that can be interacted with in a seemingly real or physical way using special electronic equipment, such as a headset with a screen or gloves fitted with sensors.</p>
+                            <p>This immersive technology creates an artificial environment that simulates a user's physical presence in a virtual world, allowing them to interact with digital objects and spaces as if they were real.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="definition-box">
+                        <h3 class="definition-title">How VR Works</h3>
+                        <div class="definition-content">
+                            <p><strong>Display Technology:</strong> VR typically uses a head-mounted display that provides users with a stereoscopic view of the simulated environment, creating a sense of depth and immersion.</p>
+                            <p><strong>Motion Tracking:</strong> Sensors track the movements of the user's head and hands, allowing for natural interaction with the virtual environment.</p>
+                            <p><strong>Audio Systems:</strong> 3D audio systems provide spatial sound that enhances the immersive experience, making sounds appear to come from specific directions in the virtual space.</p>
+                            <p><strong>Applications:</strong> VR is used in gaming, education, training, simulation, therapy, architecture, and entertainment to create immersive experiences.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Comparison Section -->
+        <section id="comparison" class="section-content">
+            <div class="content-box">
+                <h2 class="section-title">
+                    <i class="fas fa-balance-scale"></i>
+                    Comparison
+                </h2>
+                
+                <div class="comparison-container">
+                    <div class="comparison-card">
+                        <h3 class="comparison-title">
+                            <i class="fas fa-robot"></i>
+                            Robotics
+                        </h3>
+                        <ul class="comparison-list">
+                            <li><i class="fas fa-check-circle"></i> Physical machines that interact with the real world</li>
+                            <li><i class="fas fa-check-circle"></i> Combines hardware and software components</li>
+                            <li><i class="fas fa-check-circle"></i> Performs physical tasks autonomously</li>
+                            <li><i class="fas fa-check-circle"></i> Used in manufacturing, healthcare, exploration</li>
+                            <li><i class="fas fa-check-circle"></i> Replaces humans in dangerous environments</li>
+                            <li><i class="fas fa-check-circle"></i> Requires mechanical and electrical engineering</li>
+                            <li><i class="fas fa-check-circle"></i> Often designed for specific repetitive tasks</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="comparison-card">
+                        <h3 class="comparison-title">
+                            <i class="fas fa-vr-cardboard"></i>
+                            Virtual Reality
+                        </h3>
+                        <ul class="comparison-list">
+                            <li><i class="fas fa-check-circle"></i> Simulated digital environments</li>
+                            <li><i class="fas fa-check-circle"></i> Primarily software-based with specialized hardware</li>
+                            <li><i class="fas fa-check-circle"></i> Creates immersive experiences for users</li>
+                            <li><i class="fas fa-check-circle"></i> Used in training, education, entertainment, therapy</li>
+                            <li><i class="fas fa-check-circle"></i> Allows safe simulation of dangerous scenarios</li>
+                            <li><i class="fas fa-check-circle"></i> Requires 3D modeling and graphics programming</li>
+                            <li><i class="fas fa-check-circle"></i> Focuses on user experience and immersion</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h3 class="info-title">Convergence of Technologies</h3>
+                    <p>Interestingly, these technologies often converge. For example, VR can be used to program and train robots in a virtual environment before deploying them in the real world. This allows for safer and more efficient development of robotic systems. Similarly, robots can be used to create more immersive VR experiences through haptic feedback and physical interaction.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <!-- <div class="container">
+            <p>Interactive Learning Module on <span class="highlight">Robotics and Virtual Reality</span></p>
+            <p>Based on the Grade 6 Science and Technology Curriculum</p>
+            <p>Use the buttons above to explore different sections</p>
+        </div> -->
+    </footer>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

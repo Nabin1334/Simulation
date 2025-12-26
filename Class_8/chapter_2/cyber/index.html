@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybercrime & Internet Security - Interactive 3D Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a3e 100%);
+            color: #e0e0ff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 25px;
+            background: rgba(10, 10, 40, 0.9);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid #00a8ff;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #00a8ff, #9c88ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0ff;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .simulation-container {
+            flex: 1;
+            min-width: 700px;
+            height: 700px;
+            background: rgba(5, 5, 25, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 1px solid #2a2a5a;
+            position: relative;
+        }
+        
+        #threejs-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .info-panel {
+            flex: 1;
+            min-width: 400px;
+            background: rgba(15, 15, 45, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 1px solid #2a2a5a;
+            overflow-y: auto;
+            max-height: 700px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #00a8ff;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2a2a5a;
+        }
+        
+        .topic {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(30, 30, 70, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #9c88ff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .topic:hover {
+            background: rgba(40, 40, 90, 0.7);
+            transform: translateX(5px);
+        }
+        
+        .topic.active {
+            background: rgba(40, 40, 90, 0.9);
+            border-left-color: #00a8ff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .topic-title {
+            font-size: 1.3rem;
+            color: #9c88ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .topic-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .topic-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #c0c0ff;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s;
+        }
+        
+        .topic.active .topic-content {
+            max-height: 500px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 168, 255, 0.5);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .control-btn.secondary {
+            background: linear-gradient(135deg, #9c88ff 0%, #8c7ae6 100%);
+            box-shadow: 0 5px 15px rgba(156, 136, 255, 0.3);
+        }
+        
+        .control-btn.secondary:hover {
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.5);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 30px;
+            color: #a0a0ff;
+            font-size: 0.9rem;
+            border-top: 1px solid #2a2a5a;
+            background: rgba(10, 10, 40, 0.9);
+        }
+        
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00a8ff;
+            z-index: 10;
+            min-width: 200px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stats-title {
+            font-size: 1.2rem;
+            color: #00a8ff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-value {
+            color: #9c88ff;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .simulation-container, .info-panel {
+                min-width: 100%;
+            }
+            
+            .simulation-container {
+                height: 500px;
+            }
+        }
+        
+        .highlight {
+            color: #00a8ff;
+            font-weight: bold;
+        }
+        
+        .warning {
+            color: #ff9f43;
+            font-weight: bold;
+        }
+        
+        .success {
+            color: #4cd137;
+            font-weight: bold;
+        }
+        
+        .crime-list {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .crime-list li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Cybercrime & Internet Security</h1>
+        <p class="subtitle">Interactive 3D Simulation - Explore cyber threats, ethical guidelines, legal frameworks, and security measures in a virtual environment</p>
+    </div>
+    
+    <div class="container">
+        <div class="simulation-container">
+            <div id="threejs-canvas"></div>
+            <div class="stats-panel">
+                <div class="stats-title">Cyber Defense Status</div>
+                <div class="stat-item">
+                    <span>Firewall:</span>
+                    <span class="stat-value success">Active</span>
+                </div>
+                <div class="stat-item">
+                    <span>Encryption:</span>
+                    <span class="stat-value success">Enabled</span>
+                </div>
+                <div class="stat-item">
+                    <span>Threats Blocked:</span>
+                    <span class="stat-value">127</span>
+                </div>
+                <div class="stat-item">
+                    <span>Data Integrity:</span>
+                    <span class="stat-value success">98%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2 class="section-title">Interactive Learning Modules</h2>
+            
+            <div class="topic active" data-scene="cybercrime">
+                <div class="topic-title">
+                    <span class="topic-icon">🔒</span>
+                    <span>Cybercrime Overview</span>
+                </div>
+                <div class="topic-content">
+                    <p>Cybercrime is defined as any crime against a person or group that harms someone's reputation or causes physical or mental trauma through electronic means.</p>
+                    <p>Common forms include:</p>
+                    <ul class="crime-list">
+                        <li><span class="highlight">Identity Theft:</span> Misuse of personal information to gain unauthorized access</li>
+                        <li><span class="highlight">Cyber Terrorism:</span> Attacks against persons, groups or governments</li>
+                        <li><span class="highlight">Cyberbullying:</span> Using electronic media to threaten, harass or humiliate</li>
+                        <li><span class="highlight">Hacking:</span> Unethical access to websites or computer networks</li>
+                        <li><span class="highlight">Defamation:</span> Harming reputation through online statements</li>
+                    </ul>
+                    <p>Cybercrimes target banks, financial institutions, government websites, and individuals through the Internet.</p>
+                </div>
+            </div>
+            
+            <div class="topic" data-scene="ethics">
+                <div class="topic-title">
+                    <span class="topic-icon">📜</span>
+                    <span>Computer Code of Conduct</span>
+                </div>
+                <div class="topic-content">
+                    <p>A set of guidelines outlining ethical and professional standards for computer and technology users.</p>
+                    <p>Key principles include:</p>
+                    <ul class="crime-list">
+                        <li><span class="success">Respect for Intellectual Property:</span> Don't copy or distribute copyrighted materials without permission</li>
+                        <li><span class="success">Security:</span> Take measures to protect data from unauthorized access</li>
+                        <li><span class="success">Professionalism:</span> Avoid offensive or harassing behavior online</li>
+                        <li><span class="success">Accuracy:</span> Ensure information provided is accurate and truthful</li>
+                        <li><span class="success">Compliance:</span> Follow all applicable laws and regulations</li>
+                        <li><span class="success">Reporting:</span> Report violations to appropriate authorities</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="topic" data-scene="cyberlaw">
+                <div class="topic-title">
+                    <span class="topic-icon">⚖️</span>
+                    <span>Cyber Law Framework</span>
+                </div>
+                <div class="topic-content">
+                    <p>Cyberlaw governs the use of the Internet, computers, and related technologies, providing legal protection to users.</p>
+                    <p><span class="highlight">In Nepal:</span> "The Electronic Transactions Act, 2063" addresses cybercrime offences:</p>
+                    <ul class="crime-list">
+                        <li>Hacking without authority: Up to 3 years imprisonment or 2 lakh fine</li>
+                        <li>Unauthorized access: Up to 3 years imprisonment or 2 lakh fine</li>
+                        <li>Damaging computer data: Up to 3 years imprisonment or 2 lakh fine</li>
+                        <li>Publishing illegal material: Up to 5 years imprisonment or 1 lakh fine</li>
+                        <li>Computer fraud: Up to 2 years imprisonment or 1 lakh fine</li>
+                    </ul>
+                    <p>Additional laws protect children's privacy and copyright of computer programs.</p>
+                </div>
+            </div>
+            
+            <div class="topic" data-scene="security">
+                <div class="topic-title">
+                    <span class="topic-icon">🛡️</span>
+                    <span>Internet Security Measures</span>
+                </div>
+                <div class="topic-content">
+                    <p>Internet security protects users from online threats through various strategies and measures.</p>
+                    <p><span class="warning">Common Risks:</span></p>
+                    <ul class="crime-list">
+                        <li>Malware (viruses, worms, spyware)</li>
+                        <li>Phishing attacks</li>
+                        <li>Identity theft</li>
+                        <li>Hacking</li>
+                        <li>Botnet attacks</li>
+                    </ul>
+                    <p><span class="success">Security Measures:</span></p>
+                    <ul class="crime-list">
+                        <li>Use strong, complex passwords</li>
+                        <li>Enable two-factor authentication</li>
+                        <li>Keep software up-to-date</li>
+                        <li>Use antivirus and firewall protection</li>
+                        <li>Back up important data regularly</li>
+                        <li>Educate users about safe online behavior</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="prev-btn">Previous Module</button>
+                <button class="control-btn secondary" id="next-btn">Next Module</button>
+                <button class="control-btn" id="reset-btn">Reset Simulation</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <!-- <p>Science and Technology, Grade 6-8 | Cybercrime, Computer Code of Conduct, Cyber Law and Internet Security</p>
+        <p>Interactive 3D Simulation using Three.js | Educational Tool for Understanding Digital Security</p> -->
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="index.js">
+    </script>
+</body>
+</html>
