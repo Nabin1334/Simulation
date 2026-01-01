@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Velocity </title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
+        
+        /* Dashboard Styling */
+        #dashboard { 
+            
+            position: absolute; top: 20px; left: 20px; 
+            background: rgba(15, 15, 15, 0.95); 
+            padding: 20px; border-radius: 12px; 
+            width: 340px; border-left: 5px solid #00d2ff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            pointer-events: auto;
+        }
+        
+        h2 { margin: 0 0 10px 0; font-size: 18px; color: #00d2ff; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Measurement Display */
+        .measure-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;
+        }
+        .measure-box {
+            background: #2a2a2a; padding: 10px; border-radius: 6px; text-align: center;
+        }
+        .m-label { font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; }
+        .m-val { font-size: 16px; font-weight: bold; font-family: monospace; }
+        
+        /* Colors */
+        .c-effort { color: #00d2ff; border-bottom: 2px solid #00d2ff; }
+        .c-load { color: #ff5555; border-bottom: 2px solid #ff5555; }
+        
+        /* Formula Area */
+        .formula-box {
+            background: #333; padding: 12px; border-radius: 8px; text-align: center;
+            margin-bottom: 15px; border: 1px dashed #555;
+        }
+        .big-math { font-size: 18px; font-weight: bold; color: #fff; margin-top: 5px; display: block;}
+
+        /* Controls */
+        .control-group { margin-bottom: 12px; }
+        label { font-size: 12px; color: #ccc; display: flex; justify-content: space-between; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #00d2ff; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+<div id="dashboard">
+    <h2>Velocity Ratio</h2>
+    
+    <div class="measure-grid">
+        <div class="measure-box c-effort">
+            <span class="m-label">Effort Weight (Blue)</span>
+            <span id="ewVal" class="m-val">10.0 kg</span>
+        </div>
+        <div class="measure-box c-load">
+            <span class="m-label">Load Weight (Red)</span>
+            <span id="lwVal" class="m-val">10.0 kg</span>
+        </div>
+    </div>
+    
+    <div class="measure-grid">
+        <div class="measure-box c-effort">
+            <span class="m-label">Effort Dist (Blue)</span>
+            <span id="edVal" class="m-val">0.00 m</span>
+        </div>
+        <div class="measure-box c-load">
+            <span class="m-label">Load Dist (Red)</span>
+            <span id="ldVal" class="m-val">0.00 m</span>
+        </div>
+    </div>
+
+    <div class="formula-box">
+        <div style="font-size: 12px; color:#aaa;">Velocity Ratio (VR) = Effort Dist / Load Dist</div>
+        <span id="vrResult" class="big-math">1.0</span>
+    </div>
+
+    <div class="control-group">
+        <label><span>Effort Weight</span> <span>(Blue)</span></label>
+        <input type="range" id="eMass" min="5" max="40" value="10">
+    </div>
+    <div class="control-group">
+        <label><span>Load Weight</span> <span>(Red)</span></label>
+        <input type="range" id="lMass" min="5" max="40" value="10">
+    </div>
+    <div class="control-group">
+        <label><span>Pivot Position</span> <span>(Move Fulcrum)</span></label>
+        <input type="range" id="pivotPos" min="-2.0" max="2.0" step="0.1" value="0.5">
+    </div>
+    
+    <div style="font-size:11px; color:#888; text-align:center;">
+        *Note: If Torque is unbalanced, lever tilts and stops.
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
+<script src="index.js">
+    
+
+</script>
+</body>
+</html>

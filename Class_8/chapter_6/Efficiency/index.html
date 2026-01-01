@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Efficiency</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
+        
+        #dashboard { 
+            position: absolute; top: 20px; left: 20px; 
+            background: rgba(15, 15, 15, 0.95); 
+            padding: 20px; border-radius: 12px; 
+            width: 340px; border-left: 5px solid #00d2ff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            pointer-events: auto;
+        }
+        
+        h2 { margin: 0 0 10px 0; font-size: 18px; color: #00d2ff; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .measure-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;
+        }
+        .measure-box {
+            background: #2a2a2a; padding: 10px; border-radius: 6px; text-align: center;
+        }
+        .m-label { font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; }
+        .m-val { font-size: 16px; font-weight: bold; font-family: monospace; }
+        
+        .c-effort { color: #00d2ff; border-bottom: 2px solid #00d2ff; }
+        .c-load { color: #ff5555; border-bottom: 2px solid #ff5555; }
+        
+        .formula-box {
+            background: #333; padding: 12px; border-radius: 8px; text-align: center;
+            margin-bottom: 15px; border: 1px dashed #555;
+        }
+        .big-math { font-size: 18px; font-weight: bold; color: #fff; margin-top: 5px; display: block;}
+
+        .control-group { margin-bottom: 12px; }
+        label { font-size: 12px; color: #ccc; display: flex; justify-content: space-between; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #00d2ff; margin-top: 5px; }
+        
+        .work-display {
+            display: flex; justify-content: space-between; margin-top: 5px;
+            font-size: 11px; color: #ddd;
+        }
+        
+        .efficiency-bar {
+            height: 10px; background: #333; border-radius: 5px; margin-top: 8px;
+            overflow: hidden;
+        }
+        .efficiency-fill {
+            height: 100%; background: linear-gradient(90deg, #f00, #ff0, #0f0);
+            width: 0%; transition: width 0.3s ease;
+        }
+        
+        .info-box {
+            background: rgba(0, 0, 0, 0.3); 
+            padding: 10px; 
+            border-radius: 6px;
+            margin-top: 10px; 
+            font-size: 11px; 
+            color: #aaa;
+            border-left: 3px solid #4CAF50;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="dashboard">
+    <h2>Efficiency</h2>
+    
+    <div class="measure-grid">
+        <div class="measure-box c-effort">
+            <span class="m-label">Input Work (Effort)</span>
+            <span id="inputWorkVal" class="m-val">0.0 J</span>
+            <div class="work-display">
+                <span>Force:</span>
+                <span id="effortForceVal">98.1 N</span>
+            </div>
+            <div class="work-display">
+                <span>Distance:</span>
+                <span id="effortDistVal">0.00 m</span>
+            </div>
+        </div>
+        <div class="measure-box c-load">
+            <span class="m-label">Output Work (Load)</span>
+            <span id="outputWorkVal" class="m-val">0.0 J</span>
+            <div class="work-display">
+                <span>Force:</span>
+                <span id="loadForceVal">98.1 N</span>
+            </div>
+            <div class="work-display">
+                <span>Distance:</span>
+                <span id="loadDistVal">0.00 m</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="formula-box">
+        <div style="font-size: 12px; color:#aaa;">Efficiency = (Output Work ÷ Input Work) × 100%</div>
+        <span id="efficiencyResult" class="big-math">100%</span>
+        <div class="efficiency-bar">
+            <div id="efficiencyFill" class="efficiency-fill"></div>
+        </div>
+        <div style="font-size: 11px; margin-top: 8px; color: #aaa;">
+            <span id="efficiencyCalc" style="color: #fff; font-family: monospace;">Calculating...</span>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label><span>Effort Weight (Blue)</span> <span id="effortMassLabel">10.0 kg</span></label>
+        <input type="range" id="eMass" min="5" max="40" value="10">
+    </div>
+    <div class="control-group">
+        <label><span>Load Weight (Red)</span> <span id="loadMassLabel">10.0 kg</span></label>
+        <input type="range" id="lMass" min="5" max="40" value="10">
+    </div>
+    <div class="control-group">
+        <label><span>Fulcrum Position</span> <span id="pivotLabel">0.5 m</span></label>
+        <input type="range" id="pivotPos" min="-2.0" max="2.0" step="0.1" value="0.5">
+    </div>
+    
+    <div class="info-box">
+        <strong>💡 How It Works:</strong><br>
+        • Work = Force × Distance<br>
+        • Efficiency shows how much work transfers from effort to load<br>
+        • In ideal levers, efficiency is close to 100%<br>
+        • Status: <span id="balanceStatus" style="color: #4CAF50; font-weight: bold;">BALANCED</span>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+
+<script src="index.js">
+   
+
+</script>
+</body>
+</html>
