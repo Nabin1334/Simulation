@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmospheric Pressure: Scientific Drum Crushing Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #E3F2FD, #BBDEFB);
+            overflow: hidden;
+            color: #333;
+            touch-action: none;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        
+        canvas:active {
+            cursor: grabbing;
+        }
+        
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 2px solid #2196F3;
+            z-index: 10;
+        }
+        
+        h1 {
+            color: #1565C0;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .instructions {
+            background: #E8F5E9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .instructions strong {
+            color: #2E7D32;
+        }
+        
+        .stage-info {
+            background: #E3F2FD;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2196F3;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: all 0.3s;
+        }
+        
+        .stage-info.active {
+            background: #FFF3E0;
+            border-left-color: #FF9800;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .highlight {
+            color: #FF6F00;
+            font-weight: bold;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        #btnHeat {
+            background: linear-gradient(135deg, #FF5722, #F44336);
+            color: white;
+        }
+        
+        #btnHeat:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FF7043, #EF5350);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+        }
+        
+        #btnHeat:disabled {
+            background: #BDBDBD;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #btnReset {
+            background: linear-gradient(135deg, #616161, #424242);
+            color: white;
+        }
+        
+        #btnReset:hover {
+            background: linear-gradient(135deg, #757575, #616161);
+            transform: translateY(-2px);
+        }
+        
+        .gauges {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            padding-top: 15px;
+            border-top: 2px solid #E0E0E0;
+        }
+        
+        .gauge {
+            background: #F5F5F5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #E0E0E0;
+            transition: all 0.3s;
+        }
+        
+        .gauge.warning {
+            background: #FFEBEE;
+            border-color: #F44336;
+            animation: pulse-warning 1s infinite;
+        }
+        
+        .gauge.critical {
+            background: #FCE4EC;
+            border-color: #E91E63;
+            animation: pulse-critical 0.5s infinite;
+        }
+        
+        @keyframes pulse-warning {
+            0%, 100% { border-color: #F44336; }
+            50% { border-color: #FF5722; }
+        }
+        
+        @keyframes pulse-critical {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .gauge-value {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #FF6F00;
+            margin-bottom: 5px;
+        }
+        
+        .gauge.warning .gauge-value {
+            color: #D32F2F;
+        }
+        
+        .gauge.critical .gauge-value {
+            color: #C2185B;
+        }
+        
+        .gauge-label {
+            font-size: 0.75rem;
+            color: #757575;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-box {
+            background: #FFF9C4;
+            border: 2px solid #FDD835;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: #F57F17;
+            line-height: 1.5;
+            margin-top: 15px;
+        }
+        
+        #status {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 2px solid #2196F3;
+            display: none;
+            z-index: 10;
+            text-align: center;
+        }
+        
+        #status.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        
+        .explanation {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            border: 2px solid #2196F3;
+            z-index: 10;
+        }
+        
+        .explanation h3 {
+            color: #1565C0;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .explanation p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            #ui-panel {
+                width: calc(100% - 40px);
+                left: 20px;
+                top: 10px;
+            }
+            
+            .explanation {
+                width: calc(100% - 40px);
+                left: 20px;
+                bottom: 10px;
+                right: 20px;
+            }
+        }
+        
+        #dragHint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #1565C0;
+            border: 2px dashed #2196F3;
+            text-align: center;
+            z-index: 5;
+            pointer-events: none;
+            animation: fadeInOut 2s infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        
+        <div id="ui-panel">
+            <h1>🔥 Atmospheric Pressure: Scientific Demonstration</h1>
+            
+            <div class="instructions">
+                <strong>SCIENTIFIC METHOD:</strong> 
+                1. Place drum on burner<br>
+                2. Click HEAT - Fire appears<br>
+                3. Water boils at 100°C → Steam forms<br>
+                4. Steam pushes air out<br>
+                5. Drag hot drum into cold water<br>
+                6. Steam condenses → Vacuum → Drum crushed
+            </div>
+            
+            <div class="stage-info" id="stage1">
+                <strong>Stage 1:</strong> Drum at room temperature (25°C), contains air
+            </div>
+            
+            <div class="stage-info" id="stage2" style="display:none">
+                <strong>Stage 2:</strong> <span class="highlight">HEATING</span> - Fire heats drum to >100°C
+            </div>
+            
+            <div class="stage-info" id="stage3" style="display:none">
+                <strong>Stage 3:</strong> <span class="highlight">STEAM FORMATION</span> - Water boils, steam replaces air
+            </div>
+            
+            <div class="stage-info" id="stage4" style="display:none">
+                <strong>Stage 4:</strong> <span class="highlight">CONDENSATION</span> - Steam → Water creates vacuum
+            </div>
+            
+            <button id="btnHeat">🔥 START HEATING</button>
+            <button id="btnReset">🔄 RESET EXPERIMENT</button>
+            
+            <div class="gauges">
+                <div class="gauge" id="pressureGauge">
+                    <span class="gauge-value" id="pressure">101.3</span>
+                    <span class="gauge-label">Internal Pressure (kPa)</span>
+                </div>
+                <div class="gauge" id="tempGauge">
+                    <span class="gauge-value" id="temp">25°C</span>
+                    <span class="gauge-label">Drum Temperature</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 SCIENTIFIC PRINCIPLE:</strong> At 100°C, water turns to steam (1600× volume). Steam pushes air out. When cooled suddenly, steam condenses to water, creating near-vacuum. Atmospheric pressure (101.3 kPa) crushes drum.
+            </div>
+        </div>
+        
+        <div id="dragHint">← Place drum on burner to begin →</div>
+        
+        <div class="explanation">
+            <h3>Physics Principles</h3>
+            <p>1. <strong>Phase Change:</strong> Liquid water ↔ Steam</p>
+            <p>2. <strong>Volume Expansion:</strong> 1 mL water → 1600 mL steam</p>
+            <p>3. <strong>Gas Laws:</strong> PV = nRT (Pressure-Volume-Temperature)</p>
+            <p>4. <strong>Condensation:</strong> Steam → Water creates vacuum</p>
+            <p>5. <strong>Pressure Differential:</strong> 101.3 kPa (outside) vs ~5 kPa (inside)</p>
+            <p>6. <strong>Force Calculation:</strong> F = ΔP × A</p>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        
+        var btnHeat = document.getElementById('btnHeat');
+        var btnReset = document.getElementById('btnReset');
+        var stage1 = document.getElementById('stage1');
+        var stage2 = document.getElementById('stage2');
+        var stage3 = document.getElementById('stage3');
+        var stage4 = document.getElementById('stage4');
+        var pressureGauge = document.getElementById('pressureGauge');
+        var tempGauge = document.getElementById('tempGauge');
+        var pressureVal = document.getElementById('pressure');
+        var tempVal = document.getElementById('temp');
+        var statusDiv = document.getElementById('status');
+        var dragHint = document.getElementById('dragHint');
+        
+        // SCIENTIFIC CONSTANTS
+        const ATMOSPHERIC_PRESSURE = 101.325;
+        const WATER_BOILING_POINT = 100.0;
+        const MAX_HEATING_TEMP = 120;
+        const VACUUM_PRESSURE = 10;
+        const ROOM_TEMP = 25.0;
+        
+        var state = 'IDLE';
+        var heatingTimer = 0;
+        var coolingTimer = 0;
+        var pressure = ATMOSPHERIC_PRESSURE;
+        var temperature = ROOM_TEMP;
+        var crushAmount = 0;
+        var isDragging = false;
+        var drumInWater = false;
+        var drumOnBurner = false;
+        var airExpelled = false;
+        var steamFormed = false;
+        var heatingActive = false;
+        var experimentCount = 0;
+        
+        // REAL DRUM WITH PROPER STRUCTURE
+        var drum = {
+            x: 0,
+            y: 0,
+            width: 100,  // Realistic drum width
+            height: 150, // Realistic drum height
+            originalWidth: 100,
+            originalHeight: 150,
+            topRadius: 45,  // Top metal ring radius
+            bottomRadius: 45, // Bottom metal ring radius
+            bodyColor: '#8B0000', // Dark red for metal drum
+            ringColor: '#A9A9A9', // Silver for metal rings
+            topColor: '#B22222', // Red for top
+            waterVolume: 0.4,
+            steamVolume: 0,
+            airVolume: 1.0,
+            deform: [],
+            isHot: false,
+            draggable: true,
+            containsSteam: false,
+            metalThickness: 8,
+            // REAL DRUM DEFORMATION POINTS - more points for realistic crumpling
+            topDeform: [],
+            middleDeform: [],
+            bottomDeform: []
+        };
+        
+        // Burner
+        var burner = {
+            x: 0,
+            y: 0,
+            width: 120,
+            height: 35,
+            isBurning: false,
+            flameIntensity: 0,
+            flameBaseHeight: 50,
+            flameTipHeight: 90,
+            fireVisible: false
+        };
+        
+        // Water tub
+        var waterTub = {
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 120,
+            waterLevel: 0.8,
+            temperature: 20.0
+        };
+        
+        var steamParticles = [];
+        var fireParticles = [];
+        var flameShapes = [];
+        var waterSplashParticles = [];
+        var arrowParticles = [];
+        var condensationParticles = [];
+        var airBubbleParticles = [];
+        var heatRippleParticles = [];
+        var sparkParticles = [];
+        var crumpleParticles = []; // For realistic crumpling effect
+        
+        function init() {
+            resize();
+            window.addEventListener('resize', resize);
+            btnHeat.addEventListener('click', startHeating);
+            btnReset.addEventListener('click', resetExperiment);
+            
+            canvas.addEventListener('mousedown', startDrag);
+            canvas.addEventListener('mousemove', drag);
+            canvas.addEventListener('mouseup', stopDrag);
+            canvas.addEventListener('mouseleave', stopDrag);
+            
+            canvas.addEventListener('touchstart', startDragTouch, { passive: false });
+            canvas.addEventListener('touchmove', dragTouch, { passive: false });
+            canvas.addEventListener('touchend', stopDrag);
+            
+            // Initialize drum deformation points for realistic crumpling
+            initDrumDeformation();
+            
+            createFlameShapes();
+            
+            animate();
+        }
+        
+        function initDrumDeformation() {
+            // Top ring deformation (circular)
+            for (var i = 0; i < 16; i++) {
+                drum.topDeform.push({angle: (i/16) * Math.PI * 2, radius: 0});
+            }
+            
+            // Middle body deformation (cylindrical)
+            for (var i = 0; i < 24; i++) {
+                drum.middleDeform.push({
+                    heightPos: i/23, // 0 to 1 from top to bottom
+                    inward: 0,
+                    twist: 0
+                });
+            }
+            
+            // Bottom ring deformation
+            for (var i = 0; i < 16; i++) {
+                drum.bottomDeform.push({angle: (i/16) * Math.PI * 2, radius: 0});
+            }
+        }
+        
+        function createFlameShapes() {
+            flameShapes = [];
+            for (var i = 0; i < 6; i++) {
+                flameShapes.push({
+                    x: -50 + i * 20,
+                    width: 16 + Math.random() * 8,
+                    height: 50 + Math.random() * 30,
+                    offset: Math.random() * Math.PI * 2,
+                    speed: 0.5 + Math.random() * 1.5
+                });
+            }
+        }
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            var centerX = canvas.width / 2;
+            var floorY = canvas.height - 100;
+            
+            burner.x = centerX - 250;
+            burner.y = floorY - 35;
+            
+            waterTub.x = centerX + 250;
+            waterTub.y = floorY - waterTub.height + 10;
+            
+            drum.x = burner.x;
+            drum.y = burner.y - drum.height / 2 - 25;
+        }
+        
+        function startHeating() {
+            if (state === 'CRUSHING' || state === 'FINISHED') return;
+            
+            if (!isDrumOnBurner()) {
+                showStatus('Place drum on burner first');
+                return;
+            }
+            
+            state = 'HEATING';
+            heatingTimer = 0;
+            experimentCount++;
+            
+            burner.isBurning = true;
+            burner.fireVisible = true;
+            burner.flameIntensity = 0;
+            
+            heatingActive = true;
+            btnHeat.disabled = true;
+            
+            stage1.style.display = 'none';
+            stage2.style.display = 'block';
+            stage2.classList.add('active');
+            
+            showStatus('Heating started. Fire provides thermal energy.');
+            
+            createSparkEffect();
+        }
+        
+        function isDrumOnBurner() {
+            var drumCenterX = drum.x;
+            var drumBottom = drum.y + drum.height / 2;
+            
+            return (drumCenterX > burner.x - burner.width/2 && 
+                   drumCenterX < burner.x + burner.width/2 &&
+                   drumBottom > burner.y - 20 &&
+                   drumBottom < burner.y + 50);
+        }
+        
+        function createSparkEffect() {
+            for (var i = 0; i < 25; i++) {
+                sparkParticles.push({
+                    x: burner.x + (Math.random() - 0.5) * 60,
+                    y: burner.y - 15,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: -12 - Math.random() * 15,
+                    size: 2 + Math.random() * 4,
+                    life: 0.5 + Math.random() * 0.5
+                });
+            }
+        }
+        
+        function startDrag(e) {
+            if (!drum.draggable) return;
+            
+            var mouseX = e.clientX;
+            var mouseY = e.clientY;
+            
+            if (isMouseOverDrum(mouseX, mouseY)) {
+                isDragging = true;
+                canvas.style.cursor = 'grabbing';
+                heatingActive = false;
+                
+                if (state === 'HEATING') {
+                    state = 'DRAGGING';
+                    if (!isDrumOnBurner()) {
+                        burner.isBurning = false;
+                    }
+                }
+            }
+        }
+        
+        function startDragTouch(e) {
+            if (!drum.draggable) return;
+            e.preventDefault();
+            
+            var touch = e.touches[0];
+            var touchX = touch.clientX;
+            var touchY = touch.clientY;
+            
+            if (isMouseOverDrum(touchX, touchY)) {
+                isDragging = true;
+                canvas.style.cursor = 'grabbing';
+                heatingActive = false;
+                
+                if (state === 'HEATING') {
+                    state = 'DRAGGING';
+                    if (!isDrumOnBurner()) {
+                        burner.isBurning = false;
+                    }
+                }
+            }
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            drum.x = e.clientX;
+            drum.y = e.clientY;
+            
+            checkDrumPosition();
+        }
+        
+        function dragTouch(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            var touch = e.touches[0];
+            drum.x = touch.clientX;
+            drum.y = touch.clientY;
+            
+            checkDrumPosition();
+        }
+        
+        function checkDrumPosition() {
+            drumOnBurner = isDrumOnBurner();
+            checkDrumInWater();
+            
+            if (state === 'HEATING' && !drumOnBurner) {
+                burner.isBurning = false;
+                state = 'DRAGGING';
+                showStatus('Heating stopped. Drum removed from heat source.');
+            }
+        }
+        
+        function checkDrumInWater() {
+            var drumBottom = drum.y + drum.height/2;
+            var drumLeft = drum.x - drum.width/2;
+            var drumRight = drum.x + drum.width/2;
+            
+            var tubTop = waterTub.y;
+            var tubLeft = waterTub.x - waterTub.width/2;
+            var tubRight = waterTub.x + waterTub.width/2;
+            
+            drumInWater = (drumBottom > tubTop && 
+                          drumLeft > tubLeft && 
+                          drumRight < tubRight);
+            
+            if (drumInWater && drum.containsSteam && temperature >= WATER_BOILING_POINT) {
+                for (var i = 0; i < 12; i++) {
+                    condensationParticles.push({
+                        x: drum.x + (Math.random() - 0.5) * 80,
+                        y: drum.y + drum.height/2 - 10,
+                        size: 5 + Math.random() * 8,
+                        life: 1
+                    });
+                }
+            }
+        }
+        
+        function stopDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+            
+            if (drumInWater) {
+                if (drum.containsSteam && temperature >= WATER_BOILING_POINT) {
+                    startCrushing();
+                } else {
+                    showStatus('Drum not hot enough! Must reach >100°C to form steam.');
+                    createColdWaterSplash();
+                }
+            }
+        }
+        
+        function isMouseOverDrum(x, y) {
+            return x > drum.x - drum.width/2 && 
+                   x < drum.x + drum.width/2 && 
+                   y > drum.y - drum.height/2 && 
+                   y < drum.y + drum.height/2;
+        }
+        
+        function startCrushing() {
+            if (state === 'CRUSHING' || state === 'FINISHED') return;
+            
+            state = 'CRUSHING';
+            coolingTimer = 0;
+            
+            stage3.style.display = 'none';
+            stage4.style.display = 'block';
+            stage4.classList.add('active');
+            
+            pressureGauge.classList.add('warning');
+            tempGauge.classList.add('critical');
+            
+            showStatus('Steam condensing! Rapid cooling creates vacuum.');
+            
+            createWaterSplash();
+            
+            for (var i = 0; i < 20; i++) {
+                var angle = (i / 20) * Math.PI * 2;
+                arrowParticles.push({
+                    x: drum.x + Math.cos(angle) * 150,
+                    y: drum.y + Math.sin(angle) * 150,
+                    angle: angle,
+                    pulse: 0
+                });
+            }
+        }
+        
+        function createWaterSplash() {
+            for (var i = 0; i < 100; i++) {
+                waterSplashParticles.push({
+                    x: drum.x + (Math.random() - 0.5) * drum.width,
+                    y: waterTub.y,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: -15 - Math.random() * 20,
+                    life: 1
+                });
+            }
+        }
+        
+        function createColdWaterSplash() {
+            for (var i = 0; i < 40; i++) {
+                waterSplashParticles.push({
+                    x: drum.x + (Math.random() - 0.5) * drum.width,
+                    y: waterTub.y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: -6 - Math.random() * 8,
+                    life: 0.7
+                });
+            }
+        }
+        
+        function resetExperiment() {
+            state = 'IDLE';
+            heatingTimer = 0;
+            coolingTimer = 0;
+            pressure = ATMOSPHERIC_PRESSURE;
+            temperature = ROOM_TEMP;
+            crushAmount = 0;
+            burner.isBurning = false;
+            burner.fireVisible = false;
+            drum.isHot = false;
+            drum.draggable = true;
+            drumInWater = false;
+            drumOnBurner = false;
+            isDragging = false;
+            airExpelled = false;
+            steamFormed = false;
+            heatingActive = false;
+            drum.containsSteam = false;
+            drum.steamVolume = 0;
+            drum.airVolume = 1.0;
+            drum.width = drum.originalWidth;
+            drum.height = drum.originalHeight;
+            
+            // Reset deformation
+            for (var i = 0; i < drum.topDeform.length; i++) {
+                drum.topDeform[i].radius = 0;
+            }
+            for (var i = 0; i < drum.middleDeform.length; i++) {
+                drum.middleDeform[i].inward = 0;
+                drum.middleDeform[i].twist = 0;
+            }
+            for (var i = 0; i < drum.bottomDeform.length; i++) {
+                drum.bottomDeform[i].radius = 0;
+            }
+            
+            drum.x = burner.x;
+            drum.y = burner.y - drum.height / 2 - 25;
+            
+            steamParticles = [];
+            fireParticles = [];
+            waterSplashParticles = [];
+            arrowParticles = [];
+            condensationParticles = [];
+            airBubbleParticles = [];
+            heatRippleParticles = [];
+            sparkParticles = [];
+            crumpleParticles = [];
+            
+            stage1.style.display = 'block';
+            stage2.style.display = 'none';
+            stage3.style.display = 'none';
+            stage4.style.display = 'none';
+            stage2.classList.remove('active');
+            stage3.classList.remove('active');
+            stage4.classList.remove('active');
+            
+            pressureGauge.classList.remove('warning', 'critical');
+            tempGauge.classList.remove('warning', 'critical');
+            
+            btnHeat.disabled = false;
+            dragHint.style.display = 'block';
+            
+            pressureVal.textContent = ATMOSPHERIC_PRESSURE.toFixed(1);
+            tempVal.textContent = '25.0°C';
+            
+            showStatus('Experiment reset. Ready for scientific demonstration.');
+        }
+        
+        function showStatus(message) {
+            statusDiv.textContent = message;
+            statusDiv.className = 'show';
+            setTimeout(function() {
+                statusDiv.className = '';
+            }, 3000);
+        }
+        
+        function updatePhysics() {
+            drumOnBurner = isDrumOnBurner();
+            
+            if (state === 'HEATING' && heatingActive && drumOnBurner) {
+                heatingTimer++;
+                
+                burner.flameIntensity = Math.min(1, heatingTimer / 25);
+                
+                var heatTransferRate = 0.4;
+                temperature = Math.min(MAX_HEATING_TEMP, temperature + heatTransferRate);
+                
+                if (temperature < WATER_BOILING_POINT && !steamFormed) {
+                    var tempKelvin = temperature + 273.15;
+                    var initialTempKelvin = ROOM_TEMP + 273.15;
+                    pressure = ATMOSPHERIC_PRESSURE * (tempKelvin / initialTempKelvin);
+                }
+                
+            } else if (!drumOnBurner && temperature > ROOM_TEMP) {
+                var coolingRate = 0.06;
+                temperature = Math.max(ROOM_TEMP, temperature - coolingRate);
+            }
+            
+            if (state === 'HEATING') {
+                if (temperature >= WATER_BOILING_POINT && !steamFormed) {
+                    drum.isHot = true;
+                    steamFormed = true;
+                    stage2.style.display = 'none';
+                    stage3.style.display = 'block';
+                    stage3.classList.add('active');
+                    showStatus('Water boiling at 100°C! Steam formation begins.');
+                }
+                
+                if (steamFormed) {
+                    if (!airExpelled) {
+                        drum.airVolume = Math.max(0, 1 - (temperature - WATER_BOILING_POINT) / 15);
+                        if (drum.airVolume <= 0.05) {
+                            airExpelled = true;
+                            drum.containsSteam = true;
+                            showStatus('Steam has displaced air! Drum now contains steam.');
+                        }
+                    }
+                    
+                    pressure = ATMOSPHERIC_PRESSURE * 1.05;
+                    drum.steamVolume = Math.min(1, (temperature - WATER_BOILING_POINT) / 25);
+                }
+                
+                if (temperature >= MAX_HEATING_TEMP - 2) {
+                    state = 'DRAGGING';
+                    heatingActive = false;
+                    
+                    stage3.classList.remove('active');
+                    stage3.style.display = 'none';
+                    
+                    dragHint.style.display = 'block';
+                    showStatus('Drum ready: Contains steam at ' + temperature.toFixed(1) + '°C');
+                }
+            }
+            
+            // REALISTIC DRUM CRUSHING PHYSICS
+            if (state === 'CRUSHING') {
+                coolingTimer++;
+                
+                // Rapid cooling
+                temperature = Math.max(waterTub.temperature, temperature - 6);
+                
+                if (crushAmount < 1) {
+                    var condensationProgress = Math.min(1, coolingTimer / 40);
+                    drum.steamVolume = 1 - condensationProgress;
+                    
+                    pressure = ATMOSPHERIC_PRESSURE - (ATMOSPHERIC_PRESSURE - VACUUM_PRESSURE) * condensationProgress;
+                    
+                    crushAmount = condensationProgress;
+                    
+                    // REAL DRUM COMPRESSION - MULTI-PART DEFORMATION
+                    
+                    // 1. Overall size reduction (drum collapses inward)
+                    var sizeReduction = crushAmount * 0.6; // Up to 60% size reduction
+                    drum.width = drum.originalWidth * (1 - sizeReduction * 0.7);
+                    drum.height = drum.originalHeight * (1 - sizeReduction * 0.5);
+                    
+                    // 2. Top ring deformation (collapses unevenly)
+                    for (var i = 0; i < drum.topDeform.length; i++) {
+                        var angle = drum.topDeform[i].angle;
+                        var crushFactor = Math.sin(angle * 3 + crushAmount * 15) * 0.5 + 0.5;
+                        drum.topDeform[i].radius = crushAmount * 25 * crushFactor;
+                    }
+                    
+                    // 3. Middle body crumpling (complex pattern)
+                    for (var i = 0; i < drum.middleDeform.length; i++) {
+                        var pos = drum.middleDeform[i].heightPos;
+                        var timeFactor = crushAmount * 20;
+                        
+                        // Main inward collapse
+                        var inwardBase = crushAmount * 35;
+                        // Add sinusoidal pattern for realistic crumpling
+                        var wave1 = Math.sin(pos * 8 + timeFactor) * 8;
+                        var wave2 = Math.cos(pos * 12 + timeFactor * 1.3) * 6;
+                        var wave3 = Math.sin(pos * 20 + timeFactor * 0.7) * 4;
+                        
+                        drum.middleDeform[i].inward = inwardBase + wave1 + wave2 + wave3;
+                        
+                        // Twisting effect
+                        drum.middleDeform[i].twist = Math.sin(pos * 6 + timeFactor * 0.5) * crushAmount * 15;
+                    }
+                    
+                    // 4. Bottom ring deformation
+                    for (var i = 0; i < drum.bottomDeform.length; i++) {
+                        var angle = drum.bottomDeform[i].angle;
+                        var crushFactor = Math.cos(angle * 2.5 + crushAmount * 12) * 0.5 + 0.5;
+                        drum.bottomDeform[i].radius = crushAmount * 20 * crushFactor;
+                    }
+                    
+                    // Create crumple particles during intense deformation
+                    if (crushAmount > 0.3 && crushAmount < 0.9 && Math.random() < 0.3) {
+                        createCrumpleEffect();
+                    }
+                    
+                } else {
+                    state = 'FINISHED';
+                    stage4.classList.remove('active');
+                    dragHint.style.display = 'none';
+                    
+                    var finalPressureDiff = ATMOSPHERIC_PRESSURE - pressure;
+                    showStatus('Experiment complete! Drum crushed by ' + finalPressureDiff.toFixed(1) + ' kPa pressure difference.');
+                }
+            }
+            
+            // Flame physics
+            if (burner.isBurning) {
+                burner.flameIntensity = Math.min(1, burner.flameIntensity + 0.05);
+            } else {
+                burner.flameIntensity = Math.max(0, burner.flameIntensity - 0.08);
+                if (burner.flameIntensity <= 0.1) {
+                    burner.fireVisible = false;
+                }
+            }
+            
+            pressureVal.textContent = pressure.toFixed(1);
+            tempVal.textContent = temperature.toFixed(1) + '°C';
+        }
+        
+        function createCrumpleEffect() {
+            for (var i = 0; i < 5; i++) {
+                var angle = Math.random() * Math.PI * 2;
+                var distance = Math.random() * drum.width * 0.4;
+                crumpleParticles.push({
+                    x: drum.x + Math.cos(angle) * distance,
+                    y: drum.y + Math.sin(angle) * distance * 0.6,
+                    size: 2 + Math.random() * 4,
+                    life: 0.8 + Math.random() * 0.4,
+                    color: Math.random() > 0.5 ? '#FFD700' : '#C0C0C0' // Gold or silver for metal shine
+                });
+            }
+        }
+        
+        function updateParticles() {
+            // Fire particles
+            if (burner.fireVisible && burner.flameIntensity > 0.2) {
+                for (var i = 0; i < Math.floor(burner.flameIntensity * 10); i++) {
+                    fireParticles.push({
+                        x: burner.x + (Math.random() - 0.5) * 100,
+                        y: burner.y - 30,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: -10 - Math.random() * 12,
+                        size: 12 + Math.random() * 25 * burner.flameIntensity,
+                        hue: 20 + Math.random() * 40,
+                        life: 0.7 + Math.random() * 0.7
+                    });
+                }
+            }
+            
+            // Update all particle systems
+            updateParticleArray(fireParticles, 0.02, 0.95);
+            updateParticleArray(steamParticles, 0.015, 1.04);
+            updateParticleArray(airBubbleParticles, 0.02, 0.96);
+            updateParticleArray(heatRippleParticles, 0.025, 0.94);
+            updateParticleArray(sparkParticles, 0.03, 0.92);
+            updateParticleArray(crumpleParticles, 0.02, 0.98);
+            updateWaterParticles();
+            updateCondensationParticles();
+            
+            for (var i = 0; i < arrowParticles.length; i++) {
+                arrowParticles[i].pulse = Math.sin(Date.now() * 0.003 + i * 0.4) * (15 + crushAmount * 10);
+            }
+        }
+        
+        function updateParticleArray(particles, lifeDecay, sizeFactor) {
+            for (var i = particles.length - 1; i >= 0; i--) {
+                var p = particles[i];
+                if (p.vx !== undefined) p.x += p.vx;
+                if (p.vy !== undefined) p.y += p.vy;
+                if (p.vy !== undefined) p.vy += (p.gravity || 0.3);
+                p.life -= lifeDecay;
+                if (p.size !== undefined) p.size *= sizeFactor;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+        
+        function updateWaterParticles() {
+            for (var i = waterSplashParticles.length - 1; i >= 0; i--) {
+                var p = waterSplashParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.5;
+                p.life -= 0.02;
+                if (p.life <= 0 || p.y > canvas.height) waterSplashParticles.splice(i, 1);
+            }
+        }
+        
+        function updateCondensationParticles() {
+            for (var i = condensationParticles.length - 1; i >= 0; i--) {
+                var p = condensationParticles[i];
+                p.life -= 0.05;
+                if (p.life <= 0) condensationParticles.splice(i, 1);
+            }
+        }
+        
+        function draw() {
+            var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#E3F2FD');
+            gradient.addColorStop(1, '#BBDEFB');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawFloor();
+            drawBurner();
+            
+            if (burner.fireVisible && burner.flameIntensity > 0.1) {
+                drawRealisticFlame();
+            }
+            
+            drawFireParticles();
+            drawSparkParticles();
+            drawCrumpleParticles();
+            drawWaterTub();
+            drawRealDrum(); // NEW: Draw realistic drum
+            drawSteam();
+            drawAirBubbles();
+            drawHeatRipples();
+            drawWaterSplash();
+            drawCondensation();
+            drawArrows();
+            drawScientificLabels();
+            drawPhysicsInfo();
+        }
+        
+        function drawFloor() {
+            ctx.fillStyle = '#8D6E63';
+            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+            
+            ctx.strokeStyle = '#5D4037';
+            ctx.lineWidth = 2;
+            for (var i = 0; i < 30; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * 40, canvas.height - 100);
+                ctx.lineTo(i * 40, canvas.height);
+                ctx.stroke();
+            }
+        }
+        
+        function drawBurner() {
+            ctx.fillStyle = '#37474F';
+            ctx.fillRect(burner.x - burner.width / 2, burner.y, burner.width, burner.height);
+            
+            ctx.strokeStyle = '#263238';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(burner.x - burner.width / 2, burner.y, burner.width, burner.height);
+            
+            ctx.fillStyle = '#455A64';
+            for (var i = 0; i < 8; i++) {
+                ctx.fillRect(burner.x - 55 + i * 15, burner.y + 8, 10, 22);
+            }
+        }
+        
+        function drawRealisticFlame() {
+            var time = Date.now() * 0.004;
+            var flameHeight = burner.flameBaseHeight + burner.flameTipHeight * burner.flameIntensity;
+            
+            for (var layer = 0; layer < 3; layer++) {
+                var layerAlpha = 0.8 - layer * 0.25;
+                var layerScale = 1 - layer * 0.15;
+                
+                ctx.save();
+                
+                if (layer === 0) {
+                    var innerGrad = ctx.createLinearGradient(
+                        burner.x, burner.y,
+                        burner.x, burner.y - flameHeight
+                    );
+                    innerGrad.addColorStop(0, 'rgba(255, 255, 220, ' + (layerAlpha * burner.flameIntensity * 0.9) + ')');
+                    innerGrad.addColorStop(0.5, 'rgba(255, 240, 180, ' + (layerAlpha * 0.7 * burner.flameIntensity) + ')');
+                    innerGrad.addColorStop(1, 'rgba(255, 220, 140, 0)');
+                    ctx.fillStyle = innerGrad;
+                }
+                else if (layer === 1) {
+                    var middleGrad = ctx.createLinearGradient(
+                        burner.x, burner.y,
+                        burner.x, burner.y - flameHeight * 0.9
+                    );
+                    middleGrad.addColorStop(0, 'rgba(255, 200, 120, ' + (layerAlpha * burner.flameIntensity) + ')');
+                    middleGrad.addColorStop(0.6, 'rgba(255, 160, 80, ' + (layerAlpha * 0.75 * burner.flameIntensity) + ')');
+                    middleGrad.addColorStop(1, 'rgba(255, 120, 40, 0)');
+                    ctx.fillStyle = middleGrad;
+                }
+                else {
+                    var outerGrad = ctx.createLinearGradient(
+                        burner.x, burner.y,
+                        burner.x, burner.y - flameHeight * 0.8
+                    );
+                    outerGrad.addColorStop(0, 'rgba(255, 140, 60, ' + (layerAlpha * burner.flameIntensity) + ')');
+                    outerGrad.addColorStop(0.7, 'rgba(255, 100, 40, ' + (layerAlpha * 0.6 * burner.flameIntensity) + ')');
+                    outerGrad.addColorStop(1, 'rgba(220, 80, 20, 0)');
+                    ctx.fillStyle = outerGrad;
+                }
+                
+                for (var i = 0; i < flameShapes.length; i++) {
+                    var flame = flameShapes[i];
+                    var x = burner.x + flame.x;
+                    var wave = Math.sin(time * flame.speed + flame.offset) * 8;
+                    var pulse = Math.sin(time * flame.speed * 1.3 + flame.offset * 2) * 6;
+                    var heightVar = Math.sin(time * 0.7 + flame.offset * 1.5) * 10;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x - flame.width/2 + wave, burner.y);
+                    ctx.quadraticCurveTo(
+                        x - flame.width/4 + pulse, 
+                        burner.y - flame.height * 0.35 * layerScale + heightVar,
+                        x, 
+                        burner.y - flame.height * layerScale * burner.flameIntensity + heightVar
+                    );
+                    ctx.quadraticCurveTo(
+                        x + flame.width/4 - pulse, 
+                        burner.y - flame.height * 0.35 * layerScale + heightVar,
+                        x + flame.width/2 - wave, 
+                        burner.y
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+            
+            var glowGrad = ctx.createRadialGradient(
+                burner.x, burner.y, 0,
+                burner.x, burner.y, 150
+            );
+            glowGrad.addColorStop(0, 'rgba(255, 200, 100, ' + (burner.flameIntensity * 0.4) + ')');
+            glowGrad.addColorStop(0.6, 'rgba(255, 160, 60, ' + (burner.flameIntensity * 0.2) + ')');
+            glowGrad.addColorStop(1, 'rgba(255, 120, 30, 0)');
+            ctx.fillStyle = glowGrad;
+            ctx.beginPath();
+            ctx.arc(burner.x, burner.y, 150, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function drawFireParticles() {
+            for (var i = 0; i < fireParticles.length; i++) {
+                var p = fireParticles[i];
+                var grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                grad.addColorStop(0, 'hsla(' + p.hue + ', 100%, 85%, ' + p.life + ')');
+                grad.addColorStop(0.5, 'hsla(' + p.hue + ', 100%, 65%, ' + (p.life * 0.8) + ')');
+                grad.addColorStop(1, 'hsla(' + (p.hue - 15) + ', 100%, 45%, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawSparkParticles() {
+            for (var i = 0; i < sparkParticles.length; i++) {
+                var p = sparkParticles[i];
+                ctx.fillStyle = 'rgba(255, 240, 180, ' + p.life + ')';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawCrumpleParticles() {
+            for (var i = 0; i < crumpleParticles.length; i++) {
+                var p = crumpleParticles[i];
+                ctx.fillStyle = p.color + Math.floor(p.life * 255).toString(16).padStart(2, '0');
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawWaterTub() {
+            ctx.fillStyle = '#795548';
+            ctx.fillRect(waterTub.x - waterTub.width / 2, waterTub.y, waterTub.width, waterTub.height);
+            
+            ctx.strokeStyle = '#5D4037';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(waterTub.x - waterTub.width / 2, waterTub.y, waterTub.width, waterTub.height);
+            
+            var waterH = waterTub.height * waterTub.waterLevel;
+            ctx.fillStyle = 'rgba(33, 150, 243, 0.75)';
+            ctx.fillRect(waterTub.x - waterTub.width / 2 + 5, waterTub.y + waterTub.height - waterH, waterTub.width - 10, waterH);
+            
+            ctx.fillStyle = '#1565C0';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('COLD WATER (' + waterTub.temperature.toFixed(1) + '°C)', waterTub.x, waterTub.y - 8);
+        }
+        
+        function drawRealDrum() {
+            ctx.save();
+            
+            // Temperature-based color (black body radiation approximation)
+            var baseColor;
+            if (temperature > 100) {
+                baseColor = '#FF4500'; // Orange-red hot
+            } else if (temperature > 80) {
+                baseColor = '#FF6347'; // Tomato red
+            } else {
+                baseColor = drum.bodyColor; // Room temperature
+            }
+            
+            // Calculate drum dimensions with deformation
+            var currentWidth = drum.width;
+            var currentHeight = drum.height;
+            var currentTopRadius = drum.topRadius * (1 - crushAmount * 0.6);
+            var currentBottomRadius = drum.bottomRadius * (1 - crushAmount * 0.6);
+            
+            // Draw drum body with realistic metal texture
+            drawDrumBody(baseColor, currentWidth, currentHeight);
+            
+            // Draw top metal ring
+            drawTopRing(currentTopRadius);
+            
+            // Draw bottom metal ring
+            drawBottomRing(currentBottomRadius, currentHeight);
+            
+            // Draw reinforcement rings
+            drawReinforcementRings(currentWidth, currentHeight);
+            
+            // Draw water inside
+            drawWaterInside(currentWidth, currentHeight);
+            
+            // Draw thermal radiation glow
+            if (temperature > 80) {
+                drawHeatGlow(currentWidth);
+            }
+            
+            // Draw interactive outline
+            if (!isDragging) {
+                drawInteractiveOutline(currentWidth, currentHeight);
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawDrumBody(baseColor, width, height) {
+            ctx.save();
+            
+            // Main drum body with gradient for metallic look
+            var bodyGradient = ctx.createLinearGradient(
+                drum.x - width/2, drum.y - height/2,
+                drum.x + width/2, drum.y - height/2
+            );
+            bodyGradient.addColorStop(0, baseColor);
+            bodyGradient.addColorStop(0.5, lightenColor(baseColor, 30));
+            bodyGradient.addColorStop(1, baseColor);
+            
+            ctx.fillStyle = bodyGradient;
+            ctx.strokeStyle = darkenColor(baseColor, 20);
+            ctx.lineWidth = drum.metalThickness * (1 - crushAmount * 0.3);
+            
+            // Draw cylindrical body with deformation
+            ctx.beginPath();
+            
+            // Top curve (with deformation)
+            var topY = drum.y - height/2 + 15;
+            for (var i = 0; i < drum.topDeform.length; i++) {
+                var deform = drum.topDeform[i];
+                var angle = deform.angle;
+                var radius = drum.topRadius - deform.radius;
+                var x = drum.x + Math.cos(angle) * radius;
+                var y = topY + Math.sin(angle) * 10; // Elliptical top
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            
+            // Draw sides with middle deformation
+            ctx.beginPath();
+            for (var i = 0; i < drum.middleDeform.length; i++) {
+                var deform = drum.middleDeform[i];
+                var yPos = drum.y - height/2 + 25 + (height - 50) * deform.heightPos;
+                var xOffset = deform.inward + deform.twist * Math.sin(deform.heightPos * Math.PI);
+                var x = drum.x - width/2 + xOffset;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, yPos);
+                } else {
+                    ctx.lineTo(x, yPos);
+                }
+            }
+            
+            // Right side
+            for (var i = drum.middleDeform.length - 1; i >= 0; i--) {
+                var deform = drum.middleDeform[i];
+                var yPos = drum.y - height/2 + 25 + (height - 50) * deform.heightPos;
+                var xOffset = deform.inward + deform.twist * Math.sin(deform.heightPos * Math.PI);
+                var x = drum.x + width/2 - xOffset;
+                
+                ctx.lineTo(x, yPos);
+            }
+            
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Add metal texture (subtle noise)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            for (var i = 0; i < 20; i++) {
+                var texX = drum.x - width/2 + Math.random() * width;
+                var texY = drum.y - height/2 + 20 + Math.random() * (height - 40);
+                var texSize = 2 + Math.random() * 4;
+                ctx.beginPath();
+                ctx.arc(texX, texY, texSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawTopRing(radius) {
+            ctx.save();
+            
+            // Metal ring gradient
+            var ringGradient = ctx.createRadialGradient(
+                drum.x, drum.y - drum.height/2 + 10, 0,
+                drum.x, drum.y - drum.height/2 + 10, radius
+            );
+            ringGradient.addColorStop(0, '#E0E0E0');
+            ringGradient.addColorStop(0.7, drum.ringColor);
+            ringGradient.addColorStop(1, '#707070');
+            
+            ctx.fillStyle = ringGradient;
+            ctx.strokeStyle = '#505050';
+            ctx.lineWidth = 3;
+            
+            // Draw ring with deformation
+            ctx.beginPath();
+            for (var i = 0; i < drum.topDeform.length; i++) {
+                var deform = drum.topDeform[i];
+                var angle = deform.angle;
+                var currentRadius = radius - deform.radius * 0.8;
+                var x = drum.x + Math.cos(angle) * currentRadius;
+                var y = drum.y - drum.height/2 + 10 + Math.sin(angle) * 5;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Ring highlight
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(drum.x, drum.y - drum.height/2 + 10, radius * 0.9, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        function drawBottomRing(radius, height) {
+            ctx.save();
+            
+            var ringGradient = ctx.createRadialGradient(
+                drum.x, drum.y + height/2 - 10, 0,
+                drum.x, drum.y + height/2 - 10, radius
+            );
+            ringGradient.addColorStop(0, '#E0E0E0');
+            ringGradient.addColorStop(0.7, drum.ringColor);
+            ringGradient.addColorStop(1, '#707070');
+            
+            ctx.fillStyle = ringGradient;
+            ctx.strokeStyle = '#505050';
+            ctx.lineWidth = 3;
+            
+            // Draw bottom ring with deformation
+            ctx.beginPath();
+            for (var i = 0; i < drum.bottomDeform.length; i++) {
+                var deform = drum.bottomDeform[i];
+                var angle = deform.angle;
+                var currentRadius = radius - deform.radius * 0.8;
+                var x = drum.x + Math.cos(angle) * currentRadius;
+                var y = drum.y + height/2 - 10 + Math.sin(angle) * 5;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        function drawReinforcementRings(width, height) {
+            ctx.save();
+            
+            ctx.strokeStyle = drum.ringColor;
+            ctx.lineWidth = 3;
+            
+            // Draw 3 reinforcement rings
+            for (var i = 1; i <= 3; i++) {
+                var ringY = drum.y - height/2 + 30 + (height - 60) * (i/4);
+                
+                // Apply deformation to rings
+                var deformation = 0;
+                for (var j = 0; j < drum.middleDeform.length; j++) {
+                    if (Math.abs(drum.middleDeform[j].heightPos - (i/4)) < 0.1) {
+                        deformation = drum.middleDeform[j].inward * 0.5;
+                        break;
+                    }
+                }
+                
+                ctx.beginPath();
+                ctx.moveTo(drum.x - width/2 + deformation, ringY);
+                ctx.lineTo(drum.x + width/2 - deformation, ringY);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawWaterInside(width, height) {
+            var waterHeight = height * drum.waterVolume * (1 - drum.steamVolume * 0.4);
+            if (waterHeight > 5) {
+                ctx.fillStyle = 'rgba(64, 164, 244, 0.7)';
+                ctx.fillRect(drum.x - width/2 + 10, drum.y + height/2 - waterHeight, width - 20, waterHeight);
+                
+                // Water surface reflection
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(drum.x - width/2 + 10, drum.y + height/2 - waterHeight, width - 20, 3);
+            }
+        }
+        
+        function drawHeatGlow(width) {
+            var intensity = Math.min(1, (temperature - 80) / 40);
+            var glowGrad = ctx.createRadialGradient(drum.x, drum.y, 0, drum.x, drum.y, width * 1.5);
+            glowGrad.addColorStop(0, 'rgba(255, 160, 60, ' + (intensity * 0.7) + ')');
+            glowGrad.addColorStop(0.7, 'rgba(255, 120, 40, ' + (intensity * 0.3) + ')');
+            glowGrad.addColorStop(1, 'rgba(255, 80, 20, 0)');
+            ctx.fillStyle = glowGrad;
+            ctx.beginPath();
+            ctx.arc(drum.x, drum.y, width * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function drawInteractiveOutline(width, height) {
+            var outlineColor;
+            if (drum.containsSteam) {
+                outlineColor = '#FF5722';
+            } else if (drumOnBurner) {
+                outlineColor = '#FF9800';
+            } else if (state === 'FINISHED') {
+                outlineColor = '#9E9E9E';
+            } else {
+                outlineColor = '#2196F3';
+            }
+            
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(drum.x - width/2 - 5, drum.y - height/2 - 5, width + 10, height + 10);
+            ctx.setLineDash([]);
+        }
+        
+        function lightenColor(color, percent) {
+            var num = parseInt(color.slice(1), 16);
+            var amt = Math.round(2.55 * percent);
+            var R = (num >> 16) + amt;
+            var G = (num >> 8 & 0x00FF) + amt;
+            var B = (num & 0x0000FF) + amt;
+            return "#" + (
+                0x1000000 +
+                (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)
+            ).toString(16).slice(1);
+        }
+        
+        function darkenColor(color, percent) {
+            var num = parseInt(color.slice(1), 16);
+            var amt = Math.round(2.55 * percent);
+            var R = (num >> 16) - amt;
+            var G = (num >> 8 & 0x00FF) - amt;
+            var B = (num & 0x0000FF) - amt;
+            return "#" + (
+                0x1000000 +
+                (R > 0 ? R : 0) * 0x10000 +
+                (G > 0 ? G : 0) * 0x100 +
+                (B > 0 ? B : 0)
+            ).toString(16).slice(1);
+        }
+        
+        function drawSteam() {
+            for (var i = 0; i < steamParticles.length; i++) {
+                var p = steamParticles[i];
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + (p.life * 0.85) + ')';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawAirBubbles() {
+            for (var i = 0; i < airBubbleParticles.length; i++) {
+                var p = airBubbleParticles[i];
+                ctx.fillStyle = 'rgba(180, 220, 255, ' + (p.life * 0.8) + ')';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawHeatRipples() {
+            for (var i = 0; i < heatRippleParticles.length; i++) {
+                var p = heatRippleParticles[i];
+                ctx.strokeStyle = 'rgba(255, 200, 100, ' + p.life + ')';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+        
+        function drawWaterSplash() {
+            for (var i = 0; i < waterSplashParticles.length; i++) {
+                var p = waterSplashParticles[i];
+                ctx.fillStyle = 'rgba(33, 150, 243, ' + p.life + ')';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawCondensation() {
+            for (var i = 0; i < condensationParticles.length; i++) {
+                var p = condensationParticles[i];
+                ctx.fillStyle = 'rgba(220, 240, 255, ' + p.life + ')';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawArrows() {
+            if (state !== 'CRUSHING' && state !== 'FINISHED') return;
+            
+            ctx.fillStyle = '#F44336';
+            ctx.strokeStyle = '#D32F2F';
+            ctx.lineWidth = 4;
+            
+            for (var i = 0; i < arrowParticles.length; i++) {
+                var arrow = arrowParticles[i];
+                var x = arrow.x + Math.cos(arrow.angle) * arrow.pulse;
+                var y = arrow.y + Math.sin(arrow.angle) * arrow.pulse;
+                
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(arrow.angle + Math.PI);
+                
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-25, -12);
+                ctx.lineTo(-25, 12);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+        
+        function drawPhysicsInfo() {
+            if (temperature > 75) {
+                ctx.fillStyle = temperature >= 100 ? '#FF3D00' : '#FF9100';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(temperature.toFixed(1) + '°C', drum.x, drum.y - drum.height / 2 - 30);
+                
+                if (temperature >= 100) {
+                    ctx.fillStyle = '#FF1744';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText('BOILING', drum.x, drum.y - drum.height / 2 - 50);
+                }
+            }
+            
+            if (burner.fireVisible && burner.flameIntensity > 0.3) {
+                ctx.fillStyle = 'rgba(255, 100, 0, 0.9)';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔥 HEAT SOURCE ACTIVE', burner.x, burner.y - 130);
+            }
+            
+            if (state === 'CRUSHING' || state === 'FINISHED') {
+                var pressureDiff = ATMOSPHERIC_PRESSURE - pressure;
+                
+                ctx.fillStyle = '#D32F2F';
+                ctx.font = 'bold 15px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('ΔP = ' + pressureDiff.toFixed(1) + ' kPa', drum.x, drum.y - drum.height / 2 - 70);
+            }
+        }
+        
+        function drawScientificLabels() {
+            ctx.fillStyle = '#37474F';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('HEAT SOURCE', burner.x, burner.y + burner.height + 20);
+            
+            if (experimentCount > 0) {
+                ctx.fillStyle = '#FF5722';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Experiment #' + experimentCount, drum.x, drum.y + drum.height/2 + 40);
+            }
+            
+            if (drum.containsSteam) {
+                ctx.fillStyle = '#FF5722';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('STEAM', drum.x, drum.y + drum.height/2 + 55);
+            } else if (temperature > 75 && temperature < 100) {
+                ctx.fillStyle = '#FF9800';
+                ctx.font = '13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('HEATING', drum.x, drum.y + drum.height/2 + 55);
+            } else if (state === 'IDLE') {
+                ctx.fillStyle = '#2196F3';
+                ctx.font = '13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('AIR + WATER', drum.x, drum.y + drum.height/2 + 55);
+            }
+            
+            if (state === 'IDLE' && !drumOnBurner) {
+                dragHint.style.display = 'block';
+                dragHint.textContent = '← Place drum on heat source →';
+            } else if (state === 'DRAGGING') {
+                dragHint.style.display = 'block';
+                dragHint.textContent = '← Drag into cold water for phase change →';
+            } else if (state === 'FINISHED') {
+                dragHint.style.display = 'block';
+                dragHint.textContent = '← Observe atmospheric pressure effect →';
+            } else {
+                dragHint.style.display = 'none';
+            }
+        }
+        
+        function animate() {
+            updatePhysics();
+            updateParticles();
+            draw();
+            requestAnimationFrame(animate);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

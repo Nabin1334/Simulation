@@ -1,1472 +1,1014 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pressure Measurement Laboratory | Realistic 3D Simulation</title>
+    <title> Pressure</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         body {
-            overflow: hidden;
-            background: #0a0e17;
-            color: #ffffff;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        #container {
-            width: 100vw;
-            height: 100vh;
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 900px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        /* Header */
-        .lab-header {
-            padding: 20px 30px;
-            background: linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, rgba(16, 21, 35, 0.9) 100%);
+        .header {
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            padding: 30px 40px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .header-title {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .formula-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .main-formula {
+            font-size: 3.2rem;
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+            background: linear-gradient(45deg, #ffffff, #dbeafe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .formula-explanation {
+            color: #dbeafe;
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .pressure-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .pressure-title {
+            color: white;
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .pressure-items {
+            display: grid;
+            gap: 15px;
+        }
+
+        .pressure-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
-        }
-
-        .header-left h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-        }
-
-        .header-left .subtitle {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            font-weight: 400;
-        }
-
-        .lab-status {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(0, 114, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 114, 255, 0.3);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Main Content */
-        #content {
-            display: flex;
-            flex: 1;
-            min-height: 0;
-        }
-
-        /* Control Panel */
-        #control-panel {
-            width: 400px;
-            padding: 25px;
-            background: rgba(16, 21, 35, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            overflow-y: auto;
-            z-index: 90;
-        }
-
-        .panel-section {
-            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
 
-        .section-title {
+        .pressure-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .pressure-label {
+            color: #dbeafe;
+            font-size: 1.2rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .section-title h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #00c6ff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .pressure-label::before {
+            content: '📐';
+            font-size: 1.2em;
         }
 
-        .icon {
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+        .pressure-value {
+            color: #fbbf24;
+            font-family: 'Courier New', monospace;
             font-weight: bold;
+            font-size: 1.6rem;
         }
 
-        /* Device Selection */
-        .device-grid {
+        .main-content {
+            flex: 1;
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            grid-template-columns: 350px 1fr;
         }
 
-        .device-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .sidebar {
+            background: rgba(30, 41, 59, 0.9);
+            padding: 30px;
+            border-right: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
         }
 
-        .device-card:hover {
-            background: rgba(0, 114, 255, 0.1);
-            border-color: rgba(0, 114, 255, 0.3);
-            transform: translateY(-2px);
+        .control-panel {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            flex: 1;
         }
 
-        .device-card.active {
-            background: rgba(0, 114, 255, 0.15);
-            border-color: #0072ff;
-            box-shadow: 0 0 20px rgba(0, 114, 255, 0.3);
+        .control-group {
+            margin-bottom: 35px;
         }
 
-        .device-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            border-radius: 6px;
-            margin-bottom: 10px;
+        .control-title {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .device-card h4 {
-            font-size: 0.9rem;
+            gap: 10px;
             font-weight: 600;
-            margin-bottom: 5px;
         }
 
-        .device-card p {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            line-height: 1.4;
-        }
-
-        /* Control Groups */
-        .control-group {
-            margin-bottom: 20px;
+        .control-title::before {
+            content: '⚙️';
+            font-size: 1.2em;
         }
 
         .control-label {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .control-label span:first-child {
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        .control-label span:last-child {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        .slider-container {
-            position: relative;
-            height: 32px;
-            display: flex;
-            align-items: center;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
-        }
-
-        /* Visualization Container */
-        #visualization-container {
-            flex: 1;
-            position: relative;
-            background: radial-gradient(circle at 20% 50%, rgba(16, 21, 35, 0.8) 0%, rgba(10, 14, 23, 0.9) 100%);
-            overflow: hidden;
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        /* Measurements Display */
-        .measurements-panel {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 300px;
-            background: rgba(16, 21, 35, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            z-index: 80;
-        }
-
-        .measurement-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .measurement-row:last-child {
-            border-bottom: none;
-        }
-
-        .measurement-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .measurement-dot {
-            width: 6px;
-            height: 6px;
-            background: #0072ff;
-            border-radius: 50%;
-        }
-
-        .measurement-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #00ff88;
-        }
-
-        .measurement-unit {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            margin-left: 2px;
-        }
-
-        /* Physics Parameters */
-        .params-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .param-item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .param-label {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        .param-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            color: #00c6ff;
-        }
-
-        /* Footer */
-        .lab-footer {
-            padding: 15px 30px;
-            background: rgba(16, 21, 35, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            opacity: 0.7;
-        }
-
-        .footer-right {
-            display: flex;
-            gap: 20px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            #control-panel {
-                width: 350px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            #content {
-                flex-direction: column;
-            }
-            
-            #control-panel {
-                width: 100%;
-                height: 300px;
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            }
-            
-            .measurements-panel {
-                position: relative;
-                bottom: auto;
-                right: auto;
-                width: calc(100% - 60px);
-                margin: 20px auto;
-            }
-        }
-
-        /* Loading Screen */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0e17;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #0072ff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .control-name {
+            font-size: 1.2rem;
+            color: #e2e8f0;
+            font-weight: 600;
         }
 
-        .loading-text {
+        .control-value {
+            font-size: 1.8rem;
+            color: #fbbf24;
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            min-width: 140px;
+            text-align: center;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 14px;
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            border-radius: 7px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5),
+                        0 0 0 4px rgba(59, 130, 246, 0.2);
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6),
+                        0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+
+        .pressure-visual {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pressure-bar {
+            height: 24px;
+            background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa);
+            border-radius: 12px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pressure-level {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            border-radius: 12px;
+            width: 40%;
+            transition: width 0.5s ease;
+        }
+
+        .pressure-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
             font-size: 1rem;
-            opacity: 0.7;
-            letter-spacing: 2px;
+            color: #dbeafe;
+        }
+
+        .simulation-area {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .simulation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .simulation-title {
+            font-size: 2.2rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(34, 197, 94, 0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-text {
+            color: #22c55e;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.3),
+                        0 8px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            min-height: 400px;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* UPDATED: REAL-TIME MEASUREMENTS SECTION - RESPONSIVE DESIGN */
+        .data-display {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            height: fit-content;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .data-title {
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .data-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            align-items: stretch;
+            height: 100%;
+        }
+
+        .data-item {
+            text-align: center;
+            padding: 25px 15px;
+            background: linear-gradient(145deg, 
+                rgba(15, 23, 42, 0.8), 
+                rgba(30, 41, 59, 0.8));
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            z-index: 1;
+        }
+
+        .data-item:nth-child(1)::before {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .data-item:nth-child(2)::before {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .data-item:nth-child(3)::before {
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+        }
+
+        .data-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .data-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+        }
+
+        .data-item:hover .data-icon {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .data-label {
+            color: #d1d5db;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .data-value {
+            font-size: 2.8rem;
+            color: white;
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .data-unit {
+            color: #60a5fa;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: rgba(96, 165, 250, 0.1);
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .data-item:nth-child(1) .data-unit {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .data-item:nth-child(2) .data-unit {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .data-item:nth-child(3) .data-unit {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+            border-color: rgba(167, 139, 250, 0.2);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        /* RESPONSIVE DESIGN FOR ALL DEVICES */
+        /* Large Desktops (1440px and up) */
+        @media (min-width: 1440px) {
+            .container {
+                height: 950px;
+            }
+            
+            .data-value {
+                font-size: 3.2rem;
+            }
+            
+            .data-item {
+                padding: 30px 20px;
+                min-height: 200px;
+            }
+        }
+
+        /* Laptops (1024px to 1439px) */
+        @media (max-width: 1439px) and (min-width: 1024px) {
+            .container {
+                height: 850px;
+                max-width: 1200px;
+            }
+            
+            .data-value {
+                font-size: 2.6rem;
+            }
+            
+            .data-item {
+                padding: 20px 15px;
+                min-height: 170px;
+            }
+        }
+
+        /* Tablets (768px to 1023px) */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            .container {
+                height: auto;
+                max-width: 900px;
+            }
+            
+            .header-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .simulation-area {
+                padding: 25px;
+            }
+            
+            .data-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            
+            .data-value {
+                font-size: 2.4rem;
+            }
+            
+            .data-item {
+                padding: 20px 10px;
+                min-height: 160px;
+            }
+            
+            .data-icon {
+                font-size: 2.2rem;
+                margin-bottom: 12px;
+            }
+        }
+
+        /* Mobile Landscape (576px to 767px) */
+        @media (max-width: 767px) and (min-width: 576px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                height: auto;
+                max-width: 700px;
+                border-radius: 20px;
+            }
+            
+            .header {
+                padding: 20px 25px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .main-formula {
+                font-size: 2.6rem;
+            }
+            
+            .header-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                padding: 20px;
+                border-right: none;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .simulation-area {
+                padding: 20px;
+                gap: 25px;
+            }
+            
+            .simulation-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .canvas-container {
+                min-height: 350px;
+            }
+            
+            .data-display {
+                padding: 25px 20px;
+            }
+            
+            .data-title {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            .data-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            
+            .data-value {
+                font-size: 2rem;
+            }
+            
+            .data-item {
+                padding: 15px 10px;
+                min-height: 150px;
+            }
+            
+            .data-icon {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .data-label {
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+            
+            .data-unit {
+                font-size: 0.9rem;
+                padding: 4px 10px;
+            }
+        }
+
+        /* Mobile Portrait (320px to 575px) */
+        @media (max-width: 575px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                height: auto;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .main-formula {
+                font-size: 2.2rem;
+            }
+            
+            .formula-explanation {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            
+            .formula-container {
+                padding: 20px;
+            }
+            
+            .header-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .pressure-display {
+                padding: 20px;
+            }
+            
+            .pressure-title {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+            
+            .pressure-item {
+                padding: 12px;
+            }
+            
+            .pressure-label {
+                font-size: 1rem;
+            }
+            
+            .pressure-value {
+                font-size: 1.3rem;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                padding: 20px;
+                border-right: none;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .control-panel {
+                padding: 20px;
+            }
+            
+            .control-title {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            
+            .control-value {
+                font-size: 1.4rem;
+                min-width: 100px;
+                padding: 6px 12px;
+            }
+            
+            input[type="range"]::-webkit-slider-thumb {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .simulation-area {
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .simulation-title {
+                font-size: 1.6rem;
+            }
+            
+            .live-indicator {
+                padding: 8px 15px;
+            }
+            
+            .live-text {
+                font-size: 0.9rem;
+            }
+            
+            .canvas-container {
+                min-height: 300px;
+                border-radius: 12px;
+            }
+            
+            .data-display {
+                padding: 20px 15px;
+                border-radius: 16px;
+            }
+            
+            .data-title {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+            
+            .data-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .data-value {
+                font-size: 2.4rem;
+            }
+            
+            .data-item {
+                padding: 20px 15px;
+                min-height: 140px;
+            }
+            
+            .data-icon {
+                font-size: 2rem;
+                margin-bottom: 12px;
+            }
+            
+            .data-label {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+            }
+            
+            .data-unit {
+                font-size: 1rem;
+                padding: 4px 12px;
+            }
+        }
+
+        /* Very Small Mobile (320px and below) */
+        @media (max-width: 320px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .main-formula {
+                font-size: 1.8rem;
+            }
+            
+            .simulation-title {
+                font-size: 1.4rem;
+            }
+            
+            .data-title {
+                font-size: 1.2rem;
+            }
+            
+            .data-value {
+                font-size: 2rem;
+            }
+            
+            .data-item {
+                padding: 15px 10px;
+                min-height: 130px;
+            }
+            
+            .data-icon {
+                font-size: 1.8rem;
+            }
+            
+            .control-value {
+                font-size: 1.2rem;
+                min-width: 80px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">LOADING PHYSICS ENGINE</div>
-    </div>
-
-    <div id="container">
-        <header class="lab-header">
-            <div class="header-left">
-                <h1>PRESSURE MEASUREMENT LABORATORY</h1>
-                <p class="subtitle">Real-time 3D simulation of pressure measurement devices with accurate physics</p>
-            </div>
-            <div class="lab-status">
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    <span>PHYSICS ACTIVE</span>
-                </div>
-                <div class="status-indicator">
-                    <div class="status-dot" style="background: #0072ff;"></div>
-                    <span>REAL-TIME CALCULATIONS</span>
-                </div>
-            </div>
-        </header>
-
-        <div id="content">
-            <div id="control-panel">
-                <div class="panel-section">
-                    <div class="section-title">
-                        <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
-                        <h3>Pressure Instruments</h3>
-                    </div>
-                    <div class="device-grid">
-                        <div class="device-card active" data-device="manometer">
-                            <div class="device-icon"><i class="fas fa-vial"></i></div>
-                            <h4>U-Tube Manometer</h4>
-                            <p>Measures pressure difference using liquid column height</p>
-                        </div>
-                        <div class="device-card" data-device="bourdon">
-                            <div class="device-icon"><i class="fas fa-gauge-high"></i></div>
-                            <h4>Bourdon Gauge</h4>
-                            <p>Mechanical pressure gauge with curved tube mechanism</p>
-                        </div>
-                        <div class="device-card" data-device="barometer">
-                            <div class="device-icon"><i class="fas fa-cloud"></i></div>
-                            <h4>Mercury Barometer</h4>
-                            <p>Measures atmospheric pressure with mercury column</p>
-                        </div>
-                        <div class="device-card" data-device="pressure-vessel">
-                            <div class="device-icon"><i class="fas fa-flask"></i></div>
-                            <h4>Pressure Vessel</h4>
-                            <p>Demonstrates pressure distribution in fluids</p>
-                        </div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>Pressure</h1>
+                    <div class="formula-container">
+                        <div class="main-formula">P = F / A</div>
+                        <div class="formula-explanation">Pressure = Force ÷ Area</div>
                     </div>
                 </div>
-
-                <div class="panel-section">
-                    <div class="section-title">
-                        <div class="icon"><i class="fas fa-sliders-h"></i></div>
-                        <h3>Pressure Control</h3>
-                    </div>
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Applied Pressure</span>
-                            <span id="pressure-value">101.325 kPa</span>
+                
+                <div class="pressure-display">
+                    <div class="pressure-title">Current Values</div>
+                    <div class="pressure-items">
+                        <div class="pressure-item">
+                            <span class="pressure-label">P (Pressure):</span>
+                            <span class="pressure-value" id="header-pressure">32,400 Pa</span>
                         </div>
-                        <div class="slider-container">
-                            <input type="range" id="pressure-slider" min="0" max="500" value="101.325" step="0.1">
+                        <div class="pressure-item">
+                            <span class="pressure-label">F (Force):</span>
+                            <span class="pressure-value" id="header-force">81 N</span>
                         </div>
-                    </div>
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Fluid Density</span>
-                            <span id="density-value">13,600 kg/m³</span>
+                        <div class="pressure-item">
+                            <span class="pressure-label">A (Area):</span>
+                            <span class="pressure-value">0.0025 m²</span>
                         </div>
-                        <div class="slider-container">
-                            <input type="range" id="density-slider" min="500" max="20000" value="13600" step="100">
-                        </div>
-                        <div class="params-grid" style="margin-top: 15px;">
-                            <div class="param-item">
-                                <div class="param-label">Water</div>
-                                <div class="param-value">1000 kg/m³</div>
-                            </div>
-                            <div class="param-item">
-                                <div class="param-label">Oil</div>
-                                <div class="param-value">850 kg/m³</div>
-                            </div>
-                            <div class="param-item">
-                                <div class="param-label">Mercury</div>
-                                <div class="param-value">13,600 kg/m³</div>
-                            </div>
-                            <div class="param-item">
-                                <div class="param-label">Glycerin</div>
-                                <div class="param-value">1,260 kg/m³</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <div class="section-title">
-                        <div class="icon"><i class="fas fa-calculator"></i></div>
-                        <h3>Physics Parameters</h3>
-                    </div>
-                    <div class="params-grid">
-                        <div class="param-item">
-                            <div class="param-label">Gravity</div>
-                            <div class="param-value">9.80665 m/s²</div>
-                        </div>
-                        <div class="param-item">
-                            <div class="param-label">Atmospheric P</div>
-                            <div class="param-value">101.325 kPa</div>
-                        </div>
-                        <div class="param-item">
-                            <div class="param-label">Temperature</div>
-                            <div class="param-value">20°C</div>
-                        </div>
-                        <div class="param-item">
-                            <div class="param-label">Humidity</div>
-                            <div class="param-value">50% RH</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="visualization-container">
-                <div id="canvas-container"></div>
-                <div class="measurements-panel">
-                    <div class="measurement-row">
-                        <div class="measurement-label">
-                            <div class="measurement-dot"></div>
-                            <span>Absolute Pressure</span>
-                        </div>
-                        <div class="measurement-value">101.325<span class="measurement-unit"> kPa</span></div>
-                    </div>
-                    <div class="measurement-row">
-                        <div class="measurement-label">
-                            <div class="measurement-dot" style="background: #00c6ff;"></div>
-                            <span>Gauge Pressure</span>
-                        </div>
-                        <div class="measurement-value">0.000<span class="measurement-unit"> kPa</span></div>
-                    </div>
-                    <div class="measurement-row">
-                        <div class="measurement-label">
-                            <div class="measurement-dot" style="background: #ff0066;"></div>
-                            <span>Column Height</span>
-                        </div>
-                        <div class="measurement-value">760.0<span class="measurement-unit"> mm</span></div>
-                    </div>
-                    <div class="measurement-row">
-                        <div class="measurement-label">
-                            <div class="measurement-dot" style="background: #00ff88;"></div>
-                            <span>Fluid Pressure</span>
-                        </div>
-                        <div class="measurement-value">13.600<span class="measurement-unit"> kPa/m</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer class="lab-footer">
-            <div class="footer-left">
-                Pressure Measurement Laboratory v2.0 | Real-time Physics Simulation
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar Controls -->
+            <div class="sidebar">
+                <div class="control-panel">
+                    <div class="control-group">
+                        <div class="control-title">Applied Force Control</div>
+                        <div class="control-label">
+                            <div class="control-name">Force Level</div>
+                            <div class="control-value" id="force-value">81 N</div>
+                        </div>
+                        <input type="range" id="force-slider" min="0" max="200" value="81" step="1">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-title">Pressure Monitor</div>
+                        <div class="control-label">
+                            <div class="control-name">Pressure Level</div>
+                            <div class="control-value" id="pressure-value">32,400 Pa</div>
+                        </div>
+                        <div class="pressure-visual">
+                            <div class="pressure-bar">
+                                <div class="pressure-level" id="pressure-bar"></div>
+                            </div>
+                            <div class="pressure-labels">
+                                <span>0 Pa</span>
+                                <span>50,000 Pa</span>
+                                <span>100,000 Pa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="footer-right">
-                <span>FPS: <span id="fps-counter">60</span></span>
-                <span>Triangles: <span id="triangle-count">0</span></span>
-                <span>Physics Steps: <span id="physics-steps">0</span></span>
+
+            <!-- Simulation Area -->
+            <div class="simulation-area">
+                <div class="simulation-header">
+                    <div class="simulation-title">Compression Visualization</div>
+                    <div class="live-indicator">
+                        <div class="live-dot"></div>
+                        <div class="live-text">LIVE SIMULATION</div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="canvas"></canvas>
+                </div>
+                
+                <!-- REAL-TIME MEASUREMENTS SECTION -->
+                <div class="data-display">
+                    <div class="data-title">REAL-TIME MEASUREMENTS</div>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <div class="data-icon">⚡</div>
+                            <div class="data-label">Force Applied</div>
+                            <div class="data-value" id="data-force">81<span class="data-unit"> N</span></div>
+                        </div>
+                        
+                        <div class="data-item">
+                            <div class="data-icon">📊</div>
+                            <div class="data-label">Pressure Created</div>
+                            <div class="data-value" id="data-pressure">32,400<span class="data-unit"> Pa</span></div>
+                        </div>
+                        
+                        <div class="data-item">
+                            <div class="data-icon">📉</div>
+                            <div class="data-label">Foam Compression</div>
+                            <div class="data-value" id="data-compression">28<span class="data-unit"> %</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </footer>
+        </div>
+
+        <div class="footer">
+            Pressure and its Measurement Simulation 
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/stats.min.js"></script>
-    <script>
-        // Physics constants
-        const PHYSICS = {
-            GRAVITY: 9.80665, // m/s²
-            ATMOSPHERIC_PRESSURE: 101.325, // kPa
-            WATER_DENSITY: 1000, // kg/m³
-            MERCURY_DENSITY: 13600, // kg/m³
-            STANDARD_TEMP: 20, // °C
-        };
-
-        // Main Three.js variables
-        let scene, camera, renderer, controls, stats;
-        let manometer, bourdonGauge, barometer, pressureVessel;
-        let currentDevice = 'manometer';
-        
-        // Physics state
-        let appliedPressure = 101.325; // kPa
-        let fluidDensity = 13600; // kg/m³
-        let time = 0;
-        
-        // Performance tracking
-        let frameCount = 0;
-        let lastTime = performance.now();
-        let fps = 60;
-        let physicsSteps = 0;
-
-        // Initialize the application
-        async function init() {
-            // Create scene with realistic lighting
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0e17);
-            scene.fog = new THREE.Fog(0x0a0e17, 10, 50);
-
-            // Enhanced lighting setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 20, 15);
-            directionalLight.castShadow = true;
-            directionalLight.shadow.mapSize.width = 2048;
-            directionalLight.shadow.mapSize.height = 2048;
-            directionalLight.shadow.camera.near = 0.5;
-            directionalLight.shadow.camera.far = 50;
-            directionalLight.shadow.camera.left = -20;
-            directionalLight.shadow.camera.right = 20;
-            directionalLight.shadow.camera.top = 20;
-            directionalLight.shadow.camera.bottom = -20;
-            scene.add(directionalLight);
-
-            const fillLight = new THREE.DirectionalLight(0x6688ff, 0.3);
-            fillLight.position.set(-10, 5, -10);
-            scene.add(fillLight);
-
-            // Create camera
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(5, 8, 12);
-
-            // Create renderer with enhanced settings
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true,
-                alpha: true,
-                powerPreference: "high-performance"
-            });
-            renderer.setSize(window.innerWidth - 400, window.innerHeight - 150);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.0;
-            renderer.outputEncoding = THREE.sRGBEncoding;
-
-            const canvasContainer = document.getElementById('canvas-container');
-            canvasContainer.appendChild(renderer.domElement);
-
-            // Add orbit controls
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.minDistance = 3;
-            controls.maxDistance = 50;
-
-            // Create laboratory environment
-            createLabEnvironment();
-
-            // Create pressure measurement devices with realistic materials
-            await createRealisticManometer();
-            await createRealisticBourdonGauge();
-            await createRealisticBarometer();
-            await createPressureVessel();
-
-            // Setup device selection
-            setupDeviceSelection();
-
-            // Setup controls
-            setupControls();
-
-            // Hide loading screen
-            document.getElementById('loading-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.display = 'none';
-            }, 500);
-
-            // Handle window resize
-            window.addEventListener('resize', onWindowResize);
-
-            // Start animation loop
-            animate();
-        }
-
-        // Create laboratory environment
-        function createLabEnvironment() {
-            // Laboratory floor
-            const floorGeometry = new THREE.PlaneGeometry(40, 40);
-            const floorMaterial = new THREE.MeshStandardMaterial({
-                color: 0x1a1f35,
-                roughness: 0.8,
-                metalness: 0.2
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
-
-            // Laboratory grid
-            const gridHelper = new THREE.GridHelper(40, 40, 0xffffff, 0xffffff);
-            gridHelper.material.opacity = 0.05;
-            gridHelper.material.transparent = true;
-            scene.add(gridHelper);
-
-            // Laboratory walls
-            const wallMaterial = new THREE.MeshStandardMaterial({
-                color: 0x0f1428,
-                roughness: 0.7,
-                metalness: 0.1
-            });
-
-            const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 10), wallMaterial);
-            backWall.position.set(0, 5, -20);
-            backWall.receiveShadow = true;
-            scene.add(backWall);
-
-            // Laboratory equipment shelves
-            const shelfGeometry = new THREE.BoxGeometry(15, 0.2, 3);
-            const shelfMaterial = new THREE.MeshStandardMaterial({
-                color: 0x2a2f45,
-                roughness: 0.6,
-                metalness: 0.3
-            });
-
-            const shelf = new THREE.Mesh(shelfGeometry, shelfMaterial);
-            shelf.position.set(-15, 2, -10);
-            shelf.castShadow = true;
-            shelf.receiveShadow = true;
-            scene.add(shelf);
-
-            // Equipment on shelf
-            const equipmentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 16);
-            const equipmentMaterial = new THREE.MeshStandardMaterial({
-                color: 0x3a4f8c,
-                roughness: 0.5,
-                metalness: 0.7
-            });
-
-            for (let i = 0; i < 5; i++) {
-                const equipment = new THREE.Mesh(equipmentGeometry, equipmentMaterial);
-                equipment.position.set(-15 + i * 3, 2.5, -10);
-                equipment.castShadow = true;
-                scene.add(equipment);
-            }
-
-            // Ambient particles
-            createAmbientParticles();
-        }
-
-        // Create realistic U-tube manometer
-        async function createRealisticManometer() {
-            manometer = new THREE.Group();
-            manometer.name = 'manometer';
-
-            // Glass tubes
-            const glassMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xffffff,
-                transmission: 0.95,
-                roughness: 0.05,
-                metalness: 0,
-                ior: 1.5,
-                thickness: 0.3,
-                transparent: true,
-                opacity: 0.3
-            });
-
-            const tubeRadius = 0.15;
-            const tubeHeight = 12;
-            const tubeSegments = 32;
-
-            // Left tube
-            const leftTube = new THREE.Mesh(
-                new THREE.CylinderGeometry(tubeRadius, tubeRadius, tubeHeight, tubeSegments),
-                glassMaterial
-            );
-            leftTube.position.set(-3, 0, 0);
-            leftTube.castShadow = true;
-            leftTube.receiveShadow = true;
-            manometer.add(leftTube);
-
-            // Right tube
-            const rightTube = new THREE.Mesh(
-                new THREE.CylinderGeometry(tubeRadius, tubeRadius, tubeHeight, tubeSegments),
-                glassMaterial
-            );
-            rightTube.position.set(3, 0, 0);
-            rightTube.castShadow = true;
-            rightTube.receiveShadow = true;
-            manometer.add(rightTube);
-
-            // Bottom connector
-            const connectorGeometry = new THREE.BoxGeometry(6.3, tubeRadius * 2, tubeRadius * 2);
-            const connector = new THREE.Mesh(connectorGeometry, glassMaterial);
-            connector.position.set(0, -tubeHeight/2 + tubeRadius, 0);
-            connector.castShadow = true;
-            manometer.add(connector);
-
-            // Manometer base
-            const baseGeometry = new THREE.BoxGeometry(8, 0.5, 4);
-            const baseMaterial = new THREE.MeshStandardMaterial({
-                color: 0x333333,
-                roughness: 0.4,
-                metalness: 0.6
-            });
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
-            base.position.set(0, -tubeHeight/2 - 0.5, 0);
-            base.castShadow = true;
-            base.receiveShadow = true;
-            manometer.add(base);
-
-            // Mercury fluid
-            const mercuryGeometry = new THREE.CylinderGeometry(tubeRadius * 0.9, tubeRadius * 0.9, tubeHeight * 0.8, tubeSegments);
-            const mercuryMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xff5500,
-                metalness: 0.9,
-                roughness: 0.1,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1
-            });
-
-            const leftMercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
-            leftMercury.position.set(-3, -tubeHeight * 0.1, 0);
-            leftMercury.castShadow = true;
-            leftMercury.receiveShadow = true;
-            manometer.add(leftMercury);
-
-            const rightMercury = new THREE.Mesh(mercuryGeometry.clone(), mercuryMaterial);
-            rightMercury.position.set(3, -tubeHeight * 0.1, 0);
-            rightMercury.castShadow = true;
-            rightMercury.receiveShadow = true;
-            manometer.add(rightMercury);
-
-            // Pressure labels and scale
-            createManometerScale(manometer, -3, 3, tubeHeight);
-
-            // Store references for animation
-            manometer.userData = {
-                leftFluid: leftMercury,
-                rightFluid: rightMercury,
-                scale: manometer.children[manometer.children.length - 1]
-            };
-
-            scene.add(manometer);
-        }
-
-        // Create manometer scale
-        function createManometerScale(parent, leftX, rightX, height) {
-            const scaleGroup = new THREE.Group();
-            
-            // Main scale line
-            const scaleMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-            const scaleGeometry = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(leftX, height/2 - 1, 0.2),
-                new THREE.Vector3(rightX, height/2 - 1, 0.2)
-            ]);
-            const scaleLine = new THREE.Line(scaleGeometry, scaleMaterial);
-            scaleGroup.add(scaleLine);
-
-            // Scale ticks
-            for (let i = 0; i <= 10; i++) {
-                const y = -height/2 + 2 + i * (height - 4) / 10;
-                const tickGeometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(leftX - 0.2, y, 0.2),
-                    new THREE.Vector3(leftX + 0.2, y, 0.2)
-                ]);
-                const tick = new THREE.Line(tickGeometry, scaleMaterial);
-                scaleGroup.add(tick);
-
-                const rightTickGeometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(rightX - 0.2, y, 0.2),
-                    new THREE.Vector3(rightX + 0.2, y, 0.2)
-                ]);
-                const rightTick = new THREE.Line(rightTickGeometry, scaleMaterial);
-                scaleGroup.add(rightTick);
-            }
-
-            parent.add(scaleGroup);
-            return scaleGroup;
-        }
-
-        // Create realistic Bourdon gauge
-        async function createRealisticBourdonGauge() {
-            bourdonGauge = new THREE.Group();
-            bourdonGauge.name = 'bourdon';
-            bourdonGauge.visible = false;
-
-            // Gauge body
-            const bodyGeometry = new THREE.CylinderGeometry(3, 3, 2, 64);
-            const bodyMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x222222,
-                roughness: 0.3,
-                metalness: 0.8,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.2
-            });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.castShadow = true;
-            body.receiveShadow = true;
-            bourdonGauge.add(body);
-
-            // Gauge face
-            const faceGeometry = new THREE.CylinderGeometry(2.9, 2.9, 2.1, 64);
-            const faceMaterial = new THREE.MeshStandardMaterial({
-                color: 0xf5f5f5,
-                roughness: 0.1,
-                metalness: 0.1
-            });
-            const face = new THREE.Mesh(faceGeometry, faceMaterial);
-            face.position.z = 0.05;
-            bourdonGauge.add(face);
-
-            // Gauge dial
-            createBourdonDial(bourdonGauge);
-
-            // Bourdon tube mechanism
-            createBourdonMechanism(bourdonGauge);
-
-            // Pressure inlet
-            const inletGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 16);
-            const inletMaterial = new THREE.MeshStandardMaterial({
-                color: 0x444444,
-                roughness: 0.2,
-                metalness: 0.8
-            });
-            const inlet = new THREE.Mesh(inletGeometry, inletMaterial);
-            inlet.position.set(-2, -1, 0);
-            inlet.rotation.x = Math.PI / 2;
-            inlet.castShadow = true;
-            bourdonGauge.add(inlet);
-
-            scene.add(bourdonGauge);
-        }
-
-        // Create Bourdon gauge dial
-        function createBourdonDial(parent) {
-            const dialGroup = new THREE.Group();
-            
-            // Dial markings
-            const markMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-            
-            for (let i = 0; i <= 10; i++) {
-                const angle = (i / 10) * Math.PI * 1.8 - Math.PI * 0.9;
-                const length = i % 2 === 0 ? 0.3 : 0.15;
-                
-                const start = new THREE.Vector3(
-                    Math.cos(angle) * 2.5,
-                    Math.sin(angle) * 2.5,
-                    1.1
-                );
-                const end = new THREE.Vector3(
-                    Math.cos(angle) * (2.5 - length),
-                    Math.sin(angle) * (2.5 - length),
-                    1.1
-                );
-                
-                const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-                const line = new THREE.Line(geometry, markMaterial);
-                dialGroup.add(line);
-            }
-
-            // Pointer
-            const pointerGeometry = new THREE.BoxGeometry(0.05, 2, 0.05);
-            const pointerMaterial = new THREE.MeshStandardMaterial({
-                color: 0xff0000,
-                emissive: 0x330000,
-                emissiveIntensity: 0.5
-            });
-            const pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
-            pointer.position.z = 1.2;
-            pointer.rotation.z = -Math.PI * 0.9;
-            dialGroup.add(pointer);
-
-            // Store pointer reference
-            parent.userData = { pointer };
-
-            parent.add(dialGroup);
-        }
-
-        // Create Bourdon mechanism
-        function createBourdonMechanism(parent) {
-            const mechanismGroup = new THREE.Group();
-            
-            // Bourdon tube (simplified as curved tube)
-            const tubeRadius = 0.1;
-            const tubeSegments = 32;
-            const tubePoints = [];
-            
-            for (let i = 0; i <= tubeSegments; i++) {
-                const t = i / tubeSegments;
-                const angle = t * Math.PI;
-                const radius = 0.5;
-                
-                tubePoints.push(new THREE.Vector3(
-                    Math.cos(angle) * radius,
-                    Math.sin(angle) * radius * 0.5,
-                    0
-                ));
-            }
-            
-            const tubeGeometry = new THREE.TubeGeometry(
-                new THREE.CatmullRomCurve3(tubePoints),
-                tubeSegments,
-                tubeRadius,
-                8,
-                false
-            );
-            
-            const tubeMaterial = new THREE.MeshStandardMaterial({
-                color: 0x888888,
-                roughness: 0.3,
-                metalness: 0.7
-            });
-            
-            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
-            tube.position.set(0, 0, -0.5);
-            tube.rotation.y = Math.PI / 2;
-            mechanismGroup.add(tube);
-
-            // Linkage mechanism
-            const linkageGeometry = new THREE.BoxGeometry(0.05, 1, 0.05);
-            const linkageMaterial = new THREE.MeshStandardMaterial({
-                color: 0xaaaaaa,
-                roughness: 0.4,
-                metalness: 0.6
-            });
-            
-            const linkage = new THREE.Mesh(linkageGeometry, linkageMaterial);
-            linkage.position.set(0.3, 0.5, -0.5);
-            mechanismGroup.add(linkage);
-
-            parent.add(mechanismGroup);
-        }
-
-        // Create realistic mercury barometer
-        async function createRealisticBarometer() {
-            barometer = new THREE.Group();
-            barometer.name = 'barometer';
-            barometer.visible = false;
-
-            // Glass tube
-            const tubeHeight = 85;
-            const tubeRadius = 0.25;
-            const tubeSegments = 64;
-
-            const glassMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xffffff,
-                transmission: 0.95,
-                roughness: 0.05,
-                metalness: 0,
-                ior: 1.5,
-                thickness: 0.2,
-                transparent: true,
-                opacity: 0.2
-            });
-
-            const tube = new THREE.Mesh(
-                new THREE.CylinderGeometry(tubeRadius, tubeRadius, tubeHeight, tubeSegments),
-                glassMaterial
-            );
-            tube.castShadow = true;
-            tube.receiveShadow = true;
-            barometer.add(tube);
-
-            // Mercury column
-            const mercuryMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xff5500,
-                metalness: 0.95,
-                roughness: 0.05,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.05
-            });
-
-            const mercuryColumn = new THREE.Mesh(
-                new THREE.CylinderGeometry(tubeRadius * 0.9, tubeRadius * 0.9, tubeHeight * 0.76, tubeSegments),
-                mercuryMaterial
-            );
-            mercuryColumn.position.y = -tubeHeight * 0.12;
-            mercuryColumn.castShadow = true;
-            mercuryColumn.receiveShadow = true;
-            barometer.add(mercuryColumn);
-
-            // Mercury reservoir
-            const reservoirGeometry = new THREE.SphereGeometry(1.2, 32, 32);
-            const reservoir = new THREE.Mesh(reservoirGeometry, mercuryMaterial);
-            reservoir.position.y = -tubeHeight/2 - 0.8;
-            reservoir.castShadow = true;
-            reservoir.receiveShadow = true;
-            barometer.add(reservoir);
-
-            // Wooden base
-            const baseGeometry = new THREE.CylinderGeometry(3, 3, 1, 32);
-            const baseMaterial = new THREE.MeshStandardMaterial({
-                color: 0x8B4513,
-                roughness: 0.8,
-                metalness: 0.1
-            });
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
-            base.position.y = -tubeHeight/2 - 2;
-            base.castShadow = true;
-            base.receiveShadow = true;
-            barometer.add(base);
-
-            // Scale
-            createBarometerScale(barometer, tubeHeight);
-
-            // Store references
-            barometer.userData = {
-                mercury: mercuryColumn,
-                scale: barometer.children[barometer.children.length - 1]
-            };
-
-            scene.add(barometer);
-        }
-
-        // Create barometer scale
-        function createBarometerScale(parent, height) {
-            const scaleGroup = new THREE.Group();
-            
-            const scaleMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-            
-            // Main scale
-            for (let i = 0; i <= 10; i++) {
-                const y = -height/2 + 5 + i * (height - 10) / 10;
-                const geometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(0.5, y, 0),
-                    new THREE.Vector3(0.8, y, 0)
-                ]);
-                const tick = new THREE.Line(geometry, scaleMaterial);
-                scaleGroup.add(tick);
-            }
-
-            parent.add(scaleGroup);
-            return scaleGroup;
-        }
-
-        // Create pressure vessel demo
-        async function createPressureVessel() {
-            pressureVessel = new THREE.Group();
-            pressureVessel.name = 'pressure-vessel';
-            pressureVessel.visible = false;
-
-            // Vessel body
-            const vesselGeometry = new THREE.CylinderGeometry(2, 2, 4, 64);
-            const vesselMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x3a6ea5,
-                metalness: 0.7,
-                roughness: 0.2,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1
-            });
-            const vessel = new THREE.Mesh(vesselGeometry, vesselMaterial);
-            vessel.castShadow = true;
-            vessel.receiveShadow = true;
-            pressureVessel.add(vessel);
-
-            // Vessel top
-            const topGeometry = new THREE.SphereGeometry(2, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-            const top = new THREE.Mesh(topGeometry, vesselMaterial);
-            top.position.y = 2;
-            top.castShadow = true;
-            top.receiveShadow = true;
-            pressureVessel.add(top);
-
-            // Pressure indicators
-            createPressureIndicators(pressureVessel);
-
-            scene.add(pressureVessel);
-        }
-
-        // Create pressure indicators for vessel
-        function createPressureIndicators(parent) {
-            const indicatorsGroup = new THREE.Group();
-            
-            const indicatorMaterial = new THREE.MeshBasicMaterial({
-                color: 0xff0000,
-                transparent: true,
-                opacity: 0.7
-            });
-
-            // Create grid of indicators
-            for (let x = -1.5; x <= 1.5; x += 0.5) {
-                for (let y = -1.5; y <= 1.5; y += 0.5) {
-                    for (let z = -1.5; z <= 1.5; z += 0.5) {
-                        // Only create if inside sphere
-                        const distance = Math.sqrt(x*x + y*y + z*z);
-                        if (distance < 1.8) {
-                            const size = 0.05 + (distance / 1.8) * 0.1;
-                            const geometry = new THREE.SphereGeometry(size, 8, 8);
-                            const indicator = new THREE.Mesh(geometry, indicatorMaterial);
-                            indicator.position.set(x, y, z);
-                            indicatorsGroup.add(indicator);
-                        }
-                    }
-                }
-            }
-
-            parent.userData.indicators = indicatorsGroup;
-            parent.add(indicatorsGroup);
-        }
-
-        // Create ambient particles
-        function createAmbientParticles() {
-            const particleCount = 200;
-            const particleGeometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 40;
-                positions[i + 1] = Math.random() * 15;
-                positions[i + 2] = (Math.random() - 0.5) * 40;
-            }
-            
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            const particleMaterial = new THREE.PointsMaterial({
-                color: 0x6688ff,
-                size: 0.1,
-                transparent: true,
-                opacity: 0.3
-            });
-            
-            const particles = new THREE.Points(particleGeometry, particleMaterial);
-            scene.add(particles);
-            
-            particles.userData.originalPositions = positions.slice();
-        }
-
-        // Setup device selection
-        function setupDeviceSelection() {
-            const deviceCards = document.querySelectorAll('.device-card');
-            deviceCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove active class from all cards
-                    deviceCards.forEach(c => c.classList.remove('active'));
-                    
-                    // Add active class to clicked card
-                    this.classList.add('active');
-                    
-                    // Switch to selected device
-                    currentDevice = this.dataset.device;
-                    showDevice(currentDevice);
-                });
-            });
-        }
-
-        // Setup control inputs
-        function setupControls() {
-            const pressureSlider = document.getElementById('pressure-slider');
-            const densitySlider = document.getElementById('density-slider');
-            const pressureValue = document.getElementById('pressure-value');
-            const densityValue = document.getElementById('density-value');
-
-            pressureSlider.addEventListener('input', function(e) {
-                appliedPressure = parseFloat(e.target.value);
-                pressureValue.textContent = appliedPressure.toFixed(3) + ' kPa';
-                updatePhysics();
-            });
-
-            densitySlider.addEventListener('input', function(e) {
-                fluidDensity = parseInt(e.target.value);
-                densityValue.textContent = fluidDensity.toLocaleString() + ' kg/m³';
-                updatePhysics();
-            });
-        }
-
-        // Show selected device
-        function showDevice(deviceName) {
-            // Hide all devices
-            if (manometer) manometer.visible = false;
-            if (bourdonGauge) bourdonGauge.visible = false;
-            if (barometer) barometer.visible = false;
-            if (pressureVessel) pressureVessel.visible = false;
-
-            // Update camera position based on device
-            switch(deviceName) {
-                case 'manometer':
-                    if (manometer) manometer.visible = true;
-                    camera.position.set(8, 6, 10);
-                    controls.target.set(0, 2, 0);
-                    break;
-                case 'bourdon':
-                    if (bourdonGauge) bourdonGauge.visible = true;
-                    camera.position.set(5, 3, 8);
-                    controls.target.set(0, 1, 0);
-                    break;
-                case 'barometer':
-                    if (barometer) barometer.visible = true;
-                    camera.position.set(5, 15, 12);
-                    controls.target.set(0, 10, 0);
-                    break;
-                case 'pressure-vessel':
-                    if (pressureVessel) pressureVessel.visible = true;
-                    camera.position.set(10, 5, 10);
-                    controls.target.set(0, 1, 0);
-                    break;
-            }
-
-            controls.update();
-            updatePhysics();
-        }
-
-        // Update physics simulation
-        function updatePhysics() {
-            physicsSteps++;
-            
-            // Calculate pressure difference in manometer
-            if (manometer && manometer.visible) {
-                const pressureDiff = appliedPressure - PHYSICS.ATMOSPHERIC_PRESSURE;
-                const heightDiff = (pressureDiff * 1000) / (fluidDensity * PHYSICS.GRAVITY); // Convert to Pa and calculate height
-                
-                const maxHeight = 0.3; // Maximum visual height difference
-                const visualDiff = Math.max(-maxHeight, Math.min(maxHeight, heightDiff * 0.1));
-                
-                const leftFluid = manometer.userData.leftFluid;
-                const rightFluid = manometer.userData.rightFluid;
-                
-                if (leftFluid && rightFluid) {
-                    leftFluid.position.y = -1.2 + visualDiff;
-                    rightFluid.position.y = -1.2 - visualDiff;
-                    
-                    leftFluid.scale.y = 0.8 - visualDiff * 0.5;
-                    rightFluid.scale.y = 0.8 + visualDiff * 0.5;
-                }
-            }
-
-            // Update Bourdon gauge pointer
-            if (bourdonGauge && bourdonGauge.visible) {
-                const pointer = bourdonGauge.userData.pointer;
-                if (pointer) {
-                    const pressureRatio = appliedPressure / 500; // Max 500 kPa
-                    const angle = -Math.PI * 0.9 + pressureRatio * Math.PI * 1.8;
-                    pointer.rotation.z = angle;
-                }
-            }
-
-            // Update barometer mercury height
-            if (barometer && barometer.visible) {
-                const mercury = barometer.userData.mercury;
-                if (mercury) {
-                    const pressureRatio = appliedPressure / PHYSICS.ATMOSPHERIC_PRESSURE;
-                    const targetHeight = 64.5 * pressureRatio; // 85 * 0.76 = 64.6 cm for standard pressure
-                    mercury.scale.y = targetHeight / 64.5;
-                    mercury.position.y = -5.1 + (targetHeight * 0.5);
-                }
-            }
-
-            // Update pressure vessel indicators
-            if (pressureVessel && pressureVessel.visible) {
-                const indicators = pressureVessel.userData.indicators;
-                if (indicators) {
-                    const pressureFactor = appliedPressure / PHYSICS.ATMOSPHERIC_PRESSURE;
-                    indicators.children.forEach((indicator, i) => {
-                        const distance = indicator.position.length();
-                        const intensity = (distance / 1.8) * pressureFactor;
-                        indicator.scale.setScalar(0.05 + intensity * 0.15);
-                        indicator.material.opacity = 0.3 + intensity * 0.5;
-                    });
-                }
-            }
-
-            // Update measurements display
-            updateMeasurementsDisplay();
-        }
-
-        // Update measurements display
-        function updateMeasurementsDisplay() {
-            const gaugePressure = appliedPressure - PHYSICS.ATMOSPHERIC_PRESSURE;
-            const columnHeight = (appliedPressure * 1000) / (fluidDensity * PHYSICS.GRAVITY) * 1000; // mm
-            const fluidPressureGradient = fluidDensity * PHYSICS.GRAVITY / 1000; // kPa/m
-
-            const measurementValues = document.querySelectorAll('.measurement-value');
-            if (measurementValues.length >= 4) {
-                measurementValues[0].textContent = appliedPressure.toFixed(3);
-                measurementValues[1].textContent = gaugePressure.toFixed(3);
-                measurementValues[2].textContent = columnHeight.toFixed(1);
-                measurementValues[3].textContent = fluidPressureGradient.toFixed(3);
-            }
-        }
-
-        // Handle window resize
-        function onWindowResize() {
-            const canvasContainer = document.getElementById('canvas-container');
-            const width = canvasContainer.clientWidth;
-            const height = canvasContainer.clientHeight;
-            
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            
-            renderer.setSize(width, height);
-        }
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            time += 0.016; // ~60 FPS
-            
-            // Update controls
-            controls.update();
-            
-            // Update physics
-            updatePhysics();
-            
-            // Gentle animation for mercury surface
-            if (barometer && barometer.visible) {
-                const mercury = barometer.userData.mercury;
-                if (mercury) {
-                    mercury.position.y += Math.sin(time) * 0.001;
-                }
-            }
-            
-            // Update FPS counter
-            frameCount++;
-            const currentTime = performance.now();
-            if (currentTime >= lastTime + 1000) {
-                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-                frameCount = 0;
-                lastTime = currentTime;
-                
-                document.getElementById('fps-counter').textContent = fps;
-                document.getElementById('physics-steps').textContent = physicsSteps;
-                
-                // Update triangle count
-                let triangles = 0;
-                scene.traverse(object => {
-                    if (object.isMesh) {
-                        triangles += object.geometry.index ? object.geometry.index.count / 3 : object.geometry.attributes.position.count / 3;
-                    }
-                });
-                document.getElementById('triangle-count').textContent = triangles.toLocaleString();
-            }
-            
-            // Render scene
-            renderer.render(scene, camera);
-        }
-
-        // Initialize when page loads
-        window.addEventListener('DOMContentLoaded', init);
+    <script src="index.js">
     </script>
 </body>
 </html>

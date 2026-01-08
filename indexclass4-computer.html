@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Security & Cleaning </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.7/two.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 5px solid #f1c40f;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .learning-objectives {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 800px;
+        }
+
+        /* Problem Panel */
+        .problem-panel {
+            flex: 1;
+            min-width: 350px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-right: 3px solid #e0e0e0;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .problem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .problem-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .problem-item.active {
+            border-color: #e74c3c;
+            background: #ffeaea;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .problem-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .problem-icon.warning {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .problem-info {
+            flex: 1;
+        }
+
+        .problem-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .problem-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Simulation Area */
+        .simulation-area {
+            flex: 2;
+            min-width: 500px;
+            background: #ecf0f1;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #simulationCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .computer-setup {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .desk {
+            width: 95%;
+            height: 80%;
+            background: linear-gradient(to bottom, #8B4513, #A0522D);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid #5D4037;
+            display: grid;
+            grid-template-areas: 
+                "cpu monitor monitor"
+                "cpu keyboard mouse";
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Monitor Area */
+        .monitor-area {
+            grid-area: monitor;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .monitor {
+            width: 100%;
+            max-width: 400px;
+            z-index: 3;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 220px;
+            background: #1a1a2e;
+            border-radius: 10px 10px 0 0;
+            border: 15px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        .screen-message {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .screen-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #5eead4;
+        }
+
+        .status-indicator {
+            margin-top: 15px;
+            padding: 5px 15px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .monitor-stand {
+            width: 60px;
+            height: 40px;
+            background: #444;
+            margin: 0 auto;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .monitor-base {
+            width: 100px;
+            height: 10px;
+            background: #555;
+            margin: 0 auto;
+            border-radius: 3px;
+        }
+
+        /* CPU Area */
+        .cpu-area {
+            grid-area: cpu;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 20px;
+        }
+
+        .cpu-real {
+            width: 150px;
+            height: 280px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid #1a252f;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            position: relative;
+        }
+
+        .cpu-front {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .cpu-vent {
+            width: 100%;
+            height: 60px;
+            background: #1a252f;
+            margin: 10px auto;
+            border-radius: 5px;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            padding: 8px;
+        }
+
+        .cpu-vent-slot {
+            background: #3498db;
+            border-radius: 2px;
+        }
+
+        .cpu-drive-bay {
+            width: 80%;
+            height: 25px;
+            background: #2c3e50;
+            margin: 8px auto;
+            border-radius: 3px;
+            border: 1px solid #4a6491;
+        }
+
+        .cpu-power {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 35px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Keyboard Area */
+        .keyboard-area {
+            grid-area: keyboard;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+
+        .keyboard-real {
+            width: 280px;
+            height: 110px;
+            background: #2c3e50;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            position: relative;
+        }
+
+        .keyboard-top {
+            flex: 1;
+            background: #1a252f;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 2px;
+            padding: 5px;
+        }
+
+        .key {
+            background: #34495e;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            color: #ecf0f1;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .key:hover {
+            background: #4a6491;
+        }
+
+        .key-space {
+            grid-column: span 6;
+            background: #3498db;
+        }
+
+        .key-enter {
+            grid-column: span 2;
+            background: #27ae60;
+        }
+
+        .key-backspace {
+            grid-column: span 2;
+            background: #e74c3c;
+        }
+
+        /* Mouse Area */
+        .mouse-area {
+            grid-area: mouse;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            padding-left: 20px;
+        }
+
+        .mouse-real {
+            width: 80px;
+            height: 120px;
+            background: #2c3e50;
+            border-radius: 40px 40px 20px 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: perspective(500px) rotateX(15deg) rotateY(-10deg);
+        }
+
+        .mouse-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border-radius: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mouse-wheel {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 35px;
+            background: #3498db;
+            border-radius: 5px;
+        }
+
+        .mouse-button {
+            position: absolute;
+            width: 65%;
+            height: 30px;
+            background: #1a252f;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .mouse-left {
+            top: 20%;
+            left: 5px;
+        }
+
+        .mouse-right {
+            top: 20%;
+            right: 5px;
+        }
+
+        /* Cable Connections */
+        .cable-connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cable {
+            position: absolute;
+            background: #7f8c8d;
+            z-index: 1;
+        }
+
+        .cable-keyboard {
+            top: 50%;
+            left: 40%;
+            width: 180px;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #95a5a6, #7f8c8d, #95a5a6);
+            transform: rotate(-30deg);
+        }
+
+        .cable-mouse {
+            top: 50%;
+            right: 40%;
+            width: 150px;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to left, #95a5a6, #7f8c8d, #95a5a6);
+            transform: rotate(30deg);
+        }
+
+        /* Cable Connectors */
+        .connector {
+            position: absolute;
+            background: #2c3e50;
+            border-radius: 3px;
+            z-index: 2;
+        }
+
+        .connector-keyboard {
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 30px;
+            background: #27ae60;
+            transform: translate(-180px, -15px) rotate(-30deg);
+        }
+
+        .connector-mouse {
+            top: 50%;
+            right: 50%;
+            width: 18px;
+            height: 30px;
+            background: #e74c3c;
+            transform: translate(180px, -15px) rotate(30deg);
+        }
+
+        /* Animation Container */
+        .animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* Status Panel */
+        .status-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e0e0e0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .status-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Component Labels */
+        .component-label {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .cpu-label {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .keyboard-label {
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .mouse-label {
+            top: -25px;
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes shakeComponent {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0); }
+            25% { transform: translateX(-5px) translateY(-5px) rotate(-2deg); }
+            50% { transform: translateX(5px) translateY(5px) rotate(2deg); }
+            75% { transform: translateX(-3px) translateY(3px) rotate(-1deg); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes dustFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(400px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes crumbFall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(200px) rotate(180deg); opacity: 0; }
+        }
+
+        @keyframes virusFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        @keyframes keyPress {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        @keyframes pressEffect {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); }
+        }
+
+        @keyframes cableFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes heatGlow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 5px 15px rgba(231, 76, 60, 0.5); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { background: linear-gradient(135deg, #2c3e50, #34495e); }
+            50% { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        }
+
+        /* Media Queries */
+        @media (max-width: 1200px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .problem-panel, .simulation-area {
+                min-width: 100%;
+            }
+            
+            .desk {
+                width: 100%;
+                height: 70%;
+                grid-template-areas: 
+                    "monitor monitor"
+                    "cpu keyboard"
+                    "cpu mouse";
+                grid-template-columns: 1fr 2fr;
+                grid-template-rows: 2fr 1fr 1fr;
+            }
+            
+            .cpu-area {
+                padding-right: 0;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+            
+            .cpu-real {
+                width: 130px;
+                height: 250px;
+            }
+            
+            .keyboard-area, .mouse-area {
+                padding-top: 10px;
+            }
+            
+            .keyboard-real {
+                width: 250px;
+                height: 100px;
+            }
+            
+            .mouse-real {
+                width: 70px;
+                height: 110px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .desk {
+                grid-template-areas: 
+                    "monitor"
+                    "cpu"
+                    "keyboard"
+                    "mouse";
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr 1fr 1fr;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .cpu-area, .keyboard-area, .mouse-area {
+                padding: 0;
+                justify-content: center;
+            }
+            
+            .cpu-real {
+                width: 120px;
+                height: 200px;
+            }
+            
+            .keyboard-real {
+                width: 220px;
+                height: 90px;
+            }
+            
+            .mouse-real {
+                width: 60px;
+                height: 90px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .cable-connections {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Computer Security & Cleaning</h1>
+            <p class="subtitle"></p>
+            <div class="learning-objectives">
+                <p><strong>Learning Objectives:</strong> Understand common computer safety issues and learn proper maintenance techniques to extend computer lifespan.</p>
+            </div>
+        </header>
+        
+        <div class="content">
+            <!-- Problem Panel -->
+            <div class="problem-panel">
+                <div class="section-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Computer Problems
+                </div>
+                
+                <div class="problem-list">
+                    <div class="problem-item" onclick="showAnimation('hitting')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-hand-rock"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Hitting Computer Parts</div>
+                            <div class="problem-desc">Physical damage from hitting or dropping components</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('eating')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Eating Near Computer</div>
+                            <div class="problem-desc">Food crumbs and spills damaging components</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('mouse')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-mouse"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Rough Mouse Usage</div>
+                            <div class="problem-desc">Clicking too hard or throwing the mouse</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('keyboard')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Rough Keyboard Usage</div>
+                            <div class="problem-desc">Pressing keys too hard or hitting keyboard</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('shutdown')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-power-off"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Improper Shutdown</div>
+                            <div class="problem-desc">Not shutting down properly or pulling power</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('dust')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Dust Accumulation</div>
+                            <div class="problem-desc">Dust buildup causing overheating and damage</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('malware')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-virus"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Malware & Viruses</div>
+                            <div class="problem-desc">Downloaded from unsafe websites</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Simulation Area -->
+            <div class="simulation-area">
+                <div id="simulationCanvas"></div>
+                <div class="animation-container" id="animationContainer"></div>
+                
+                <div class="computer-setup">
+                    <div class="desk">
+                        <!-- Cable Connections -->
+                        <div class="cable-connections">
+                            <div class="cable cable-keyboard"></div>
+                            <div class="cable cable-mouse"></div>
+                            <div class="connector connector-keyboard"></div>
+                            <div class="connector connector-mouse"></div>
+                        </div>
+                        
+                        <!-- Monitor Area -->
+                        <div class="monitor-area">
+                            <div class="monitor" id="monitor">
+                                <div class="monitor-screen">
+                                    <div class="screen-content">
+                                        <div class="screen-message">
+                                            <h3>Computer System</h3>
+                                            <p>Status: <span id="systemStatus">Normal</span></p>
+                                            <p id="screenMessage">All systems operational</p>
+                                            <div class="status-indicator" id="statusIndicator">✓ Protected</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="monitor-stand"></div>
+                                <div class="monitor-base"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- CPU Area -->
+                        <div class="cpu-area">
+                            <div class="cpu-real" id="cpuReal">
+                                <div class="component-label cpu-label">CPU Tower</div>
+                                <div class="cpu-front">
+                                    <div class="cpu-vent">
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div>
+                                    </div>
+                                    <div class="cpu-drive-bay"></div>
+                                    <div class="cpu-drive-bay"></div>
+                                    <div class="cpu-power" id="cpuPower">
+                                        <i class="fas fa-power-off"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Keyboard Area -->
+                        <div class="keyboard-area">
+                            <div class="keyboard-real" id="keyboardReal">
+                                <div class="component-label keyboard-label">Keyboard</div>
+                                <div class="keyboard-top">
+                                    <!-- First row -->
+                                    <div class="key">Esc</div><div class="key">F1</div><div class="key">F2</div><div class="key">F3</div><div class="key">F4</div>
+                                    <div class="key">F5</div><div class="key">F6</div><div class="key">F7</div><div class="key">F8</div><div class="key">F9</div>
+                                    <div class="key">F10</div><div class="key">F11</div><div class="key">F12</div><div class="key">PrtSc</div><div class="key">Del</div>
+                                    
+                                    <!-- Second row -->
+                                    <div class="key">~</div><div class="key">1</div><div class="key">2</div><div class="key">3</div><div class="key">4</div>
+                                    <div class="key">5</div><div class="key">6</div><div class="key">7</div><div class="key">8</div><div class="key">9</div>
+                                    <div class="key">0</div><div class="key">-</div><div class="key">=</div><div class="key key-backspace">Back</div>
+                                    
+                                    <!-- Third row -->
+                                    <div class="key key-tab" style="grid-column: span 2;">Tab</div><div class="key">Q</div><div class="key">W</div><div class="key">E</div>
+                                    <div class="key">R</div><div class="key">T</div><div class="key">Y</div><div class="key">U</div><div class="key">I</div>
+                                    <div class="key">O</div><div class="key">P</div><div class="key">{</div><div class="key">}</div><div class="key">|</div>
+                                    
+                                    <!-- Fourth row -->
+                                    <div class="key key-caps" style="grid-column: span 2;">Caps</div><div class="key">A</div><div class="key">S</div><div class="key">D</div>
+                                    <div class="key">F</div><div class="key">G</div><div class="key">H</div><div class="key">J</div><div class="key">K</div>
+                                    <div class="key">L</div><div class="key">:</div><div class="key">"</div><div class="key key-enter">Enter</div>
+                                    
+                                    <!-- Fifth row -->
+                                    <div class="key key-shift" style="grid-column: span 2;">Shift</div><div class="key">Z</div><div class="key">X</div><div class="key">C</div>
+                                    <div class="key">V</div><div class="key">B</div><div class="key">N</div><div class="key">M</div><div class="key"><</div>
+                                    <div class="key">></div><div class="key">?</div><div class="key key-shift" style="grid-column: span 3;">Shift</div>
+                                    
+                                    <!-- Sixth row -->
+                                    <div class="key key-ctrl" style="grid-column: span 2;">Ctrl</div><div class="key key-alt">Alt</div>
+                                    <div class="key key-space"></div>
+                                    <div class="key key-alt">Alt</div><div class="key key-ctrl" style="grid-column: span 2;">Ctrl</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mouse Area -->
+                        <div class="mouse-area">
+                            <div class="mouse-real" id="mouseReal">
+                                <div class="component-label mouse-label">Mouse</div>
+                                <div class="mouse-body">
+                                    <div class="mouse-wheel"></div>
+                                    <div class="mouse-button mouse-left" onclick="simulateMouseClick('left')"></div>
+                                    <div class="mouse-button mouse-right" onclick="simulateMouseClick('right')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Panel -->
+                <div class="status-panel">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-value" id="cpuTemp">40°C</div>
+                            <div class="status-label">CPU Temperature</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="securityStatus">Protected</div>
+                            <div class="status-label">Security Status</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="systemLoad">10%</div>
+                            <div class="status-label">System Load</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="maintenanceStatus">Good</div>
+                            <div class="status-label">Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Two.js Setup
+        let two;
+        let currentAnimation = null;
+        let animationElements = [];
+
+        function initTwoJS() {
+            const canvas = document.getElementById('simulationCanvas');
+            two = new Two({
+                width: canvas.parentElement.clientWidth,
+                height: canvas.parentElement.clientHeight,
+                type: Two.Types.canvas,
+                autostart: true
+            }).appendTo(canvas);
+            
+            // Update time
+            setInterval(updateTime, 1000);
+        }
+
+        function showAnimation(problemType) {
+            // Reset active state
+            document.querySelectorAll('.problem-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Set active state for clicked item
+            event.currentTarget.classList.add('active');
+            
+            // Clear previous animations
+            clearAnimation();
+            
+            // Stop current animation
+            if (currentAnimation) {
+                clearInterval(currentAnimation);
+            }
+            
+            // Show problem-specific animation
+            switch(problemType) {
+                case 'hitting':
+                    animateHitting();
+                    break;
+                case 'eating':
+                    animateEating();
+                    break;
+                case 'mouse':
+                    animateMouse();
+                    break;
+                case 'keyboard':
+                    animateKeyboard();
+                    break;
+                case 'shutdown':
+                    animateShutdown();
+                    break;
+                case 'dust':
+                    animateDust();
+                    break;
+                case 'malware':
+                    animateMalware();
+                    break;
+            }
+        }
+
+        function clearAnimation() {
+            // Clear Two.js elements
+            if (two) {
+                animationElements.forEach(element => {
+                    two.remove(element);
+                });
+                animationElements = [];
+            }
+            
+            // Clear DOM animations
+            const container = document.getElementById('animationContainer');
+            container.innerHTML = '';
+            
+            // Reset screen
+            document.getElementById('systemStatus').textContent = 'Normal';
+            document.getElementById('systemStatus').style.color = '';
+            document.getElementById('screenMessage').textContent = 'All systems operational';
+            document.getElementById('statusIndicator').textContent = '✓ Protected';
+            document.getElementById('statusIndicator').style.background = 'rgba(46, 204, 113, 0.2)';
+            
+            // Reset components
+            const cpu = document.getElementById('cpuReal');
+            const keyboard = document.getElementById('keyboardReal');
+            const mouse = document.getElementById('mouseReal');
+            const monitor = document.getElementById('monitor');
+            
+            cpu.style.animation = '';
+            cpu.style.transform = '';
+            cpu.style.background = 'linear-gradient(135deg, #2c3e50, #34495e)';
+            
+            keyboard.style.animation = '';
+            keyboard.style.transform = '';
+            keyboard.style.background = '#2c3e50';
+            
+            mouse.style.animation = '';
+            mouse.style.transform = '';
+            mouse.style.background = '#2c3e50';
+            
+            monitor.style.animation = '';
+            monitor.style.transform = '';
+            
+            // Reset CPU vents
+            const cpuVents = document.querySelectorAll('.cpu-vent-slot');
+            cpuVents.forEach(vent => {
+                vent.style.background = '#3498db';
+            });
+            
+            // Reset CPU power button
+            const cpuPower = document.getElementById('cpuPower');
+            cpuPower.style.background = '#27ae60';
+            
+            // Reset cables
+            document.querySelectorAll('.cable').forEach(cable => {
+                cable.style.animation = '';
+                cable.style.opacity = '';
+                cable.style.background = '';
+            });
+            
+            // Reset connectors
+            document.querySelectorAll('.connector').forEach(connector => {
+                connector.style.animation = '';
+                connector.style.background = '';
+            });
+            
+            // Reset status values
+            document.getElementById('cpuTemp').textContent = '40°C';
+            document.getElementById('cpuTemp').style.color = '';
+            document.getElementById('securityStatus').textContent = 'Protected';
+            document.getElementById('securityStatus').style.color = '';
+            document.getElementById('systemLoad').textContent = '10%';
+            document.getElementById('systemLoad').style.color = '';
+            document.getElementById('maintenanceStatus').textContent = 'Good';
+            document.getElementById('maintenanceStatus').style.color = '';
+            
+            // Reset all keys
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                key.style.animation = '';
+                key.style.transform = '';
+                key.style.background = '';
+            });
+            
+            // Reset mouse buttons
+            const mouseButtons = document.querySelectorAll('.mouse-button');
+            mouseButtons.forEach(button => {
+                button.style.animation = '';
+                button.style.background = '#1a252f';
+            });
+        }
+
+        function animateHitting() {
+            const monitor = document.getElementById('monitor');
+            const cpu = document.getElementById('cpuReal');
+            
+            // Shake animation
+            monitor.style.animation = 'shake 0.5s ease-in-out infinite';
+            cpu.style.animation = 'shakeComponent 0.5s ease-in-out infinite';
+            
+            // Update screen message
+            document.getElementById('systemStatus').textContent = 'Danger';
+            document.getElementById('systemStatus').style.color = '#e74c3c';
+            document.getElementById('screenMessage').textContent = 'Physical impact detected! Hardware damage imminent';
+            document.getElementById('statusIndicator').textContent = '⚠ Hardware at Risk';
+            document.getElementById('statusIndicator').style.background = 'rgba(231, 76, 60, 0.2)';
+            
+            // Create impact particles
+            currentAnimation = setInterval(() => {
+                createImpactParticles();
+            }, 300);
+            
+            // Update status values
+            document.getElementById('cpuTemp').textContent = '75°C';
+            document.getElementById('cpuTemp').style.color = '#e74c3c';
+            document.getElementById('systemLoad').textContent = '95%';
+            document.getElementById('maintenanceStatus').textContent = 'Critical';
+            document.getElementById('maintenanceStatus').style.color = '#e74c3c';
+            
+            // Make CPU show overheating
+            cpu.style.animation += ', heatGlow 1s infinite';
+        }
+
+        function createImpactParticles() {
+            const monitorRect = document.getElementById('monitor').getBoundingClientRect();
+            const cpuRect = document.getElementById('cpuReal').getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            // Create particles from monitor
+            for (let i = 0; i < 3; i++) {
+                const x = monitorRect.left + monitorRect.width/2 - containerRect.left;
+                const y = monitorRect.top + monitorRect.height/2 - containerRect.top;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                const size = Math.random() * 4 + 2;
+                
+                const particle = two.makeCircle(x, y, size);
+                particle.fill = '#e74c3c';
+                particle.noStroke();
+                
+                animationElements.push(particle);
+                
+                // Animate particle
+                let life = 30;
+                const update = () => {
+                    particle.translation.x += Math.cos(angle) * speed;
+                    particle.translation.y += Math.sin(angle) * speed;
+                    particle.opacity -= 0.03;
+                    life--;
+                    
+                    if (life > 0) {
+                        requestAnimationFrame(update);
+                    } else {
+                        two.remove(particle);
+                        const index = animationElements.indexOf(particle);
+                        if (index > -1) animationElements.splice(index, 1);
+                    }
+                };
+                
+                update();
+            }
+        }
+
+        function animateEating() {
+            const keyboard = document.getElementById('keyboardReal');
+            const keyboardRect = keyboard.getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            // Create food crumbs
+            currentAnimation = setInterval(() => {
+                const x = keyboardRect.left + Math.random() * keyboardRect.width - containerRect.left;
+                const y = keyboardRect.top - 50 - containerRect.top;
+                
+                const crumb = two.makeCircle(x, y, Math.random() * 5 + 2);
+                crumb.fill = '#d35400';
+                crumb.noStroke();
+                
+                animationElements.push(crumb);
+                
+                // Animate crumb falling
+                let life = 100;
+                const speed = Math.random() * 2 + 1;
+                const wiggle = Math.random() * 0.1 - 0.05;
+                
+                const update = () => {
+                    crumb.translation.y += speed;
+                    crumb.translation.x += wiggle;
+                    crumb.rotation += 0.05;
+                    life--;
+                    
+                    if (life > 0 && crumb.translation.y < containerRect.height) {
+                        requestAnimationFrame(update);
+                    } else {
+                        two.remove(crumb);
+                        const index = animationElements.indexOf(crumb);
+                        if (index > -1) animationElements.splice(index, 1);
+                    }
+                };
+                
+                update();
+            }, 500);
+            
+            // Update screen message
+            document.getElementById('screenMessage').textContent = 'Food particles detected on keyboard';
+            document.getElementById('statusIndicator').textContent = '⚠ Contamination Risk';
+            document.getElementById('statusIndicator').style.background = 'rgba(243, 156, 18, 0.2)';
+            
+            // Update status values
+            document.getElementById('maintenanceStatus').textContent = 'Required';
+            document.getElementById('maintenanceStatus').style.color = '#f39c12';
+        }
+
+        function animateMouse() {
+            const mouse = document.getElementById('mouseReal');
+            const mouseBody = document.querySelector('.mouse-body');
+            let clickCount = 0;
+            
+            // Create violent click animation
+            currentAnimation = setInterval(() => {
+                // Shake mouse
+                mouse.style.animation = 'shakeComponent 0.2s';
+                
+                // Create click effect
+                if (clickCount % 3 === 0) {
+                    createMouseClickEffect();
+                }
+                
+                // Press effect on mouse buttons
+                const mouseButtons = document.querySelectorAll('.mouse-button');
+                mouseButtons.forEach(button => {
+                    button.style.animation = 'pressEffect 0.1s';
+                    button.style.background = '#e74c3c';
+                    
+                    setTimeout(() => {
+                        button.style.background = '#1a252f';
+                        button.style.animation = '';
+                    }, 100);
+                });
+                
+                // Change mouse color to show stress
+                mouseBody.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                
+                setTimeout(() => {
+                    mouseBody.style.background = 'linear-gradient(135deg, #34495e, #2c3e50)';
+                }, 100);
+                
+                clickCount++;
+                
+                // Stop after 30 clicks
+                if (clickCount > 30) {
+                    clearInterval(currentAnimation);
+                    mouse.style.animation = '';
+                }
+            }, 200);
+            
+            // Update screen message
+            document.getElementById('screenMessage').textContent = 'Excessive force detected on mouse';
+            document.getElementById('statusIndicator').textContent = '⚠ Hardware Stress';
+            document.getElementById('statusIndicator').style.background = 'rgba(231, 76, 60, 0.2)';
+            
+            // Update status values
+            document.getElementById('maintenanceStatus').textContent = 'Urgent';
+            document.getElementById('maintenanceStatus').style.color = '#e74c3c';
+        }
+
+        function createMouseClickEffect() {
+            const mouse = document.getElementById('mouseReal');
+            const mouseRect = mouse.getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            const x = mouseRect.left + mouseRect.width/2 - containerRect.left;
+            const y = mouseRect.top + mouseRect.height/2 - containerRect.top;
+            
+            // Create click ring
+            const ring = two.makeCircle(x, y, 15);
+            ring.noFill();
+            ring.stroke = '#e74c3c';
+            ring.linewidth = 2;
+            
+            animationElements.push(ring);
+            
+            // Animate ring expansion
+            let scale = 1;
+            const animateRing = () => {
+                scale += 0.2;
+                ring.scale = scale;
+                ring.opacity -= 0.05;
+                
+                if (ring.opacity > 0) {
+                    requestAnimationFrame(animateRing);
+                } else {
+                    two.remove(ring);
+                    const index = animationElements.indexOf(ring);
+                    if (index > -1) animationElements.splice(index, 1);
+                }
+            };
+            
+            animateRing();
+        }
+
+        function simulateMouseClick(button) {
+            // Simulate mouse click effect
+            const mouseButton = button === 'left' ? 
+                document.querySelector('.mouse-left') : 
+                document.querySelector('.mouse-right');
+            
+            mouseButton.style.animation = 'pressEffect 0.2s';
+            mouseButton.style.background = '#3498db';
+            
+            setTimeout(() => {
+                mouseButton.style.background = '#1a252f';
+                mouseButton.style.animation = '';
+            }, 200);
+        }
+
+        function animateKeyboard() {
+            const keyboard = document.getElementById('keyboardReal');
+            const keys = document.querySelectorAll('.key');
+            let pressCount = 0;
+            
+            // Create violent key press animation
+            currentAnimation = setInterval(() => {
+                // Press animation
+                keyboard.style.animation = 'keyPress 0.1s, pressEffect 0.1s';
+                
+                // Randomly select 3 keys to press hard
+                for (let i = 0; i < 3; i++) {
+                    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                    randomKey.style.animation = 'keyPress 0.1s';
+                    randomKey.style.background = '#e74c3c';
+                    
+                    setTimeout(() => {
+                        randomKey.style.background = '';
+                        randomKey.style.animation = '';
+                    }, 100);
+                }
+                
+                // Create flying keycap effect occasionally
+                if (Math.random() > 0.8) {
+                    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                    createFlyingKeycap(randomKey.textContent);
+                }
+                
+                pressCount++;
+                
+                // Stop after 20 cycles
+                if (pressCount > 20) {
+                    clearInterval(currentAnimation);
+                    keyboard.style.animation = '';
+                }
+            }, 300);
+            
+            // Update screen message
+            document.getElementById('screenMessage').textContent = 'Excessive force on keyboard detected';
+            document.getElementById('statusIndicator').textContent = '⚠ Key Damage';
+            document.getElementById('statusIndicator').style.background = 'rgba(231, 76, 60, 0.2)';
+            
+            // Update status values
+            document.getElementById('maintenanceStatus').textContent = 'Critical';
+            document.getElementById('maintenanceStatus').style.color = '#e74c3c';
+        }
+
+        function createFlyingKeycap(keyLabel) {
+            const keyboard = document.getElementById('keyboardReal');
+            const keyboardRect = keyboard.getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            const x = keyboardRect.left + keyboardRect.width/2 - containerRect.left;
+            const y = keyboardRect.top + keyboardRect.height/2 - containerRect.top;
+            
+            // Create flying keycap
+            const keycap = two.makeRoundedRectangle(x, y, 25, 20, 4);
+            keycap.fill = '#333';
+            keycap.stroke = '#666';
+            keycap.linewidth = 1;
+            
+            // Add key label
+            const labelText = keyLabel || 'K';
+            const label = two.makeText(labelText, x, y);
+            label.fill = 'white';
+            label.size = 10;
+            label.weight = 'bold';
+            
+            animationElements.push(keycap, label);
+            
+            // Animate flying
+            let angle = Math.random() * Math.PI * 2;
+            let speedX = Math.cos(angle) * 2;
+            let speedY = -Math.abs(Math.sin(angle)) * 3;
+            let rotation = 0;
+            let rotationSpeed = Math.random() * 0.2 - 0.1;
+            
+            const animateKeycap = () => {
+                keycap.translation.x += speedX;
+                keycap.translation.y += speedY;
+                label.translation.x += speedX;
+                label.translation.y += speedY;
+                
+                keycap.rotation += rotationSpeed;
+                label.rotation += rotationSpeed;
+                
+                // Gravity
+                speedY += 0.1;
+                
+                // Friction
+                speedX *= 0.98;
+                
+                // Check if out of bounds
+                if (keycap.translation.y < containerRect.height + 100) {
+                    requestAnimationFrame(animateKeycap);
+                } else {
+                    two.remove(keycap);
+                    two.remove(label);
+                    const keycapIndex = animationElements.indexOf(keycap);
+                    const labelIndex = animationElements.indexOf(label);
+                    if (keycapIndex > -1) animationElements.splice(keycapIndex, 1);
+                    if (labelIndex > -1) animationElements.splice(labelIndex, 1);
+                }
+            };
+            
+            animateKeycap();
+        }
+
+        function animateShutdown() {
+            const screen = document.querySelector('.screen-content');
+            const cpuPower = document.getElementById('cpuPower');
+            let flickerCount = 0;
+            
+            // Create flickering effect
+            currentAnimation = setInterval(() => {
+                flickerCount++;
+                
+                if (flickerCount <= 10) {
+                    // Flicker screen
+                    screen.style.opacity = flickerCount % 2 === 0 ? '0.3' : '1';
+                    
+                    // Flicker CPU power button
+                    cpuPower.style.background = flickerCount % 2 === 0 ? '#e74c3c' : '#27ae60';
+                    
+                    // Flicker cables
+                    document.querySelectorAll('.cable').forEach(cable => {
+                        cable.style.animation = 'cableFlicker 0.1s';
+                    });
+                    
+                    // Update message
+                    document.getElementById('screenMessage').textContent = 
+                        flickerCount % 2 === 0 ? 'System shutting down...' : 'Abnormal termination detected';
+                } else if (flickerCount === 11) {
+                    // Turn off
+                    screen.style.opacity = '0.1';
+                    cpuPower.style.background = '#e74c3c';
+                    document.getElementById('screenMessage').textContent = 'System powered off abruptly';
+                    document.getElementById('systemStatus').textContent = 'Offline';
+                    
+                    // Create power surge effect
+                    createPowerSurge();
+                } else if (flickerCount > 20) {
+                    // Restore
+                    clearInterval(currentAnimation);
+                    setTimeout(() => {
+                        screen.style.opacity = '1';
+                        cpuPower.style.background = '#27ae60';
+                        document.getElementById('systemStatus').textContent = 'Recovering';
+                        document.getElementById('screenMessage').textContent = 'System recovering from improper shutdown';
+                    }, 1000);
+                }
+            }, 300);
+            
+            // Update screen message initially
+            document.getElementById('systemStatus').textContent = 'Warning';
+            document.getElementById('systemStatus').style.color = '#f39c12';
+            document.getElementById('statusIndicator').textContent = '⚠ Power Issue';
+            document.getElementById('statusIndicator').style.background = 'rgba(243, 156, 18, 0.2)';
+            
+            // Update status values
+            document.getElementById('cpuTemp').textContent = '75°C';
+            document.getElementById('cpuTemp').style.color = '#e74c3c';
+            document.getElementById('systemLoad').textContent = '95%';
+            document.getElementById('systemLoad').style.color = '#e74c3c';
+        }
+
+        function createPowerSurge() {
+            const cpu = document.getElementById('cpuReal');
+            const cpuRect = cpu.getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            const x = cpuRect.left + cpuRect.width/2 - containerRect.left;
+            const y = cpuRect.top + cpuRect.height/2 - containerRect.top;
+            
+            // Create surge effect through cables
+            const cables = document.querySelectorAll('.cable');
+            cables.forEach(cable => {
+                cable.style.animation = 'cableFlicker 0.1s infinite';
+                cable.style.background = 'linear-gradient(to right, #f1c40f, #f39c12, #f1c40f)';
+            });
+            
+            // Create electrical surge particles
+            for (let i = 0; i < 15; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 30;
+                const duration = Math.random() * 20 + 10;
+                
+                const surge = two.makeLine(x, y, 
+                    x + Math.cos(angle) * distance, 
+                    y + Math.sin(angle) * distance);
+                surge.stroke = '#f1c40f';
+                surge.linewidth = 2;
+                surge.opacity = 0.7;
+                
+                animationElements.push(surge);
+                
+                // Animate surge
+                let progress = 0;
+                const animateSurge = () => {
+                    progress++;
+                    surge.opacity -= 0.05;
+                    
+                    if (progress < duration) {
+                        requestAnimationFrame(animateSurge);
+                    } else {
+                        two.remove(surge);
+                        const index = animationElements.indexOf(surge);
+                        if (index > -1) animationElements.splice(index, 1);
+                    }
+                };
+                
+                animateSurge();
+            }
+        }
+
+        function animateDust() {
+            const deskRect = document.querySelector('.desk').getBoundingClientRect();
+            const cpu = document.getElementById('cpuReal');
+            
+            // Create dust particles
+            currentAnimation = setInterval(() => {
+                for (let i = 0; i < 3; i++) {
+                    const x = Math.random() * deskRect.width;
+                    const y = -10;
+                    const size = Math.random() * 3 + 1;
+                    
+                    const dust = two.makeCircle(x, y, size);
+                    dust.fill = `rgba(189, 195, 199, ${Math.random() * 0.5 + 0.3})`;
+                    dust.noStroke();
+                    
+                    animationElements.push(dust);
+                    
+                    // Animate dust falling
+                    let life = 200;
+                    const speed = Math.random() * 1 + 0.5;
+                    const wiggle = Math.random() * 0.2 - 0.1;
+                    
+                    const update = () => {
+                        dust.translation.y += speed;
+                        dust.translation.x += wiggle;
+                        life--;
+                        
+                        if (life > 0 && dust.translation.y < deskRect.height) {
+                            requestAnimationFrame(update);
+                        } else {
+                            two.remove(dust);
+                            const index = animationElements.indexOf(dust);
+                            if (index > -1) animationElements.splice(index, 1);
+                        }
+                    };
+                    
+                    update();
+                }
+            }, 500);
+            
+            // Dust layers on components
+            setTimeout(() => {
+                createDustLayer('cpuReal');
+                createDustLayer('keyboardReal');
+                createDustLayer('mouseReal');
+            }, 1000);
+            
+            // Update screen message
+            document.getElementById('screenMessage').textContent = 'Dust accumulation detected. Overheating risk!';
+            document.getElementById('statusIndicator').textContent = '⚠ Cooling Impaired';
+            document.getElementById('statusIndicator').style.background = 'rgba(230, 126, 34, 0.2)';
+            
+            // Update status values
+            document.getElementById('cpuTemp').textContent = '85°C';
+            document.getElementById('cpuTemp').style.color = '#e74c3c';
+            document.getElementById('systemLoad').textContent = '70%';
+            document.getElementById('maintenanceStatus').textContent = 'Required';
+            document.getElementById('maintenanceStatus').style.color = '#f39c12';
+            
+            // Make CPU show overheating
+            cpu.style.animation = 'pulseGlow 1s infinite';
+            
+            // Dust in CPU vents
+            const cpuVents = document.querySelectorAll('.cpu-vent-slot');
+            cpuVents.forEach(vent => {
+                vent.style.background = '#95a5a6';
+            });
+        }
+
+        function createDustLayer(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const dustLayer = document.createElement('div');
+            dustLayer.style.position = 'absolute';
+            dustLayer.style.top = '0';
+            dustLayer.style.left = '0';
+            dustLayer.style.width = '100%';
+            dustLayer.style.height = '100%';
+            dustLayer.style.background = 'rgba(148, 163, 184, 0.2)';
+            dustLayer.style.borderRadius = 'inherit';
+            dustLayer.style.pointerEvents = 'none';
+            dustLayer.style.zIndex = '1';
+            
+            element.appendChild(dustLayer);
+            
+            setTimeout(() => {
+                if (dustLayer.parentNode) {
+                    dustLayer.parentNode.removeChild(dustLayer);
+                }
+            }, 5000);
+        }
+
+        function animateMalware() {
+            const screenRect = document.querySelector('.monitor-screen').getBoundingClientRect();
+            const containerRect = document.querySelector('.desk').getBoundingClientRect();
+            
+            // Create virus particles
+            for (let i = 0; i < 8; i++) {
+                const x = Math.random() * screenRect.width;
+                const y = Math.random() * screenRect.height;
+                
+                createVirus(x, y);
+            }
+            
+            // Update screen message with hacker-style effect
+            let messageIndex = 0;
+            const messages = [
+                "VIRUS DETECTED!",
+                "System compromised",
+                "Data breach in progress",
+                "Security compromised",
+                "Malware active"
+            ];
+            
+            currentAnimation = setInterval(() => {
+                document.getElementById('screenMessage').textContent = messages[messageIndex];
+                document.getElementById('systemStatus').textContent = 'DANGER';
+                document.getElementById('systemStatus').style.color = '#e74c3c';
+                document.getElementById('statusIndicator').textContent = '✗ HACKED';
+                document.getElementById('statusIndicator').style.background = 'rgba(231, 76, 60, 0.3)';
+                
+                // Flicker effect on connectors
+                const connectors = document.querySelectorAll('.connector');
+                connectors.forEach(connector => {
+                    connector.style.animation = 'cableFlicker 0.5s infinite';
+                    connector.style.background = '#e74c3c';
+                });
+                
+                // Flicker effect
+                document.getElementById('statusIndicator').style.opacity = 
+                    Math.random() > 0.5 ? '1' : '0.5';
+                
+                messageIndex = (messageIndex + 1) % messages.length;
+            }, 1000);
+            
+            // Update status values
+            document.getElementById('securityStatus').textContent = 'Compromised';
+            document.getElementById('securityStatus').style.color = '#e74c3c';
+            document.getElementById('systemLoad').textContent = '100%';
+            document.getElementById('systemLoad').style.color = '#e74c3c';
+            document.getElementById('cpuTemp').textContent = '90°C';
+            document.getElementById('cpuTemp').style.color = '#e74c3c';
+            document.getElementById('maintenanceStatus').textContent = 'EMERGENCY';
+            document.getElementById('maintenanceStatus').style.color = '#e74c3c';
+            
+            // Create more viruses periodically
+            setInterval(() => {
+                const x = Math.random() * screenRect.width;
+                const y = Math.random() * screenRect.height;
+                createVirus(x, y);
+            }, 2000);
+        }
+
+        function createVirus(x, y) {
+            const size = Math.random() * 12 + 8;
+            const virus = two.makeCircle(x, y, size);
+            virus.fill = 'rgba(231, 76, 60, 0.7)';
+            virus.stroke = '#c0392b';
+            virus.linewidth = 2;
+            
+            // Add spikes
+            const spikeCount = 6;
+            for (let i = 0; i < spikeCount; i++) {
+                const angle = (i / spikeCount) * Math.PI * 2;
+                const spike = two.makeLine(
+                    x + Math.cos(angle) * size,
+                    y + Math.sin(angle) * size,
+                    x + Math.cos(angle) * (size * 1.5),
+                    y + Math.sin(angle) * (size * 1.5)
+                );
+                spike.stroke = '#c0392b';
+                spike.linewidth = 2;
+                virus.add(spike);
+            }
+            
+            // Add "V" symbol
+            const vSymbol = two.makeText('V', x, y);
+            vSymbol.fill = 'white';
+            vSymbol.size = size * 0.8;
+            vSymbol.weight = 'bold';
+            
+            animationElements.push(virus, vSymbol);
+            
+            // Animation properties
+            let angle = Math.random() * Math.PI * 2;
+            let speed = Math.random() * 0.3 + 0.1;
+            let floatOffset = Math.random() * Math.PI * 2;
+            
+            const animateVirus = () => {
+                // Move in random direction
+                virus.translation.x += Math.cos(angle) * speed;
+                virus.translation.y += Math.sin(angle) * speed;
+                vSymbol.translation.x = virus.translation.x;
+                vSymbol.translation.y = virus.translation.y;
+                
+                // Float up and down
+                virus.translation.y += Math.sin(Date.now() * 0.001 + floatOffset) * 0.3;
+                vSymbol.translation.y = virus.translation.y;
+                
+                // Rotate
+                virus.rotation += 0.01;
+                vSymbol.rotation = virus.rotation;
+                
+                // Bounce off edges
+                const screenRect = document.querySelector('.monitor-screen').getBoundingClientRect();
+                if (virus.translation.x < 0 || virus.translation.x > screenRect.width) {
+                    angle = Math.PI - angle;
+                }
+                if (virus.translation.y < 0 || virus.translation.y > screenRect.height) {
+                    angle = -angle;
+                }
+                
+                requestAnimationFrame(animateVirus);
+            };
+            
+            animateVirus();
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initTwoJS();
+            
+            // Auto-demo: Cycle through problems every 8 seconds
+            let demoIndex = 0;
+            const problems = ['hitting', 'eating', 'mouse', 'keyboard', 'shutdown', 'dust', 'malware'];
+            
+            setInterval(() => {
+                const problemItems = document.querySelectorAll('.problem-item');
+                if (problemItems[demoIndex]) {
+                    problemItems[demoIndex].click();
+                    demoIndex = (demoIndex + 1) % problems.length;
+                }
+            }, 8000);
+        });
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>

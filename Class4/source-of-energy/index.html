@@ -41,17 +41,55 @@
         
         .container {
             display: flex;
-            flex-direction: column;
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            gap: 2rem;
+        }
+        
+        .left-sidebar {
+            flex: 0 0 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .energy-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .energy-btn {
+            padding: 1.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .energy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .energy-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
         }
         
         .visualization-section {
+            flex: 1;
             display: flex;
             flex-wrap: wrap;
             gap: 2rem;
-            margin-bottom: 3rem;
         }
         
         .canvas-container {
@@ -74,36 +112,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             overflow-y: auto;
             max-height: 500px;
-        }
-        
-        .energy-selector {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-        
-        .energy-btn {
-            padding: 1rem 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .energy-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-        }
-        
-        .energy-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: white;
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
         }
         
         h2 {
@@ -164,6 +172,28 @@
             margin-top: 2rem;
         }
         
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-sidebar {
+                flex: 0 0 auto;
+                width: 100%;
+            }
+            
+            .energy-selector {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .energy-btn {
+                flex: 1;
+                min-width: 150px;
+            }
+        }
+        
         @media (max-width: 768px) {
             .visualization-section {
                 flex-direction: column;
@@ -172,22 +202,32 @@
             .canvas-container, .info-panel {
                 min-width: 100%;
             }
+            
+            .energy-btn {
+                padding: 1rem 0.5rem;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Energy Sources Visualization</h1>
-        <p class="subtitle">Explore different energy generation methods through interactive 3D models and detailed explanations</p>
+        <p class="subtitle">Explore different energy generation methods through interactive detailed explanations</p>
     </header>
     
     <div class="container">
-        <div class="energy-selector">
-            <button class="energy-btn active" data-energy="solar">Solar Energy</button>
-            <button class="energy-btn" data-energy="wind">Wind Energy</button>
-            <button class="energy-btn" data-energy="hydro">Hydroelectric</button>
-            <button class="energy-btn" data-energy="fossil">Fossil Fuels</button>
-            <button class="energy-btn" data-energy="nuclear">Nuclear Power</button>
+        <div class="left-sidebar">
+            <div class="energy-selector">
+                <button class="energy-btn active" data-energy="solar">Solar Energy</button>
+                <button class="energy-btn" data-energy="wind">Wind Energy</button>
+                <button class="energy-btn" data-energy="hydro">Hydroelectric</button>
+                <button class="energy-btn" data-energy="fossil">Fossil Fuels</button>
+                <button class="energy-btn" data-energy="nuclear">Nuclear Power</button>
+            </div>
+            
+            <!-- Optional: Add some info or controls in the left sidebar -->
+           
         </div>
         
         <div class="visualization-section">

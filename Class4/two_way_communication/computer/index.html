@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Modes Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Communication Modes Simulator</h1>
+            <p class="subtitle">Interactive simulator for one-way and two-way communication processes</p>
+        </header>
+
+        <div class="content">
+            <div class="description-section">
+                <div id="oneWayDescription" class="description-box">
+                    <h2 class="description-title">One-Way Communication</h2>
+                    <div class="description-content">
+                        <p>One-way communication is a linear process where information flows only from the sender to the
+                            receiver without any feedback or response.</p>
+                        <br>
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Sender transmits message</li>
+                            <li>Receiver only receives</li>
+                            <li>No feedback mechanism</li>
+                            <li>Fast information sharing</li>
+                            <li>Examples: TV broadcasts, Radio , lectures</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="twoWayDescription" class="description-box" style="display: none;">
+                    <h2 class="description-title">Two-Way Communication</h2>
+                    <div class="description-content">
+                        <p>Two-way communication is an interactive process where both sender and receiver exchange
+                            information, with feedback enabling mutual understanding.</p>
+                        <br>
+                        <p><strong>Characteristics:</strong></p>
+                        <ul>
+                            <li>Interactive Conversations</li>
+                            <li>Feedback is important</li>
+                            <li>Better communication</li>
+                            <li>Examples: Conversations, zoom meetings, video call</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="toggleModeBtn" class="btn">
+                    Switch to Two-Way Communication
+                </button>
+            </div>
+
+            <div class="simulation-section">
+                <div class="simulation-container" id="simulationContainer">
+                    <div class="mode-indicator one-way-indicator" id="modeIndicator">
+                        One-Way Communication Mode
+                    </div>
+
+                    <div class="response-indicator" id="responseIndicator">
+                        Receiver can now respond...
+                    </div>
+
+                    <div class="simulation-area">
+                        <div class="characters-container">
+                            <div class="character sender">
+                                <div class="character-human">
+                                    <div class="human-head">
+                                        <div class="human-face">
+                                            <div class="human-eyes">
+                                                <div class="human-eye left-eye"></div>
+                                                <div class="human-eye right-eye"></div>
+                                            </div>
+                                            <div class="human-mouth"></div>
+                                        </div>
+                                    </div>
+                                    <div class="human-body">
+                                        <div class="human-arm left-arm"></div>
+                                        <div class="human-torso"></div>
+                                        <div class="human-arm right-arm"></div>
+                                    </div>
+                                    <div class="human-legs">
+                                        <div class="human-leg left-leg"></div>
+                                        <div class="human-leg right-leg"></div>
+                                    </div>
+                                </div>
+                                <div class="character-label">SENDER</div>
+                            </div>
+
+                            <div class="communication-path">
+                                <div class="path-glow"></div>
+                            </div>
+
+                            <div class="character receiver">
+                                <div class="character-human">
+                                    <div class="human-head">
+                                        <div class="human-face">
+                                            <div class="human-eyes">
+                                                <div class="human-eye left-eye"></div>
+                                                <div class="human-eye right-eye"></div>
+                                            </div>
+                                            <div class="human-mouth"></div>
+                                        </div>
+                                    </div>
+                                    <div class="human-body">
+                                        <div class="human-arm left-arm"></div>
+                                        <div class="human-torso"></div>
+                                        <div class="human-arm right-arm"></div>
+                                    </div>
+                                    <div class="human-legs">
+                                        <div class="human-leg left-leg"></div>
+                                        <div class="human-leg right-leg"></div>
+                                    </div>
+                                </div>
+                                <div class="character-label">RECEIVER</div>
+                            </div>
+                        </div>
+
+                        <div class="message-display-area">
+                            <div id="senderMessageBubble" class="message-bubble sender-bubble">
+                                <div class="bubble-text" id="senderMessageText">Waiting for message...</div>
+                                <div class="bubble-sender">Sender </div>
+                            </div>
+
+                            <div id="receiverMessageBubble" class="message-bubble receiver-bubble">
+                                <div class="bubble-text" id="receiverMessageText">Waiting for message...</div>
+                                <div class="bubble-sender">Receiver</div>
+                            </div>
+                        </div>
+
+                        <!-- Animated message that moves across the screen -->
+                        <div class="message-animation" id="messageAnimation"></div>
+                    </div>
+
+                    <div class="communication-ui">
+                        <div class="one-way-ui">
+                            <textarea id="oneWayInput" class="message-input"
+                                placeholder="Type your message here for one-way communication... (Only sender can send)"
+                                rows="3">Hello! This is a one-way message from Sender  to Receiver .</textarea>
+                            <div class="controls">
+                                <button id="oneWaySend" class="control-btn send-btn">Send Message (One-Way)</button>
+                                <button id="resetOneWay" class="control-btn reset-btn">Reset Simulation</button>
+                            </div>
+                        </div>
+
+                        <div class="two-way-ui">
+                            <textarea id="senderInput" class="message-input"
+                                placeholder="Sender: Type your message here..."
+                                rows="2">Hello! This is two-way communication between sender and receiver.</textarea>
+                            <textarea id="receiverInput" class="message-input"
+                                placeholder="Receiver: Type your response here..." rows="2" disabled></textarea>
+                            <div class="controls">
+                                <button id="senderSend" class="control-btn send-btn">Send from Sender</button>
+                                <button id="receiverSend" class="control-btn send-btn" disabled>Send Response from
+                                    Receiver</button>
+                                <button id="resetTwoWay" class="control-btn reset-btn">Reset Simulation</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

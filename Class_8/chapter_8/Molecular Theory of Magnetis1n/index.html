@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Theory of Magnetism</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #e0f7fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            background: rgba(0, 30, 40, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(64, 224, 208, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #40e0d0, #20b2aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0e7e5;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+        }
+        
+        #visualization-container {
+            flex: 3;
+            min-width: 300px;
+            height: 500px;
+            background: rgba(0, 20, 30, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(64, 224, 208, 0.3);
+            position: relative;
+        }
+        
+        #controls {
+            flex: 1;
+            min-width: 280px;
+            background: rgba(0, 30, 40, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(64, 224, 208, 0.2);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            color: #40e0d0;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(64, 224, 208, 0.3);
+        }
+        
+        h3 {
+            color: #20b2aa;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .material-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .material-btn {
+            padding: 12px;
+            background: rgba(0, 40, 50, 0.7);
+            border: 2px solid #2c5364;
+            border-radius: 10px;
+            color: #b0e0e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .material-btn:hover {
+            background: rgba(32, 178, 170, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .material-btn.active {
+            background: rgba(32, 178, 170, 0.4);
+            border-color: #40e0d0;
+            color: #e0ffff;
+            box-shadow: 0 0 15px rgba(64, 224, 208, 0.4);
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0e7e5;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(0, 40, 50, 0.8);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #40e0d0;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(64, 224, 208, 0.8);
+        }
+        
+        .external-field {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .field-toggle {
+            padding: 12px 20px;
+            background: rgba(0, 40, 50, 0.7);
+            border: 2px solid #2c5364;
+            border-radius: 10px;
+            color: #b0e0e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .field-toggle.active {
+            background: rgba(220, 20, 60, 0.4);
+            border-color: #dc143c;
+            color: #ffccd5;
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.4);
+        }
+        
+        .field-toggle:hover {
+            transform: translateY(-2px);
+        }
+        
+        .explanation {
+            background: rgba(0, 30, 40, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(64, 224, 208, 0.2);
+        }
+        
+        .explanation p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+        
+        .key {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .key-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .north {
+            background: linear-gradient(45deg, #ff3333, #cc0000);
+        }
+        
+        .south {
+            background: linear-gradient(45deg, #3333ff, #0000cc);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #88aabb;
+            font-size: 0.9rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            #visualization-container, #controls {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>Molecular Theory of Magnetism</h1>
+            <p class="subtitle">
+                This visualization demonstrates how magnetic properties arise from the alignment of molecular dipoles in different materials. 
+                Each sphere represents a molecular magnet with a north (red) and south (blue) pole.
+            </p>
+        </header>
+        
+        <div class="content">
+            <div id="visualization-container">
+                <div id="canvas-container"></div>
+                <div id="hud">
+                    <div class="material-name" id="material-name">Ferromagnetic Material</div>
+                    <div class="field-indicator" id="field-indicator">External Field: OFF</div>
+                </div>
+            </div>
+            
+            <div id="controls">
+                <div class="control-group">
+                    <h2>Material Type</h2>
+                    <div class="material-selector">
+                        <div class="material-btn active" data-material="ferromagnetic">Ferromagnetic</div>
+                        <div class="material-btn" data-material="paramagnetic">Paramagnetic</div>
+                        <div class="material-btn" data-material="diamagnetic">Diamagnetic</div>
+                        <div class="material-btn" data-material="antiferromagnetic">Antiferromagnetic</div>
+                    </div>
+                    
+                    <h3>External Magnetic Field</h3>
+                    <div class="external-field">
+                        <div class="field-toggle active" id="field-on">ON</div>
+                        <div class="field-toggle" id="field-off">OFF</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h2>Simulation Controls</h2>
+                    
+                    <div class="slider-container">
+                        <label for="temperature">Temperature: <span id="temp-value">Low</span></label>
+                        <input type="range" id="temperature" min="0" max="100" value="20">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="field-strength">Field Strength: <span id="field-value">Medium</span></label>
+                        <input type="range" id="field-strength" min="0" max="100" value="50">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="dipole-count">Number of Dipoles: <span id="dipole-value">64</span></label>
+                        <input type="range" id="dipole-count" min="8" max="125" value="64" step="1">
+                    </div>
+                </div>
+                
+                <div class="key">
+                    <div class="key-item">
+                        <div class="color-box north"></div>
+                        <span>North Pole</span>
+                    </div>
+                    <div class="key-item">
+                        <div class="color-box south"></div>
+                        <span>South Pole</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h2>How It Works</h2>
+            <p>
+                The <strong>Molecular Theory of Magnetism</strong> states that every molecule of a magnetic substance is a complete magnet in itself, 
+                with a north and south pole. The overall magnetic property of a material depends on how these molecular magnets are arranged.
+            </p>
+            <p>
+                <strong>Ferromagnetic materials</strong> (like iron) have molecular magnets that align in the same direction, creating strong magnetism even without an external field.
+            </p>
+            <p>
+                <strong>Paramagnetic materials</strong> have randomly oriented molecular magnets that partially align when an external magnetic field is applied.
+            </p>
+            <p>
+                <strong>Diamagnetic materials</strong> have molecular magnets that oppose an external magnetic field, creating weak repulsion.
+            </p>
+            <p>
+                <strong>Antiferromagnetic materials</strong> have alternating molecular magnets that cancel each other out, resulting in no net magnetization.
+            </p>
+        </div>
+        
+        <footer>
+            <p>Molecular Theory of Magnetism Visualization | Created with Three.js | Physics Simulation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let dipoles = [];
+        let externalField = true;
+        let fieldStrength = 0.5;
+        let temperature = 0.2;
+        let currentMaterial = 'ferromagnetic';
+        let dipoleCount = 64;
+        let clock = new THREE.Clock();
+        
+        // Initialize the application
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a1929);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(60, 
+                document.getElementById('visualization-container').offsetWidth / 
+                document.getElementById('visualization-container').offsetHeight, 
+                0.1, 1000);
+            camera.position.set(8, 8, 8);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(
+                document.getElementById('visualization-container').offsetWidth,
+                document.getElementById('visualization-container').offsetHeight
+            );
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            const container = document.getElementById('canvas-container');
+            container.appendChild(renderer.domElement);
+            
+            // Add orbit controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Add a subtle grid to help with orientation
+            const gridHelper = new THREE.GridHelper(20, 20, 0x1a3a4a, 0x0a2a3a);
+            gridHelper.position.y = -3;
+            scene.add(gridHelper);
+            
+            // Create initial dipoles
+            createDipoles();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Setup UI controls
+            setupUIControls();
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Create molecular dipoles
+        function createDipoles() {
+            // Remove existing dipoles
+            dipoles.forEach(dipole => {
+                scene.remove(dipole.arrow);
+                scene.remove(dipole.northSphere);
+                scene.remove(dipole.southSphere);
+            });
+            dipoles = [];
+            
+            // Calculate grid size based on dipole count
+            const gridSize = Math.cbrt(dipoleCount);
+            const spacing = 2.5;
+            
+            for (let i = 0; i < dipoleCount; i++) {
+                // Calculate position in a 3D grid
+                const x = (i % gridSize) * spacing - (gridSize-1) * spacing / 2;
+                const y = (Math.floor(i / gridSize) % gridSize) * spacing - (gridSize-1) * spacing / 2;
+                const z = Math.floor(i / (gridSize * gridSize)) * spacing - (gridSize-1) * spacing / 2;
+                
+                // Create a dipole (molecular magnet)
+                const dipole = createDipole(x, y, z);
+                dipoles.push(dipole);
+            }
+            
+            // Update material type
+            updateMaterialAlignment();
+        }
+        
+        // Create a single molecular dipole
+        function createDipole(x, y, z) {
+            // Create arrow for the dipole direction
+            const direction = new THREE.Vector3(
+                Math.random() - 0.5,
+                Math.random() - 0.5,
+                Math.random() - 0.5
+            ).normalize();
+            
+            const arrowLength = 1.2;
+            const arrowHelper = new THREE.ArrowHelper(
+                direction,
+                new THREE.Vector3(x, y, z),
+                arrowLength,
+                0xffaa33,
+                0.3,
+                0.15
+            );
+            
+            // Create north pole sphere (red)
+            const northGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const northMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xff3333,
+                shininess: 100,
+                emissive: 0x220000
+            });
+            const northSphere = new THREE.Mesh(northGeometry, northMaterial);
+            northSphere.position.copy(direction.clone().multiplyScalar(arrowLength/2).add(new THREE.Vector3(x, y, z)));
+            
+            // Create south pole sphere (blue)
+            const southGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const southMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x3333ff,
+                shininess: 100,
+                emissive: 0x000022
+            });
+            const southSphere = new THREE.Mesh(southGeometry, southMaterial);
+            southSphere.position.copy(direction.clone().multiplyScalar(-arrowLength/2).add(new THREE.Vector3(x, y, z)));
+            
+            scene.add(arrowHelper);
+            scene.add(northSphere);
+            scene.add(southSphere);
+            
+            return {
+                arrow: arrowHelper,
+                northSphere: northSphere,
+                southSphere: southSphere,
+                position: new THREE.Vector3(x, y, z),
+                direction: direction,
+                originalDirection: direction.clone(),
+                alignmentStrength: 1.0
+            };
+        }
+        
+        // Update dipole alignment based on material type
+        function updateMaterialAlignment() {
+            const externalFieldDirection = new THREE.Vector3(1, 0, 0);
+            
+            dipoles.forEach((dipole, index) => {
+                let targetDirection;
+                
+                switch(currentMaterial) {
+                    case 'ferromagnetic':
+                        // Strong alignment to external field or to neighbors
+                        if (externalField && fieldStrength > 0) {
+                            targetDirection = externalFieldDirection.clone();
+                        } else {
+                            // Ferromagnets retain alignment even without external field
+                            targetDirection = new THREE.Vector3(1, 0, 0);
+                        }
+                        dipole.alignmentStrength = 0.9;
+                        break;
+                        
+                    case 'paramagnetic':
+                        // Weak alignment to external field
+                        if (externalField && fieldStrength > 0) {
+                            targetDirection = externalFieldDirection.clone();
+                            dipole.alignmentStrength = 0.3;
+                        } else {
+                            // Random orientation without field
+                            targetDirection = new THREE.Vector3(
+                                Math.random() - 0.5,
+                                Math.random() - 0.5,
+                                Math.random() - 0.5
+                            ).normalize();
+                            dipole.alignmentStrength = 0.1;
+                        }
+                        break;
+                        
+                    case 'diamagnetic':
+                        // Alignment opposite to external field
+                        if (externalField && fieldStrength > 0) {
+                            targetDirection = externalFieldDirection.clone().multiplyScalar(-1);
+                            dipole.alignmentStrength = 0.2;
+                        } else {
+                            // Random orientation without field
+                            targetDirection = new THREE.Vector3(
+                                Math.random() - 0.5,
+                                Math.random() - 0.5,
+                                Math.random() - 0.5
+                            ).normalize();
+                            dipole.alignmentStrength = 0.1;
+                        }
+                        break;
+                        
+                    case 'antiferromagnetic':
+                        // Alternating alignment
+                        if (externalField && fieldStrength > 0) {
+                            // Slight preference for alignment with field
+                            const alternate = index % 2 === 0 ? 1 : -1;
+                            targetDirection = externalFieldDirection.clone().multiplyScalar(alternate);
+                            dipole.alignmentStrength = 0.6;
+                        } else {
+                            // Perfect alternating alignment without field
+                            const alternate = index % 2 === 0 ? 1 : -1;
+                            targetDirection = new THREE.Vector3(alternate, 0, 0);
+                            dipole.alignmentStrength = 0.8;
+                        }
+                        break;
+                }
+                
+                // Add thermal fluctuations based on temperature
+                const thermalNoise = new THREE.Vector3(
+                    (Math.random() - 0.5) * temperature,
+                    (Math.random() - 0.5) * temperature,
+                    (Math.random() - 0.5) * temperature
+                );
+                
+                targetDirection.add(thermalNoise).normalize();
+                
+                // Smoothly interpolate toward target direction
+                dipole.direction.lerp(targetDirection, dipole.alignmentStrength * fieldStrength * 0.05);
+                dipole.direction.normalize();
+            });
+        }
+        
+        // Update dipole visualization
+        function updateDipoles() {
+            const arrowLength = 1.2;
+            
+            dipoles.forEach(dipole => {
+                // Update arrow direction
+                dipole.arrow.setDirection(dipole.direction);
+                
+                // Update pole positions
+                dipole.northSphere.position.copy(
+                    dipole.direction.clone()
+                        .multiplyScalar(arrowLength/2)
+                        .add(dipole.position)
+                );
+                
+                dipole.southSphere.position.copy(
+                    dipole.direction.clone()
+                        .multiplyScalar(-arrowLength/2)
+                        .add(dipole.position)
+                );
+            });
+        }
+        
+        // Set up UI controls
+        function setupUIControls() {
+            // Material selection
+            const materialButtons = document.querySelectorAll('.material-btn');
+            materialButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    materialButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    currentMaterial = button.getAttribute('data-material');
+                    
+                    // Update material name display
+                    document.getElementById('material-name').textContent = 
+                        button.textContent + ' Material';
+                    
+                    updateMaterialAlignment();
+                });
+            });
+            
+            // External field toggle
+            document.getElementById('field-on').addEventListener('click', () => {
+                document.getElementById('field-on').classList.add('active');
+                document.getElementById('field-off').classList.remove('active');
+                externalField = true;
+                document.getElementById('field-indicator').textContent = 'External Field: ON';
+                updateMaterialAlignment();
+            });
+            
+            document.getElementById('field-off').addEventListener('click', () => {
+                document.getElementById('field-off').classList.add('active');
+                document.getElementById('field-on').classList.remove('active');
+                externalField = false;
+                document.getElementById('field-indicator').textContent = 'External Field: OFF';
+                updateMaterialAlignment();
+            });
+            
+            // Temperature slider
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temp-value');
+            
+            tempSlider.addEventListener('input', () => {
+                const value = parseInt(tempSlider.value);
+                temperature = value / 100;
+                
+                if (value < 33) {
+                    tempValue.textContent = 'Low';
+                } else if (value < 66) {
+                    tempValue.textContent = 'Medium';
+                } else {
+                    tempValue.textContent = 'High';
+                }
+                
+                updateMaterialAlignment();
+            });
+            
+            // Field strength slider
+            const fieldSlider = document.getElementById('field-strength');
+            const fieldValue = document.getElementById('field-value');
+            
+            fieldSlider.addEventListener('input', () => {
+                const value = parseInt(fieldSlider.value);
+                fieldStrength = value / 100;
+                
+                if (value < 33) {
+                    fieldValue.textContent = 'Weak';
+                } else if (value < 66) {
+                    fieldValue.textContent = 'Medium';
+                } else {
+                    fieldValue.textContent = 'Strong';
+                }
+                
+                updateMaterialAlignment();
+            });
+            
+            // Dipole count slider
+            const dipoleSlider = document.getElementById('dipole-count');
+            const dipoleValue = document.getElementById('dipole-value');
+            
+            dipoleSlider.addEventListener('input', () => {
+                dipoleCount = parseInt(dipoleSlider.value);
+                dipoleValue.textContent = dipoleCount;
+                createDipoles();
+            });
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            const container = document.getElementById('visualization-container');
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const delta = clock.getDelta();
+            
+            // Update controls
+            controls.update();
+            
+            // Update dipoles with slight random motion for visual effect
+            if (temperature > 0.1) {
+                dipoles.forEach(dipole => {
+                    // Add small random motion
+                    const randomMotion = new THREE.Vector3(
+                        (Math.random() - 0.5) * temperature * 0.1,
+                        (Math.random() - 0.5) * temperature * 0.1,
+                        (Math.random() - 0.5) * temperature * 0.1
+                    );
+                    
+                    dipole.direction.add(randomMotion).normalize();
+                });
+            }
+            
+            // Update dipole visualization
+            updateDipoles();
+            
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize the application when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications of Pressure in Daily Life</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide.active {
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide.next {
+            transform: translateX(100%);
+        }
+
+        /* Slide 1 - Title */
+        #slide1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .title-content {
+            text-align: center;
+            color: white;
+        }
+
+        .title-content h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .title-content p {
+            font-size: 1.5em;
+            max-width: 800px;
+            line-height: 1.8;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .formula-display {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 30px 60px;
+            border-radius: 20px;
+            margin-top: 40px;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .formula-display h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        /* Slide 2 - Nail */
+        #slide2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* Slide 3 - Plough */
+        #slide3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* Slide 4 - Knife */
+        #slide4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .demo-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1400px;
+            gap: 60px;
+        }
+
+        .demo-left {
+            flex: 1;
+            color: white;
+            max-width: 500px;
+        }
+
+        .demo-left h2 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .demo-left p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .pressure-info {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .pressure-info strong {
+            display: block;
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        .demo-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 15px;
+        }
+
+        /* Pressure Control Buttons */
+        .pressure-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pressure-btn {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            border: none;
+            border-radius: 50px;
+            padding: 16px 32px;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .pressure-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .pressure-btn:active {
+            transform: translateY(0);
+        }
+
+        .pressure-btn:nth-child(2) {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+        }
+
+        .pressure-btn:nth-child(3) {
+            background: linear-gradient(135deg, #FFD166, #FFB74D);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #888, #555);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #999, #666);
+        }
+
+        .btn-icon {
+            font-size: 1.4em;
+        }
+
+        .pressure-intensity {
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+            font-size: 1.1em;
+            background: rgba(255,255,255,0.15);
+            padding: 15px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            display: none;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .pressure-intensity.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .force-meter {
+            width: 100%;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .force-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00C9FF, #92FE9D);
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .force-value {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            font-size: 1.1em;
+        }
+
+        /* Enhanced Pressure Display for Knife - MOVED TO BOTTOM LEFT */
+        .knife-pressure-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            padding: 20px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 65, 108, 0.6);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+            display: none;
+            animation: pulsePressure 2s infinite alternate;
+            border: 2px solid white;
+            min-width: 180px;
+            backdrop-filter: blur(5px);
+        }
+
+        .knife-pressure-display.active {
+            display: block;
+        }
+
+        .pressure-title {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: #FFD700;
+        }
+
+        .pressure-value-main {
+            font-size: 2.8em;
+            font-weight: 900;
+            margin: 5px 0;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            line-height: 1;
+            transition: all 0.3s ease;
+        }
+
+        .pressure-unit {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-top: 3px;
+            color: #FFB74D;
+        }
+
+        .pressure-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .pressure-label {
+            display: block;
+            margin: 3px 0;
+            font-size: 0.9em;
+        }
+
+        /* Real-time Pressure Formula Display - MOVED TO BOTTOM RIGHT */
+        .pressure-formula-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1a237e, #283593);
+            padding: 20px 25px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.6);
+            z-index: 10;
+            display: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            min-width: 180px;
+            backdrop-filter: blur(5px);
+        }
+
+        .pressure-formula-display.active {
+            display: block;
+        }
+
+        .formula-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #bbdefb;
+        }
+
+        .formula-equation {
+            font-size: 1.3em;
+            margin: 10px 0;
+            text-align: center;
+            font-family: 'Cambria Math', serif;
+            line-height: 1.4;
+        }
+
+        .formula-values {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .formula-value {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 0.9em;
+        }
+
+        .formula-value .label {
+            color: #bbdefb;
+        }
+
+        .formula-value .value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Pressure Comparison Bar */
+        .pressure-comparison {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            padding: 15px 20px;
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.6);
+            z-index: 10;
+            display: none;
+            border: 2px solid white;
+            min-width: 200px;
+            backdrop-filter: blur(5px);
+        }
+
+        .pressure-comparison.active {
+            display: block;
+        }
+
+        .comparison-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #C8E6C9;
+        }
+
+        .comparison-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .comparison-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #FF9800, #FF5722);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .comparison-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+
+        .nav-dot.active {
+            background: white;
+            transform: scale(1.3);
+        }
+
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 2em;
+            color: white;
+            user-select: none;
+        }
+
+        .nav-arrow:hover {
+            background: rgba(255,255,255,0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.left {
+            left: 30px;
+        }
+
+        .nav-arrow.right {
+            right: 30px;
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            color: white;
+            font-size: 1.2em;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            z-index: 1000;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulsePressure {
+            0% { 
+                transform: scale(1); 
+                box-shadow: 0 10px 30px rgba(255, 65, 108, 0.6);
+            }
+            100% { 
+                transform: scale(1.02); 
+                box-shadow: 0 15px 40px rgba(255, 65, 108, 0.8);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @media (max-width: 968px) {
+            .demo-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .demo-left h2 {
+                font-size: 2.5em;
+            }
+            
+            .title-content h1 {
+                font-size: 2.5em;
+            }
+            
+            canvas {
+                width: 100% !important;
+                height: auto !important;
+            }
+            
+            .pressure-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .pressure-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .knife-pressure-display,
+            .pressure-formula-display,
+            .pressure-comparison {
+                position: relative;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: 15px auto;
+                width: 90%;
+            }
+            
+            .pressure-value-main {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slider-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active" id="slide1">
+            <div class="title-content">
+                <h1>⚙️ Applications of Pressure in Daily Life</h1>
+                <p>
+                    Pressure has an important role in different work that we do in our daily life. 
+                    When area decreases, pressure increases for the same force applied, making our tools more effective.
+                </p>
+                <div class="formula-display">
+                    <h2>Pressure = Force ÷ Area</h2>
+                    <p style="font-size: 1.2em; margin-top: 10px;">Smaller area = Higher pressure</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Nail -->
+        <div class="slide next" id="slide2">
+            <div class="demo-content">
+                <div class="demo-left">
+                    <h2>🔨 Sharp Nail</h2>
+                    <p>
+                        The tip of an iron nail is made sharper to concentrate the applied force on a very small area. 
+                        This creates extremely high pressure at the tip.
+                    </p>
+                    <p>
+                        This high pressure allows the nail to pierce through hard materials like wood with relatively less force applied at the head.
+                    </p>
+                    <div class="pressure-info">
+                        <strong>⚡ High Pressure at Tip</strong>
+                        <p>Same force, smaller area = Easy penetration</p>
+                    </div>
+                </div>
+                <div class="demo-right">
+                    <div class="canvas-wrapper">
+                        <canvas id="nailCanvas" width="500" height="400"></canvas>
+                    </div>
+                    
+                    <div class="pressure-intensity" id="nailPressureText">
+                        Generating pressure at nail tip...
+                        <div class="force-meter">
+                            <div class="force-fill" id="nailForceFill"></div>
+                            <div class="force-value" id="nailForceValue">0 N</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pressure-controls">
+                        <button class="pressure-btn" onclick="applyPressure('nail')">
+                            <span class="btn-icon">🔨</span>
+                            <span>Apply Pressure to Nail</span>
+                        </button>
+                        <button class="pressure-btn reset-btn" onclick="resetNail()">
+                            <span class="btn-icon">↺</span>
+                            <span>Reset Nail</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Plough -->
+        <div class="slide next" id="slide3">
+            <div class="demo-content">
+                <div class="demo-left">
+                    <h2>🌾 Sharp Plough</h2>
+                    <p>
+                        Sharp plough shares made of iron are used to plough the field. The narrow, sharp edge of the ploughshare cuts through soil efficiently.
+                    </p>
+                    <p>
+                        More pressure is exerted even while applying less force due to the smaller contact area of the ploughshare, making it easier to plough.
+                    </p>
+                    <div class="pressure-info">
+                        <strong>🚜 Efficient Farming</strong>
+                        <p>Sharp edge cuts through soil with minimal effort</p>
+                    </div>
+                </div>
+                <div class="demo-right">
+                    <div class="canvas-wrapper">
+                        <canvas id="ploughCanvas" width="500" height="400"></canvas>
+                    </div>
+                    
+                    <div class="pressure-intensity" id="ploughPressureText">
+                        Generating pressure at plough edge...
+                        <div class="force-meter">
+                            <div class="force-fill" id="ploughForceFill"></div>
+                            <div class="force-value" id="ploughForceValue">0 N</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pressure-controls">
+                        <button class="pressure-btn" onclick="applyPressure('plough')">
+                            <span class="btn-icon">🌾</span>
+                            <span>Apply Pressure to Plough</span>
+                        </button>
+                        <button class="pressure-btn reset-btn" onclick="resetPlough()">
+                            <span class="btn-icon">↺</span>
+                            <span>Reset Plough</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Knife -->
+        <div class="slide next" id="slide4">
+            <div class="demo-content">
+                <div class="demo-left">
+                    <h2>🔪 Sharp Knife</h2>
+                    <p>
+                        One end of sickles and knives are made sharper to cut or chop wood and other materials easily.
+                    </p>
+                    <p>
+                        The thin, sharp edge creates intense pressure that slices through objects. The sharper the blade, the less force needed to cut.
+                    </p>
+                    <div class="pressure-info">
+                        <strong>✂️ Real Cutting Simulation</strong>
+                        <p>Razor-thin edge delivers maximum pressure</p>
+                    </div>
+                </div>
+                <div class="demo-right">
+                    <div class="canvas-wrapper">
+                        <canvas id="knifeCanvas" width="500" height="400"></canvas>
+                        
+                        <!-- PRESSURE DISPLAYS POSITIONED AROUND CANVAS -->
+                        <div class="knife-pressure-display" id="knifePressureDisplay">
+                            <div class="pressure-title">CUTTING PRESSURE</div>
+                            <div class="pressure-value-main" id="knifePressureValue">0.0</div>
+                            <div class="pressure-unit">MEGAPASCALS (MPa)</div>
+                            <div class="pressure-details">
+                                <span class="pressure-label">Edge: 0.1 mm thick</span>
+                                <span class="pressure-label">Force: <span id="knifeForceDisplay">0 N</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="pressure-formula-display" id="pressureFormulaDisplay">
+                            <div class="formula-title">PRESSURE FORMULA</div>
+                            <div class="formula-equation" id="formulaEquation">
+                                P = F / A
+                            </div>
+                            <div class="formula-values">
+                                <div class="formula-value">
+                                    <span class="label">Force (F):</span>
+                                    <span class="value" id="formulaForce">0 N</span>
+                                </div>
+                                <div class="formula-value">
+                                    <span class="label">Area (A):</span>
+                                    <span class="value" id="formulaArea">5 mm²</span>
+                                </div>
+                                <div class="formula-value">
+                                    <span class="label">Pressure (P):</span>
+                                    <span class="value" id="formulaPressure">0 MPa</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pressure-comparison" id="pressureComparison">
+                            <div class="comparison-title">PRESSURE COMPARISON</div>
+                            <div class="comparison-bar">
+                                <div class="comparison-fill" id="comparisonFill"></div>
+                            </div>
+                            <div class="comparison-labels">
+                                <span>Dull Knife</span>
+                                <span>Sharp Knife</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pressure-intensity" id="knifePressureText">
+                        Generating pressure at knife edge...
+                        <div class="force-meter">
+                            <div class="force-fill" id="knifeForceFill"></div>
+                            <div class="force-value" id="knifeForceValue">0 N</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pressure-controls">
+                        <button class="pressure-btn" onclick="applyPressure('knife')">
+                            <span class="btn-icon">🔪</span>
+                            <span>Cut with Knife</span>
+                        </button>
+                        <button class="pressure-btn reset-btn" onclick="resetKnife()">
+                            <span class="btn-icon">↺</span>
+                            <span>Reset Cutting</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-number">
+        <span id="currentSlide">1</span> / 4
+    </div>
+
+    <div class="nav-arrow left" onclick="prevSlide()">‹</div>
+    <div class="nav-arrow right" onclick="nextSlide()">›</div>
+
+    <div class="navigation">
+        <div class="nav-dot active" onclick="goToSlide(0)"></div>
+        <div class="nav-dot" onclick="goToSlide(1)"></div>
+        <div class="nav-dot" onclick="goToSlide(2)"></div>
+        <div class="nav-dot" onclick="goToSlide(3)"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 4;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.nav-dot');
+        
+        // Pressure application states
+        let pressureState = {
+            nail: { active: false, force: 0, maxForce: 120 },
+            plough: { active: false, force: 0, maxForce: 200 },
+            knife: { active: false, force: 0, maxForce: 150 }
+        };
+        
+        // Animation variables
+        let frame = 0;
+        let nailHammering = 0;
+        let nailDepth = 0;
+        let ploughOffset = 0;
+        let ploughActive = false;
+        
+        // Enhanced Knife variables for realistic cutting
+        let knifeCutProgress = 0;
+        let knifeActive = false;
+        let cutParticles = [];
+        let cutDebris = [];
+        let isCutting = false;
+        let cutPosition = { x: 200, y: 290 };
+        let cutWidth = 70;
+        let materialStrength = 20;
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev', 'next');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < currentSlide) {
+                    slide.classList.add('prev');
+                } else {
+                    slide.classList.add('next');
+                }
+            });
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlides();
+        }
+
+        // Pressure application function
+        function applyPressure(tool) {
+            const state = pressureState[tool];
+            const pressureText = document.getElementById(`${tool}PressureText`);
+            const forceFill = document.getElementById(`${tool}ForceFill`);
+            const forceValue = document.getElementById(`${tool}ForceValue`);
+            
+            // Reset any existing pressure
+            Object.keys(pressureState).forEach(key => {
+                pressureState[key].active = false;
+                document.getElementById(`${key}PressureText`).classList.remove('active');
+            });
+            
+            // Activate this tool's pressure
+            state.active = true;
+            state.force = 0;
+            
+            // Show pressure indicator
+            pressureText.classList.add('active');
+            
+            // Show knife pressure display
+            if (tool === 'knife') {
+                document.getElementById('knifePressureDisplay').classList.add('active');
+                document.getElementById('pressureFormulaDisplay').classList.add('active');
+                document.getElementById('pressureComparison').classList.add('active');
+                isCutting = true;
+            }
+            
+            // Animate the force increase
+            const animateForce = () => {
+                if (state.active && state.force < state.maxForce) {
+                    state.force += 3;
+                    
+                    // Update UI
+                    const percentage = (state.force / state.maxForce) * 100;
+                    forceFill.style.width = `${percentage}%`;
+                    forceValue.textContent = `${state.force} N`;
+                    
+                    // Update knife pressure display and cutting
+                    if (tool === 'knife') {
+                        // REALISTIC KNIFE PRESSURE CALCULATION
+                        // Knife specifications
+                        const knifeEdgeThickness = 0.1; // mm - extremely sharp knife edge
+                        const knifeEdgeLength = 50; // mm - length of cutting edge in contact
+                        
+                        // Calculate contact area (edge thickness × cutting length)
+                        const contactArea_mm2 = knifeEdgeThickness * knifeEdgeLength; // 5 mm²
+                        const contactArea_m2 = contactArea_mm2 * 0.000001; // Convert to m²
+                        
+                        // Calculate pressure in Pascal (Pa = N/m²)
+                        const pressure_pa = state.force / contactArea_m2;
+                        
+                        // Convert to Megapascals (1 MPa = 1,000,000 Pa)
+                        const pressure_mpa = pressure_pa / 1000000;
+                        
+                        // Update pressure display
+                        const pressureDisplay = document.getElementById('knifePressureValue');
+                        pressureDisplay.textContent = pressure_mpa.toFixed(2);
+                        document.getElementById('knifeForceDisplay').textContent = `${state.force} N`;
+                        
+                        // Update formula display with REAL values
+                        document.getElementById('formulaForce').textContent = `${state.force} N`;
+                        document.getElementById('formulaArea').textContent = `${contactArea_mm2.toFixed(2)} mm²`;
+                        document.getElementById('formulaPressure').textContent = `${pressure_mpa.toFixed(2)} MPa`;
+                        
+                        // Show REAL calculation
+                        document.getElementById('formulaEquation').innerHTML = 
+                            `P = ${state.force}N ÷ ${contactArea_mm2.toFixed(2)}mm²<br>= ${pressure_mpa.toFixed(2)} MPa`;
+                        
+                        // Add color coding based on pressure level
+                        if (pressure_mpa < 10) {
+                            pressureDisplay.style.color = '#4CAF50'; // Green for low pressure
+                        } else if (pressure_mpa < 50) {
+                            pressureDisplay.style.color = '#FF9800'; // Orange for medium pressure
+                        } else {
+                            pressureDisplay.style.color = '#F44336'; // Red for high pressure
+                        }
+                        
+                        // Show pressure comparison with dull knife
+                        const dullKnifeArea_mm2 = 1.0 * knifeEdgeLength; // 1mm thick dull edge
+                        const dullKnifePressure_mpa = (state.force / (dullKnifeArea_mm2 * 0.000001)) / 1000000;
+                        const pressureRatio = Math.min(pressure_mpa / (dullKnifePressure_mpa * 10), 1);
+                        document.getElementById('comparisonFill').style.width = `${pressureRatio * 100}%`;
+                        
+                        // Make pressure display pulse based on pressure intensity
+                        const scale = 1 + (pressure_mpa / 100) * 0.2;
+                        pressureDisplay.style.transform = `scale(${scale})`;
+                        
+                        // Update cutting progress based on pressure
+                        if (state.force > 30) {
+                            const cutSpeed = (pressure_mpa / 20) * 0.01; // Cutting speed depends on pressure
+                            knifeCutProgress = Math.min(knifeCutProgress + cutSpeed, 1);
+                            
+                            // Create cutting effects
+                            createCuttingEffects(pressure_mpa);
+                        }
+                    }
+                    
+                    // Continue animation
+                    requestAnimationFrame(animateForce);
+                } else if (state.force >= state.maxForce) {
+                    // NO AUTO-RESET - USER MUST RESET MANUALLY
+                }
+            };
+            
+            animateForce();
+            
+            // Trigger tool-specific animations
+            if (tool === 'nail') {
+                nailHammering = 1;
+            } else if (tool === 'plough') {
+                ploughActive = true;
+            } else if (tool === 'knife') {
+                knifeActive = true;
+            }
+            
+            // Add visual feedback to button
+            const button = event.target.closest('.pressure-btn');
+            button.classList.add('pulse');
+            setTimeout(() => button.classList.remove('pulse'), 500);
+        }
+
+        // Create cutting effects based on pressure intensity
+        function createCuttingEffects(pressure) {
+            if (!isCutting || knifeCutProgress <= 0 || knifeCutProgress >= 1) return;
+            
+            // More particles for higher pressure
+            const particleCount = Math.min(Math.floor(pressure / 10), 5);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * (10 + pressure / 5);
+                cutParticles.push({
+                    x: cutPosition.x + Math.cos(angle) * distance,
+                    y: cutPosition.y + Math.sin(angle) * distance,
+                    vx: (Math.random() * 6 - 3) * (1 + pressure / 50),
+                    vy: (Math.random() * -3 - 1) * (1 + pressure / 50),
+                    life: 1.0,
+                    color: `rgba(255, ${165 - pressure}, 0, ${Math.random() * 0.5 + 0.3})`
+                });
+            }
+            
+            // Create debris for higher pressures
+            if (Math.random() > 0.8 && pressure > 30) {
+                cutDebris.push({
+                    x: cutPosition.x + Math.random() * cutWidth - cutWidth/2,
+                    y: cutPosition.y,
+                    vx: Math.random() * 8 - 4,
+                    vy: Math.random() * -6 - 2,
+                    life: 1.0,
+                    color: `rgba(255, ${140 - pressure/2}, 0, ${Math.random() * 0.6 + 0.4})`,
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+
+        // Reset functions
+        function resetNail() {
+            const state = pressureState.nail;
+            state.active = false;
+            state.force = 0;
+            
+            const forceFill = document.getElementById('nailForceFill');
+            const forceValue = document.getElementById('nailForceValue');
+            const pressureText = document.getElementById('nailPressureText');
+            
+            forceFill.style.width = '0%';
+            forceValue.textContent = '0 N';
+            pressureText.classList.remove('active');
+            
+            nailHammering = 0;
+            nailDepth = 0;
+            
+            const button = event.target.closest('.pressure-btn');
+            button.classList.add('shake');
+            setTimeout(() => button.classList.remove('shake'), 500);
+        }
+
+        function resetPlough() {
+            const state = pressureState.plough;
+            state.active = false;
+            state.force = 0;
+            
+            const forceFill = document.getElementById('ploughForceFill');
+            const forceValue = document.getElementById('ploughForceValue');
+            const pressureText = document.getElementById('ploughPressureText');
+            
+            forceFill.style.width = '0%';
+            forceValue.textContent = '0 N';
+            pressureText.classList.remove('active');
+            
+            ploughActive = false;
+            ploughOffset = 0;
+            
+            const button = event.target.closest('.pressure-btn');
+            button.classList.add('shake');
+            setTimeout(() => button.classList.remove('shake'), 500);
+        }
+
+        function resetKnife() {
+            const state = pressureState.knife;
+            state.active = false;
+            state.force = 0;
+            
+            const forceFill = document.getElementById('knifeForceFill');
+            const forceValue = document.getElementById('knifeForceValue');
+            const pressureText = document.getElementById('knifePressureText');
+            
+            forceFill.style.width = '0%';
+            forceValue.textContent = '0 N';
+            pressureText.classList.remove('active');
+            document.getElementById('knifePressureDisplay').classList.remove('active');
+            document.getElementById('pressureFormulaDisplay').classList.remove('active');
+            document.getElementById('pressureComparison').classList.remove('active');
+            document.getElementById('knifePressureValue').textContent = '0.0';
+            document.getElementById('knifeForceDisplay').textContent = '0 N';
+            
+            // Reset formula display
+            document.getElementById('formulaForce').textContent = '0 N';
+            document.getElementById('formulaPressure').textContent = '0 MPa';
+            document.getElementById('formulaEquation').innerHTML = 'P = F / A';
+            document.getElementById('comparisonFill').style.width = '0%';
+            
+            knifeActive = false;
+            knifeCutProgress = 0;
+            isCutting = false;
+            cutParticles = [];
+            cutDebris = [];
+            
+            const button = event.target.closest('.pressure-btn');
+            button.classList.add('shake');
+            setTimeout(() => button.classList.remove('shake'), 500);
+        }
+
+        // Enhanced Nail Animation (UNCHANGED)
+        function drawNail() {
+            const canvas = document.getElementById('nailCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (nailHammering > 0) {
+                nailDepth = Math.min(nailDepth + 2, 80);
+                nailHammering = Math.max(0, nailHammering - 0.02);
+            }
+            
+            const woodGradient = ctx.createLinearGradient(0, 250, 0, 380);
+            woodGradient.addColorStop(0, '#A0826D');
+            woodGradient.addColorStop(0.5, '#8B6F47');
+            woodGradient.addColorStop(1, '#6F5C3E');
+            ctx.fillStyle = woodGradient;
+            ctx.fillRect(50, 250, 400, 130);
+            
+            ctx.strokeStyle = 'rgba(101, 67, 33, 0.3)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(60 + i * 50, 260);
+                ctx.bezierCurveTo(80 + i * 50, 290, 70 + i * 50, 320, 80 + i * 50, 370);
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(50, 250, 400, 10);
+            
+            const nailGradient = ctx.createLinearGradient(240, 0, 260, 0);
+            nailGradient.addColorStop(0, '#9E9E9E');
+            nailGradient.addColorStop(0.5, '#BDBDBD');
+            nailGradient.addColorStop(1, '#757575');
+            ctx.fillStyle = nailGradient;
+            ctx.fillRect(240, 100 - nailDepth, 20, 150 + nailDepth);
+            
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillRect(243, 100 - nailDepth, 4, 150 + nailDepth);
+            
+            const headGradient = ctx.createRadialGradient(250, 100 - nailDepth, 5, 250, 100 - nailDepth, 25);
+            headGradient.addColorStop(0, '#E0E0E0');
+            headGradient.addColorStop(0.7, '#9E9E9E');
+            headGradient.addColorStop(1, '#616161');
+            ctx.fillStyle = headGradient;
+            ctx.beginPath();
+            ctx.arc(250, 100 - nailDepth, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const tipGradient = ctx.createLinearGradient(240, 250, 260, 250);
+            tipGradient.addColorStop(0, '#757575');
+            tipGradient.addColorStop(0.5, '#9E9E9E');
+            tipGradient.addColorStop(1, '#757575');
+            ctx.fillStyle = tipGradient;
+            ctx.beginPath();
+            ctx.moveTo(240, 250);
+            ctx.lineTo(250, 265 + nailDepth);
+            ctx.lineTo(260, 250);
+            ctx.closePath();
+            ctx.fill();
+            
+            if (pressureState.nail.active) {
+                const forceIntensity = pressureState.nail.force / pressureState.nail.maxForce;
+                ctx.shadowColor = '#FF0000';
+                ctx.shadowBlur = 10 + forceIntensity * 20;
+                ctx.strokeStyle = '#FF0000';
+                ctx.fillStyle = '#FF0000';
+                ctx.lineWidth = 4 + forceIntensity * 6;
+                ctx.beginPath();
+                ctx.moveTo(250, 20 - nailDepth);
+                ctx.lineTo(250, 70 - nailDepth);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(30, 320, 15, 30);
+            ctx.fillStyle = '#FF5722';
+            ctx.fillRect(30, 320 + (60 - nailDepth * 0.75), 15, nailDepth * 0.75);
+        }
+
+        // Enhanced Plough Animation (UNCHANGED)
+        function drawPlough() {
+            const canvas = document.getElementById('ploughCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (ploughActive && pressureState.plough.active) {
+                const speed = pressureState.plough.force / pressureState.plough.maxForce * 3;
+                ploughOffset = Math.min(ploughOffset + speed, 400);
+            }
+            
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, 200);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#B0E0E6');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, 500, 200);
+            
+            const soilGradient = ctx.createLinearGradient(0, 200, 0, 400);
+            soilGradient.addColorStop(0, '#8B7355');
+            soilGradient.addColorStop(0.5, '#6B5D48');
+            soilGradient.addColorStop(1, '#5C4D3A');
+            ctx.fillStyle = soilGradient;
+            ctx.fillRect(0, 200, 500, 200);
+            
+            ctx.fillStyle = 'rgba(91, 77, 62, 0.6)';
+            for (let i = 0; i < 15; i++) {
+                const x = (i * 40 + frame * 0.5) % 500;
+                ctx.beginPath();
+                ctx.arc(x, 220 + Math.sin(i) * 30, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            if (ploughOffset > 30) {
+                ctx.fillStyle = '#4A3F35';
+                ctx.beginPath();
+                ctx.moveTo(0, 230);
+                ctx.lineTo(ploughOffset - 30, 230);
+                ctx.lineTo(ploughOffset - 20, 260);
+                ctx.lineTo(0, 260);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            const ploughGradient = ctx.createLinearGradient(ploughOffset, 150, ploughOffset + 60, 150);
+            ploughGradient.addColorStop(0, '#34495E');
+            ploughGradient.addColorStop(0.5, '#2C3E50');
+            ploughGradient.addColorStop(1, '#1A252F');
+            ctx.fillStyle = ploughGradient;
+            ctx.beginPath();
+            ctx.moveTo(ploughOffset, 150);
+            ctx.lineTo(ploughOffset + 60, 150);
+            ctx.lineTo(ploughOffset + 60, 200);
+            ctx.lineTo(ploughOffset, 200);
+            ctx.closePath();
+            ctx.fill();
+            
+            const bladeGradient = ctx.createLinearGradient(ploughOffset - 30, 200, ploughOffset + 30, 200);
+            bladeGradient.addColorStop(0, '#7F8C8D');
+            bladeGradient.addColorStop(0.3, '#BDC3C7');
+            bladeGradient.addColorStop(0.5, '#ECF0F1');
+            bladeGradient.addColorStop(0.7, '#BDC3C7');
+            bladeGradient.addColorStop(1, '#7F8C8D');
+            ctx.fillStyle = bladeGradient;
+            ctx.beginPath();
+            ctx.moveTo(ploughOffset, 200);
+            ctx.lineTo(ploughOffset - 30, 215);
+            ctx.lineTo(ploughOffset - 20, 245);
+            ctx.lineTo(ploughOffset + 20, 245);
+            ctx.lineTo(ploughOffset + 30, 215);
+            ctx.lineTo(ploughOffset, 200);
+            ctx.closePath();
+            ctx.fill();
+            
+            if (pressureState.plough.active) {
+                const forceIntensity = pressureState.plough.force / pressureState.plough.maxForce;
+                ctx.shadowColor = '#3498DB';
+                ctx.shadowBlur = 5 + forceIntensity * 15;
+                ctx.strokeStyle = '#3498DB';
+                ctx.fillStyle = '#3498DB';
+                ctx.lineWidth = 4 + forceIntensity * 4;
+                ctx.beginPath();
+                ctx.moveTo(ploughOffset + 140, 120);
+                ctx.lineTo(ploughOffset + 190, 120);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // REALISTIC KNIFE CUTTING SIMULATION (UNCHANGED except visual feedback)
+        function drawKnife() {
+            const canvas = document.getElementById('knifeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            cutParticles = cutParticles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                p.vy += 0.1;
+                return p.life > 0;
+            });
+            
+            cutDebris = cutDebris.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.01;
+                p.vy += 0.15;
+                return p.life > 0;
+            });
+            
+            const knifeY = 80 + knifeCutProgress * 100;
+            const cutGap = knifeCutProgress * 40;
+            
+            const boardGradient = ctx.createLinearGradient(100, 250, 100, 350);
+            boardGradient.addColorStop(0, '#D2B48C');
+            boardGradient.addColorStop(0.5, '#C9A96E');
+            boardGradient.addColorStop(1, '#B8956A');
+            ctx.fillStyle = boardGradient;
+            ctx.fillRect(100, 250, 300, 100);
+            
+            ctx.strokeStyle = 'rgba(160, 130, 90, 0.3)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(120 + i * 50, 260);
+                ctx.bezierCurveTo(130 + i * 50, 280, 125 + i * 50, 310, 135 + i * 50, 340);
+                ctx.stroke();
+            }
+            
+            cutParticles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2 * p.life, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            cutDebris.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            const leftPieceX = 200 - cutGap;
+            const rightPieceX = 200 + cutGap;
+            
+            const leftGradient = ctx.createRadialGradient(leftPieceX, 290, 10, leftPieceX, 290, 35);
+            leftGradient.addColorStop(0, '#FFA500');
+            leftGradient.addColorStop(0.7, '#FF8C00');
+            leftGradient.addColorStop(1, '#FF6F00');
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(leftPieceX, 290, 35, Math.PI/2, 3*Math.PI/2);
+            ctx.lineTo(leftPieceX + 35 - knifeCutProgress * 35, 255);
+            ctx.lineTo(leftPieceX + 35 - knifeCutProgress * 35, 325);
+            ctx.closePath();
+            ctx.fillStyle = leftGradient;
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(leftPieceX + 35 - knifeCutProgress * 35, 255, 5, 70);
+            
+            ctx.strokeStyle = '#CC7000';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(leftPieceX, 290, 15 + i * 8, Math.PI/2, 3*Math.PI/2);
+                ctx.stroke();
+            }
+            ctx.restore();
+            
+            const rightGradient = ctx.createRadialGradient(rightPieceX, 290, 10, rightPieceX, 290, 35);
+            rightGradient.addColorStop(0, '#FFA500');
+            rightGradient.addColorStop(0.7, '#FF8C00');
+            rightGradient.addColorStop(1, '#FF6F00');
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(rightPieceX, 290, 35, -Math.PI/2, Math.PI/2);
+            ctx.lineTo(rightPieceX - 35 + knifeCutProgress * 35, 255);
+            ctx.lineTo(rightPieceX - 35 + knifeCutProgress * 35, 325);
+            ctx.closePath();
+            ctx.fillStyle = rightGradient;
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(rightPieceX - 35 + knifeCutProgress * 35 - 5, 255, 5, 70);
+            
+            ctx.strokeStyle = '#CC7000';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(rightPieceX, 290, 15 + i * 8, -Math.PI/2, Math.PI/2);
+                ctx.stroke();
+            }
+            ctx.restore();
+            
+            const knifeX = 245 + knifeCutProgress * 60;
+            
+            const handleGradient = ctx.createLinearGradient(knifeX - 100, knifeY - 40, knifeX - 40, knifeY - 40);
+            handleGradient.addColorStop(0, '#654321');
+            handleGradient.addColorStop(0.5, '#8B4513');
+            handleGradient.addColorStop(1, '#654321');
+            ctx.fillStyle = handleGradient;
+            ctx.fillRect(knifeX - 100, knifeY - 50, 90, 30);
+            
+            ctx.fillStyle = '#C0C0C0';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(knifeX - 80 + i * 25, knifeY - 35, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            const bladeGradient = ctx.createLinearGradient(knifeX - 70, knifeY - 35, knifeX + 80, knifeY - 35);
+            bladeGradient.addColorStop(0, '#E8E8E8');
+            bladeGradient.addColorStop(0.3, '#FFFFFF');
+            bladeGradient.addColorStop(0.5, '#D0D0D0');
+            bladeGradient.addColorStop(1, '#A8A8A8');
+            ctx.fillStyle = bladeGradient;
+            ctx.beginPath();
+            ctx.moveTo(knifeX - 70, knifeY - 40);
+            ctx.lineTo(knifeX + 80, knifeY - 30);
+            ctx.lineTo(knifeX + 80, knifeY + 10);
+            ctx.lineTo(knifeX - 70, knifeY);
+            ctx.closePath();
+            ctx.fill();
+            
+            if (pressureState.knife.active && pressureState.knife.force > 0) {
+                ctx.shadowColor = '#FF0000';
+                ctx.shadowBlur = 5 + (pressureState.knife.force / pressureState.knife.maxForce) * 10;
+            }
+            
+            const edgeGradient = ctx.createLinearGradient(knifeX + 80, knifeY - 30, knifeX + 105, knifeY - 10);
+            edgeGradient.addColorStop(0, '#C0C0C0');
+            edgeGradient.addColorStop(0.5, '#E8E8E8');
+            edgeGradient.addColorStop(1, '#909090');
+            ctx.fillStyle = edgeGradient;
+            ctx.beginPath();
+            ctx.moveTo(knifeX + 80, knifeY - 30);
+            ctx.lineTo(knifeX + 105, knifeY - 10);
+            ctx.lineTo(knifeX + 80, knifeY + 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            
+            if (pressureState.knife.active) {
+                const forceIntensity = pressureState.knife.force / pressureState.knife.maxForce;
+                ctx.shadowColor = '#E74C3C';
+                ctx.shadowBlur = 10 + forceIntensity * 15;
+                ctx.strokeStyle = '#E74C3C';
+                ctx.fillStyle = '#E74C3C';
+                ctx.lineWidth = 5 + forceIntensity * 5;
+                ctx.beginPath();
+                ctx.moveTo(knifeX - 50, knifeY - 80);
+                ctx.lineTo(knifeX - 50, knifeY - 55);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(420, 250, 30, 100);
+            
+            const gaugeFill = pressureState.knife.active ? 
+                pressureState.knife.force / pressureState.knife.maxForce : 
+                knifeCutProgress;
+            
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(422, 252 + (100 - gaugeFill * 96), 26, gaugeFill * 96);
+            
+            if (knifeCutProgress > 0.1 && knifeCutProgress < 0.9) {
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(knifeX, 255);
+                ctx.lineTo(knifeX, 325);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            drawNail();
+            drawPlough();
+            drawKnife();
+            frame++;
+            requestAnimationFrame(animate);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide === 1) applyPressure('nail');
+                else if (currentSlide === 2) applyPressure('plough');
+                else if (currentSlide === 3) applyPressure('knife');
+            }
+            if (e.key === 'r' || e.key === 'R') {
+                if (currentSlide === 1) resetNail();
+                else if (currentSlide === 2) resetPlough();
+                else if (currentSlide === 3) resetKnife();
+            }
+        });
+
+        // Touch swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        });
+
+        // Initialize
+        animate();
+        updateSlides();
+    </script>
+</body>
+</html>
