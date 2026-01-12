@@ -1,609 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demagnetization Lab</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demagnetization </title>
     <style>
-        :root {
-            --bg-color: #1e1e24;
-            --ui-bg: rgba(30, 30, 36, 0.95);
-            --accent: #ff0055;
-            --text: #ffffff;
-        }
+      :root {
+        --bg-color: #1e1e24;
+        --ui-bg: rgba(30, 30, 36, 0.95);
+        --accent: #ff0055;
+        --text: #ffffff;
+      }
 
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text);
-            user-select: none;
-        }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: var(--bg-color);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--text);
+        user-select: none;
+      }
 
-        #canvas-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at center, #2b2b36 0%, #000000 100%);
-        }
+      #canvas-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(circle at center, #2b2b36 0%, #000000 100%);
+      }
 
-        canvas {
-            display: block;
-            cursor: grab;
-        }
-        canvas:active { cursor: grabbing; }
+      canvas {
+        display: block;
+        cursor: grab;
+      }
+      canvas:active {
+        cursor: grabbing;
+      }
 
-        /* HUD - Moved to Top Right for cleaner layout */
-        #hud {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 280px;
-            pointer-events: none;
-            text-align: right;
-        }
+      /* HUD - Moved to Top Right for cleaner layout */
+      #hud {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 280px;
+        pointer-events: none;
+        text-align: right;
+      }
 
-        .panel {
-            background: var(--ui-bg);
-            padding: 15px;
-            border-right: 4px solid var(--accent); /* Border on right now */
-            border-radius: 4px;
-            margin-bottom: 10px;
-            display: inline-block;
-            text-align: left;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
+      .panel {
+        background: var(--ui-bg);
+        padding: 15px;
+        border-right: 4px solid var(--accent);
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: inline-block;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      }
 
-        h2 { margin: 0 0 5px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; }
-        p { margin: 5px 0; font-size: 13px; font-weight: bold; }
+      h2 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #aaa;
+      }
+      p {
+        margin: 5px 0;
+        font-size: 13px;
+        font-weight: bold;
+      }
 
-        /* Meter */
-        .meter-box {
-            background: #000;
-            height: 15px;
-            width: 200px;
-            border: 1px solid #555;
-            margin-top: 5px;
-            position: relative;
-            display: block;
-        }
-        .meter-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0055, #ff9900);
-            width: 100%;
-            transition: width 0.1s linear;
-        }
+      /* Meter */
+      .meter-box {
+        background: #000;
+        height: 15px;
+        width: 200px;
+        border: 1px solid #555;
+        margin-top: 5px;
+        position: relative;
+        display: block;
+      }
+      .meter-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff0055, #ff9900);
+        width: 100%;
+        transition: width 0.1s linear;
+      }
 
-        /* CONTROLS - Moved to LEFT SIDE Vertical Column */
-        #controls {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            pointer-events: auto;
-            z-index: 100;
-        }
+      /* CONTROLS - Moved to LEFT SIDE Vertical Column */
+      #controls {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        pointer-events: auto;
+        z-index: 100;
+      }
 
-        .tool-btn {
-            background: #2b2b36;
-            border: 1px solid #555;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
-            width: 200px;
-        }
+      .tool-btn {
+        background: #2b2b36;
+        border: 1px solid #555;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: inherit;
+        text-transform: uppercase;
+        font-weight: bold;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+        width: 200px;
+      }
 
-        .tool-btn:hover { 
-            background: #3a3a45; 
-            border-color: white; 
-            transform: translateX(5px);
-        }
-        
-        .tool-btn:active { transform: scale(0.98); }
-        .tool-btn.active { background: var(--accent); border-color: var(--accent); }
+      .tool-btn:hover {
+        background: #3a3a45;
+        border-color: white;
+        transform: translateX(5px);
+      }
 
-        /* Switch for Circuit - Bottom Right */
-        #circuit-switch {
-            position: absolute;
-            right: 40px;
-            bottom: 40px;
-            width: 60px;
-            height: 100px;
-            background: #333;
-            border: 2px solid #555;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        #circuit-switch.on { background: #004d00; border-color: #00ff00; }
-        .switch-lever {
-            width: 20px;
-            height: 60px;
-            background: #888;
-            border-radius: 2px;
-            transition: 0.3s;
-            transform: translateY(15px);
-        }
-        #circuit-switch.on .switch-lever { transform: translateY(-15px); background: #00ff00; box-shadow: 0 0 10px #00ff00; }
-        .switch-label { position: absolute; bottom: -25px; font-weight: bold; width: 100px; text-align: center; color: #aaa; pointer-events: none; font-size: 12px; }
+      .tool-btn:active {
+        transform: scale(0.98);
+      }
+      .tool-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
 
+      /* Switch for Circuit - Moved to LEFT CENTER UPPER */
+      #circuit-switch {
+        position: absolute;
+        left: 40px;
+        top: 40px;
+        width: 60px;
+        height: 100px;
+        background: #333;
+        border: 2px solid #555;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+      #circuit-switch.on {
+        background: #004d00;
+        border-color: #00ff00;
+      }
+      .switch-lever {
+        width: 20px;
+        height: 60px;
+        background: #888;
+        border-radius: 2px;
+        transition: 0.3s;
+        transform: translateY(15px);
+      }
+      #circuit-switch.on .switch-lever {
+        transform: translateY(-15px);
+        background: #00ff00;
+        box-shadow: 0 0 10px #00ff00;
+      }
+      .switch-label {
+        position: absolute;
+        bottom: -25px;
+        font-weight: bold;
+        width: 100px;
+        text-align: center;
+        color: #aaa;
+        pointer-events: none;
+        font-size: 12px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div id="canvas-container">
+      <canvas id="simCanvas"></canvas>
 
-<div id="canvas-container">
-    <canvas id="simCanvas"></canvas>
-
-    <div id="hud">
+      <div id="hud">
         <div class="panel">
-            <h2>Magnetic Strength</h2>
-            <div class="meter-box">
-                <div class="meter-fill" id="strength-meter"></div>
-            </div>
-            <p id="strength-val">100%</p>
+          <h2>Magnetic Strength</h2>
+          <div class="meter-box">
+            <div class="meter-fill" id="strength-meter"></div>
+          </div>
+          <p id="strength-val">100%</p>
         </div>
-        <br>
+        <br />
         <div class="panel">
-            <h2>Status Info</h2>
-            <p id="status-text">Select a tool from the left.</p>
+          <h2>Status Info</h2>
+          <p id="status-text">Select a tool from the left.</p>
         </div>
-    </div>
+      </div>
 
-    <div id="controls">
-        <button class="tool-btn" onclick="toggleTool('candle')" id="btn-candle">🔥 Heat (Candle)</button>
-        <button class="tool-btn" onclick="toggleTool('hammer')" id="btn-hammer">🔨 Hammer</button>
-        <button class="tool-btn" onclick="resetSim()" style="border-color: #4cd137;">🔄 Reset Lab</button>
-    </div>
+      <div id="controls">
+        <button class="tool-btn" onclick="toggleTool('candle')" id="btn-candle">
+          🔥 Heat (Candle)
+        </button>
+        <button class="tool-btn" onclick="toggleTool('hammer')" id="btn-hammer">
+          🔨 Hammer
+        </button>
+        <button
+          class="tool-btn"
+          onclick="toggleTool('coil')"
+          id="btn-coil"
+        >
+          ⚡ AC Coil
+        </button>
+        <button
+          class="tool-btn"
+          onclick="resetSim()"
+          style="border-color: #4cd137"
+        >
+          🔄 Reset Lab
+        </button>
+      </div>
 
-    <div id="circuit-switch" onclick="toggleCircuit()">
+      <div id="circuit-switch" onclick="toggleCircuitSwitch()">
         <div class="switch-lever"></div>
-        <div class="switch-label">AC COIL POWER</div>
+        <div class="switch-label">COIL POWER</div>
+      </div>
     </div>
-</div>
 
-<script>
-    const canvas = document.getElementById('simCanvas');
-    const ctx = canvas.getContext('2d');
-    const hudBar = document.getElementById('strength-meter');
-    const hudVal = document.getElementById('strength-val');
-    const statusText = document.getElementById('status-text');
-    const switchEl = document.getElementById('circuit-switch');
-
-    // --- State Variables ---
-    let width, height;
-    let draggingItem = null;
-    let dragOffset = { x: 0, y: 0 };
-    let lastMousePos = { x: 0, y: 0 };
-    let mouseVelocity = 0;
-    let time = 0; // For floating animation
-
-    // --- Physics Objects ---
-    
-    // 1. The Magnet
-    const magnet = {
-        x: 0, y: 0, w: 200, h: 50,
-        strength: 100, 
-        temp: 0,       
-        colorN: '#e74c3c',
-        colorS: '#2980b9',
-        isDragging: false,
-        update: function() {
-            if (this.strength > 0) this.strength -= 0.005; // Natural decay
-            if (this.temp > 0) this.temp -= 0.1;
-            this.strength = Math.max(0, Math.min(100, this.strength));
-            
-            hudBar.style.width = this.strength + "%";
-            hudVal.innerText = Math.floor(this.strength) + "%";
-        },
-        draw: function(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-
-            if (this.temp > 10) {
-                ctx.shadowBlur = this.temp;
-                ctx.shadowColor = `rgba(255, 100, 50, ${this.temp/100})`;
-            }
-
-            ctx.fillStyle = this.colorS;
-            ctx.fillRect(-this.w/2, -this.h/2, this.w/2, this.h);
-            ctx.fillStyle = this.colorN;
-            ctx.fillRect(0, -this.h/2, this.w/2, this.h);
-            
-            ctx.fillStyle = "#fff";
-            ctx.font = "bold 24px Arial";
-            ctx.fillText("S", -this.w/4 - 10, 8);
-            ctx.fillText("N", this.w/4 - 10, 8);
-            ctx.restore();
-        }
-    };
-
-    // 2. The Coil
-    const coil = {
-        x: 0, y: 0, w: 250, h: 120,
-        active: false,
-        drawBack: function(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.strokeStyle = '#cd7f32'; 
-            ctx.lineWidth = 4;
-            for(let i = -this.w/2; i < this.w/2; i+=15) {
-                ctx.beginPath();
-                ctx.arc(i, 0, 50, Math.PI, 0); 
-                ctx.stroke();
-            }
-            ctx.fillStyle = '#444';
-            ctx.fillRect(-this.w/2 - 10, 50, this.w + 20, 20);
-            ctx.restore();
-        },
-        drawFront: function(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.strokeStyle = this.active ? '#ffff00' : '#b87333';
-            if(this.active) ctx.shadowBlur = 10;
-            if(this.active) ctx.shadowColor = 'yellow';
-            
-            ctx.lineWidth = 4;
-            for(let i = -this.w/2; i < this.w/2; i+=15) {
-                ctx.beginPath();
-                ctx.arc(i, 0, 50, 0, Math.PI); 
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-    };
-
-    // 3. The Candle
-    const candle = {
-        x: 100, y: 100, w: 30, h: 80,
-        visible: false,
-        isDragging: false,
-        draw: function(ctx) {
-            if(!this.visible) return;
-            ctx.save();
-            
-            // Floating Effect when not dragging
-            let floatY = 0;
-            if(!this.isDragging) floatY = Math.sin(time * 0.05) * 10;
-
-            ctx.translate(this.x, this.y + floatY);
-            
-            // Wax
-            ctx.fillStyle = '#f5f5f5';
-            ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-            // Wick
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-1, -this.h/2 - 5, 2, 5);
-            // Flame
-            const flicker = Math.random() * 5;
-            ctx.fillStyle = 'rgba(255, 165, 0, 0.8)';
-            ctx.beginPath();
-            ctx.ellipse(0, -this.h/2 - 20, 10 + flicker/2, 20 + flicker, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
-            ctx.beginPath();
-            ctx.ellipse(0, -this.h/2 - 15, 5, 10, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.restore();
-        }
-    };
-
-    // 4. The Hammer
-    const hammer = {
-        x: 200, y: 100, w: 60, h: 60,
-        visible: false,
-        isDragging: false,
-        angle: 0,
-        draw: function(ctx) {
-            if(!this.visible) return;
-            ctx.save();
-
-            // Floating Effect when not dragging
-            let floatY = 0;
-            if(!this.isDragging) floatY = Math.sin(time * 0.05) * 10;
-
-            ctx.translate(this.x, this.y + floatY);
-            
-            let swing = Math.min(Math.max(mouseVelocity * 2, -1), 1);
-            ctx.rotate(this.angle + swing);
-
-            ctx.fillStyle = '#8e44ad';
-            ctx.fillRect(-5, -50, 10, 100);
-            ctx.fillStyle = '#95a5a6';
-            ctx.fillRect(-20, -60, 40, 30);
-            
-            ctx.restore();
-        }
-    };
-
-    // 5. Metal Nails
-    let nails = [];
-    class Nail {
-        constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = 0; this.vy = 0;
-            this.angle = Math.random() * 6.28;
-            this.w = 30; this.h = 4;
-            this.stuck = false; 
-            this.stuckOffset = {x:0, y:0};
-        }
-        
-        update() {
-            if (this.stuck) {
-                if(magnet.strength < 10) {
-                    this.stuck = false; 
-                } else {
-                    this.x = magnet.x + this.stuckOffset.x;
-                    this.y = magnet.y + this.stuckOffset.y;
-                    this.vx = 0; this.vy = 0;
-                    return;
-                }
-            }
-
-            if (magnet.strength > 0) {
-                const dx = magnet.x - this.x;
-                const dy = magnet.y - this.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist < 400) {
-                    const force = (magnet.strength / 100) * (2000 / (dist * dist + 100));
-                    this.vx += (dx / dist) * force;
-                    this.vy += (dy / dist) * force;
-                    
-                    const targetAngle = Math.atan2(dy, dx);
-                    this.angle += (targetAngle - this.angle) * 0.1;
-                }
-            }
-
-            this.vx *= 0.92;
-            this.vy *= 0.92;
-
-            if (magnet.strength < 20 || !this.stuck) {
-                const dist = Math.hypot(magnet.x - this.x, magnet.y - this.y);
-                if (dist > 50 || magnet.strength < 20) {
-                     this.vy += 0.2; // Gravity
-                }
-            }
-
-            this.x += this.vx;
-            this.y += this.vy;
-
-            if (this.y > height - 20) {
-                this.y = height - 20;
-                this.vy *= -0.5;
-                this.vx *= 0.8;
-            }
-
-            if (magnet.strength > 10 && !this.stuck) {
-                if (Math.abs(this.x - magnet.x) < magnet.w/2 && Math.abs(this.y - magnet.y) < magnet.h/2) {
-                    this.stuck = true;
-                    this.stuckOffset.x = this.x - magnet.x;
-                    this.stuckOffset.y = this.y - magnet.y;
-                }
-            }
-        }
-
-        draw(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle);
-            ctx.fillStyle = '#bdc3c7';
-            ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-            ctx.fillStyle = '#7f8c8d'; 
-            ctx.fillRect(-this.w/2, -this.h, 4, this.h*2);
-            ctx.restore();
-        }
-    }
-
-    // --- Core Functions ---
-
-    function init() {
-        resize();
-        window.addEventListener('resize', resize);
-        resetSim();
-        loop();
-    }
-
-    function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-        coil.x = width - 150;
-        coil.y = height - 100;
-    }
-
-    function resetSim() {
-        magnet.strength = 100;
-        magnet.temp = 0;
-        magnet.x = width/2;
-        magnet.y = height/2;
-        magnet.isDragging = false;
-        
-        candle.visible = false;
-        hammer.visible = false;
-        coil.active = false;
-        switchEl.classList.remove('on');
-        
-        // Reset buttons CSS
-        document.getElementById('btn-candle').classList.remove('active');
-        document.getElementById('btn-hammer').classList.remove('active');
-
-        draggingItem = null;
-        nails = [];
-        // Spawn nails floating in air initially
-        for(let i=0; i<30; i++) {
-            nails.push(new Nail());
-        }
-        statusText.innerText = "Simulation Reset. Ready.";
-    }
-
-    function toggleTool(tool) {
-        if(tool === 'candle') {
-            candle.visible = !candle.visible;
-            // Spawn Floating in Air (left side of magnet)
-            candle.x = width/2 - 200; 
-            candle.y = height/2;
-            
-            document.getElementById('btn-candle').classList.toggle('active');
-            statusText.innerText = candle.visible ? "Candle spawned. Drag it under the magnet." : "Candle removed.";
-        }
-        if(tool === 'hammer') {
-            hammer.visible = !hammer.visible;
-            // Spawn Floating in Air (right side of magnet)
-            hammer.x = width/2 + 200; 
-            hammer.y = height/2;
-
-            document.getElementById('btn-hammer').classList.toggle('active');
-            statusText.innerText = hammer.visible ? "Hammer spawned. Drag fast to hit!" : "Hammer removed.";
-        }
-    }
-
-    function toggleCircuit() {
-        coil.active = !coil.active;
-        if(coil.active) {
-            switchEl.classList.add('on');
-            statusText.innerText = "AC Power ON. Place magnet in coil.";
-        } else {
-            switchEl.classList.remove('on');
-            statusText.innerText = "AC Power OFF.";
-        }
-    }
-
-    // --- Interaction Logic ---
-
-    function getMousePos(evt) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
-    }
-
-    function checkHit(obj, mx, my) {
-        let hitSize = 50;
-        if (obj === magnet) {
-            return mx > obj.x - obj.w/2 && mx < obj.x + obj.w/2 &&
-                   my > obj.y - obj.h/2 && my < obj.y + obj.h/2;
-        } else {
-            // Adjust hit check for floating offset
-            let currentY = obj.y;
-            if(!obj.isDragging) currentY += Math.sin(time * 0.05) * 10;
-            return mx > obj.x - hitSize && mx < obj.x + hitSize &&
-                   my > currentY - hitSize && my < currentY + hitSize;
-        }
-    }
-
-    canvas.addEventListener('mousedown', (e) => {
-        const pos = getMousePos(e);
-        
-        if (candle.visible && checkHit(candle, pos.x, pos.y)) draggingItem = candle;
-        else if (hammer.visible && checkHit(hammer, pos.x, pos.y)) draggingItem = hammer;
-        else if (checkHit(magnet, pos.x, pos.y)) draggingItem = magnet;
-
-        if (draggingItem) {
-            draggingItem.isDragging = true;
-            // Fix offset calculation to prevent jumping
-            let currentY = draggingItem.y;
-            if (draggingItem !== magnet) currentY += Math.sin(time * 0.05) * 10;
-            
-            dragOffset.x = pos.x - draggingItem.x;
-            dragOffset.y = pos.y - currentY;
-        }
-    });
-
-    window.addEventListener('mouseup', () => {
-        if (draggingItem) draggingItem.isDragging = false;
-        draggingItem = null;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        const pos = getMousePos(e);
-        const dx = pos.x - lastMousePos.x;
-        const dy = pos.y - lastMousePos.y;
-        mouseVelocity = Math.sqrt(dx*dx + dy*dy);
-        lastMousePos = pos;
-
-        if (draggingItem) {
-            draggingItem.x = pos.x - dragOffset.x;
-            draggingItem.y = pos.y - dragOffset.y;
-        }
-    });
-
-    // --- Simulation Loop ---
-
-    function updateLogic() {
-        time++;
-        magnet.update();
-        nails.forEach(n => n.update());
-
-        if (candle.visible) {
-            let candleY = candle.y + (candle.isDragging ? 0 : Math.sin(time * 0.05) * 10);
-            const dist = Math.hypot(candle.x - magnet.x, (candleY - 40) - magnet.y);
-            if (dist < 80) {
-                magnet.temp += 0.8;
-                magnet.strength -= 0.3;
-                statusText.innerText = "Heating... Domains randomizing.";
-            }
-        }
-
-        if (hammer.visible && draggingItem === hammer) {
-            const dist = Math.hypot(hammer.x - magnet.x, hammer.y - magnet.y);
-            if (dist < 80 && mouseVelocity > 15) {
-                magnet.strength -= 5;
-                statusText.innerText = "IMPACT! Disorienting domains!";
-                magnet.x += (Math.random()-0.5)*10;
-                magnet.y += (Math.random()-0.5)*10;
-            }
-        }
-
-        if (coil.active) {
-            const dist = Math.hypot(coil.x - magnet.x, coil.y - magnet.y);
-            if (dist < 80) {
-                magnet.strength -= 1.0;
-                statusText.innerText = "AC Field active!";
-                magnet.x += (Math.random()-0.5)*5;
-                magnet.y += (Math.random()-0.5)*5;
-            }
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, width, height);
-        coil.drawBack(ctx);
-        nails.forEach(n => n.draw(ctx));
-        magnet.draw(ctx);
-        coil.drawFront(ctx);
-        candle.draw(ctx);
-        hammer.draw(ctx);
-    }
-
-    function loop() {
-        updateLogic();
-        draw();
-        requestAnimationFrame(loop);
-    }
-
-    init();
-
-</script>
-</body>
+    <script src="index.js">
+      
+    </script>
+  </body>
 </html>

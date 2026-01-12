@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Wire Information - 2 Pictures</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e6ef;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.8rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .tagline {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        
+        .wire-icon {
+            color: #f1c40f;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .wire-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.3rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            min-width: 220px;
+        }
+        
+        .wire-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .wire-btn:active {
+            transform: translateY(0);
+        }
+        
+        .wire-btn.neutral {
+            background-color: #2ecc71;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .wire-btn.neutral:hover {
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        .wire-btn.earth {
+            background-color: #e74c3c;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .wire-btn.earth:hover {
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+        
+        .info-display {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: none;
+            animation: fadeIn 0.5s ease;
+            border-left: 6px solid #3498db;
+        }
+        
+        .info-display.active {
+            display: block;
+        }
+        
+        .info-display.neutral {
+            border-left-color: #2ecc71;
+        }
+        
+        .info-display.earth {
+            border-left-color: #e74c3c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .wire-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .wire-description {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .two-picture-container {
+            max-width: 900px;
+            margin: 30px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .picture-frame {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            background-color: white;
+        }
+        
+        .picture-frame:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .picture-frame img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .neutral-picture img {
+            border-bottom-color: #2ecc71;
+        }
+        
+        .earth-picture img {
+            border-bottom-color: #e74c3c;
+        }
+        
+        .picture-caption {
+            padding: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #444;
+            font-size: 1.1rem;
+            background-color: #f8f9fa;
+        }
+        
+        .picture-number {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .neutral-picture .picture-number {
+            background-color: #2ecc71;
+        }
+        
+        .earth-picture .picture-number {
+            background-color: #e74c3c;
+        }
+        
+        .color-code {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .color-sample {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            transition: transform 0.3s ease;
+        }
+        
+        .color-sample:hover {
+            transform: scale(1.3);
+        }
+        
+        .neutral-color {
+            background-color: #2ecc71;
+        }
+        
+        .earth-color {
+            background-color: #e74c3c;
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 1.05rem;
+        }
+        
+        .picture-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .picture-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .picture-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .neutral-picture-btn {
+            background-color: #2ecc71;
+        }
+        
+        .neutral-picture-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .earth-picture-btn {
+            background-color: #e74c3c;
+        }
+        
+        .earth-picture-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .current-picture-indicator {
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .wire-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .two-picture-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .picture-frame {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .picture-frame img {
+                height: 200px;
+            }
+            
+            .picture-caption {
+                padding: 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="wire-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <h1>Electrical Wire Information</h1>
+           
+        </header>
+        
+        <div class="content">
+            <div class="button-container">
+                <button class="wire-btn neutral" id="neutralBtn">
+                    <i class="fas fa-minus-circle btn-icon"></i>
+                    Show Neutral Wire
+                </button>
+                
+                <button class="wire-btn earth" id="earthBtn">
+                    <i class="fas fa-shield-alt btn-icon"></i>
+                    Show Earth Wire
+                </button>
+            </div>
+            
+            <div class="instructions">
+                
+               
+            </div>
+            
+            <div class="info-display" id="neutralInfo">
+                <h2 class="wire-title">
+                    <i class="fas fa-minus-circle"></i>
+                    Neutral Wire
+                </h2>
+                
+                <p class="wire-description">
+                    The neutral wire is a current-carrying conductor that completes the electrical circuit by providing a return path for current back to the power source. In electrical systems, it's typically connected to ground at the main electrical panel. The neutral wire is essential for the operation of most AC electrical circuits and helps balance the electrical load in a system.
+                </p>
+                
+                <div class="color-code">
+                    <div class="color-sample neutral-color"></div>
+                    <div>Neutral wires are typically identified by <strong>blue</strong> insulation in Europe and <strong>white or gray</strong> insulation in North America.</div>
+                </div>
+                
+                <!-- Two Picture Display for Neutral Wire -->
+                <div class="two-picture-container" id="neutralPictures"></div>
+                
+                <div class="current-picture-indicator" id="neutralIndicator">
+                    Showing picture 1 of 2
+                </div>
+                
+                <div class="picture-controls">
+                    <button class="picture-btn neutral-picture-btn" id="neutralPrevBtn">
+                        <i class="fas fa-chevron-left"></i> Previous Picture
+                    </button>
+                    <button class="picture-btn neutral-picture-btn" id="neutralNextBtn">
+                        Next Picture <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-display" id="earthInfo">
+                <h2 class="wire-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Earth Wire (Ground Wire)
+                </h2>
+                
+                <p class="wire-description">
+                    The earth wire (also called ground wire) is a safety conductor that provides a path for electrical current to flow to the ground in case of a fault. It protects people from electric shock by ensuring that any exposed conductive parts do not reach a dangerous voltage. The earth wire connects electrical equipment to the earth electrode buried in the ground.
+                </p>
+                
+                <div class="color-code">
+                    <div class="color-sample earth-color"></div>
+                    <div>Earth wires are typically identified by <strong>green with yellow stripe</strong> insulation internationally, or <strong>bare copper</strong> in some applications.</div>
+                </div>
+                
+                <!-- Two Picture Display for Earth Wire -->
+                <div class="two-picture-container" id="earthPictures"></div>
+                
+                <div class="current-picture-indicator" id="earthIndicator">
+                    Showing picture 1 of 2
+                </div>
+                
+                <div class="picture-controls">
+                    <button class="picture-btn earth-picture-btn" id="earthPrevBtn">
+                        <i class="fas fa-chevron-left"></i> Previous Picture
+                    </button>
+                    <button class="picture-btn earth-picture-btn" id="earthNextBtn">
+                        Next Picture <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Image data - Exactly 2 pictures per wire type
+        const wireImages = {
+            neutral: [
+                {
+                    url: "neuramire.webp",
+                    caption: "Neutral wires in an electrical panel (typically white)"
+                },
+                {
+                    url: "neuraa.webp",
+                    caption: "Neutral wire within an electrical cable"
+                }
+            ],
+            earth: [
+                {
+                    url: "ground.webp",
+                    caption: "Earth wire connection to grounding rod"
+                },
+                {
+                    url: "gw.webp",
+                    caption: "Earth wire in a three-pin electrical plug"
+                }
+            ]
+        };
+
+        // Get references to DOM elements
+        const neutralBtn = document.getElementById('neutralBtn');
+        const earthBtn = document.getElementById('earthBtn');
+        const neutralInfo = document.getElementById('neutralInfo');
+        const earthInfo = document.getElementById('earthInfo');
+        
+        // Picture containers
+        const neutralPictures = document.getElementById('neutralPictures');
+        const earthPictures = document.getElementById('earthPictures');
+        
+        // Navigation buttons
+        const neutralPrevBtn = document.getElementById('neutralPrevBtn');
+        const neutralNextBtn = document.getElementById('neutralNextBtn');
+        const earthPrevBtn = document.getElementById('earthPrevBtn');
+        const earthNextBtn = document.getElementById('earthNextBtn');
+        
+        // Indicators
+        const neutralIndicator = document.getElementById('neutralIndicator');
+        const earthIndicator = document.getElementById('earthIndicator');
+        
+        // Current picture state
+        let currentPicture = {
+            neutral: 0,
+            earth: 0
+        };
+        
+        // Function to create picture display (showing exactly 2 pictures)
+        function createPictureDisplay(container, images, type) {
+            // Clear existing content
+            container.innerHTML = '';
+            
+            // Create picture frames for exactly 2 pictures
+            images.forEach((image, index) => {
+                const pictureFrame = document.createElement('div');
+                pictureFrame.className = `picture-frame ${type}-picture`;
+                pictureFrame.dataset.index = index;
+                
+                // Picture number
+                const pictureNumber = document.createElement('div');
+                pictureNumber.className = 'picture-number';
+                pictureNumber.textContent = index + 1;
+                
+                // Image
+                const img = document.createElement('img');
+                img.src = image.url;
+                img.alt = image.caption;
+                img.loading = "lazy";
+                
+                // Caption
+                const caption = document.createElement('div');
+                caption.className = 'picture-caption';
+                caption.innerHTML = `<span class="picture-number">${index + 1}</span> ${image.caption}`;
+                
+                // Assemble picture frame
+                pictureFrame.appendChild(img);
+                pictureFrame.appendChild(caption);
+                container.appendChild(pictureFrame);
+            });
+            
+            // Initialize display
+            updatePictureDisplay(type);
+        }
+        
+        // Function to update which picture is currently visible
+        function updatePictureDisplay(type) {
+            const container = document.getElementById(`${type}Pictures`);
+            const pictures = container.querySelectorAll('.picture-frame');
+            const indicator = document.getElementById(`${type}Indicator`);
+            
+            // Hide all pictures
+            pictures.forEach(picture => {
+                picture.style.display = 'none';
+                picture.style.opacity = '0';
+                picture.style.transform = 'translateY(20px)';
+            });
+            
+            // Show only the current picture
+            const currentIndex = currentPicture[type];
+            if (pictures[currentIndex]) {
+                pictures[currentIndex].style.display = 'block';
+                // Add fade-in animation
+                setTimeout(() => {
+                    pictures[currentIndex].style.opacity = '1';
+                    pictures[currentIndex].style.transform = 'translateY(0)';
+                    pictures[currentIndex].style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                }, 50);
+            }
+            
+            // Update indicator text
+            if (indicator) {
+                indicator.textContent = `Showing picture ${currentIndex + 1} of ${pictures.length}`;
+            }
+            
+            // Update button states
+            updateButtonStates(type);
+        }
+        
+        // Function to update button states (enable/disable)
+        function updateButtonStates(type) {
+            const images = wireImages[type];
+            const prevBtn = document.getElementById(`${type}PrevBtn`);
+            const nextBtn = document.getElementById(`${type}NextBtn`);
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentPicture[type] === 0;
+                prevBtn.style.opacity = currentPicture[type] === 0 ? '0.5' : '1';
+                prevBtn.style.cursor = currentPicture[type] === 0 ? 'not-allowed' : 'pointer';
+            }
+            
+            if (nextBtn) {
+                nextBtn.disabled = currentPicture[type] === images.length - 1;
+                nextBtn.style.opacity = currentPicture[type] === images.length - 1 ? '0.5' : '1';
+                nextBtn.style.cursor = currentPicture[type] === images.length - 1 ? 'not-allowed' : 'pointer';
+            }
+        }
+        
+        // Function to show next picture
+        function showNextPicture(type) {
+            const images = wireImages[type];
+            if (currentPicture[type] < images.length - 1) {
+                currentPicture[type]++;
+                updatePictureDisplay(type);
+            }
+        }
+        
+        // Function to show previous picture
+        function showPreviousPicture(type) {
+            if (currentPicture[type] > 0) {
+                currentPicture[type]--;
+                updatePictureDisplay(type);
+            }
+        }
+        
+        // Function to go to specific picture
+        function goToPicture(type, index) {
+            const images = wireImages[type];
+            if (index >= 0 && index < images.length) {
+                currentPicture[type] = index;
+                updatePictureDisplay(type);
+            }
+        }
+        
+        // Initialize picture displays
+        createPictureDisplay(neutralPictures, wireImages.neutral, 'neutral');
+        createPictureDisplay(earthPictures, wireImages.earth, 'earth');
+        
+        // Initially show neutral wire information
+        neutralInfo.classList.add('active');
+        
+        // Function to hide all info displays
+        function hideAllDisplays() {
+            neutralInfo.classList.remove('active');
+            earthInfo.classList.remove('active');
+        }
+        
+        // Add event listeners to buttons
+        neutralBtn.addEventListener('click', function() {
+            hideAllDisplays();
+            neutralInfo.classList.add('active');
+            updatePictureDisplay('neutral');
+            
+            // Add visual feedback for the button click
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+        
+        earthBtn.addEventListener('click', function() {
+            hideAllDisplays();
+            earthInfo.classList.add('active');
+            updatePictureDisplay('earth');
+            
+            // Add visual feedback for the button click
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+        
+        // Add navigation event listeners
+        neutralPrevBtn.addEventListener('click', () => showPreviousPicture('neutral'));
+        neutralNextBtn.addEventListener('click', () => showNextPicture('neutral'));
+        earthPrevBtn.addEventListener('click', () => showPreviousPicture('earth'));
+        earthNextBtn.addEventListener('click', () => showNextPicture('earth'));
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            // Switch between wire types
+            if (event.key === '1' || event.key === 'n') {
+                hideAllDisplays();
+                neutralInfo.classList.add('active');
+                updatePictureDisplay('neutral');
+                neutralBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    neutralBtn.style.transform = '';
+                }, 150);
+            } else if (event.key === '2' || event.key === 'e') {
+                hideAllDisplays();
+                earthInfo.classList.add('active');
+                updatePictureDisplay('earth');
+                earthBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    earthBtn.style.transform = '';
+                }, 150);
+            }
+            
+            // Navigate pictures with arrow keys
+            const activeDisplay = document.querySelector('.info-display.active');
+            if (activeDisplay) {
+                const type = activeDisplay.id.includes('neutral') ? 'neutral' : 'earth';
+                
+                if (event.key === 'ArrowLeft') {
+                    showPreviousPicture(type);
+                    event.preventDefault();
+                } else if (event.key === 'ArrowRight') {
+                    showNextPicture(type);
+                    event.preventDefault();
+                } else if (event.key >= '1' && event.key <= '2') {
+                    // Number keys 1-2 to go directly to specific picture
+                    const pictureIndex = parseInt(event.key) - 1;
+                    goToPicture(type, pictureIndex);
+                }
+            }
+        });
+        
+        // Add click event to picture frames to navigate
+        function addPictureFrameClickEvents() {
+            document.querySelectorAll('.picture-frame').forEach(frame => {
+                frame.addEventListener('click', function() {
+                    const container = this.closest('.two-picture-container');
+                    const type = container.id.includes('neutral') ? 'neutral' : 'earth';
+                    const index = parseInt(this.dataset.index);
+                    goToPicture(type, index);
+                });
+            });
+        }
+        
+        // Initialize click events on picture frames
+        setTimeout(addPictureFrameClickEvents, 100);
+        
+        // Add a simple interactive feature: change wire color on hover
+        const colorSamples = document.querySelectorAll('.color-sample');
+        colorSamples.forEach(sample => {
+            sample.addEventListener('mouseover', function() {
+                this.style.transform = 'scale(1.3)';
+            });
+            
+            sample.addEventListener('mouseout', function() {
+                this.style.transform = 'scale(1)';
+            });
+            
+            // Click to switch to that wire type
+            sample.addEventListener('click', function() {
+                const isNeutral = this.classList.contains('neutral-color');
+                hideAllDisplays();
+                
+                if (isNeutral) {
+                    neutralInfo.classList.add('active');
+                    updatePictureDisplay('neutral');
+                    neutralBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        neutralBtn.style.transform = '';
+                    }, 150);
+                } else {
+                    earthInfo.classList.add('active');
+                    updatePictureDisplay('earth');
+                    earthBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        earthBtn.style.transform = '';
+                    }, 150);
+                }
+            });
+        });
+        
+        // Add hover effect to picture buttons
+        document.querySelectorAll('.picture-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                if (!this.disabled) {
+                    this.style.transform = 'translateY(-2px)';
+                }
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

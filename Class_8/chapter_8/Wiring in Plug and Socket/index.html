@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wiring in Plug and Socket</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      body {
+        background-color: #f0f7ff;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      /* Top Section - Definitions */
+      .definition-section {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+      }
+
+      .definition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+      }
+
+      .definition-card {
+        background: #e6f2ff;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #4a90e2;
+      }
+
+      .definition-card h3 {
+        color: #1e3c72;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+      }
+
+      /* Center Section - Image */
+      .image-section {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .image-container {
+        width: 100%;
+        max-width: 800px;
+        height: 400px;
+        margin: 20px auto;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .main-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        background: #f5f5f5;
+        display: block;
+        margin: 0 auto;
+        transition: transform 0.3s ease;
+      }
+
+      .main-image:hover {
+        transform: scale(1.02);
+      }
+
+      .image-title {
+        background: linear-gradient(to right, #1e3c72, #2a5298);
+        color: white;
+        padding: 18px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .image-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        margin: 25px 0;
+      }
+
+      .nav-btn {
+        padding: 14px 30px;
+        background: linear-gradient(to right, #4a90e2, #2a5298);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+      }
+
+      .nav-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
+      }
+
+      .nav-btn:active {
+        transform: translateY(-1px);
+      }
+
+      .image-counter {
+        font-size: 1.2rem;
+        color: #1e3c72;
+        font-weight: 600;
+        background: #e6f2ff;
+        padding: 10px 25px;
+        border-radius: 25px;
+        min-width: 150px;
+        text-align: center;
+      }
+
+      .image-info {
+        background-color: #f9f9f9;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #4a90e2;
+        max-width: 800px;
+        margin: 20px auto 0;
+        text-align: left;
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+
+      /* Bottom Section - Steps */
+      .steps-section {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+      }
+
+      .step-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        border: 2px solid #e6f2ff;
+        transition: transform 0.3s ease;
+      }
+
+      .step-card:hover {
+        transform: translateY(-5px);
+        border-color: #4a90e2;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .step-number {
+        display: inline-block;
+        background: #1e3c72;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .step-card h3 {
+        color: #1e3c72;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        padding: 25px;
+        color: #666;
+        font-size: 1rem;
+        border-top: 2px solid #e6f2ff;
+      }
+
+      .warning-note {
+        background-color: #fff0f0;
+        color: #d32f2f;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border-left: 5px solid #ff4444;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        .definition-grid,
+        .steps-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .image-container {
+          height: 300px;
+        }
+
+        .image-nav {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .nav-btn {
+          width: 100%;
+          max-width: 300px;
+          justify-content: center;
+        }
+
+        .image-counter {
+          order: -1;
+        }
+
+        header,
+        .definition-section,
+        .image-section,
+        .steps-section {
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .image-container {
+          height: 250px;
+        }
+
+        .nav-btn {
+          padding: 12px 20px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Wiring in Plug and Socket</h1>
+        <p class="subtitle"></p>
+      </header>
+
+      <!-- Top Section: Definitions -->
+      <section class="definition-section">
+        <h2 style="color: #1e3c72; margin-bottom: 20px; text-align: center">
+          What is Electrical Wiring?
+        </h2>
+        <p style="text-align: center; font-size: 1.2rem; margin-bottom: 30px">
+          Electrical wiring connects plugs to sockets so electricity can power
+          devices safely and efficiently.
+        </p>
+
+        <div class="definition-grid">
+          <div class="definition-card">
+            <h3>Three Important Wires</h3>
+            <p>
+              <strong style="color: brown">Brown Wire (Live)</strong> - Brings
+              electricity from power source to the device
+            </p>
+            <p>
+              <strong style="color: blue">Blue Wire (Neutral)</strong> - Returns
+              electricity back to the source
+            </p>
+            <p>
+              <strong style="color: green">Green/Yellow Wire (Earth)</strong> -
+              Safety wire that prevents electric shocks
+            </p>
+          </div>
+
+          <div class="definition-card">
+            <h3>⚠️ Safety Rules</h3>
+            <p>• Never touch electrical wires with wet hands</p>
+            <p>• Always turn off main power before working</p>
+            <p>• Use proper insulated tools only</p>
+            <p>• Ask an adult or electrician for help</p>
+            <p>• Check all connections twice</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Section: Image Display -->
+      <section class="image-section">
+        <h2 style="color: #1e3c72; margin-bottom: 20px">Wiring Examples</h2>
+        <p style="text-align: center; margin-bottom: 20px; font-size: 1.1rem">
+          Use the buttons below to view different wiring examples
+        </p>
+
+        <!-- Image Counter -->
+        <div class="image-counter" id="imageCounter">Image 1 of 3</div>
+
+        <!-- Main Image Display -->
+        <div class="image-container">
+          <img class="main-image" id="mainImage" src="" alt="Wiring Image" />
+          <div class="image-title" id="imageTitle"></div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="image-nav">
+          <button class="nav-btn" id="prevBtn">
+            <span style="font-size: 1.3rem">←</span> Previous
+          </button>
+          <button class="nav-btn" id="nextBtn">
+            Next <span style="font-size: 1.3rem">→</span>
+          </button>
+        </div>
+
+        <!-- Image Information -->
+        <div class="image-info" id="imageInfo">
+          <!-- Info will be added by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Bottom Section: Steps -->
+      <section class="steps-section">
+        <h2 style="color: #1e3c72; margin-bottom: 20px; text-align: center">
+          Basic Wiring Steps
+        </h2>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Switch Off Power</h3>
+            <p>
+              Always turn off the main power supply before starting any
+              electrical work.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Strip Wires</h3>
+            <p>
+              Carefully strip about 1 cm of insulation from each wire using wire
+              strippers.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>Connect Properly</h3>
+            <p>
+              Connect brown wire to right terminal, blue to left, green/yellow
+              to top terminal.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h3>Tighten Screws</h3>
+            <p>
+              Secure all connections by tightening screws properly with a
+              screwdriver.
+            </p>
+          </div>
+        </div>
+
+        <div class="warning-note">
+          ⚠️ Important: This is for educational purposes only. Always consult a
+          qualified electrician for actual electrical work.
+        </div>
+      </section>
+
+      <footer>
+        <!-- <p>Educational Tool for 8th Class Students | Electrical Safety First</p>
+            <p style="margin-top: 10px;">Use arrow keys (← →) to navigate images | Made for easy learning</p> -->
+      </footer>
+    </div>
+
+    <script>
+      // Image data with actual wiring images
+      const images = [
+        {
+          title: "3-Pin Plug Wiring",
+          info: "This shows a correctly wired plug. Brown wire (live) connected to right terminal, blue wire (neutral) to left terminal, and green/yellow wire (earth) to top terminal. All connections are secure and properly insulated.",
+          url: "./three.webp",
+          fallbackColor: "#1e3c72",
+        },
+        {
+          title: "Wall Socket Internal Wiring",
+          info: "Inside view of a wall socket showing proper wiring connections. The wires from main supply are connected to socket terminals. Earth wire provides safety path to ground in case of faults.",
+          url: "./wall-socket.webp",
+          fallbackColor: "#2a5298",
+        },
+        {
+          title: "Essential Electrical Tools",
+          info: "Basic tools needed for safe wiring: Insulated screwdriver, wire stripper, pliers with insulated handles, and electrical tape. Always use tools with proper insulation for safety.",
+          url: "./tools.webp",
+          fallbackColor: "#4a90e2",
+        },
+      ];
+
+      let currentImage = 0;
+
+      // Initialize the page
+      function initPage() {
+        // Show first image
+        showImage(0);
+      }
+
+      // Show specific image
+      function showImage(index) {
+        currentImage = index;
+        const image = images[currentImage];
+
+        // Update counter
+        document.getElementById("imageCounter").textContent = `Image ${
+          currentImage + 1
+        } of ${images.length}`;
+
+        // Get main image element
+        const mainImage = document.getElementById("mainImage");
+
+        // Set the actual image URL
+        mainImage.src = image.url;
+        mainImage.alt = image.title;
+
+        // Add error handling for image loading
+        mainImage.onerror = function () {
+          // If image fails to load, create a colored SVG placeholder
+          this.onerror = null;
+          this.src = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+            `<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="grad${currentImage}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:${
+                                  image.fallbackColor
+                                };stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#000000;stop-opacity:0.7" />
+                            </linearGradient>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grad${currentImage})"/>
+                        <rect x="10%" y="10%" width="80%" height="80%" rx="10" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="2"/>
+                        <text x="50%" y="35%" font-family="Arial" font-size="32" fill="white" text-anchor="middle" font-weight="bold">${
+                          image.title
+                        }</text>
+                        <text x="50%" y="45%" font-family="Arial" font-size="18" fill="white" text-anchor="middle">Educational Image ${
+                          currentImage + 1
+                        }</text>
+                        <text x="50%" y="60%" font-family="Arial" font-size="16" fill="white" text-anchor="middle" style="font-style:italic;">Image loading failed - showing placeholder</text>
+                        <circle cx="50%" cy="75%" r="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="2"/>
+                        <text x="50%" y="76%" font-family="Arial" font-size="24" fill="white" text-anchor="middle">${
+                          currentImage + 1
+                        }</text>
+                    </svg>`
+          )}`;
+        };
+
+        // Update title
+        document.getElementById("imageTitle").textContent = image.title;
+
+        // Update info
+        document.getElementById("imageInfo").innerHTML = `
+                <strong style="color: #1e3c72;">${image.title}:</strong><br>
+                ${image.info}
+            `;
+      }
+
+      // Show next image
+      function nextImage() {
+        let next = currentImage + 1;
+        if (next >= images.length) {
+          next = 0;
+        }
+        showImage(next);
+      }
+
+      // Show previous image
+      function prevImage() {
+        let prev = currentImage - 1;
+        if (prev < 0) {
+          prev = images.length - 1;
+        }
+        showImage(prev);
+      }
+
+      // When page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        initPage();
+
+        // Add button events
+        document.getElementById("prevBtn").addEventListener("click", prevImage);
+        document.getElementById("nextBtn").addEventListener("click", nextImage);
+
+        // Add keyboard navigation
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowLeft") {
+            prevImage();
+          }
+          if (e.key === "ArrowRight") {
+            nextImage();
+          }
+        });
+
+        // Add button animations
+        const buttons = document.querySelectorAll(".nav-btn");
+        buttons.forEach((button) => {
+          button.addEventListener("mousedown", function () {
+            this.style.transform = "translateY(1px)";
+          });
+
+          button.addEventListener("mouseup", function () {
+            this.style.transform = "translateY(-3px)";
+          });
+
+          button.addEventListener("mouseleave", function () {
+            this.style.transform = "translateY(0)";
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
