@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Displacement-time graph</title>
+    <style>
+        :root {
+            --bus-yellow: #ffcc00;
+            --bus-orange: #f97316;
+            --road-grey: #334155;
+            --sky-blue: #bae6fd;
+            --grass-green: #16a34a;
+            --graph-blue: #3b82f6;
+            --graph-grid: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        /* --- THE LAB MONITOR --- */
+        .lab-container {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: clamp(15px, 3vw, 30px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: min(1000px, 95vw);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: clamp(20px, 4vw, 30px);
+            padding-bottom: clamp(15px, 3vw, 20px);
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .header h1 { 
+            color: #0f172a; 
+            margin: 0 0 10px 0;
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .header p { 
+            color: #64748b; 
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* --- THE GRAPH --- */
+        .graph-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: clamp(15px, 3vw, 20px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: clamp(20px, 4vw, 30px);
+            overflow: hidden;
+        }
+        
+        .graph-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        @media (min-width: 640px) {
+            .graph-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        .graph-header h3 {
+            margin: 0;
+            color: #0f172a;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        #graphCanvas {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            display: block;
+        }
+
+        /* --- THE ANIMATION SCENE --- */
+        .scene-container {
+            position: relative;
+            margin-bottom: clamp(20px, 4vw, 30px);
+        }
+        
+        .scene {
+            position: relative;
+            height: clamp(150px, 25vw, 220px);
+            background: linear-gradient(to bottom, var(--sky-blue) 65%, var(--grass-green) 65%);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #cbd5e1;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: clamp(50px, 10vw, 70px);
+            background: var(--road-grey);
+            border-top: 6px solid #fbbf24;
+        }
+
+        .lane-line {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, #fff, #fff 30px, transparent 30px, transparent 60px);
+            transform: translateY(-50%);
+        }
+
+        /* --- REALISTIC BUS DESIGN --- */
+        #bus {
+            position: absolute;
+            bottom: clamp(15px, 4vw, 25px);
+            left: 0;
+            width: clamp(120px, 20vw, 160px);
+            height: clamp(60px, 12vw, 80px);
+            z-index: 10;
+            transition: left 0.1s linear;
+        }
+
+        .bus-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--bus-yellow) 70%, var(--bus-orange) 70%);
+            border-radius: 10px 20px 5px 5px;
+            border: 3px solid #b45309;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .bus-roof {
+            position: absolute;
+            top: 0;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: 12px;
+            background: #d97706;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .bus-window-row {
+            display: flex;
+            gap: 4px;
+            padding: 10px 12px 5px 12px;
+        }
+
+        .bus-win {
+            flex: 1;
+            height: clamp(15px, 3vw, 20px);
+            background: linear-gradient(160deg, #7dd3fc 0%, #0ea5e9 100%);
+            border: 2px solid #1e293b;
+            border-radius: 4px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        .bus-door {
+            position: absolute;
+            right: 20px;
+            bottom: 0;
+            width: 15px;
+            height: clamp(30px, 8vw, 40px);
+            background: #dc2626;
+            border: 2px solid #991b1b;
+            border-bottom: none;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .bus-headlight {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fef3c7;
+            border-radius: 50%;
+            border: 1px solid #f59e0b;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        
+        .headlight-front {
+            right: 5px;
+            top: 20px;
+        }
+        
+        .headlight-back {
+            left: 5px;
+            top: 20px;
+            background: #dc2626;
+            border: 1px solid #991b1b;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        .wheel {
+            position: absolute;
+            bottom: -10px;
+            width: clamp(22px, 5vw, 28px);
+            height: clamp(22px, 5vw, 28px);
+            background: #0f172a;
+            border: 4px solid #475569;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wheel::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+        }
+
+        .w-front { right: 15px; }
+        .w-back { left: 15px; }
+
+        @keyframes wheelSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- DASHBOARD CONTROLS --- */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(15px, 3vw, 25px);
+            margin: clamp(20px, 4vw, 30px) 0;
+            align-items: center;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            padding: clamp(15px, 3vw, 25px);
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        @media (min-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr 2fr 1fr;
+            }
+        }
+
+        .stat-box {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            color: #10b981;
+            padding: clamp(12px, 2vw, 15px);
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .stat-box .value {
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            margin: 5px 0;
+            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+        }
+        
+        .stat-box .label {
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: clamp(15px, 3vw, 18px);
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+
+        #startBtn { 
+            background: linear-gradient(to bottom, #10b981, #059669);
+            box-shadow: 0 6px #047857; 
+        }
+        #startBtn:hover { background: linear-gradient(to bottom, #34d399, #10b981); }
+        #startBtn:active { transform: translateY(4px); box-shadow: 0 2px #047857; }
+        #startBtn.running { 
+            background: linear-gradient(to bottom, #ef4444, #dc2626);
+            box-shadow: 0 6px #b91c1c;
+        }
+        #startBtn.running:hover { background: linear-gradient(to bottom, #f87171, #ef4444); }
+
+        .slider-group {
+            text-align: center;
+        }
+        
+        .slider-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: clamp(10px, 2vw, 15px);
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            color: #475569;
+        }
+
+        input[type=range] {
+            width: 100%;
+            margin: clamp(10px, 2vw, 15px) 0;
+            cursor: pointer;
+            -webkit-appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #dc2626, #fbbf24, #10b981);
+            outline: none;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: clamp(20px, 4vw, 25px);
+            height: clamp(20px, 4vw, 25px);
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        .speed-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* --- RESET BUTTON --- */
+        .reset-btn {
+            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+            border: 2px solid #cbd5e1;
+            padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 30px);
+            border-radius: 8px;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
+            color: #334155;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- PHYSICS INFO --- */
+        .physics-info {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: clamp(15px, 3vw, 20px);
+            margin-top: clamp(20px, 4vw, 30px);
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .physics-info h3 {
+            margin-top: 0;
+            color: #1e40af;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+        
+        .physics-info p {
+            margin: 10px 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+        }
+        
+        .physics-info ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        
+        .physics-info li {
+            margin: 8px 0;
+            color: #475569;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+        }
+        
+        .formula {
+            font-family: 'Courier New', Courier, monospace;
+            background: #1e293b;
+            color: #10b981;
+            padding: clamp(8px, 2vw, 10px) clamp(12px, 2vw, 15px);
+            border-radius: 8px;
+            margin: clamp(10px, 2vw, 15px) 0;
+            text-align: center;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            overflow-x: auto;
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .main-btn, .reset-btn {
+                min-height: 44px; /* Apple recommended minimum touch target size */
+            }
+            
+            input[type=range]::-webkit-slider-thumb {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .bus-win {
+                min-height: 20px;
+            }
+        }
+
+        /* Very small screens (phones in portrait) */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .lab-container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .graph-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .controls {
+                padding: 15px;
+            }
+            
+            .stat-box {
+                min-height: 85px;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .lab-container {
+                max-width: 1100px;
+            }
+            
+            #graphCanvas {
+                height: 400px;
+            }
+        }
+
+        /* Landscape orientation for mobile */
+        @media (max-height: 600px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .lab-container {
+                max-width: 100%;
+            }
+            
+            .scene {
+                height: 120px;
+            }
+            
+            #bus {
+                width: 100px;
+                height: 50px;
+            }
+            
+            .graph-container {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lab-container">
+    <div class="header">
+        <h1>Physics Motion Lab</h1>
+        <p>Investigate how <b>velocity</b> affects the <b>Displacement-time graph</b> of a moving object. Adjust the throttle to control the bus speed and observe real-time graphing.</p>
+    </div>
+
+    <!-- Graph placed ABOVE the simulation -->
+    <div class="graph-container">
+        <div class="graph-header">
+            <h3>Displacement-Time Graph</h3>
+            <div style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); color: #64748b;">
+                Velocity: <span id="currentVelocity">0.0</span> m/s
+            </div>
+        </div>
+        <canvas id="graphCanvas"></canvas>
+    </div>
+
+    <!-- Simulation placed BELOW the graph -->
+    <div class="scene-container">
+        <div class="scene">
+            <div id="bus">
+                <div class="bus-body">
+                    <div class="bus-roof"></div>
+                    <div class="bus-window-row">
+                        <div class="bus-win"></div>
+                        <div class="bus-win"></div>
+                        <div class="bus-win"></div>
+                        <div class="bus-win"></div>
+                    </div>
+                    <div class="bus-door"></div>
+                    <div class="bus-headlight headlight-front"></div>
+                    <div class="bus-headlight headlight-back"></div>
+                </div>
+                <div class="wheel w-back" id="wb"></div>
+                <div class="wheel w-front" id="wf"></div>
+            </div>
+            <div class="road">
+                <div class="lane-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="stat-box">
+            <div class="label">TIME ELAPSED</div>
+            <div class="value" id="timeVal">0.0</div>
+            <div class="label">seconds</div>
+        </div>
+
+        <div class="slider-group">
+            <label for="throttle">THROTTLE (SPEED CONTROL)</label>
+            <input type="range" id="throttle" min="-8" max="8" value="0" step="0.5">
+            <div class="speed-labels">
+                <span>REVERSE</span>
+                <span>NEUTRAL</span>
+                <span>FORWARD</span>
+            </div>
+            <button id="startBtn" class="main-btn" onclick="toggleSim()">START ENGINE</button>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">DISPLACEMENT</div>
+            <div class="value" id="distVal">0.0</div>
+            <div class="label">meters</div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: clamp(15px, 3vw, 20px);">
+        <button class="reset-btn" onclick="resetLab()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+            </svg>
+            Clear Data & Reset Simulation
+        </button>
+    </div>
+    
+    <div class="physics-info">
+        <h3>Physics Concepts</h3>
+        <p>The displacement-time graph shows how far the bus has moved from its starting point over time.</p>
+        <p><b>Slope of the graph = Velocity</b></p>
+        <ul>
+            <li><b>Positive slope</b>: Bus moving forward (positive velocity)</li>
+            <li><b>Negative slope</b>: Bus moving backward (negative velocity)</li>
+            <li><b>Zero slope</b>: Bus is stationary (zero velocity)</li>
+            <li><b>Steeper slope</b>: Higher speed</li>
+        </ul>
+        <div class="formula">Displacement = Velocity × Time</div>
+        <p>Adjust the throttle to change velocity and observe how it affects the graph's shape.</p>
+    </div>
+</div>
+
+<script src="index.js">
+
+    
+</script>
+
+</body>
+</html>

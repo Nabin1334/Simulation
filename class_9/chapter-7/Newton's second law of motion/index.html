@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Newton's Second Law: F = m × a - Physics Lab</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #1a237e;
+        --secondary: #283593;
+        --accent: #d32f2f;
+        --success: #388e3c;
+        --warning: #f57c00;
+        --info: #0288d1;
+        --dark: #0a3d7a;
+        --light: #e3f2fd;
+        --friction: #795548;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        min-height: 100vh;
+        color: #2d3748;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 1400px;
+      }
+
+      h1 {
+        color: var(--primary);
+        font-size: 2.2rem;
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        color: #4a5568;
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto 15px;
+        line-height: 1.5;
+      }
+
+      /* Main Container */
+      .main-container {
+        width: 100%;
+        max-width: 1400px;
+        display: flex;
+        gap: 20px;
+      }
+
+      /* Left Side Panel */
+      .left-sidebar {
+        width: 320px;
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Action Buttons Section - NOW AT THE TOP */
+      .action-buttons-section {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .btn {
+        padding: 18px 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+      }
+
+      #btn-push {
+        background: linear-gradient(135deg, var(--success), #2e7d32);
+        color: white;
+        box-shadow: 0 5px 15px rgba(56, 142, 60, 0.3);
+      }
+
+      #btn-push:hover:not(:disabled) {
+        transform: translateX(5px);
+        box-shadow: 0 8px 20px rgba(56, 142, 60, 0.4);
+      }
+
+      #btn-push:active:not(:disabled) {
+        transform: translateX(2px);
+      }
+
+      #btn-push.running {
+        background: linear-gradient(135deg, var(--accent), #c62828);
+        animation: pulse 1.5s infinite;
+      }
+
+      #btn-reset {
+        background: linear-gradient(135deg, var(--primary), var(--dark));
+        color: white;
+        box-shadow: 0 5px 15px rgba(21, 101, 192, 0.3);
+      }
+
+      #btn-reset:hover {
+        transform: translateX(5px);
+        box-shadow: 0 8px 20px rgba(21, 101, 192, 0.4);
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 15px rgba(211, 47, 47, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+        }
+      }
+
+      /* Control Groups - BELOW BUTTONS */
+      .control-section {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+      }
+
+      .control-group {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .control-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .control-title {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .control-value {
+        background: var(--primary);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+        font-size: 1.2rem;
+      }
+
+      /* Range Sliders */
+      input[type="range"] {
+        width: 100%;
+        height: 8px;
+        -webkit-appearance: none;
+        background: linear-gradient(to right, #cbd5e0, #a0aec0);
+        border-radius: 4px;
+        outline: none;
+        margin: 15px 0;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        border: 3px solid var(--primary);
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(21, 101, 192, 0.3);
+      }
+
+      .range-info {
+        display: flex;
+        justify-content: space-between;
+        color: #718096;
+        font-size: 0.85rem;
+        margin-top: 8px;
+      }
+
+      /* Right Content Area */
+      .right-content {
+        flex: 2;
+        min-width: 0;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Simulation Area */
+      .simulation-area {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        height: 45vw;
+        max-height: 500px;
+        min-height: 200px;
+        background: linear-gradient(to bottom, #87ceeb 0%, #b0e0e6 60%);
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      #simCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Surface Info */
+      .surface-info {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 10px 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        font-weight: 600;
+        color: var(--friction);
+        border: 2px solid var(--friction);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+      }
+
+      /* Physics Data Display */
+      .physics-data {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 25px;
+      }
+
+      .data-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+      }
+
+      .data-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+      }
+
+      .data-label {
+        font-size: 0.9rem;
+        color: #718096;
+        margin-bottom: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .data-value {
+        font-size: 2rem;
+        font-weight: 800;
+        font-family: "Courier New", monospace;
+        color: var(--primary);
+        margin: 5px 0;
+      }
+
+      .data-unit {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        font-weight: 500;
+      }
+
+      /* Formula Display */
+      .formula-display {
+        background: linear-gradient(135deg, var(--primary), var(--dark));
+        color: white;
+        padding: 25px;
+        margin: 0 25px 25px;
+        border-radius: 12px;
+        font-family: "Courier New", monospace;
+        font-size: 1.3rem;
+        text-align: center;
+        box-shadow: 0 6px 18px rgba(21, 101, 192, 0.3);
+      }
+
+      /* Friction Control */
+      .friction-control {
+        background: #fef7e6;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid var(--friction);
+      }
+
+      .friction-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .friction-title {
+        font-weight: 600;
+        color: var(--friction);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+      }
+
+      .friction-value {
+        background: var(--friction);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+        font-size: 1.2rem;
+      }
+
+      /* Physics Info Panel */
+      .physics-info {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        padding: 20px;
+        margin: 0 25px 25px;
+        border-radius: 12px;
+        border-left: 4px solid var(--info);
+      }
+
+      .info-title {
+        font-weight: 600;
+        color: var(--info);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .info-content {
+        color: #37474f;
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        color: #718096;
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 1000px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 900px) {
+        .main-container {
+          flex-direction: column;
+          max-width: 100vw;
+          gap: 0;
+        }
+        .left-sidebar {
+          width: 100%;
+          margin-bottom: 20px;
+        }
+        .simulation-area {
+          min-width: 0;
+          width: 100%;
+          height: 40vw;
+          max-height: 350px;
+          min-height: 180px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .physics-data {
+          grid-template-columns: 1fr;
+        }
+        .simulation-area {
+          min-width: 0;
+          width: 100%;
+          height: 35vw;
+          max-height: 220px;
+          min-height: 120px;
+        }
+        .left-sidebar {
+          padding: 12px;
+        }
+        @media (max-width: 400px) {
+          .main-container {
+            padding: 0;
+          }
+          .simulation-area {
+            height: 28vw;
+            max-height: 120px;
+            min-height: 80px;
+          }
+          .left-sidebar {
+            padding: 6px;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Newton's Second Law: F = m × a</h1>
+      <p class="subtitle">
+        Real physics simulation with medium friction surface
+      </p>
+    </div>
+
+    <div class="main-container">
+      <!-- Left Sidebar with Controls and Buttons -->
+      <div class="left-sidebar">
+        <!-- ACTION BUTTONS SECTION - NOW AT THE TOP -->
+        <div class="action-buttons-section">
+          <div class="action-buttons">
+            <button id="btn-push" class="btn">
+              <span style="font-size: 1.4rem">▶️</span>
+              APPLY FORCE
+            </button>
+            <button id="btn-reset" class="btn">
+              <span style="font-size: 1.4rem">🔄</span>
+              RESET SIMULATION
+            </button>
+          </div>
+
+          <!-- Quick Tip removed -->
+        </div>
+
+        <!-- CONTROL SECTION - BELOW BUTTONS -->
+        <div class="control-section">
+          <!-- Force Control -->
+          <div class="control-group">
+            <div class="control-header">
+              <div class="control-title">
+                <span style="font-size: 1.3rem">💪</span>
+                APPLIED FORCE
+              </div>
+              <div id="disp-force" class="control-value">200 N</div>
+            </div>
+            <input
+              type="range"
+              id="input-force"
+              min="10"
+              max="500"
+              value="200"
+              step="10"
+            />
+            <div class="range-info">
+              <span>10N</span>
+              <span>250N</span>
+              <span>500N</span>
+            </div>
+            <div style="color: #718096; font-size: 0.9rem; margin-top: 10px">
+              How hard you push the object
+            </div>
+          </div>
+
+          <!-- Mass Control -->
+          <div class="control-group">
+            <div class="control-header">
+              <div class="control-title">
+                <span style="font-size: 1.3rem">⚖️</span>
+                OBJECT MASS
+              </div>
+              <div id="disp-mass" class="control-value">50 kg</div>
+            </div>
+            <input
+              type="range"
+              id="input-mass"
+              min="5"
+              max="200"
+              value="50"
+              step="5"
+            />
+            <div class="range-info">
+              <span>5kg</span>
+              <span>100kg</span>
+              <span>200kg</span>
+            </div>
+            <div style="color: #718096; font-size: 0.9rem; margin-top: 10px">
+              How heavy the object is
+            </div>
+          </div>
+
+          <!-- Friction Control -->
+          <div class="friction-control">
+            <div class="friction-header">
+              <div class="friction-title">
+                <span style="font-size: 1.3rem">🌊</span>
+                SURFACE FRICTION
+              </div>
+              <div id="disp-friction" class="friction-value">0.3 μ</div>
+            </div>
+            <input
+              type="range"
+              id="input-friction"
+              min="0"
+              max="0.8"
+              value="0.3"
+              step="0.1"
+            />
+            <div class="range-info">
+              <span>Smooth</span>
+              <span>Medium</span>
+              <span>Rough</span>
+            </div>
+            <div style="color: #795548; font-size: 0.9rem; margin-top: 10px">
+              Higher friction slows motion
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Content Area -->
+      <div class="right-content">
+        <!-- Simulation Area -->
+        <div class="simulation-area">
+          <canvas id="simCanvas"></canvas>
+          <div class="surface-info">
+            <span>🌊</span>
+            Medium Friction Surface (μ = 0.3)
+          </div>
+        </div>
+
+        <!-- Physics Data Display -->
+        <div class="physics-data">
+          <div class="data-card">
+            <div class="data-label">ACCELERATION</div>
+            <div id="out-acc" class="data-value">0.00</div>
+            <div class="data-unit">meters per second²</div>
+          </div>
+          <div class="data-card">
+            <div class="data-label">VELOCITY</div>
+            <div id="out-vel" class="data-value">0.00</div>
+            <div class="data-unit">meters per second</div>
+          </div>
+          <div class="data-card">
+            <div class="data-label">DISTANCE</div>
+            <div id="out-dist" class="data-value">0.0</div>
+            <div class="data-unit">meters traveled</div>
+          </div>
+          <div class="data-card">
+            <div class="data-label">TIME</div>
+            <div id="out-time" class="data-value">0.0</div>
+            <div class="data-unit">seconds elapsed</div>
+          </div>
+        </div>
+
+        <!-- Formula Display -->
+        <div id="formula-display" class="formula-display">
+          a = (200N - 147.2N) ÷ 50kg = 1.06 m/s²
+        </div>
+
+        <!-- Physics Info Panel -->
+        <div class="physics-info">
+          <div class="info-title">
+            <span>📊</span>
+            PHYSICS CALCULATION
+          </div>
+          <div class="info-content">
+            <strong>Net Force = Applied Force - Friction Force</strong><br />
+            <strong>Friction Force = μ × m × g</strong> (μ = friction, g = 9.81
+            m/s²)<br />
+            <strong>Acceleration = Net Force ÷ Mass</strong><br />
+            With friction, the object slows down when force stops.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>
+        Real Physics Simulation | Newton's Second Law with Friction |
+        Educational Tool
+      </p>
+    </div>
+
+    <script>
+      // ========================
+      // REAL PHYSICS SIMULATION
+      // ========================
+
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Get DOM Elements
+      const elements = {
+        force: {
+          input: document.getElementById("input-force"),
+          display: document.getElementById("disp-force"),
+        },
+        mass: {
+          input: document.getElementById("input-mass"),
+          display: document.getElementById("disp-mass"),
+        },
+        friction: {
+          input: document.getElementById("input-friction"),
+          display: document.getElementById("disp-friction"),
+        },
+        outputs: {
+          acc: document.getElementById("out-acc"),
+          vel: document.getElementById("out-vel"),
+          dist: document.getElementById("out-dist"),
+          time: document.getElementById("out-time"),
+        },
+        formula: document.getElementById("formula-display"),
+        buttons: {
+          push: document.getElementById("btn-push"),
+          reset: document.getElementById("btn-reset"),
+        },
+      };
+
+      // ========================
+      // PHYSICS STATE
+      // ========================
+      const state = {
+        // Core physics
+        x: 100,
+        v: 0,
+        a: 0,
+        mass: 50,
+        force: 200,
+        friction: 0.3,
+
+        // Simulation settings
+        pixelScale: 8,
+        groundY: 0,
+        isPushing: false,
+        totalDistance: 0,
+        pushStartTime: 0,
+        pushDuration: 0,
+        maxPushDuration: 2.5,
+        gravity: 9.81,
+
+        // Visual elements
+        trailPoints: [],
+        particles: [],
+        lastUpdateTime: 0,
+      };
+
+      // ========================
+      // INITIALIZATION
+      // ========================
+      function init() {
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        setupEventListeners();
+        updateUI();
+        updateFormula();
+
+        requestAnimationFrame(animate);
+      }
+
+      function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        state.groundY = canvas.height * 0.75;
+      }
+
+      // ========================
+      // EVENT HANDLERS
+      // ========================
+      function setupEventListeners() {
+        // Force slider
+        elements.force.input.addEventListener("input", (e) => {
+          state.force = parseInt(e.target.value);
+          elements.force.display.textContent = state.force + " N";
+          if (state.isPushing) stopPush();
+          updateFormula();
+        });
+
+        // Mass slider
+        elements.mass.input.addEventListener("input", (e) => {
+          state.mass = parseInt(e.target.value);
+          elements.mass.display.textContent = state.mass + " kg";
+          if (state.isPushing) stopPush();
+          updateFormula();
+        });
+
+        // Friction slider
+        elements.friction.input.addEventListener("input", (e) => {
+          state.friction = parseFloat(e.target.value);
+          elements.friction.display.textContent =
+            state.friction.toFixed(1) + " μ";
+          updateFormula();
+        });
+
+        // Push button
+        elements.buttons.push.addEventListener("click", () => {
+          if (!state.isPushing && Math.abs(state.v) < 0.1) {
+            startPush();
+          }
+        });
+
+        // Reset button
+        elements.buttons.reset.addEventListener("click", resetSimulation);
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+          if (
+            e.code === "Space" &&
+            !state.isPushing &&
+            Math.abs(state.v) < 0.1
+          ) {
+            startPush();
+            e.preventDefault();
+          } else if (e.code === "KeyR") {
+            resetSimulation();
+            e.preventDefault();
+          }
+        });
+      }
+
+      // ========================
+      // REAL PHYSICS CALCULATIONS
+      // ========================
+      function calculateNetForce() {
+        // Normal force = mass × gravity
+        const normalForce = state.mass * state.gravity;
+
+        // Friction force = friction coefficient × normal force
+        const frictionForce = state.friction * normalForce;
+
+        let netForce = 0;
+
+        if (state.isPushing) {
+          // When pushing: Net force = Applied force - Friction
+          netForce = state.force - frictionForce;
+
+          // Object won't move if applied force <= static friction
+          if (netForce <= 0) {
+            netForce = 0;
+            if (state.v === 0) {
+              return 0; // Won't start moving
+            }
+          }
+        } else {
+          // When not pushing: Only friction acts (deceleration)
+          if (Math.abs(state.v) > 0.01) {
+            netForce = -Math.sign(state.v) * frictionForce;
+          } else {
+            netForce = 0;
+            state.v = 0;
+          }
+        }
+
+        return netForce;
+      }
+
+      function updatePhysics(deltaTime) {
+        // Update push duration
+        if (state.isPushing) {
+          state.pushDuration += deltaTime;
+          if (state.pushDuration >= state.maxPushDuration) {
+            stopPush();
+          }
+        }
+
+        // Calculate net force and acceleration
+        const netForce = calculateNetForce();
+        state.a = netForce / state.mass;
+
+        // Update velocity and position
+        state.v += state.a * deltaTime;
+
+        // Stop if velocity is very small
+        if (Math.abs(state.v) < 0.05 && !state.isPushing) {
+          state.v = 0;
+          state.a = 0;
+        }
+
+        const dx = state.v * deltaTime * state.pixelScale;
+        state.x += dx;
+        state.totalDistance += Math.abs(state.v * deltaTime);
+
+        // Add trail points when moving
+        if (Math.abs(state.v) > 0.1) {
+          const boxSize = getBoxSize();
+          state.trailPoints.push({
+            x: state.x + boxSize.width / 2,
+            y: state.groundY - boxSize.height / 2,
+            alpha: 1.0,
+            time: Date.now(),
+          });
+
+          // Keep only recent points
+          const maxAge = 1500;
+          state.trailPoints = state.trailPoints.filter(
+            (p) => Date.now() - p.time < maxAge
+          );
+
+          // Fade trail points
+          state.trailPoints.forEach((p) => (p.alpha *= 0.93));
+        }
+
+        // Wall collision with friction
+        const boxSize = getBoxSize();
+        if (state.x + boxSize.width > canvas.width - 30) {
+          state.x = canvas.width - boxSize.width - 30;
+          state.v = -state.v * 0.3; // Bounce with energy loss
+
+          // Create particles on impact
+          createImpactParticles(
+            state.x + boxSize.width,
+            state.groundY - boxSize.height / 2
+          );
+
+          if (state.isPushing) stopPush();
+        }
+
+        // Left boundary
+        if (state.x < 30) {
+          state.x = 30;
+          state.v = Math.max(state.v, 0);
+        }
+
+        // Update particles
+        updateParticles(deltaTime);
+
+        // Update UI
+        updateUI();
+        updateFormula();
+      }
+
+      function getBoxSize() {
+        const baseSize = 50;
+        const massFactor = state.mass * 0.12;
+        return {
+          width: baseSize + massFactor,
+          height: baseSize + massFactor,
+        };
+      }
+
+      // ========================
+      // SIMULATION CONTROL
+      // ========================
+      function startPush() {
+        state.isPushing = true;
+        state.pushStartTime = performance.now();
+        state.pushDuration = 0;
+        state.trailPoints = [];
+
+        elements.buttons.push.textContent = "PUSHING...";
+        elements.buttons.push.classList.add("running");
+
+        createForceParticles();
+      }
+
+      function stopPush() {
+        state.isPushing = false;
+        elements.buttons.push.textContent = "APPLY FORCE";
+        elements.buttons.push.classList.remove("running");
+      }
+
+      function resetSimulation() {
+        state.x = 100;
+        state.v = 0;
+        state.a = 0;
+        state.isPushing = false;
+        state.totalDistance = 0;
+        state.pushDuration = 0;
+        state.trailPoints = [];
+        state.particles = [];
+
+        elements.buttons.push.textContent = "APPLY FORCE";
+        elements.buttons.push.classList.remove("running");
+
+        updateUI();
+        updateFormula();
+      }
+
+      // ========================
+      // VISUAL EFFECTS
+      // ========================
+      function createForceParticles() {
+        const boxSize = getBoxSize();
+        const particleCount = Math.min(Math.floor(state.force / 30), 15);
+
+        for (let i = 0; i < particleCount; i++) {
+          state.particles.push({
+            x: state.x - 10,
+            y: state.groundY - boxSize.height / 2 + Math.random() * 15 - 7.5,
+            vx: 2 + Math.random() * 3,
+            vy: Math.random() * 2 - 1,
+            life: 1.0,
+            size: 2 + Math.random() * 3,
+            color: "#4CAF50",
+          });
+        }
+      }
+
+      function createImpactParticles(x, y) {
+        for (let i = 0; i < 8; i++) {
+          state.particles.push({
+            x: x,
+            y: y,
+            vx: -Math.abs(state.v) * 2 * (0.5 + Math.random()),
+            vy: (Math.random() - 0.5) * 4,
+            life: 1.0,
+            size: 1 + Math.random() * 3,
+            color: "#F44336",
+          });
+        }
+      }
+
+      function updateParticles(deltaTime) {
+        state.particles = state.particles.filter((particle) => {
+          particle.x += particle.vx * deltaTime * 30;
+          particle.y += particle.vy * deltaTime * 30;
+          particle.vy += 0.2 * deltaTime * 30; // Gravity
+          particle.life -= 0.8 * deltaTime;
+
+          return particle.life > 0 && particle.y < canvas.height;
+        });
+      }
+
+      // ========================
+      // UI UPDATES
+      // ========================
+      function updateUI() {
+        elements.outputs.acc.textContent = Math.abs(state.a).toFixed(2);
+        elements.outputs.vel.textContent = Math.abs(state.v).toFixed(2);
+        elements.outputs.dist.textContent = state.totalDistance.toFixed(1);
+        elements.outputs.time.textContent = state.pushDuration.toFixed(1);
+      }
+
+      function updateFormula() {
+        // Calculate net force for display
+        const normalForce = state.mass * state.gravity;
+        const frictionForce = state.friction * normalForce;
+        const netForce = state.force - frictionForce;
+        const acceleration = (netForce > 0 ? netForce / state.mass : 0).toFixed(
+          2
+        );
+
+        elements.formula.textContent = `a = (${
+          state.force
+        }N - ${frictionForce.toFixed(1)}N) ÷ ${
+          state.mass
+        }kg = ${acceleration} m/s²`;
+      }
+
+      // ========================
+      // RENDERING
+      // ========================
+      function draw() {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw sky
+        drawSky();
+
+        // Draw surface
+        drawSurface();
+
+        // Draw trail
+        drawTrail();
+
+        // Draw object
+        drawObject();
+
+        // Draw pusher
+        if (state.isPushing) drawPusher();
+
+        // Draw particles
+        drawParticles();
+
+        // Draw physics info
+        drawPhysicsInfo();
+      }
+
+      function drawSky() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, state.groundY);
+        gradient.addColorStop(0, "#4a90e2");
+        gradient.addColorStop(1, "#87CEEB");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, state.groundY);
+      }
+
+      function drawSurface() {
+        const surfaceHeight = canvas.height - state.groundY;
+
+        // Main surface with friction texture
+        const gradient = ctx.createLinearGradient(
+          0,
+          state.groundY,
+          0,
+          canvas.height
+        );
+
+        if (state.friction < 0.2) {
+          // Smooth surface
+          gradient.addColorStop(0, "#90A4AE");
+          gradient.addColorStop(1, "#B0BEC5");
+        } else if (state.friction < 0.5) {
+          // Medium surface
+          gradient.addColorStop(0, "#78909C");
+          gradient.addColorStop(1, "#90A4AE");
+        } else {
+          // Rough surface
+          gradient.addColorStop(0, "#5D4037");
+          gradient.addColorStop(1, "#795548");
+        }
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, state.groundY, canvas.width, surfaceHeight);
+
+        // Draw surface texture based on friction
+        drawSurfaceTexture();
+
+        // Draw distance markers
+        drawDistanceMarkers();
+      }
+
+      function drawSurfaceTexture() {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+        const textureSize = state.friction < 0.3 ? 25 : 15;
+
+        for (let x = 0; x < canvas.width; x += textureSize) {
+          for (let y = state.groundY; y < canvas.height; y += textureSize) {
+            if ((x + y) % (textureSize * 2) === 0) {
+              ctx.fillRect(x, y, 1, 1);
+            }
+          }
+        }
+      }
+
+      function drawDistanceMarkers() {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.lineWidth = 1;
+        ctx.fillStyle = "#fff";
+        ctx.font = "11px Arial";
+        ctx.textAlign = "center";
+
+        for (let i = 0; i <= canvas.width / state.pixelScale; i += 5) {
+          const x = i * state.pixelScale;
+          const isMajor = i % 10 === 0;
+
+          if (isMajor && i > 0) {
+            ctx.beginPath();
+            ctx.moveTo(x, state.groundY - 8);
+            ctx.lineTo(x, state.groundY);
+            ctx.stroke();
+
+            ctx.fillText(i + "m", x, state.groundY - 12);
+          }
+        }
+      }
+
+      function drawTrail() {
+        if (state.trailPoints.length < 2) return;
+
+        ctx.strokeStyle = "rgba(33, 150, 243, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+
+        for (let i = 1; i < state.trailPoints.length; i++) {
+          const prev = state.trailPoints[i - 1];
+          const curr = state.trailPoints[i];
+
+          ctx.globalAlpha = curr.alpha;
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(curr.x, curr.y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1.0;
+      }
+
+      function drawObject() {
+        const boxSize = getBoxSize();
+        const x = state.x;
+        const y = state.groundY - boxSize.height;
+
+        // Draw shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(x + 3, y + 3, boxSize.width, boxSize.height);
+
+        // Draw main box
+        const gradient = ctx.createLinearGradient(x, y, x, y + boxSize.height);
+        gradient.addColorStop(0, "#FF5252");
+        gradient.addColorStop(1, "#D32F2F");
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, boxSize.width, boxSize.height);
+
+        // Draw border
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, boxSize.width, boxSize.height);
+
+        // Draw mass label
+        ctx.fillStyle = "white";
+        ctx.font = `bold ${Math.min(18, 14 + state.mass * 0.04)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          state.mass + " kg",
+          x + boxSize.width / 2,
+          y + boxSize.height / 2
+        );
+
+        // Draw force indicator if pushing
+        if (state.isPushing) {
+          ctx.font = "bold 16px Arial";
+          ctx.fillStyle = "#4CAF50";
+          ctx.fillText(
+            "→ " + state.force + " N",
+            x + boxSize.width / 2,
+            y - 20
+          );
+        }
+      }
+
+      function drawPusher() {
+        const boxSize = getBoxSize();
+        const pusherX = state.x - 40;
+        const pusherY = state.groundY - boxSize.height / 2;
+
+        ctx.save();
+        ctx.translate(pusherX, pusherY);
+
+        // Draw pusher
+        ctx.strokeStyle = "#37474F";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+
+        // Body
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-12, -30);
+        ctx.stroke();
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(-12, -38, 8, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Arms
+        ctx.beginPath();
+        ctx.moveTo(-12, -30);
+        ctx.lineTo(40, 0);
+        ctx.stroke();
+
+        // Legs
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-15, 20);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(12, 16);
+        ctx.stroke();
+
+        ctx.restore();
+
+        // Draw pushing indicator
+        ctx.fillStyle = "rgba(244, 67, 54, 0.9)";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("PUSHING!", pusherX, pusherY - 45);
+      }
+
+      function drawParticles() {
+        state.particles.forEach((particle) => {
+          ctx.globalAlpha = particle.life;
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1.0;
+      }
+
+      function drawPhysicsInfo() {
+        // Calculate friction force for display
+        const frictionForce = (
+          state.friction *
+          state.mass *
+          state.gravity
+        ).toFixed(1);
+
+        ctx.fillStyle = "rgba(26, 35, 126, 0.9)";
+        ctx.font = "13px Arial";
+        ctx.textAlign = "left";
+
+        const startY = 25;
+        const lineHeight = 18;
+
+        ctx.fillText(`Force: ${state.force} N`, 15, startY);
+        ctx.fillText(`Mass: ${state.mass} kg`, 15, startY + lineHeight);
+        ctx.fillStyle = "#795548";
+        ctx.fillText(
+          `Friction: ${state.friction.toFixed(1)} μ`,
+          15,
+          startY + lineHeight * 2
+        );
+        ctx.fillStyle = "#F44336";
+        ctx.fillText(
+          `Accel: ${Math.abs(state.a).toFixed(2)} m/s²`,
+          15,
+          startY + lineHeight * 3
+        );
+        ctx.fillStyle = "#2196F3";
+        ctx.fillText(
+          `Velocity: ${Math.abs(state.v).toFixed(2)} m/s`,
+          15,
+          startY + lineHeight * 4
+        );
+      }
+
+      // ========================
+      // ANIMATION LOOP
+      // ========================
+      let lastFrameTime = 0;
+
+      function animate(currentTime) {
+        const deltaTime = Math.min((currentTime - lastFrameTime) / 1000, 0.1);
+        lastFrameTime = currentTime;
+
+        updatePhysics(deltaTime);
+        draw();
+
+        requestAnimationFrame(animate);
+      }
+
+      // ========================
+      // START SIMULATION
+      // ========================
+      window.addEventListener("load", init);
+      if (document.readyState === "complete") {
+        init();
+      }
+    </script>
+  </body>
+</html>

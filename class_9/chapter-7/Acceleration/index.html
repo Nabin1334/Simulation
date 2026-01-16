@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceleration - Physics Class 9</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 15px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Main Content Layout */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .content-wrapper {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .content-wrapper {
+                gap: 30px;
+                padding: 30px;
+            }
+        }
+
+        /* Simulation Section */
+        .simulation-section {
+            background: #0a1929;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .simulation-section h2 {
+            color: white;
+            font-size: clamp(1.3rem, 3vw, 1.6rem);
+            margin-bottom: 10px;
+        }
+
+        /* Road Container */
+        .road-container {
+            position: relative;
+            height: clamp(200px, 35vh, 300px);
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #4a90e2 0%, #87CEEB 100%);
+            flex-shrink: 0;
+        }
+
+        #roadCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        /* Speedometer */
+        .speedometer-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .speedometer-container h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .speed-display {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .speed-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .controls-section h2 {
+            color: #2c3e50;
+            font-size: clamp(1.3rem, 3vw, 1.6rem);
+            margin-bottom: 5px;
+        }
+
+        /* Control Groups */
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .control-group h3 {
+            color: #4a6491;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        /* Sliders */
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .value-display {
+            background: #4a6491;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #e0e0e0, #667eea);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #4a6491;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 10px 0 20px;
+        }
+
+        .control-btn {
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 54px;
+        }
+
+        .control-btn:active {
+            transform: translateY(2px);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        /* Data Display */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 480px) {
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .data-card {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .data-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .data-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .data-value {
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+        }
+
+        .data-unit {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Physics Info */
+        .physics-info {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .physics-info h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .concept-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .concept-list li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .concept-list li:hover {
+            transform: translateX(5px);
+            background: #eef2f7;
+        }
+
+        .tip-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #2196f3;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 767px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            .content-wrapper {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .simulation-section,
+            .controls-section {
+                padding: 15px;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-btn {
+                min-height: 48px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .road-container {
+                height: 180px;
+            }
+            
+            .control-group {
+                padding: 15px;
+            }
+            
+            .value-display {
+                padding: 4px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .speed-display {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus Styles */
+        button:focus,
+        input:focus {
+            outline: 3px solid rgba(102, 126, 234, 0.5);
+            outline-offset: 2px;
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Acceleration </h1>
+          
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Simulation Area -->
+            <section class="simulation-section" aria-labelledby="simulation-title">
+                <h2 id="simulation-title">Real Car Motion</h2>
+                
+                <div class="road-container">
+                    <canvas id="roadCanvas" role="img" aria-label="Car moving on road showing acceleration">
+                        Your browser does not support the canvas element.
+                    </canvas>
+                </div>
+                
+                <div class="speedometer-container">
+                    <h3>Current Speed</h3>
+                    <div class="speed-display" id="currentSpeed" aria-live="polite">0.0</div>
+                    <div class="speed-label">meters per second (m/s)</div>
+                </div>
+            </section>
+
+            <!-- Controls and Data -->
+            <section class="controls-section" aria-labelledby="controls-title">
+                <h2 id="controls-title">Controls & Physics Data</h2>
+                
+                <!-- Acceleration Controls -->
+                <div class="control-group" role="group" aria-labelledby="acceleration-controls">
+                    <h3 id="acceleration-controls">Acceleration Settings</h3>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Acceleration Rate</span>
+                            <span class="value-display" id="accValue" aria-live="polite">2.0 m/s²</span>
+                        </div>
+                        <input type="range" id="accSlider" min="0" max="5" step="0.5" value="2.0"
+                               aria-label="Acceleration rate slider from 0 to 5 meters per second squared">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Starting Speed</span>
+                            <span class="value-display" id="startSpeedValue" aria-live="polite">0 m/s</span>
+                        </div>
+                        <input type="range" id="startSpeedSlider" min="0" max="10" step="1" value="0"
+                               aria-label="Starting speed slider from 0 to 10 meters per second">
+                    </div>
+                </div>
+
+                <!-- Simulation Controls -->
+                <div class="control-group" role="group" aria-labelledby="sim-controls">
+                    <h3 id="sim-controls">Simulation Control</h3>
+                    <div class="button-group">
+                        <button class="control-btn btn-start" id="startBtn" aria-label="Start simulation">
+                            <span>▶</span> Start
+                        </button>
+                        <button class="control-btn btn-pause" id="pauseBtn" aria-label="Pause simulation">
+                            <span>⏸</span> Pause
+                        </button>
+                        <button class="control-btn btn-reset" id="resetBtn" aria-label="Reset simulation">
+                            <span>↺</span> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Data -->
+                <div class="control-group">
+                    <h3>Live Physics Data</h3>
+                    <div class="data-grid">
+                        <div class="data-card" aria-label="Time elapsed">
+                            <div class="data-label">Time</div>
+                            <div class="data-value" id="timeDisplay">0.0</div>
+                            <div class="data-unit">seconds</div>
+                        </div>
+                        <div class="data-card" aria-label="Distance traveled">
+                            <div class="data-label">Distance</div>
+                            <div class="data-value" id="distanceDisplay">0.0</div>
+                            <div class="data-unit">meters</div>
+                        </div>
+                        <div class="data-card" aria-label="Current speed">
+                            <div class="data-label">Speed</div>
+                            <div class="data-value" id="speedDisplay">0.0</div>
+                            <div class="data-unit">m/s</div>
+                        </div>
+                        <div class="data-card" aria-label="Current acceleration">
+                            <div class="data-label">Acceleration</div>
+                            <div class="data-value" id="accDisplay">0.0</div>
+                            <div class="data-unit">m/s²</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Physics Concepts -->
+                <div class="physics-info">
+                    <h3>Physics Concepts</h3>
+                    <div class="formula-box" aria-label="Acceleration formula">
+                        v = u + at
+                    </div>
+                    <ul class="concept-list">
+                        <li><strong>v = Final Speed</strong> (m/s)</li>
+                        <li><strong>u = Starting Speed</strong> (m/s)</li>
+                        <li><strong>a = Acceleration</strong> (m/s²)</li>
+                        <li><strong>t = Time</strong> (seconds)</li>
+                    </ul>
+                    <div class="tip-box">
+                        <strong>Tip:</strong> Set acceleration to 0 m/s² to observe constant velocity motion (no change in speed).
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <!-- <p>Physics Class 9 | Accurate Acceleration Simulation | Works on all devices</p> -->
+        </footer>
+    </div>
+
+    <script src="index.js">
+        
+    </script>
+</body>
+</html>

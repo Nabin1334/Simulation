@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass & Inertia Physics Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+        
+        .simulation-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .theory-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        #simulationCanvas {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            display: block;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        @media (min-width: 480px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .control-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+        
+        .control-value {
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to right, #bbdefb, #2196f3);
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #1565c0;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e8f4fc;
+            color: #3498db;
+            border: 2px solid #3498db;
+        }
+        
+        .btn-secondary:hover {
+            background: #d4e9fa;
+            transform: translateY(-2px);
+        }
+        
+        .data-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .data-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid #3498db;
+        }
+        
+        .data-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        
+        .data-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .formula-box {
+            background: #e8f4fc;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1565c0;
+            border: 2px solid #bbdefb;
+            font-family: 'Cambria', serif;
+        }
+        
+        .theory-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        
+        .theory-point {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .theory-point h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .key-concept {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .key-concept h4 {
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .comparison-table th {
+            background: #e8f4fc;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            color: #666;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .mobile-warning {
+            display: none;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-warning {
+                display: block;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .data-value {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .simulation-section, .theory-section {
+                padding: 15px;
+            }
+            
+            .canvas-container {
+                height: 250px;
+            }
+        }
+        
+        .experiment-tip {
+            background: #fff8e1;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffb300;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mass & Inertia Physics Lab</h1>
+            <p class="tagline">Understand how mass affects an object's resistance to motion</p>
+        </header>
+        
+        <div class="mobile-warning">
+            💡 Tip: On mobile, use two fingers to adjust sliders more precisely
+        </div>
+        
+        <div class="main-content">
+            <div class="simulation-section">
+                <h2 class="section-title">Interactive Simulation</h2>
+                
+                <div class="canvas-container">
+                    <canvas id="simulationCanvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-header">
+                            <div class="control-label">Object Mass</div>
+                            <div class="control-value" id="massValue">5 kg</div>
+                        </div>
+                        <input type="range" min="1" max="20" value="5" class="slider" id="massSlider">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            <span>Light (1 kg)</span>
+                            <span>Heavy (20 kg)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-header">
+                            <div class="control-label">Applied Force</div>
+                            <div class="control-value" id="forceValue">30 N</div>
+                        </div>
+                        <input type="range" min="10" max="100" value="30" class="slider" id="forceSlider">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            <span>Weak (10 N)</span>
+                            <span>Strong (100 N)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="btn btn-primary" id="startBtn">
+                        Apply Force
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        Reset
+                    </button>
+                </div>
+                
+                <div class="formula-box">
+                    F = m × a (Newton's Second Law)
+                </div>
+                
+                <div class="data-display">
+                    <div class="data-card">
+                        <div class="data-label">Velocity</div>
+                        <div class="data-value" id="velocity">0.00 m/s</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">Acceleration</div>
+                        <div class="data-value" id="acceleration">0.00 m/s²</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">Momentum</div>
+                        <div class="data-value" id="momentum">0.00 kg·m/s</div>
+                    </div>
+                </div>
+                
+                <div class="experiment-tip">
+                    <strong>Try this:</strong> Apply 50N force to 1kg object, then same force to 20kg object. See the difference!
+                </div>
+            </div>
+            
+            <div class="theory-section">
+                <h2 class="section-title">Physics Theory</h2>
+                
+                <div class="theory-content">
+                    <div class="theory-point">
+                        <h3>What is Mass?</h3>
+                        <p>Mass is the amount of matter in an object. More mass = more matter.</p>
+                    </div>
+                    
+                    <div class="theory-point">
+                        <h3>What is Inertia?</h3>
+                        <p>Inertia is an object's resistance to changes in motion.</p>
+                        <p style="margin-top: 5px; font-size: 0.9rem;">• Objects at rest stay at rest</p>
+                        <p style="font-size: 0.9rem;">• Objects in motion stay in motion</p>
+                    </div>
+                    
+                    <div class="key-concept">
+                        <h4>The Key Relationship</h4>
+                        <p><strong>Mass and inertia are directly proportional:</strong></p>
+                        <p style="text-align: center; font-weight: 600; color: #2e7d32; margin: 8px 0;">
+                            Double the mass = Double the inertia
+                        </p>
+                    </div>
+                    
+                    <div class="theory-point">
+                        <h3>Newton's Second Law</h3>
+                        <p>The mathematical relationship:</p>
+                        <div class="formula-box">
+                            F = m × a
+                        </div>
+                        <p>Where:</p>
+                        <ul style="margin: 8px 0 8px 20px; font-size: 0.9rem; color: #555;">
+                            <li><strong>F</strong> = Force (Newtons)</li>
+                            <li><strong>m</strong> = Mass (kilograms)</li>
+                            <li><strong>a</strong> = Acceleration (m/s²)</li>
+                        </ul>
+                        <p style="font-size: 0.9rem;">This means: For the same force, heavier objects accelerate less.</p>
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Mass</th>
+                                <th>Inertia</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1 kg</td>
+                                <td>Low</td>
+                                <td>Soccer ball</td>
+                            </tr>
+                            <tr>
+                                <td>5 kg</td>
+                                <td>Medium</td>
+                                <td>Textbook</td>
+                            </tr>
+                            <tr>
+                                <td>20 kg</td>
+                                <td>High</td>
+                                <td>Suitcase</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Physics Education Tool</strong> | Works on all devices</p>
+            <p>Drag sliders to change mass and force, then click Apply Force</p>
+        </footer>
+    </div>
+
+    <script>
+        // Physics Simulation
+        let canvas, ctx;
+        let physicsObject = {
+            x: 100,
+            y: 150,
+            mass: 5,
+            radius: 30,
+            velocity: 0,
+            acceleration: 0,
+            force: 0,
+            isMoving: false,
+            startX: 100,
+            color: '#3498db'
+        };
+        
+        let animationId = null;
+        let canvasWidth, canvasHeight;
+        let isMobile = false;
+        
+        // Initialize simulation
+        function initSimulation() {
+            canvas = document.getElementById('simulationCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Check if mobile
+            isMobile = window.innerWidth <= 768;
+            
+            // Set canvas size
+            resizeCanvas();
+            
+            // Initialize event listeners
+            setupEventListeners();
+            
+            // Initial draw
+            drawSimulation();
+        }
+        
+        // Resize canvas for responsiveness
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvasWidth = container.clientWidth;
+            canvasHeight = container.clientHeight;
+            
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            
+            // Adjust object position based on new size
+            physicsObject.x = canvasWidth * 0.15;
+            physicsObject.startX = physicsObject.x;
+            physicsObject.y = canvasHeight * 0.5;
+            physicsObject.radius = Math.min(40, canvasWidth * 0.04 + physicsObject.mass * 1.5);
+        }
+        
+        // DOM Elements
+        function setupEventListeners() {
+            const massSlider = document.getElementById('massSlider');
+            const forceSlider = document.getElementById('forceSlider');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const massValue = document.getElementById('massValue');
+            const forceValue = document.getElementById('forceValue');
+            
+            // Update slider displays
+            function updateDisplays() {
+                massValue.textContent = massSlider.value + ' kg';
+                forceValue.textContent = forceSlider.value + ' N';
+            }
+            
+            // Mass slider
+            massSlider.addEventListener('input', function() {
+                updateDisplays();
+                physicsObject.mass = parseFloat(this.value);
+                physicsObject.radius = Math.min(40, canvasWidth * 0.04 + physicsObject.mass * 1.5);
+                if (!physicsObject.isMoving) {
+                    drawSimulation();
+                }
+            });
+            
+            // Force slider
+            forceSlider.addEventListener('input', updateDisplays);
+            
+            // Start button
+            startBtn.addEventListener('click', applyForce);
+            
+            // Reset button
+            resetBtn.addEventListener('click', resetSimulation);
+            
+            // Touch events for mobile
+            if (isMobile) {
+                startBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    applyForce();
+                });
+                
+                resetBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    resetSimulation();
+                });
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    applyForce();
+                }
+                if (e.code === 'KeyR') {
+                    resetSimulation();
+                }
+            });
+            
+            // Initial display update
+            updateDisplays();
+            
+            // Window resize
+            window.addEventListener('resize', function() {
+                resizeCanvas();
+                if (!physicsObject.isMoving) {
+                    drawSimulation();
+                }
+            });
+        }
+        
+        // Draw the simulation
+        function drawSimulation() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Draw background
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Draw ground
+            const groundHeight = canvasHeight * 0.2;
+            const groundY = canvasHeight - groundHeight;
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(0, groundY, canvasWidth, groundHeight);
+            
+            // Draw distance markers
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            
+            const markerSpacing = canvasWidth * 0.1;
+            for (let x = physicsObject.startX; x < canvasWidth - 50; x += markerSpacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, groundY - 20);
+                ctx.lineTo(x, groundY);
+                ctx.stroke();
+                
+                // Distance label
+                const meters = ((x - physicsObject.startX) / (canvasWidth * 0.01)).toFixed(1);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(meters + 'm', x, groundY - 25);
+            }
+            
+            // Draw object
+            ctx.beginPath();
+            ctx.arc(physicsObject.x, physicsObject.y, physicsObject.radius, 0, Math.PI * 2);
+            ctx.fillStyle = physicsObject.color;
+            ctx.fill();
+            
+            // Draw object border
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#2c3e50';
+            ctx.stroke();
+            
+            // Draw mass label
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = isMobile ? '14px Arial' : '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(physicsObject.mass + ' kg', physicsObject.x, physicsObject.y + (isMobile ? 3 : 5));
+            
+            // Draw physics info
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = isMobile ? '12px Arial' : '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText("F = m × a", 10, 20);
+            ctx.fillText(`F = ${physicsObject.force}N, m = ${physicsObject.mass}kg`, 10, 40);
+        }
+        
+        // Update physics calculations
+        function updatePhysics() {
+            if (!physicsObject.isMoving) return;
+            
+            // Constants
+            const GRAVITY = 9.81;
+            const TIME_STEP = 0.016;
+            const PIXELS_PER_METER = canvasWidth * 0.01;
+            
+            // Friction calculation
+            const frictionCoefficient = 0.1;
+            const frictionForce = frictionCoefficient * physicsObject.mass * GRAVITY;
+            
+            // Net force = applied force - friction
+            let netForce = physicsObject.force - frictionForce;
+            if (netForce < 0) netForce = 0;
+            
+            // Calculate acceleration: a = F/m
+            physicsObject.acceleration = netForce / physicsObject.mass;
+            
+            // Update velocity: v = v + a * Δt
+            physicsObject.velocity += physicsObject.acceleration * TIME_STEP;
+            
+            // Update position
+            physicsObject.x += physicsObject.velocity * PIXELS_PER_METER * TIME_STEP;
+            
+            // Update data displays
+            document.getElementById('velocity').textContent = physicsObject.velocity.toFixed(2) + ' m/s';
+            document.getElementById('acceleration').textContent = physicsObject.acceleration.toFixed(2) + ' m/s²';
+            document.getElementById('momentum').textContent = (physicsObject.mass * physicsObject.velocity).toFixed(2) + ' kg·m/s';
+            
+            // Stop conditions
+            if (physicsObject.x >= canvasWidth - physicsObject.radius - 20 || physicsObject.velocity < 0.01) {
+                physicsObject.isMoving = false;
+                physicsObject.velocity = 0;
+                physicsObject.acceleration = 0;
+                document.getElementById('startBtn').textContent = 'Apply Force';
+                document.getElementById('startBtn').disabled = false;
+            }
+            
+            // Continue animation if still moving
+            if (physicsObject.isMoving) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            drawSimulation();
+            updatePhysics();
+        }
+        
+        // Apply force to object
+        function applyForce() {
+            if (physicsObject.isMoving) return;
+            
+            const massSlider = document.getElementById('massSlider');
+            const forceSlider = document.getElementById('forceSlider');
+            const startBtn = document.getElementById('startBtn');
+            
+            // Get values from sliders
+            physicsObject.mass = parseFloat(massSlider.value);
+            physicsObject.force = parseFloat(forceSlider.value);
+            physicsObject.radius = Math.min(40, canvasWidth * 0.04 + physicsObject.mass * 1.5);
+            
+            // Reset position if needed
+            if (physicsObject.x > canvasWidth - 100) {
+                physicsObject.x = canvasWidth * 0.15;
+                physicsObject.startX = physicsObject.x;
+            }
+            
+            // Start movement
+            physicsObject.isMoving = true;
+            startBtn.textContent = 'Moving...';
+            startBtn.disabled = true;
+            
+            // Start animation
+            animate();
+        }
+        
+        // Reset simulation
+        function resetSimulation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            physicsObject.x = canvasWidth * 0.15;
+            physicsObject.startX = physicsObject.x;
+            physicsObject.velocity = 0;
+            physicsObject.acceleration = 0;
+            physicsObject.isMoving = false;
+            
+            document.getElementById('velocity').textContent = '0.00 m/s';
+            document.getElementById('acceleration').textContent = '0.00 m/s²';
+            document.getElementById('momentum').textContent = '0.00 kg·m/s';
+            
+            document.getElementById('startBtn').textContent = 'Apply Force';
+            document.getElementById('startBtn').disabled = false;
+            
+            drawSimulation();
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', initSimulation);
+        
+        // Prevent zoom on mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
