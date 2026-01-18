@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Resistance - Simple & Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0066cc, #004494);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .intro-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .intro-section h2 {
+            color: #0066cc;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+        }
+
+        .intro-section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+            margin: 20px 0;
+        }
+
+        .highlight-box strong {
+            color: #0066cc;
+            font-size: 1.15rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .simulation-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            color: #0066cc;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .canvas-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 400px;
+            display: block;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .click-hint {
+            text-align: center;
+            color: #666;
+            font-size: 0.95rem;
+            margin-top: 10px;
+            padding: 8px;
+            background: #fff3e0;
+            border-radius: 6px;
+        }
+
+        .measurements {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .measure-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            transition: transform 0.3s;
+        }
+
+        .measure-card:hover {
+            transform: translateY(-5px);
+            border-color: #0066cc;
+        }
+
+        .measure-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .measure-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0066cc;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .measure-unit {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #0066cc, #004494);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,102,204,0.3);
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .status-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #dc3545;
+            transition: all 0.3s;
+        }
+
+        .status-box.active {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .led {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #dc3545;
+            box-shadow: 0 0 15px #dc3545;
+            transition: all 0.3s;
+        }
+
+        .led.on {
+            background: #28a745;
+            box-shadow: 0 0 25px #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px #28a745; }
+            50% { box-shadow: 0 0 30px #28a745; }
+        }
+
+        .status-text {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .control-section p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .slider-box {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffc107;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-labels span {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .current-resistance {
+            font-size: 1.5rem;
+            color: #ff6b00;
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #28a745 0%, #ffc107 50%, #dc3545 100%);
+            border-radius: 10px;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #0066cc;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #0066cc;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .resistance-info {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-weight: 600;
+            color: #ff6b00;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0066cc, #0052a3);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,102,204,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-card h3 {
+            color: #0066cc;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .analogy-item {
+            display: flex;
+            align-items: start;
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .analogy-icon {
+            font-size: 1.5rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .analogy-text strong {
+            color: #0066cc;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps-list li {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border-left: 4px solid #9c27b0;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .steps-list li strong {
+            color: #9c27b0;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .example-card {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #ffc107;
+            transition: transform 0.3s;
+        }
+
+        .example-card:hover {
+            transform: scale(1.05);
+        }
+
+        .example-card strong {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .example-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .key-points {
+            background: linear-gradient(135deg, #fff8dc, #ffeaa7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffd93d;
+        }
+
+        .key-points h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .key-point {
+            padding: 10px 0;
+            font-size: 1.05rem;
+            color: #333;
+        }
+
+        .key-point strong {
+            color: #0066cc;
+        }
+
+        .color-high { color: #dc3545; font-weight: 700; }
+        .color-low { color: #28a745; font-weight: 700; }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .measurements {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Understanding Electric Resistance</h1>
+            <p class="subtitle">Learn how resistance controls electric current - Interactive & Simple!</p>
+        </header>
+
+        <div class="content">
+            <div class="intro-section">
+                <h2>🎓 What is Electric Resistance?</h2>
+                <p>
+                    <strong>Resistance</strong> is anything that makes it harder for electricity to flow through a wire. 
+                    Think of it like this: when water flows through a pipe, a narrow section slows down the water. 
+                    In the same way, resistance slows down the flow of electricity (current).
+                </p>
+                
+                <div class="highlight-box">
+                    <p><strong>The Golden Rule (Ohm's Law):</strong></p>
+                    <p style="font-size: 1.2rem; margin-top: 10px;">
+                        More Resistance = Less Current<br>
+                        Less Resistance = More Current
+                    </p>
+                    <p style="margin-top: 10px;">The formula is: <strong>Current (I) = Voltage (V) ÷ Resistance (R)</strong></p>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <div class="simulation-box">
+                    <h2 class="section-title">🔌 Interactive Circuit</h2>
+                    
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas" width="800" height="400"></canvas>
+                        <p class="click-hint">👆 Click the SWITCH to turn the circuit ON/OFF</p>
+                    </div>
+
+                    <div class="measurements">
+                        <div class="measure-card">
+                            <div class="measure-label">CURRENT</div>
+                            <div class="measure-value" id="currentDisplay">0.00</div>
+                            <div class="measure-unit">Amps (A)</div>
+                        </div>
+                        <div class="measure-card">
+                            <div class="measure-label">VOLTAGE</div>
+                            <div class="measure-value">9.0</div>
+                            <div class="measure-unit">Volts (V)</div>
+                        </div>
+                        <div class="measure-card">
+                            <div class="measure-label">RESISTANCE</div>
+                            <div class="measure-value" id="resistanceDisplay">10</div>
+                            <div class="measure-unit">Ohms (Ω)</div>
+                        </div>
+                    </div>
+
+                    <div class="formula-box">
+                        <div id="formulaDisplay">Current = 9V ÷ 10Ω = 0.00A</div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="control-section">
+                        <h3>📊 Circuit Status</h3>
+                        <div class="status-box" id="statusBox">
+                            <div class="led" id="statusLed"></div>
+                            <div class="status-text" id="statusText">Circuit is OFF</div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>🎚️ Change Resistance</h3>
+                        <p>Move the slider to change how much resistance is in the circuit. Watch what happens to the current!</p>
+                        
+                        <div class="slider-box">
+                            <div class="slider-labels">
+                                <span>Low<br>1Ω</span>
+                                <span class="current-resistance" id="sliderValue">10Ω</span>
+                                <span>High<br>100Ω</span>
+                            </div>
+                            <input type="range" id="resistanceSlider" min="1" max="100" value="10">
+                            <div class="resistance-info" id="resistanceInfo">
+                                Medium resistance - normal current
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>🎮 Controls</h3>
+                        <div class="button-group">
+                            <button id="toggleBtn">
+                                <span>⚡</span>
+                                <span>Toggle Switch</span>
+                            </button>
+                            <button id="resetBtn">
+                                <span>🔄</span>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>💧 Easy to Understand: The Water Analogy</h3>
+                
+                <div class="analogy-item">
+                    <div class="analogy-icon">🔋</div>
+                    <div class="analogy-text">
+                        <strong>Battery = Water Pump</strong>
+                        Creates pressure to push water (electricity) through pipes (wires)
+                    </div>
+                </div>
+
+                <div class="analogy-item">
+                    <div class="analogy-icon">💦</div>
+                    <div class="analogy-text">
+                        <strong>Current = Water Flow</strong>
+                        How much water flows per second (like amps in electricity)
+                    </div>
+                </div>
+
+                <div class="analogy-item">
+                    <div class="analogy-icon">🚰</div>
+                    <div class="analogy-text">
+                        <strong>Resistance = Narrow Pipe</strong>
+                        A narrow section that slows down the water flow
+                    </div>
+                </div>
+
+                <div class="analogy-item">
+                    <div class="analogy-icon">💡</div>
+                    <div class="analogy-text">
+                        <strong>Light Bulb = Water Wheel</strong>
+                        Uses the flowing energy to do work (create light)
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>👀 What You're Seeing in the Simulation</h3>
+                <ul class="steps-list">
+                    <li><strong>Blue dots</strong> are electrons (tiny particles carrying electricity)</li>
+                    <li><strong>Switch OFF:</strong> Path is broken, electrons can't flow, bulb stays dark</li>
+                    <li><strong>Switch ON:</strong> Complete path formed, electrons flow around the circuit</li>
+                    <li><strong>Resistor (zigzag):</strong> Makes it harder for electrons to pass through</li>
+                    <li><strong>Orange glow:</strong> Shows heat being produced by the resistor</li>
+                    <li><strong>Bright bulb:</strong> More current = brighter light</li>
+                    <li><strong>Dim bulb:</strong> Less current = dimmer light</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>🏠 Where Do We Use Resistance in Real Life?</h3>
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <strong>💡 Dimmer Switch</strong>
+                        <p>Increases resistance to make lights dimmer, decreases it to make them brighter</p>
+                    </div>
+                    <div class="example-card">
+                        <strong>🔥 Toaster</strong>
+                        <p>High resistance wire gets very hot and glows red to toast your bread</p>
+                    </div>
+                    <div class="example-card">
+                        <strong>📱 Phone Charger</strong>
+                        <p>Uses resistors to control current and safely charge your battery</p>
+                    </div>
+                    <div class="example-card">
+                        <strong>🌡️ Thermometer</strong>
+                        <p>Resistance changes with temperature - we measure this to read temperature</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-points">
+                <h3>🎯 Remember These Key Points</h3>
+                <div class="key-point">
+                    <strong>1.</strong> High Resistance → <span class="color-high">LOW Current</span> → Dim bulb
+                </div>
+                <div class="key-point">
+                    <strong>2.</strong> Low Resistance → <span class="color-low">HIGH Current</span> → Bright bulb
+                </div>
+                <div class="key-point">
+                    <strong>3.</strong> Resistance turns electrical energy into <strong>heat energy</strong>
+                </div>
+                <div class="key-point">
+                    <strong>4.</strong> Ohm's Law formula: <strong>I = V ÷ R</strong> (Current = Voltage ÷ Resistance)
+                </div>
+                <div class="key-point">
+                    <strong>5.</strong> Voltage stays the same (9V battery), but current changes when you change resistance
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>⚡ Electric Resistance Educational Simulator</strong></p>
+            <p>Learn by doing - Experiment with different resistance values and see what happens!</p>
+        </footer>
+    </div>
+
+    <script>
+        const config = {
+            voltage: 9.0,
+            resistance: 10
+        };
+
+        const state = {
+            isOn: false,
+            current: 0,
+            electrons: [],
+            animationId: null
+        };
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const currentDisplay = document.getElementById('currentDisplay');
+        const resistanceDisplay = document.getElementById('resistanceDisplay');
+        const formulaDisplay = document.getElementById('formulaDisplay');
+        const statusBox = document.getElementById('statusBox');
+        const statusLed = document.getElementById('statusLed');
+        const statusText = document.getElementById('statusText');
+        const resistanceSlider = document.getElementById('resistanceSlider');
+        const sliderValue = document.getElementById('sliderValue');
+        const resistanceInfo = document.getElementById('resistanceInfo');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const circuit = {
+            battery: { x: 120, y: 200 },
+            bulb: { x: 680, y: 200 },
+            switch: { x: 400, y: 80 },
+            resistor: { x: 280, y: 50, width: 240, height: 60 },
+            path: {
+                topLeft: { x: 120, y: 80 },
+                topRight: { x: 680, y: 80 },
+                bottomRight: { x: 680, y: 320 },
+                bottomLeft: { x: 120, y: 320 }
+            }
+        };
+
+        function createElectrons() {
+            const p = circuit.path;
+            const w = p.topRight.x - p.topLeft.x;
+            const h = p.bottomLeft.y - p.topLeft.y;
+            const total = 2 * (w + h);
+            const count = 45;
+            
+            state.electrons = [];
+            for (let i = 0; i < count; i++) {
+                state.electrons.push({
+                    pos: (i / count) * total,
+                    total: total
+                });
+            }
+        }
+
+        function getPos(d) {
+            const p = circuit.path;
+            const w = p.topRight.x - p.topLeft.x;
+            const h = p.bottomLeft.y - p.topLeft.y;
+            
+            if (d < w) {
+                return { x: p.bottomLeft.x + d, y: p.bottomLeft.y };
+            } else if (d < w + h) {
+                return { x: p.bottomRight.x, y: p.bottomRight.y - (d - w) };
+            } else if (d < 2 * w + h) {
+                return { x: p.topRight.x - (d - w - h), y: p.topRight.y };
+            } else {
+                return { x: p.topLeft.x, y: p.topLeft.y + (d - 2 * w - h) };
+            }
+        }
+
+        function drawBattery() {
+            const x = circuit.battery.x;
+            const y = circuit.battery.y;
+            
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(x - 35, y - 70, 70, 140);
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(x - 35, y - 70, 70, 22);
+            ctx.fillStyle = '#999';
+            ctx.fillRect(x - 12, y - 85, 24, 15);
+            
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(x - 35, y + 48, 70, 22);
+            ctx.fillStyle = '#999';
+            ctx.fillRect(x - 12, y + 70, 24, 15);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+', x, y - 45);
+            ctx.fillText('−', x, y + 40);
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('9V', x, y);
+            
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px Arial';
+            ctx.fillText('BATTERY', x, y + 100);
+        }
+
+        function drawBulb() {
+            const x = circuit.bulb.x;
+            const y = circuit.bulb.y;
+            
+            // Calculate actual filament characteristics based on current
+            let filamentTemp = 0; // Kelvin
+            let glowIntensity = 0;
+            let visibleGlow = false;
+            
+            if (state.isOn && state.current > 0) {
+                // Realistic physics: Power = I²R
+                const power = state.current * state.current * config.resistance;
+                
+                // More accurate temperature calculation for tungsten filament
+                filamentTemp = 300 + (power * 240); // Room temp + heating
+                glowIntensity = Math.min((filamentTemp - 1600) / 1400, 1);
+                visibleGlow = filamentTemp > 1600;
+                glowIntensity = Math.max(0, glowIntensity);
+            }
+            
+            // Save context for clipping
+            ctx.save();
+            
+            // Create clipping path for bulb glass
+            ctx.beginPath();
+            ctx.ellipse(x, y - 15, 28, 42, 0, 0, Math.PI * 2);
+            ctx.clip();
+            
+            // Draw intense light glow that fills the entire glass
+            if (state.isOn && visibleGlow && glowIntensity > 0) {
+                // Calculate color temperature (Black-body radiation)
+                let r, g, b;
+                
+                if (filamentTemp < 1700) {
+                    r = 255; g = 100; b = 0; // Deep orange
+                } else if (filamentTemp < 2200) {
+                    r = 255; g = 150; b = 50; // Orange
+                } else if (filamentTemp < 2700) {
+                    r = 255; g = 200; b = 100; // Warm white
+                } else if (filamentTemp < 3200) {
+                    r = 255; g = 230; b = 180; // Soft white
+                } else {
+                    r = 255; g = 245; b = 220; // Bright white
+                }
+                
+                // Main intense glow filling glass
+                const mainGlow = ctx.createRadialGradient(x, y - 15, 0, x, y - 15, 50);
+                mainGlow.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${glowIntensity * 0.9})`);
+                mainGlow.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, ${glowIntensity * 0.4})`);
+                mainGlow.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+                
+                ctx.fillStyle = mainGlow;
+                ctx.beginPath();
+                ctx.arc(x, y - 15, 50, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Hot spot at filament location
+                const hotspot = ctx.createRadialGradient(x, y - 10, 0, x, y - 10, 30);
+                hotspot.addColorStop(0, `rgba(255, 255, 220, ${glowIntensity * 1.2})`);
+                hotspot.addColorStop(0.7, `rgba(255, 240, 180, ${glowIntensity * 0.6})`);
+                hotspot.addColorStop(1, `rgba(255, 200, 100, 0)`);
+                
+                ctx.fillStyle = hotspot;
+                ctx.beginPath();
+                ctx.arc(x, y - 10, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Restore context
+            ctx.restore();
+            
+            // Draw glass bulb with transparency and highlights
+            // Outer glass with slight frost
+            ctx.fillStyle = state.isOn ? 'rgba(255, 255, 250, 0.15)' : 'rgba(245, 245, 245, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(x, y - 15, 28, 42, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Glass edge highlights
+            ctx.strokeStyle = state.isOn ? 'rgba(255, 255, 255, 0.4)' : 'rgba(230, 230, 230, 0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.ellipse(x, y - 15, 28, 42, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Left highlight
+            const highlight1 = ctx.createLinearGradient(x - 28, y - 15, x - 10, y - 15);
+            highlight1.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            highlight1.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.strokeStyle = highlight1;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 28, Math.PI * 0.7, Math.PI * 1.3);
+            ctx.stroke();
+            
+            // Right highlight
+            const highlight2 = ctx.createLinearGradient(x + 10, y - 15, x + 28, y - 15);
+            highlight2.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            highlight2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.strokeStyle = highlight2;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 28, Math.PI * 1.7, Math.PI * 0.3, true);
+            ctx.stroke();
+            
+            // Draw realistic screw base (E26 size)
+            // Base cylinder
+            ctx.fillStyle = '#8c8c8c';
+            ctx.beginPath();
+            ctx.roundRect(x - 20, y + 25, 40, 28, 4);
+            ctx.fill();
+            
+            // Screw threads
+            ctx.strokeStyle = '#666666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                const threadY = y + 28 + i * 6;
+                ctx.moveTo(x - 18, threadY);
+                ctx.lineTo(x + 18, threadY);
+            }
+            ctx.stroke();
+            
+            // Base ridges
+            ctx.strokeStyle = '#777777';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(x, y + 30, 18 - i*2, Math.PI * 0.2, Math.PI * 0.8);
+                ctx.stroke();
+            }
+            
+            // Bottom contact (center)
+            ctx.fillStyle = '#595959';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 53, 6, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Glass to metal transition (neck)
+            ctx.fillStyle = '#a6a6a6';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 27, 22, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw internal structure
+            // Support wires (inconel/molybdenum)
+            ctx.strokeStyle = '#a0a0a0';
+            ctx.lineWidth = 1.2;
+            
+            // Left support wire
+            ctx.beginPath();
+            ctx.moveTo(x - 12, y + 20);
+            ctx.lineTo(x - 12, y - 5);
+            ctx.stroke();
+            
+            // Right support wire
+            ctx.beginPath();
+            ctx.moveTo(x + 12, y + 20);
+            ctx.lineTo(x + 12, y - 5);
+            ctx.stroke();
+            
+            // Top support wire
+            ctx.beginPath();
+            ctx.moveTo(x, y + 20);
+            ctx.lineTo(x, y - 8);
+            ctx.stroke();
+            
+            // Draw ultra-realistic tungsten filament
+            if (state.isOn && filamentTemp > 300) {
+                // Filament glow colors based on actual incandescent temperatures
+                let filamentColor;
+                let innerGlowColor;
+                
+                if (filamentTemp < 1000) {
+                    filamentColor = '#4a4a4a'; // Black (not visible)
+                    innerGlowColor = 'rgba(139, 0, 0, 0)';
+                } else if (filamentTemp < 1600) {
+                    filamentColor = '#8b0000'; // Dark red
+                    innerGlowColor = 'rgba(139, 0, 0, 0.3)';
+                } else if (filamentTemp < 2000) {
+                    filamentColor = '#ff4500'; // Red-orange
+                    innerGlowColor = 'rgba(255, 69, 0, 0.5)';
+                } else if (filamentTemp < 2500) {
+                    filamentColor = '#ff8c00'; // Orange
+                    innerGlowColor = 'rgba(255, 140, 0, 0.7)';
+                } else if (filamentTemp < 3000) {
+                    filamentColor = '#ffd700'; // Yellow
+                    innerGlowColor = 'rgba(255, 215, 0, 0.9)';
+                } else {
+                    filamentColor = '#ffffe0'; // Bright white-yellow
+                    innerGlowColor = 'rgba(255, 255, 224, 1)';
+                }
+                
+                // Draw filament glow (visible through glass)
+                if (filamentTemp > 1600) {
+                    const filamentGlow = ctx.createRadialGradient(x, y - 10, 0, x, y - 10, 15);
+                    filamentGlow.addColorStop(0, innerGlowColor);
+                    filamentGlow.addColorStop(0.7, `rgba(255, 200, 100, ${glowIntensity * 0.3})`);
+                    filamentGlow.addColorStop(1, 'rgba(255, 150, 50, 0)');
+                    
+                    ctx.fillStyle = filamentGlow;
+                    ctx.beginPath();
+                    ctx.arc(x, y - 10, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw coiled tungsten filament (double-coil design)
+                ctx.strokeStyle = filamentColor;
+                ctx.lineWidth = filamentTemp > 2000 ? 2.5 : 2;
+                ctx.lineCap = 'round';
+                
+                // Main filament coil (8 loops)
+                const coilRadius = 9;
+                const coilHeight = 6;
+                ctx.beginPath();
+                
+                for (let i = 0; i <= 64; i++) {
+                    const angle = (i / 64) * Math.PI * 4; // 2 full coils
+                    const coilX = x + Math.cos(angle) * coilRadius;
+                    const coilY = (y - 10) + Math.sin(angle) * coilHeight;
+                    
+                    // Add micro-coiling effect
+                    const microRadius = 0.8;
+                    const microAngle = angle * 3;
+                    const finalX = coilX + Math.cos(microAngle) * microRadius;
+                    const finalY = coilY + Math.sin(microAngle) * microRadius * 0.5;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(finalX, finalY);
+                    } else {
+                        ctx.lineTo(finalX, finalY);
+                    }
+                }
+                ctx.stroke();
+                
+                // Draw hot spots on filament
+                if (filamentTemp > 2000) {
+                    ctx.fillStyle = '#ffffa0';
+                    for (let i = 0; i < 3; i++) {
+                        const angle = Math.PI * i * 1.5;
+                        const spotX = x + Math.cos(angle) * coilRadius;
+                        const spotY = (y - 10) + Math.sin(angle) * coilHeight;
+                        ctx.beginPath();
+                        ctx.arc(spotX, spotY, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else {
+                // Cold, unlit filament (tungsten gray)
+                ctx.strokeStyle = '#666666';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                // Straight tungsten wire
+                ctx.moveTo(x - 10, y - 10);
+                ctx.lineTo(x + 10, y - 10);
+                // Add slight sag for realism
+                ctx.quadraticCurveTo(x, y - 8, x - 10, y - 10);
+                ctx.stroke();
+            }
+            
+            // Glass imperfections and texture
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            for (let i = 0; i < 3; i++) {
+                const imperfectionX = x + (Math.random() - 0.5) * 15;
+                const imperfectionY = y - 15 + (Math.random() - 0.5) * 25;
+                ctx.beginPath();
+                ctx.arc(imperfectionX, imperfectionY, 2 + Math.random() * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Label
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('INCANDESCENT BULB', x, y + 70);
+            
+            // Temperature/brightness indicator with realistic descriptions
+            if (state.isOn && filamentTemp > 300) {
+                let statusText;
+                let statusColor;
+                
+                if (filamentTemp < 1000) {
+                    statusText = 'COLD';
+                    statusColor = '#6c757d';
+                } else if (filamentTemp < 1600) {
+                    statusText = 'WARMING UP';
+                    statusColor = '#dc3545';
+                } else if (filamentTemp < 2000) {
+                    statusText = 'DIM GLOW';
+                    statusColor = '#fd7e14';
+                } else if (filamentTemp < 2500) {
+                    statusText = 'NORMAL BRIGHT';
+                    statusColor = '#ffc107';
+                } else if (filamentTemp < 3000) {
+                    statusText = 'VERY BRIGHT';
+                    statusColor = '#28a745';
+                } else {
+                    statusText = 'OVERHEATING!';
+                    statusColor = '#dc3545';
+                }
+                
+                ctx.fillStyle = statusColor;
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText(statusText, x, y + 85);
+                
+                // Show actual temperature
+                ctx.fillStyle = '#666';
+                ctx.font = '9px Arial';
+                ctx.fillText(`${Math.round(filamentTemp)}K`, x, y + 100);
+                
+                // Show power consumption
+                const power = state.current * state.current * config.resistance;
+                ctx.fillText(`${power.toFixed(1)}W`, x, y + 115);
+            }
+        }
+
+        function drawSwitch() {
+            const x = circuit.switch.x;
+            const y = circuit.switch.y;
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(x - 40, y - 20, 80, 40);
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 40, y - 20, 80, 40);
+            
+            ctx.fillStyle = state.isOn ? '#27ae60' : '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(x - 20, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 20, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y);
+            if (state.isOn) {
+                ctx.lineTo(x + 20, y);
+            } else {
+                ctx.lineTo(x - 20, y - 25);
+            }
+            ctx.stroke();
+            
+            ctx.fillStyle = state.isOn ? '#27ae60' : '#e74c3c';
+            ctx.beginPath();
+            if (state.isOn) {
+                ctx.arc(x + 20, y, 6, 0, Math.PI * 2);
+            } else {
+                ctx.arc(x - 20, y - 25, 6, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('SWITCH', x, y + 35);
+        }
+
+        function drawResistor() {
+            const r = circuit.resistor;
+            const heat = state.isOn ? Math.min(state.current / 2, 1) : 0;
+            
+            if (heat > 0) {
+                const g = ctx.createRadialGradient(r.x + r.width/2, r.y + r.height/2, 0, 
+                                                   r.x + r.width/2, r.y + r.height/2, 100);
+                g.addColorStop(0, `rgba(255,100,0,${heat * 0.3})`);
+                g.addColorStop(1, 'rgba(255,100,0,0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(r.x - 50, r.y - 50, r.width + 100, r.height + 100);
+            }
+            
+            const gradient = ctx.createLinearGradient(r.x, r.y, r.x, r.y + r.height);
+            gradient.addColorStop(0, heat > 0 ? '#ff6b35' : '#8b4513');
+            gradient.addColorStop(1, heat > 0 ? '#ff4500' : '#654321');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(r.x, r.y, r.width, r.height);
+            
+            ctx.strokeStyle = heat > 0 ? '#ffd700' : '#d2691e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(r.x, r.y + r.height/2);
+            
+            const segments = 8;
+            const segmentWidth = r.width / segments;
+            for (let i = 0; i <= segments; i++) {
+                const x = r.x + i * segmentWidth;
+                const y = r.y + r.height/2 + (i % 2 === 0 ? -20 : 20);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(r.x - 40, r.y + r.height/2);
+            ctx.lineTo(r.x, r.y + r.height/2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(r.x + r.width, r.y + r.height/2);
+            ctx.lineTo(r.x + r.width + 40, r.y + r.height/2);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('RESISTOR', r.x + r.width/2, r.y + r.height + 20);
+        }
+
+        function drawWires() {
+            const p = circuit.path;
+            
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(p.topLeft.x, p.topLeft.y);
+            ctx.lineTo(p.topRight.x, p.topRight.y);
+            ctx.lineTo(p.bottomRight.x, p.bottomRight.y);
+            ctx.lineTo(p.bottomLeft.x, p.bottomLeft.y);
+            ctx.closePath();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(p.topLeft.x, p.topLeft.y);
+            ctx.lineTo(circuit.switch.x, circuit.switch.y - 20);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(circuit.switch.x, circuit.switch.y + 20);
+            ctx.lineTo(circuit.resistor.x - 40, circuit.resistor.y + circuit.resistor.height/2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(circuit.resistor.x + circuit.resistor.width + 40, 
+                      circuit.resistor.y + circuit.resistor.height/2);
+            ctx.lineTo(p.topRight.x, p.topRight.y);
+            ctx.stroke();
+        }
+
+        function drawElectrons() {
+            if (!state.isOn) return;
+            
+            const speed = Math.max(0.5, Math.min(2, 9 / config.resistance));
+            
+            state.electrons.forEach(e => {
+                e.pos += speed;
+                if (e.pos >= e.total) e.pos = 0;
+                
+                const pos = getPos(e.pos);
+                
+                if (state.current > 0) {
+                    const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 10);
+                    g.addColorStop(0, `rgba(64,156,255,${0.8 + state.current * 0.2})`);
+                    g.addColorStop(1, 'rgba(64,156,255,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.fillStyle = '#3498db';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(pos.x - 1, pos.y - 1, 1, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function calculateCurrent() {
+            if (!state.isOn) return 0;
+            return config.voltage / config.resistance;
+        }
+
+        function updateDisplay() {
+            state.current = calculateCurrent();
+            
+            currentDisplay.textContent = state.current.toFixed(2);
+            resistanceDisplay.textContent = config.resistance;
+            formulaDisplay.textContent = `Current = ${config.voltage}V ÷ ${config.resistance}Ω = ${state.current.toFixed(2)}A`;
+            
+            if (state.isOn) {
+                statusBox.classList.add('active');
+                statusLed.classList.add('on');
+                statusText.textContent = 'Circuit is ON - Current is flowing';
+            } else {
+                statusBox.classList.remove('active');
+                statusLed.classList.remove('on');
+                statusText.textContent = 'Circuit is OFF';
+            }
+            
+            sliderValue.textContent = `${config.resistance}Ω`;
+            
+            let info = '';
+            let color = '';
+            if (config.resistance <= 3) {
+                info = 'Very low resistance - DANGER: High current!';
+                color = '#dc3545';
+            } else if (config.resistance <= 10) {
+                info = 'Low resistance - High current';
+                color = '#28a745';
+            } else if (config.resistance <= 30) {
+                info = 'Medium resistance - Normal current';
+                color = '#ffc107';
+            } else if (config.resistance <= 70) {
+                info = 'High resistance - Low current';
+                color = '#fd7e14';
+            } else {
+                info = 'Very high resistance - Very low current';
+                color = '#6c757d';
+            }
+            resistanceInfo.textContent = info;
+            resistanceInfo.style.color = color;
+        }
+
+        function drawCircuit() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawWires();
+            drawBattery();
+            drawResistor();
+            drawBulb();
+            drawSwitch();
+            drawElectrons();
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Click here to toggle switch', circuit.switch.x, circuit.switch.y - 40);
+        }
+
+        function animate() {
+            drawCircuit();
+            updateDisplay();
+            state.animationId = requestAnimationFrame(animate);
+        }
+
+        function handleCanvasClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const switchX = circuit.switch.x;
+            const switchY = circuit.switch.y;
+            const distance = Math.sqrt((x - switchX) ** 2 + (y - switchY) ** 2);
+            
+            if (distance < 40) {
+                toggleCircuit();
+            }
+        }
+
+        function toggleCircuit() {
+            state.isOn = !state.isOn;
+            updateDisplay();
+            
+            if (state.isOn) {
+                createElectrons();
+            }
+        }
+
+        function handleResistanceChange() {
+            config.resistance = parseInt(resistanceSlider.value);
+            updateDisplay();
+        }
+
+        function resetSimulation() {
+            config.resistance = 10;
+            state.isOn = false;
+            resistanceSlider.value = 10;
+            createElectrons();
+            updateDisplay();
+        }
+
+        function init() {
+            canvas.addEventListener('click', handleCanvasClick);
+            resistanceSlider.addEventListener('input', handleResistanceChange);
+            toggleBtn.addEventListener('click', toggleCircuit);
+            resetBtn.addEventListener('click', resetSimulation);
+            
+            createElectrons();
+            animate();
+            updateDisplay();
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

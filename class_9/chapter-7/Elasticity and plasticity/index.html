@@ -2,240 +2,462 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Elastic vs Plastic: 9th Grade Physics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elastic vs Plastic - Interactive Physics Lab</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #222; }
-        
-        /* The Control Panel */
-        #ui-panel {
-            position: absolute;
-            top: 20px; left: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .lab-container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .lab-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .lab-header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .lab-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .lab-main {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .lab-sidebar {
             width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            color: #333;
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #e9ecef;
         }
 
-        h2 { margin-top: 0; font-size: 1.2rem; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 10px;}
-        
-        .control-group { margin-bottom: 20px; }
-        
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        
-        /* Making the slider look nice */
-        input[type=range] {
-            width: 100%;
-            cursor: pointer;
+        .lab-canvas-area {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .status { font-size: 0.9rem; margin-top: 5px; color: #666; }
-        .force-val { color: #d00; font-weight: bold; }
+        .material-selector {
+            margin-bottom: 30px;
+        }
 
-        button {
+        .material-btn {
             width: 100%;
-            padding: 10px;
-            background: #333;
-            color: white;
+            padding: 18px;
+            margin: 10px 0;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
-        button:hover { background: #555; }
 
-        /* Floating labels above 3D objects */
-        .world-label {
-            position: absolute;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 5px 10px;
+        .material-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .material-btn.active {
+            box-shadow: 0 0 0 3px rgba(0, 176, 155, 0.3);
+        }
+
+        .material-icon {
+            font-size: 1.8rem;
+        }
+
+        .elastic-btn.active {
+            background: linear-gradient(135deg, #00b09b20, #96c93d20);
+            color: #00b09b;
+        }
+
+        .plastic-btn.active {
+            background: linear-gradient(135deg, #ff416c20, #ff4b2b20);
+            color: #ff416c;
+        }
+
+        .property-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #e9ecef;
             border-radius: 4px;
-            pointer-events: none;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00b09b;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
             font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #e9ecef;
+        }
+
+        #physicsCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+
+        #physicsCanvas:active {
+            cursor: grabbing;
+        }
+
+        .physics-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .data-display {
+            font-size: 2rem;
             font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .elastic-data {
+            color: #00b09b;
+        }
+
+        .plastic-data {
+            color: #ff416c;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .real-time-graph {
+            height: 100px;
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .auto-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #fff8e1, #ffe082);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 5px solid #ff9800;
+        }
+
+        .instructions h4 {
+            color: #ff9800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions p {
+            color: #5d4037;
+            line-height: 1.6;
+        }
+
+        .mode-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .elastic-mode {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+        }
+
+        .plastic-mode {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .help-tooltip {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            max-width: 300px;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .lab-main {
+                flex-direction: column;
+            }
+            
+            .lab-sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .lab-canvas-area {
+                order: 1;
+            }
         }
     </style>
 </head>
 <body>
-
-<div id="ui-panel">
-    <h2>🧪 Material Science Lab</h2>
-    
-    <div class="control-group">
-        <label>Apply Pulling Force (Stress)</label>
-        <input type="range" id="forceSlider" min="0" max="1.5" step="0.01" value="0">
-        <div class="status">Force: <span id="forceDisplay" class="force-val">0.00</span> N</div>
+    <div class="lab-container">
+        <div class="lab-header">
+            <h1>⚛️ Physics Lab: Elasticity and  Plasticity</h1>
+          
+        </div>
+        
+        <div class="lab-main">
+            <div class="lab-sidebar">
+                <div class="material-selector">
+                    <h3>🎯 Select Material Type</h3>
+                    <button class="material-btn elastic-btn active" onclick="switchMaterial('elastic')">
+                        <span class="material-icon">🌀</span>
+                        <div>
+                            <div>Elastic Material</div>
+                            <small style="font-weight: normal; opacity: 0.8;">Springs back to original shape</small>
+                        </div>
+                    </button>
+                    
+                    <button class="material-btn plastic-btn" onclick="switchMaterial('plastic')">
+                        <span class="material-icon">🧱</span>
+                        <div>
+                            <div>Plastic Material</div>
+                            <small style="font-weight: normal; opacity: 0.8;">Keeps deformed shape</small>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="property-controls">
+                    <h3>⚙️ Adjust Properties</h3>
+                    
+                    <div class="control-group">
+                        <label for="stiffness">Material Stiffness</label>
+                        <input type="range" id="stiffness" class="slider" min="0.01" max="0.1" step="0.01" value="0.05">
+                        <div class="value-display">
+                            <span>Soft</span>
+                            <span id="stiffnessValue">0.05</span>
+                            <span>Stiff</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="damping">Energy Loss</label>
+                        <input type="range" id="damping" class="slider" min="0.8" max="0.99" step="0.01" value="0.95">
+                        <div class="value-display">
+                            <span>Low</span>
+                            <span id="dampingValue">0.95</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="yieldStrength">Yield Strength</label>
+                        <input type="range" id="yieldStrength" class="slider" min="10" max="50" step="1" value="25">
+                        <div class="value-display">
+                            <span>Low</span>
+                            <span id="yieldStrengthValue">25 N</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h4>📖 How to Use:</h4>
+                    <p>1. Click and drag the material on canvas</p>
+                    <p>2. Watch real-time physics data</p>
+                    <p>3. Switch between Elastic/Plastic modes</p>
+                    <p>4. Adjust properties with sliders</p>
+                </div>
+            </div>
+            
+            <div class="lab-canvas-area">
+                <div class="canvas-container">
+                    <div id="modeIndicator" class="mode-indicator elastic-mode">ELASTIC MODE</div>
+                    <canvas id="physicsCanvas" width="800" height="500"></canvas>
+                    <div class="help-tooltip" id="helpTooltip">Click and drag to apply force</div>
+                </div>
+                
+                <div class="physics-info">
+                    <div class="info-card">
+                        <h3>📏 Current Length</h3>
+                        <div class="data-display" id="currentLength">300 px</div>
+                        <div class="info-label">Original: <span id="originalLength">300 px</span></div>
+                        <div class="real-time-graph">
+                            <canvas id="lengthGraph" width="200" height="60"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>💪 Applied Force</h3>
+                        <div class="data-display" id="appliedForce">0 N</div>
+                        <div class="info-label">Yield Point: <span id="yieldPoint">25 N</span></div>
+                        <div class="real-time-graph">
+                            <canvas id="forceGraph" width="200" height="60"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>📈 Deformation</h3>
+                        <div class="data-display" id="deformation">0%</div>
+                        <div class="info-label" id="deformationType">Elastic (Temporary)</div>
+                        <div class="real-time-graph">
+                            <canvas id="deformGraph" width="200" height="60"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn reset-btn" onclick="resetExperiment()">
+                        <span>🔄</span> Reset Experiment
+                    </button>
+                    <button class="action-btn auto-btn" onclick="toggleAutoStretch()">
+                        <span>⚡</span> <span id="autoBtnText">Start Auto-Stretch</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div style="font-size: 0.85rem; line-height: 1.4; margin-bottom: 15px; background: #f0f0f0; padding: 10px; border-radius: 5px;">
-        <strong>Look closely:</strong><br>
-        Notice how the bars get <em>thinner</em> as they get longer? That is real physics!
-    </div>
-
-    <button onclick="resetExperiment()">🔄 Reset Experiment</button>
-</div>
-
-<div id="label-elastic" class="world-label">Elastic (Rubber)</div>
-<div id="label-plastic" class="world-label">Plastic (Gum)</div>
-
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    // 1. SCENE SETUP
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xa0a0a0);
-    scene.fog = new THREE.Fog(0xa0a0a0, 10, 50); // Adds depth
-
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 5, 10);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true; // Enable shadows for realism
-    document.body.appendChild(renderer.domElement);
-
-    // 2. LIGHTING (Make it look real)
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-    hemiLight.position.set(0, 20, 0);
-    scene.add(hemiLight);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-    dirLight.position.set(5, 10, 7);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    scene.add(dirLight);
-
-    // 3. THE FLOOR (Grounding the physics)
-    const mesh = new THREE.Mesh( new THREE.PlaneGeometry(100, 100), new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
-    mesh.rotation.x = - Math.PI / 2;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-    
-    // Grid helper
-    const grid = new THREE.GridHelper(100, 100, 0x000000, 0x000000);
-    grid.material.opacity = 0.2;
-    grid.material.transparent = true;
-    scene.add(grid);
-
-    // 4. THE MATERIALS (The Bars)
-    // Geometry logic: We move the pivot point to the BOTTOM of the cylinder so it grows upwards
-    const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
-    geometry.translate(0, 0.5, 0); // Shift geometry so y=0 is the bottom
-
-    // Elastic Bar (Blue)
-    const elasticMat = new THREE.MeshStandardMaterial({ color: 0x2266cc, roughness: 0.4, metalness: 0.2 });
-    const elasticBar = new THREE.Mesh(geometry, elasticMat);
-    elasticBar.position.set(-2, 0, 0);
-    elasticBar.castShadow = true;
-    scene.add(elasticBar);
-
-    // Plastic Bar (Red)
-    const plasticMat = new THREE.MeshStandardMaterial({ color: 0xdd3333, roughness: 0.4, metalness: 0.2 });
-    const plasticBar = new THREE.Mesh(geometry, plasticMat);
-    plasticBar.position.set(2, 0, 0);
-    plasticBar.castShadow = true;
-    scene.add(plasticBar);
-
-    // 5. CONTROLS & LOGIC
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.target.set(0, 2, 0);
-
-    const slider = document.getElementById('forceSlider');
-    const display = document.getElementById('forceDisplay');
-    const labelElastic = document.getElementById('label-elastic');
-    const labelPlastic = document.getElementById('label-plastic');
-
-    // Variables for physics state
-    let maxPlasticDeformation = 1.0; // Starts at scale 1.0
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-
-        // --- THE PHYSICS ENGINE ---
+    <script src="index.js"></script>
         
-        // 1. Get the Force (Stress)
-        const force = parseFloat(slider.value);
-        display.innerText = (force * 100).toFixed(0); // Display as realistic Newtons
-
-        // Calculate Stretch (Strain)
-        const targetScale = 1 + force; // If force is 0, scale is 1. If force is 1, scale is 2.
-
-        // --- ELASTIC BEHAVIOR (Blue) ---
-        // It simply follows the slider.
-        elasticBar.scale.y = targetScale;
-        
-        // REALISM: Poisson Effect (Conservation of Volume)
-        // As it gets taller (y), it must get thinner (x and z).
-        // Formula: NewWidth = 1 / sqrt(NewHeight)
-        const thinning = 1 / Math.sqrt(elasticBar.scale.y);
-        elasticBar.scale.x = thinning;
-        elasticBar.scale.z = thinning;
-
-        // --- PLASTIC BEHAVIOR (Red) ---
-        // It only grows if we pull harder than before. It never shrinks.
-        if (targetScale > maxPlasticDeformation) {
-            maxPlasticDeformation = targetScale;
-        }
-        plasticBar.scale.y = maxPlasticDeformation;
-        
-        // Plastic Thinning (remains thin permanently)
-        const plasticThinning = 1 / Math.sqrt(maxPlasticDeformation);
-        plasticBar.scale.x = plasticThinning;
-        plasticBar.scale.z = plasticThinning;
-
-        // --- UPDATE LABELS POSITIONS ---
-        updateLabel(elasticBar, labelElastic);
-        updateLabel(plasticBar, labelPlastic);
-
-        renderer.render(scene, camera);
-    }
-
-    // Helper to keep text floating above the bars
-    function updateLabel(mesh, div) {
-        const tempV = new THREE.Vector3();
-        // Get the top center of the bar
-        tempV.setFromMatrixPosition(mesh.matrixWorld);
-        tempV.y += mesh.scale.y + 0.5; 
-
-        // Project to 2D screen space
-        tempV.project(camera);
-        const x = (tempV.x * .5 + .5) * window.innerWidth;
-        const y = (-(tempV.y * .5) + .5) * window.innerHeight;
-
-        div.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-    }
-
-    // Handle Window Resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Reset Button Logic
-    window.resetExperiment = () => {
-        // Animate slider back to 0
-        slider.value = 0;
-        maxPlasticDeformation = 1.0;
-    };
-
-    animate();
-</script>
+    </script>
 </body>
 </html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohm's Law Circuit Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Left Side Panel - Controls */
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Right Side - Circuit Display */
+        .right-panel {
+            flex: 2;
+            min-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .circuit-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #circuit-canvas {
+            background: #0c0c2b;
+            border-radius: 10px;
+            width: 100%;
+            height: 400px;
+            cursor: pointer;
+        }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #4fc3f7;
+        }
+
+        .circuit-state {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .state-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+
+        .state-indicator.active {
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+
+        .state-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .state-text.open {
+            color: #f44336;
+        }
+
+        .state-text.closed {
+            color: #4caf50;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #2196f3;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 0 #0d47a1;
+        }
+
+        button:hover {
+            background: #42a5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #0d47a1;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #0d47a1;
+        }
+
+        .instructions {
+            line-height: 1.6;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .components {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .component {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .component-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff9800;
+        }
+
+        .component-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .current-flow {
+            height: 4px;
+            background: linear-gradient(90deg, #ff9800, #ff5722);
+            border-radius: 2px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .current-flow.active {
+            opacity: 1;
+            animation: flow 2s linear infinite;
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .measurements {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .measurement {
+            text-align: center;
+        }
+
+        .measurement-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+
+        .slider-container {
+            margin: 15px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+
+        .ohms-law-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.4rem;
+            margin: 10px 0;
+        }
+
+        .formula {
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        .formula-values {
+            color: #ff9800;
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .right-panel {
+                min-width: 100%;
+            }
+            
+            .left-panel {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Ohm's Law Circuit Simulator</h1>
+            <p class="subtitle">
+                Interactive visualization of electrical circuits demonstrating Ohm's Law: V = I × R
+            </p>
+        </header>
+
+        <div class="content">
+            <!-- LEFT PANEL - CONTROLS -->
+            <div class="left-panel">
+                <div class="control-panel">
+                    <!-- Circuit Controls Section -->
+                    <div class="panel-section">
+                        <h2>Circuit Controls</h2>
+                        <div class="controls">
+                            <button id="toggle-circuit">Toggle Switch (Open/Close Circuit)</button>
+                            
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Voltage (V):</span>
+                                    <span id="voltage-slider-value">1.50 V</span>
+                                </div>
+                                <input type="range" min="0.5" max="12" step="0.1" value="1.5" class="slider" id="voltage-slider">
+                            </div>
+                            
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Resistance (Ω):</span>
+                                    <span id="resistance-slider-value">10.0 Ω</span>
+                                </div>
+                                <input type="range" min="1" max="100" step="1" value="10" class="slider" id="resistance-slider">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Circuit Status Section -->
+                    <div class="panel-section">
+                        <h2>Circuit Status</h2>
+                        <div class="circuit-state">
+                            <div class="state-indicator"></div>
+                            <div class="state-text open">Circuit Open - No Current Flow</div>
+                        </div>
+                        <div class="current-flow"></div>
+                    </div>
+
+                    <!-- Ohm's Law Display Section -->
+                    <div class="panel-section">
+                        <h2>Ohm's Law Display</h2>
+                        <div class="ohms-law-display">
+                            <span class="formula">V = I × R</span><br>
+                            <span class="formula-values">
+                                <span id="voltage-display">1.50</span> = 
+                                <span id="current-display">0.00</span> × 
+                                <span id="resistance-display">10.0</span>
+                            </span>
+                        </div>
+                        <div class="explanation">
+                            <p><strong>Ohm's Law:</strong> Voltage (V) = Current (I) × Resistance (R)</p>
+                            <p>When the circuit is closed, current flows according to this formula.</p>
+                        </div>
+                    </div>
+
+                    <!-- Circuit Components Section -->
+                    <div class="panel-section">
+                        <h2>Circuit Components</h2>
+                        <div class="components">
+                            <div class="component">
+                                <div class="component-name">Power Source (V)</div>
+                                <div class="component-desc">Provides voltage to push electrons</div>
+                            </div>
+                            <div class="component">
+                                <div class="component-name">Switch</div>
+                                <div class="component-desc">Controls current flow</div>
+                            </div>
+                            <div class="component">
+                                <div class="component-name">Resistor (R)</div>
+                                <div class="component-desc">Opposes current flow</div>
+                            </div>
+                            <div class="component">
+                                <div class="component-name">Light Bulb</div>
+                                <div class="component-desc">Visual indicator of current</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL - CIRCUIT VISUALIZATION -->
+            <div class="right-panel">
+                <div class="circuit-container">
+                    <h2>Circuit Diagram</h2>
+                    <canvas id="circuit-canvas" width="800" height="400"></canvas>
+                    <div class="measurements">
+                        <div class="measurement">
+                            <div>Voltage (V)</div>
+                            <div class="measurement-value" id="voltage-value">1.50 V</div>
+                        </div>
+                        <div class="measurement">
+                            <div>Current (I)</div>
+                            <div class="measurement-value" id="current-value">0.00 A</div>
+                        </div>
+                        <div class="measurement">
+                            <div>Resistance (R)</div>
+                            <div class="measurement-value" id="resistance-value">10.0 Ω</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="panel-section instructions">
+                    <h2>How It Works</h2>
+                    <ul>
+                        <li><strong>Close the circuit</strong> by toggling the switch to see current flow</li>
+                        <li><strong>Adjust voltage</strong> (V) - increasing voltage increases current</li>
+                        <li><strong>Adjust resistance</strong> (R) - increasing resistance decreases current</li>
+                        <li>Watch how <strong>Ohm's Law (V = I × R)</strong> is always true</li>
+                        <li>Notice that current only flows when the circuit is complete (closed)</li>
+                        <li><strong>Click directly on the switch</strong> in the diagram to open/close the circuit</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Ohm's Law Circuit Simulator | V = I × R | Interactive Visualization of Electrical Circuits</p>
+        </footer>
+    </div>
+
+    <script>
+        // Circuit state
+        let circuitClosed = false;
+        let current = 0;
+        let voltage = 1.5; // Volts
+        let resistance = 10; // Ohms
+
+        // Get canvas context
+        const canvas = document.getElementById('circuit-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Component positions and dimensions
+        const components = {
+            battery: { x: 100, y: 200, width: 60, height: 80 },
+            switch: { x: 350, y: 200, width: 80, height: 40 },
+            bulb: { x: 600, y: 200, width: 60, height: 80 },
+            resistor: { x: 450, y: 160, width: 40, height: 80 },
+            wires: {
+                top: { x: 100, y: 160, width: 600, height: 5 },
+                bottom: { x: 100, y: 240, width: 600, height: 5 },
+                left: { x: 100, y: 160, width: 5, height: 80 },
+                right: { x: 700, y: 160, width: 5, height: 80 },
+            }
+        };
+
+        // Animation control
+        let animationId = null;
+
+        // Draw the complete circuit (static parts)
+        function drawCircuit() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw wires
+            drawWires();
+
+            // Draw components
+            drawBattery();
+            drawResistor();
+            drawSwitch();
+            drawBulb();
+            
+            // Draw labels for Ohm's Law
+            drawLabels();
+        }
+
+        // Draw all wires
+        function drawWires() {
+            ctx.fillStyle = '#333';
+
+            // Top wire
+            ctx.fillRect(
+                components.wires.top.x,
+                components.wires.top.y,
+                components.wires.top.width,
+                components.wires.top.height
+            );
+
+            // Bottom wire
+            ctx.fillRect(
+                components.wires.bottom.x,
+                components.wires.bottom.y,
+                components.wires.bottom.width,
+                components.wires.bottom.height
+            );
+
+            // Left wire
+            ctx.fillRect(
+                components.wires.left.x,
+                components.wires.left.y,
+                components.wires.left.width,
+                components.wires.left.height
+            );
+
+            // Right wire
+            ctx.fillRect(
+                components.wires.right.x,
+                components.wires.right.y,
+                components.wires.right.width,
+                components.wires.right.height
+            );
+
+            // Add wire connections
+            ctx.fillStyle = '#555';
+            ctx.beginPath();
+            ctx.arc(components.wires.top.x, components.wires.top.y + components.wires.top.height / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(components.wires.top.x + components.wires.top.width, components.wires.top.y + components.wires.top.height / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(components.wires.bottom.x, components.wires.bottom.y + components.wires.bottom.height / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(components.wires.bottom.x + components.wires.bottom.width, components.wires.bottom.y + components.wires.bottom.height / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw the battery
+        function drawBattery() {
+            const bat = components.battery;
+
+            // Battery body
+            ctx.fillStyle = '#333';
+            ctx.fillRect(bat.x, bat.y, bat.width, bat.height);
+
+            // Positive terminal
+            ctx.fillStyle = '#e53935';
+            ctx.fillRect(bat.x - 5, bat.y + 10, 10, 20);
+
+            // Negative terminal
+            ctx.fillStyle = '#1565c0';
+            ctx.fillRect(bat.x - 5, bat.y + bat.height - 30, 10, 20);
+
+            // Plus sign
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('+', bat.x + bat.width / 2 - 5, bat.y + 25);
+
+            // Minus sign
+            ctx.fillText('-', bat.x + bat.width / 2 - 5, bat.y + bat.height - 15);
+
+            // Label
+            ctx.font = '14px Arial';
+            ctx.fillText('Battery', bat.x + bat.width / 2 - 25, bat.y + bat.height + 20);
+        }
+
+        // Draw the resistor
+        function drawResistor() {
+            const res = components.resistor;
+            
+            // Resistor body (zigzag pattern)
+            ctx.strokeStyle = '#ff9800';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(res.x, res.y + 10);
+            
+            // Draw zigzag pattern
+            const segments = 6;
+            const segmentWidth = res.width / segments;
+            for (let i = 0; i <= segments; i++) {
+                const x = res.x + i * segmentWidth;
+                const y = res.y + 10 + (i % 2 === 0 ? 0 : 20);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // Resistor ends
+            ctx.fillStyle = '#ff9800';
+            ctx.fillRect(res.x - 5, res.y + 8, 5, 4);
+            ctx.fillRect(res.x + res.width, res.y + 8, 5, 4);
+            
+            // Label
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.fillText('Resistor', res.x + res.width / 2 - 25, res.y + res.height + 20);
+        }
+
+        // Draw the switch
+        function drawSwitch() {
+            const sw = components.switch;
+
+            // Switch base
+            ctx.fillStyle = '#757575';
+            ctx.fillRect(sw.x, sw.y, sw.width, sw.height);
+
+            // Switch contacts
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(sw.x + 20, sw.y + sw.height / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(sw.x + sw.width - 20, sw.y + sw.height / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Switch lever
+            ctx.strokeStyle = '#212121';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+
+            if (circuitClosed) {
+                // Closed position - lever connects the contacts
+                ctx.moveTo(sw.x + 20, sw.y + sw.height / 2);
+                ctx.lineTo(sw.x + sw.width - 20, sw.y + sw.height / 2);
+            } else {
+                // Open position - lever is angled
+                ctx.moveTo(sw.x + 20, sw.y + sw.height / 2);
+                ctx.lineTo(sw.x + 20 + 30, sw.y + sw.height / 2 - 20);
+            }
+
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.fillText('Switch', sw.x + sw.width / 2 - 20, sw.y + sw.height + 20);
+        }
+
+        // Draw a realistic bulb
+        function drawBulb() {
+            const bulb = components.bulb;
+            const centerX = bulb.x + bulb.width / 2;
+            const centerY = bulb.y + 30;
+
+            // Draw glow effect when bulb is on
+            if (circuitClosed && current > 0) {
+                // Outer glow
+                const gradient = ctx.createRadialGradient(
+                    centerX, centerY, 0,
+                    centerX, centerY, 50
+                );
+                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+                gradient.addColorStop(0.7, 'rgba(255, 255, 150, 0.4)');
+                gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Bulb glass (outer)
+            ctx.fillStyle = (circuitClosed && current > 0) ? '#ffffcc' : '#f0f0f0';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 25, 35, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bulb glass (inner highlight)
+            ctx.fillStyle = (circuitClosed && current > 0) ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.5)';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 8, centerY - 10, 10, 20, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bulb base (metal part)
+            ctx.fillStyle = '#b0b0b0';
+            ctx.beginPath();
+            ctx.moveTo(bulb.x + 10, bulb.y + 40);
+            ctx.lineTo(bulb.x + bulb.width - 10, bulb.y + 40);
+            ctx.lineTo(bulb.x + bulb.width - 5, bulb.y + bulb.height - 10);
+            ctx.lineTo(bulb.x + 5, bulb.y + bulb.height - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            // Base screw threads
+            ctx.strokeStyle = '#909090';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(bulb.x + 10, bulb.y + 45);
+            ctx.lineTo(bulb.x + bulb.width - 10, bulb.y + 45);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(bulb.x + 12, bulb.y + 50);
+            ctx.lineTo(bulb.x + bulb.width - 12, bulb.y + 50);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(bulb.x + 8, bulb.y + 55);
+            ctx.lineTo(bulb.x + bulb.width - 8, bulb.y + 55);
+            ctx.stroke();
+
+            // Filament supports
+            ctx.strokeStyle = '#707070';
+            ctx.lineWidth = 2;
+
+            // Left support
+            ctx.beginPath();
+            ctx.moveTo(centerX - 10, centerY + 15);
+            ctx.lineTo(centerX - 5, centerY - 5);
+            ctx.stroke();
+
+            // Right support
+            ctx.beginPath();
+            ctx.moveTo(centerX + 10, centerY + 15);
+            ctx.lineTo(centerX + 5, centerY - 5);
+            ctx.stroke();
+
+            // Filament
+            ctx.strokeStyle = (circuitClosed && current > 0) ? '#ffeb3b' : '#a0a0a0';
+            ctx.lineWidth = (circuitClosed && current > 0) ? 3 : 2;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX - 5, centerY - 5);
+            ctx.lineTo(centerX, centerY);
+            ctx.lineTo(centerX + 5, centerY - 5);
+            ctx.stroke();
+
+            // Contact points at base
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(bulb.x + 15, bulb.y + bulb.height - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(bulb.x + bulb.width - 15, bulb.y + bulb.height - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.fillText('Light Bulb', centerX - 25, bulb.y + bulb.height + 20);
+        }
+
+        // Draw labels for V, I, R
+        function drawLabels() {
+            ctx.fillStyle = '#4fc3f7';
+            ctx.font = 'bold 16px Arial';
+            
+            // Voltage label at battery
+            ctx.fillText('V', components.battery.x + components.battery.width / 2 - 5, components.battery.y - 10);
+            
+            // Current label
+            ctx.fillText('I', 750, 150);
+            
+            // Resistance label
+            ctx.fillText('R', components.resistor.x + components.resistor.width / 2 - 5, components.resistor.y - 10);
+        }
+
+        // Draw current flow animation
+        function drawCurrentFlow(timeMs) {
+            const t = (timeMs || Date.now()) / 1000; // seconds
+
+            // Path coordinates (follow the full rectangular loop)
+            const topY = components.wires.top.y + 2;
+            const bottomY = components.wires.bottom.y + 2;
+            const leftX = components.wires.left.x + 2;
+            const rightX = components.wires.top.x + components.wires.top.width - 2;
+
+            // Build segments for the loop (top -> right -> bottom -> left)
+            const segments = [
+                { x1: leftX, y1: topY, x2: rightX, y2: topY }, // top
+                { x1: rightX, y1: topY, x2: rightX, y2: bottomY }, // right
+                { x1: rightX, y1: bottomY, x2: leftX, y2: bottomY }, // bottom
+                { x1: leftX, y1: bottomY, x2: leftX, y2: topY }, // left
+            ];
+
+            // Calculate segment lengths and cumulative lengths
+            const segLens = segments.map(s => Math.hypot(s.x2 - s.x1, s.y2 - s.y1));
+            const cumLens = [];
+            let totalLen = 0;
+            for (let L of segLens) {
+                cumLens.push(totalLen);
+                totalLen += L;
+            }
+
+            // Helper: get point (x,y) on path given distance along path (0..totalLen)
+            function getPointOnPath(d) {
+                d = ((d % totalLen) + totalLen) % totalLen; // wrap
+                let segIndex = segLens.findIndex((L, i) => d >= cumLens[i] && d < cumLens[i] + L);
+                if (segIndex === -1) segIndex = segLens.length - 1;
+                const seg = segments[segIndex];
+                const segStart = cumLens[segIndex];
+                const segLen = segLens[segIndex];
+                const localT = (d - segStart) / segLen;
+                const x = seg.x1 + (seg.x2 - seg.x1) * localT;
+                const y = seg.y1 + (seg.y2 - seg.y1) * localT;
+                return { x, y };
+            }
+
+            // Parameters: electrons only, all moving the same direction (one-way)
+            const numElectrons = 18;
+            const speedElectrons = 140 * (current / 0.15); // Speed proportional to current
+            const eSpacing = totalLen / numElectrons;
+
+            // Draw electrons (negative charges) - blue - single direction around the loop
+            ctx.fillStyle = '#4fc3f7';
+            for (let i = 0; i < numElectrons; i++) {
+                const d = (t * speedElectrons + i * eSpacing) % totalLen;
+                const p = getPointOnPath(d);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Show current direction with arrows
+            ctx.fillStyle = '#ff5722';
+            ctx.font = 'bold 20px Arial';
+            
+            // Arrow on top wire
+            const arrowX = 400;
+            const arrowY = topY - 15;
+            ctx.fillText('→', arrowX, arrowY);
+            
+            // Arrow on bottom wire (opposite direction)
+            ctx.fillText('←', arrowX, bottomY + 20);
+        }
+
+        // Update measurements based on circuit state
+        function updateMeasurements() {
+            if (circuitClosed) {
+                // Calculate current using Ohm's Law: I = V / R
+                current = voltage / resistance;
+                document.getElementById('current-value').textContent = current.toFixed(2) + ' A';
+            } else {
+                current = 0;
+                document.getElementById('current-value').textContent = '0.00 A';
+            }
+            
+            // Update all displays
+            document.getElementById('voltage-value').textContent = voltage.toFixed(2) + ' V';
+            document.getElementById('resistance-value').textContent = resistance.toFixed(1) + ' Ω';
+            
+            // Update Ohm's Law display
+            document.getElementById('voltage-display').textContent = voltage.toFixed(2);
+            document.getElementById('current-display').textContent = current.toFixed(2);
+            document.getElementById('resistance-display').textContent = resistance.toFixed(1);
+        }
+
+        // Update circuit status display
+        function updateCircuitStatus() {
+            if (circuitClosed) {
+                document.querySelector('.state-indicator').classList.add('active');
+                document.querySelector('.state-text').textContent = 'Circuit Closed - Current Flowing';
+                document.querySelector('.state-text').className = 'state-text closed';
+                document.querySelector('.current-flow').classList.add('active');
+            } else {
+                document.querySelector('.state-indicator').classList.remove('active');
+                document.querySelector('.state-text').textContent = 'Circuit Open - No Current Flow';
+                document.querySelector('.state-text').className = 'state-text open';
+                document.querySelector('.current-flow').classList.remove('active');
+            }
+        }
+
+        // Animation loop
+        function animate(time) {
+            drawCircuit();
+            if (circuitClosed && current > 0) {
+                drawCurrentFlow(time || Date.now());
+                animationId = requestAnimationFrame(animate);
+            } else {
+                // no continuous animation when open; ensure any running loop is stopped
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+            }
+        }
+
+        // Toggle circuit function
+        function toggleCircuit() {
+            circuitClosed = !circuitClosed;
+            updateCircuitStatus();
+
+            // Update animation
+            if (circuitClosed) {
+                // start animation
+                if (!animationId) animationId = requestAnimationFrame(animate);
+            } else {
+                // stop animation
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                // redraw static state once
+                drawCircuit();
+            }
+
+            updateMeasurements();
+        }
+
+        // Update voltage from slider
+        function updateVoltage(value) {
+            voltage = parseFloat(value);
+            document.getElementById('voltage-slider-value').textContent = voltage.toFixed(2) + ' V';
+            updateMeasurements();
+            
+            // Redraw if circuit is closed
+            if (circuitClosed) {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                animationId = requestAnimationFrame(animate);
+            } else {
+                drawCircuit();
+            }
+        }
+
+        // Update resistance from slider
+        function updateResistance(value) {
+            resistance = parseFloat(value);
+            document.getElementById('resistance-slider-value').textContent = resistance.toFixed(1) + ' Ω';
+            updateMeasurements();
+            
+            // Redraw if circuit is closed
+            if (circuitClosed) {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                animationId = requestAnimationFrame(animate);
+            } else {
+                drawCircuit();
+            }
+        }
+
+        // Check if click is on the switch
+        function isClickOnSwitch(x, y) {
+            const sw = components.switch;
+            return x >= sw.x && x <= sw.x + sw.width && y >= sw.y && y <= sw.y + sw.height;
+        }
+
+        // Handle canvas clicks
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (isClickOnSwitch(x, y)) {
+                toggleCircuit();
+            }
+        });
+
+        // Add event listeners for buttons
+        document.getElementById('toggle-circuit').addEventListener('click', toggleCircuit);
+
+        // Add event listeners for sliders
+        document.getElementById('voltage-slider').addEventListener('input', (e) => {
+            updateVoltage(e.target.value);
+        });
+
+        document.getElementById('resistance-slider').addEventListener('input', (e) => {
+            updateResistance(e.target.value);
+        });
+
+        // Initialize the circuit
+        drawCircuit();
+        updateMeasurements();
+        updateCircuitStatus();
+        
+        // Initialize slider values
+        updateVoltage(document.getElementById('voltage-slider').value);
+        updateResistance(document.getElementById('resistance-slider').value);
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Electric Circuit Simulator</title>
+    <title>EMF and PD</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -45,10 +45,10 @@
       }
 
       h1 {
-        font-size: 3.2rem;
+        font-size: 2.8rem;
         margin-bottom: 10px;
         text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-        background: linear-gradient(to right, #4facfe, #00f2fe);
+        background: linear-gradient(to right, #ff6b6b, #4facfe);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -64,6 +64,55 @@
         max-width: 800px;
         margin: 0 auto;
         line-height: 1.5;
+      }
+
+      .summary-box {
+        background: rgba(255, 107, 107, 0.1);
+        border: 2px solid rgba(255, 107, 107, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        backdrop-filter: blur(10px);
+      }
+
+      .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+      }
+
+      .summary-item:hover {
+        transform: translateY(-5px);
+      }
+
+      .summary-emf {
+        border-left: 5px solid #ff6b6b;
+      }
+
+      .summary-pd {
+        border-left: 5px solid #4fc3f7;
+      }
+
+      .summary-icon {
+        font-size: 2rem;
+        color: inherit;
+      }
+
+      .summary-content h3 {
+        margin-bottom: 5px;
+        font-size: 1.2rem;
+      }
+
+      .summary-content p {
+        opacity: 0.9;
+        font-size: 1rem;
       }
 
       .content {
@@ -93,6 +142,7 @@
         cursor: pointer;
         box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
         border: 2px solid rgba(100, 150, 255, 0.2);
+        position: relative;
       }
 
       .info-panel {
@@ -121,20 +171,20 @@
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
       }
 
-      .circuit-status-section {
+      .emf-section {
+        border-left-color: #ff6b6b;
+      }
+
+      .pd-section {
         border-left-color: #4fc3f7;
       }
 
-      .controls-section {
+      .comparison-section {
         border-left-color: #ff9800;
       }
 
-      .components-section {
+      .controls-section {
         border-left-color: #9c27b0;
-      }
-
-      .instructions-section {
-        border-left-color: #4caf50;
       }
 
       h2 {
@@ -231,6 +281,16 @@
         box-shadow: 0 3px 0 #0d47a1;
       }
 
+      button.emf-btn {
+        background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+        box-shadow: 0 6px 0 #c0392b;
+      }
+
+      button.pd-btn {
+        background: linear-gradient(to right, #4fc3f7, #81d4fa);
+        box-shadow: 0 6px 0 #0288d1;
+      }
+
       button.secondary {
         background: linear-gradient(to right, #ff9800, #ffb74d);
         box-shadow: 0 6px 0 #e65100;
@@ -253,44 +313,99 @@
         color: #ffeb3b;
       }
 
-      .components {
+      .comparison-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 18px;
+        gap: 20px;
+        margin-top: 20px;
       }
 
-      .component {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 18px;
+      .comparison-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
         border-radius: 12px;
         text-align: center;
+        border-top: 4px solid;
         transition: all 0.3s ease;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.05);
       }
 
-      .component:hover {
-        background: rgba(255, 255, 255, 0.15);
+      .comparison-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.1);
       }
 
-      .component-icon {
-        font-size: 2.5rem;
-        margin-bottom: 12px;
+      .emf-card {
+        border-color: #ff6b6b;
+      }
+
+      .pd-card {
+        border-color: #4fc3f7;
+      }
+
+      .comparison-title {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        color: #fff;
+      }
+
+      .comparison-points {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+      }
+
+      .comparison-points li {
+        margin-bottom: 10px;
+        padding-left: 25px;
+        position: relative;
+      }
+
+      .comparison-points li:before {
+        content: "•";
+        position: absolute;
+        left: 10px;
+        color: inherit;
+        font-size: 1.5rem;
+      }
+
+      .emf-points li:before {
+        color: #ff6b6b;
+      }
+
+      .pd-points li:before {
         color: #4fc3f7;
       }
 
-      .component-name {
-        font-weight: bold;
-        margin-bottom: 8px;
-        color: #ff9800;
+      .formula-box {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        font-family: "Courier New", monospace;
         font-size: 1.2rem;
+      }
+
+      .formula-emf {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+      }
+
+      .formula-pd {
+        border-color: #4fc3f7;
+        color: #4fc3f7;
+      }
+
+      .formula-label {
+        font-size: 1rem;
+        color: #b0bec5;
+        margin-bottom: 5px;
       }
 
       .current-flow {
         height: 5px;
-        background: linear-gradient(90deg, #ff9800, #ff5722, #ff9800);
+        background: linear-gradient(90deg, #4fc3f7, #2196f3, #4fc3f7);
         background-size: 200% 100%;
         border-radius: 3px;
         margin-top: 15px;
@@ -328,11 +443,28 @@
         min-width: 180px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
+        border-top: 4px solid;
       }
 
       .measurement:hover {
         transform: translateY(-5px);
         background: rgba(0, 0, 0, 0.6);
+      }
+
+      .measurement.emf {
+        border-color: #ff6b6b;
+      }
+
+      .measurement.pd {
+        border-color: #4fc3f7;
+      }
+
+      .measurement.current {
+        border-color: #4caf50;
+      }
+
+      .measurement.power {
+        border-color: #ff9800;
       }
 
       .measurement-title {
@@ -344,8 +476,23 @@
       .measurement-value {
         font-size: 1.8rem;
         font-weight: bold;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      }
+
+      .emf-value {
+        color: #ff6b6b;
+      }
+
+      .pd-value {
         color: #4fc3f7;
-        text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+      }
+
+      .current-value {
+        color: #4caf50;
+      }
+
+      .power-value {
+        color: #ff9800;
       }
 
       .measurement-unit {
@@ -354,7 +501,7 @@
         margin-left: 5px;
       }
 
-      .component-symbols {
+      .legend {
         display: flex;
         justify-content: space-around;
         margin-top: 20px;
@@ -362,18 +509,36 @@
         gap: 20px;
       }
 
-      .symbol {
-        text-align: center;
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
         background: rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        border-radius: 10px;
-        width: 120px;
+        border-radius: 8px;
+        border-left: 4px solid;
       }
 
-      .symbol-icon {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: #ffeb3b;
+      .legend-emf {
+        border-color: #ff6b6b;
+      }
+
+      .legend-pd {
+        border-color: #4fc3f7;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+
+      .color-emf {
+        background: #ff6b6b;
+      }
+
+      .color-pd {
+        background: #4fc3f7;
       }
 
       footer {
@@ -398,12 +563,13 @@
         gap: 10px;
       }
 
-      .ohm-law {
+      .formula {
         font-size: 1.2rem;
         background: rgba(0, 0, 0, 0.4);
         padding: 10px 20px;
         border-radius: 10px;
         border: 1px solid rgba(79, 195, 247, 0.3);
+        font-family: "Courier New", monospace;
       }
 
       @media (max-width: 1100px) {
@@ -415,6 +581,9 @@
         }
         h1 {
           font-size: 2.5rem;
+        }
+        .summary-box {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -437,6 +606,9 @@
         footer {
           flex-direction: column;
           text-align: center;
+        }
+        .comparison-grid {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -491,181 +663,208 @@
           opacity: 0.6;
         }
       }
+
+      .voltage-drop {
+        position: absolute;
+        pointer-events: none;
+        z-index: 5;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      }
+
+      .emf-drop {
+        color: #ff6b6b;
+      }
+
+      .pd-drop {
+        color: #4fc3f7;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <header>
         <h1>
-          <i class="fas fa-bolt"></i>
-          Electric Circuit Simulator
-          <i class="fas fa-microchip"></i>
+          <i class="fas fa-car-battery" style="color: #ff6b6b"></i>
+          EMF and Potential
+          <i class="fas fa-bolt" style="color: #4fc3f7"></i>
         </h1>
         <p class="subtitle">
-          Interactive visualization of electric circuits with realistic physics
-          simulation. Click directly on the switch or bulb to interact with the
-          circuit!
+          Visualize the fundamental difference between Electromotive Force (EMF)
+          and Potential Difference (PD) in real-time. Click on components to
+          interact and see how EMF and PD behave differently!
         </p>
+
+        <div class="summary-box">
+          <div class="summary-item summary-emf">
+            <div class="summary-icon" style="color: #ff6b6b">⚡</div>
+            <div class="summary-content">
+              <h3 style="color: #ff6b6b">EMF: The Battery's Push</h3>
+              <p>
+                Energy supplied by the battery per unit charge. It's the
+                <strong>cause</strong> of current flow. Present even when
+                circuit is open.
+              </p>
+            </div>
+          </div>
+
+          <div class="summary-item summary-pd">
+            <div class="summary-icon" style="color: #4fc3f7">🔌</div>
+            <div class="summary-content">
+              <h3 style="color: #4fc3f7">PD: Energy Used by Components</h3>
+              <p>
+                Energy used per unit charge across circuit components. It's the
+                <strong>effect</strong> of EMF. Only present when current flows.
+              </p>
+            </div>
+          </div>
+        </div>
       </header>
 
       <div class="content">
         <div class="info-panel">
-          <div class="panel-section circuit-status-section">
-            <h2><i class="fas fa-chart-line"></i> Circuit Status</h2>
-            <div class="circuit-state">
-              <div class="state-indicator"></div>
-              <div class="state-text open">Circuit Open - No Current Flow</div>
-            </div>
-            <div class="current-flow"></div>
-            <div class="ohm-law" style="margin-top: 20px; text-align: center">
-              Ohm's Law: <strong>V = I × R</strong>
-            </div>
-          </div>
-
           <div class="panel-section controls-section">
             <h2><i class="fas fa-sliders-h"></i> Controls</h2>
             <div class="controls">
-              <button id="toggle-circuit">
+              <button id="toggle-circuit" class="emf-btn">
                 <i class="fas fa-toggle-on"></i> Toggle Switch
+              </button>
+              <button id="show-emf" class="emf-btn">
+                <i class="fas fa-car-battery"></i> Show EMF
+              </button>
+              <button id="show-pd" class="pd-btn">
+                <i class="fas fa-bolt"></i> Show PD
               </button>
               <button id="reset-circuit" class="secondary">
                 <i class="fas fa-redo"></i> Reset Circuit
               </button>
-              <button id="change-voltage" class="secondary">
-                <i class="fas fa-bolt"></i> Change Voltage
-              </button>
             </div>
           </div>
 
-          <div class="panel-section components-section">
-            <h2><i class="fas fa-cogs"></i> Circuit Components</h2>
-            <div class="components">
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-car-battery"></i>
-                </div>
-                <div class="component-name">Power Source</div>
-                <div class="component-desc">Dry Cell (DC Voltage Source)</div>
-                <span class="tooltiptext"
-                  >Provides electrical energy to the circuit. Converts chemical
-                  energy to electrical energy.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-toggle-on"></i>
-                </div>
-                <div class="component-name">Switch</div>
-                <div class="component-desc">
-                  Controls current flow (Open/Closed)
-                </div>
-                <span class="tooltiptext"
-                  >A mechanical device that opens or closes the circuit to
-                  control the flow of current.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="component-name">Light Bulb</div>
-                <div class="component-desc">Load & Visual Indicator</div>
-                <span class="tooltiptext"
-                  >Converts electrical energy into light and heat. Acts as a
-                  resistor in the circuit.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon"><i class="fas fa-bolt"></i></div>
-                <div class="component-name">Conducting Wires</div>
-                <div class="component-desc">Current Pathway (Copper)</div>
-                <span class="tooltiptext"
-                  >Provides a path for electrons to flow. Made of conductive
-                  materials like copper.</span
-                >
-              </div>
+          <div class="panel-section emf-section">
+            <h2>
+              <i class="fas fa-car-battery"></i> Electromotive Force (EMF)
+            </h2>
+            <div class="circuit-state">
+              <div class="state-indicator"></div>
+              <div class="state-text open">Circuit Open - EMF Present</div>
+            </div>
+            <p>
+              <strong>Definition:</strong> Energy supplied by the battery per
+              unit charge (the "cause" of current flow).
+            </p>
+            <p>
+              <strong>Key Point:</strong> EMF exists even when the circuit is
+              open. It's the battery's total voltage.
+            </p>
+
+            <div class="formula-box formula-emf">
+              <div class="formula-label">EMF Formula:</div>
+              EMF (ε) = V<sub>terminal</sub> + I × r
+            </div>
+
+            <div class="current-flow"></div>
+          </div>
+
+          <div class="panel-section pd-section">
+            <h2><i class="fas fa-bolt"></i> Potential Difference (PD)</h2>
+            <p>
+              <strong>Definition:</strong> Energy used per unit charge across
+              circuit components (the "effect" of EMF).
+            </p>
+            <p>
+              <strong>Key Point:</strong> PD only exists when current flows.
+              It's the voltage drop across components.
+            </p>
+
+            <div class="formula-box formula-pd">
+              <div class="formula-label">PD Formula:</div>
+              PD (V) = I × R
             </div>
           </div>
 
-          <div class="panel-section instructions-section">
-            <h2><i class="fas fa-info-circle"></i> Instructions</h2>
-            <div class="instructions">
-              <ul>
-                <li>
-                  <strong>Click directly on the switch</strong> in the circuit
-                  diagram to open/close it.
-                </li>
-                <li>
-                  <strong>Click on the bulb</strong> to change its brightness
-                  level.
-                </li>
-                <li>
-                  When the circuit is closed, current flows and the bulb lights
-                  up.
-                </li>
-                <li>
-                  When the circuit is open, no current flows and the bulb
-                  remains off.
-                </li>
-                <li>
-                  Change the voltage to see how it affects current (Ohm's Law: I
-                  = V/R).
-                </li>
-              </ul>
+          <div class="panel-section comparison-section">
+            <h2><i class="fas fa-balance-scale"></i> EMF vs PD Comparison</h2>
+            <div class="comparison-grid">
+              <div class="comparison-card emf-card">
+                <div class="comparison-title">⚡ EMF</div>
+                <ul class="comparison-points emf-points">
+                  <li>Energy <strong>PROVIDED</strong> by source</li>
+                  <li><strong>CAUSE</strong> of current flow</li>
+                  <li>Constant for ideal source</li>
+                  <li>Present even when circuit is OFF</li>
+                  <li>Measured across source terminals with no load</li>
+                  <li>Maximum possible voltage</li>
+                </ul>
+              </div>
+              <div class="comparison-card pd-card">
+                <div class="comparison-title">🔌 PD</div>
+                <ul class="comparison-points pd-points">
+                  <li>Energy <strong>USED</strong> by components</li>
+                  <li><strong>EFFECT</strong> of current flow</li>
+                  <li>Depends on circuit conditions</li>
+                  <li>Only present when current flows</li>
+                  <li>Measured across components when circuit is ON</li>
+                  <li>Always less than or equal to EMF</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="circuit-container">
-          <h2><i class="fas fa-project-diagram"></i> Circuit Diagram</h2>
+          <h2><i class="fas fa-project-diagram"></i> Circuit Visualization</h2>
           <div style="position: relative">
             <canvas id="circuit-canvas" width="1000" height="450"></canvas>
-            <div class="click-hint">Click on switch or bulb to interact</div>
+            <div class="click-hint">Click on components to interact</div>
           </div>
 
           <div class="measurements">
-            <div class="measurement">
-              <div class="measurement-title">Current (I)</div>
-              <div class="measurement-value" id="current-value">
-                0.00<span class="measurement-unit">A</span>
-              </div>
-            </div>
-            <div class="measurement">
-              <div class="measurement-title">Voltage (V)</div>
-              <div class="measurement-value" id="voltage-value">
+            <div class="measurement emf">
+              <div class="measurement-title">EMF (ε)</div>
+              <div class="measurement-value emf-value" id="emf-value">
                 1.50<span class="measurement-unit">V</span>
               </div>
+              <div class="formula-label">Battery's total voltage</div>
             </div>
-            <div class="measurement">
-              <div class="measurement-title">Resistance (R)</div>
-              <div class="measurement-value" id="resistance-value">
-                10.0<span class="measurement-unit">Ω</span>
+            <div class="measurement pd">
+              <div class="measurement-title">PD (V)</div>
+              <div class="measurement-value pd-value" id="pd-value">
+                0.00<span class="measurement-unit">V</span>
               </div>
+              <div class="formula-label">Across bulb</div>
             </div>
-            <div class="measurement">
+            <div class="measurement current">
+              <div class="measurement-title">Current (I)</div>
+              <div class="measurement-value current-value" id="current-value">
+                0.00<span class="measurement-unit">A</span>
+              </div>
+              <div class="formula-label">Caused by EMF</div>
+            </div>
+            <div class="measurement power">
               <div class="measurement-title">Power (P)</div>
-              <div class="measurement-value" id="power-value">
+              <div class="measurement-value power-value" id="power-value">
                 0.00<span class="measurement-unit">W</span>
               </div>
+              <div class="formula-label">P = V × I</div>
             </div>
           </div>
 
-          <div class="component-symbols">
-            <div class="symbol">
-              <div class="symbol-icon">⎓</div>
-              <div class="symbol-name">DC Source</div>
+          <div class="legend">
+            <div class="legend-item legend-emf">
+              <div class="legend-color color-emf"></div>
+              <span
+                ><strong>EMF</strong> - The battery's pushing force
+                (Cause)</span
+              >
             </div>
-            <div class="symbol">
-              <div class="symbol-icon">⭘</div>
-              <div class="symbol-name">Switch</div>
-            </div>
-            <div class="symbol">
-              <div class="symbol-icon">⚡</div>
-              <div class="symbol-name">Bulb</div>
-            </div>
-            <div class="symbol">
-              <div class="symbol-icon">⏛</div>
-              <div class="symbol-name">Resistor</div>
+            <div class="legend-item legend-pd">
+              <div class="legend-color color-pd"></div>
+              <span
+                ><strong>PD</strong> - Voltage drop across components
+                (Effect)</span
+              >
             </div>
           </div>
         </div>
@@ -675,25 +874,29 @@
         <div class="footer-info">
           <i class="fas fa-graduation-cap"></i>
           <span
-            >Electric Circuit Visualization | Demonstrating Circuit Principles &
-            Ohm's Law</span
+            >EMF vs Potential Difference Visualization | Demonstrating the
+            fundamental difference between source voltage and load voltage</span
           >
         </div>
-        <div class="ohm-law">
-          P = V × I = <span id="power-equation">0.00 W</span>
-        </div>
+        <div class="formula">V<sub>terminal</sub> = ε - Ir</div>
       </footer>
     </div>
 
     <script>
-      class CircuitSimulator {
+      class EMFPDSimulator {
         constructor() {
           this.circuitClosed = false;
+          this.emf = 1.5; // Electromotive Force (battery's total voltage)
+          this.internalResistance = 0.5; // Battery's internal resistance
+          this.loadResistance = 10.0; // Bulb resistance
           this.current = 0;
-          this.voltage = 1.5;
-          this.resistance = 10.0;
+          this.terminalVoltage = 0; // Voltage at battery terminals when current flows
+          this.pdAcrossBulb = 0; // Potential difference across bulb
           this.power = 0;
           this.bulbBrightness = 1.0;
+
+          this.showingEMF = true; // Show EMF by default
+          this.showingPD = true; // Show PD by default
 
           this.canvas = document.getElementById("circuit-canvas");
           this.ctx = this.canvas.getContext("2d");
@@ -715,12 +918,10 @@
           this.electrons = [];
           this.initElectrons();
 
+          this.emfValueElement = document.getElementById("emf-value");
+          this.pdValueElement = document.getElementById("pd-value");
           this.currentValueElement = document.getElementById("current-value");
-          this.voltageValueElement = document.getElementById("voltage-value");
-          this.resistanceValueElement =
-            document.getElementById("resistance-value");
           this.powerValueElement = document.getElementById("power-value");
-          this.powerEquationElement = document.getElementById("power-equation");
 
           this.init();
         }
@@ -736,25 +937,28 @@
             .getElementById("toggle-circuit")
             .addEventListener("click", () => this.toggleCircuit());
           document
+            .getElementById("show-emf")
+            .addEventListener("click", () => this.toggleShowEMF());
+          document
+            .getElementById("show-pd")
+            .addEventListener("click", () => this.toggleShowPD());
+          document
             .getElementById("reset-circuit")
             .addEventListener("click", () => this.resetCircuit());
-          document
-            .getElementById("change-voltage")
-            .addEventListener("click", () => this.changeVoltage());
 
           document.addEventListener("keydown", (e) => {
             if (e.code === "Space" || e.code === "KeyS") {
               this.toggleCircuit();
               e.preventDefault();
             }
+            if (e.code === "KeyE") {
+              this.toggleShowEMF();
+            }
+            if (e.code === "KeyP") {
+              this.toggleShowPD();
+            }
             if (e.code === "KeyR") {
               this.resetCircuit();
-            }
-            if (e.code === "KeyV") {
-              this.changeVoltage();
-            }
-            if (e.code === "KeyB") {
-              this.changeBulbBrightness();
             }
           });
         }
@@ -778,7 +982,25 @@
           }
         }
 
+        calculateCircuitValues() {
+          if (this.circuitClosed) {
+            const totalResistance =
+              this.loadResistance + this.internalResistance;
+            this.current = this.emf / totalResistance;
+            this.terminalVoltage =
+              this.emf - this.current * this.internalResistance;
+            this.pdAcrossBulb = this.current * this.loadResistance;
+            this.power = this.current * this.pdAcrossBulb;
+          } else {
+            this.current = 0;
+            this.terminalVoltage = this.emf; // When circuit open, terminal voltage = EMF
+            this.pdAcrossBulb = 0;
+            this.power = 0;
+          }
+        }
+
         drawCircuit() {
+          // Clear canvas
           const gradient = this.ctx.createLinearGradient(
             0,
             0,
@@ -801,6 +1023,16 @@
           if (this.circuitClosed) {
             this.drawCurrentFlow();
           }
+
+          if (this.showingEMF) {
+            this.drawEMFIndicator();
+          }
+
+          if (this.showingPD && this.circuitClosed) {
+            this.drawPDIndicator();
+          }
+
+          this.drawFormulas();
         }
 
         drawGrid() {
@@ -863,52 +1095,46 @@
             wires.right.width,
             wires.right.height
           );
-
-          this.ctx.fillStyle = this.circuitClosed ? "#ffeb3b" : "#888";
-          this.drawWireJunction(
-            wires.top.x,
-            wires.top.y + wires.top.height / 2
-          );
-          this.drawWireJunction(
-            wires.top.x + wires.top.width,
-            wires.top.y + wires.top.height / 2
-          );
-          this.drawWireJunction(
-            wires.bottom.x,
-            wires.bottom.y + wires.bottom.height / 2
-          );
-          this.drawWireJunction(
-            wires.bottom.x + wires.bottom.width,
-            wires.bottom.y + wires.bottom.height / 2
-          );
-        }
-
-        drawWireJunction(x, y) {
-          this.ctx.beginPath();
-          this.ctx.arc(x, y, 10, 0, Math.PI * 2);
-          this.ctx.fill();
-
-          this.ctx.fillStyle = "#222";
-          this.ctx.beginPath();
-          this.ctx.arc(x, y, 5, 0, Math.PI * 2);
-          this.ctx.fill();
         }
 
         drawBattery() {
           const bat = this.components.battery;
 
+          // Battery casing
           this.ctx.fillStyle = "#333";
           this.ctx.fillRect(bat.x, bat.y, bat.width, bat.height);
 
+          // Battery cells (representing EMF)
           this.ctx.fillStyle = "#444";
           this.ctx.fillRect(bat.x + 5, bat.y + 5, bat.width - 10, 15);
 
-          this.ctx.fillStyle = "#e53935";
+          // Positive terminal (red)
+          this.ctx.fillStyle = "#ff6b6b";
           this.ctx.fillRect(bat.x - 8, bat.y + 15, 10, 25);
 
-          this.ctx.fillStyle = "#1565c0";
+          // Negative terminal (blue)
+          this.ctx.fillStyle = "#4fc3f7";
           this.ctx.fillRect(bat.x - 8, bat.y + bat.height - 40, 10, 25);
 
+          // Internal resistance indicator
+          this.ctx.fillStyle = "rgba(255, 107, 107, 0.3)";
+          this.ctx.beginPath();
+          this.ctx.rect(bat.x + bat.width / 2 - 10, bat.y + 30, 20, 30);
+          this.ctx.fill();
+
+          this.ctx.strokeStyle = "#ff6b6b";
+          this.ctx.lineWidth = 1;
+          this.ctx.strokeRect(bat.x + bat.width / 2 - 10, bat.y + 30, 20, 30);
+
+          this.ctx.fillStyle = "#ff6b6b";
+          this.ctx.font = "10px Arial";
+          this.ctx.fillText(
+            `r=${this.internalResistance}Ω`,
+            bat.x + bat.width / 2 - 15,
+            bat.y + 50
+          );
+
+          // Labels
           this.ctx.fillStyle = "#fff";
           this.ctx.font = "bold 16px Arial";
           this.ctx.fillText("+", bat.x + bat.width / 2 - 5, bat.y + 30);
@@ -920,10 +1146,158 @@
 
           this.ctx.font = "14px Arial";
           this.ctx.fillText(
-            `${this.voltage}V`,
-            bat.x + bat.width / 2 - 15,
+            `EMF = ${this.emf}V`,
+            bat.x + bat.width / 2 - 25,
             bat.y + bat.height / 2 + 5
           );
+        }
+
+        drawEMFIndicator() {
+          const bat = this.components.battery;
+
+          // Draw EMF indicator line (battery's total voltage)
+          this.ctx.strokeStyle = "#ff6b6b";
+          this.ctx.lineWidth = 3;
+          this.ctx.setLineDash([5, 3]);
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(bat.x - 30, bat.y + 25);
+          this.ctx.lineTo(bat.x - 30, bat.y + bat.height - 35);
+          this.ctx.stroke();
+
+          // Draw arrow heads
+          this.drawArrow(
+            bat.x - 30,
+            bat.y + 25,
+            bat.x - 30,
+            bat.y + 10,
+            8,
+            "#ff6b6b"
+          );
+          this.drawArrow(
+            bat.x - 30,
+            bat.y + bat.height - 35,
+            bat.x - 30,
+            bat.y + bat.height - 20,
+            8,
+            "#ff6b6b"
+          );
+
+          // EMF label with formula
+          this.ctx.fillStyle = "#ff6b6b";
+          this.ctx.font = "bold 16px Arial";
+          this.ctx.fillText(
+            `ε = ${this.emf}V`,
+            bat.x - 80,
+            bat.y + bat.height / 2
+          );
+
+          this.ctx.setLineDash([]);
+        }
+
+        drawPDIndicator() {
+          const bulb = this.components.bulb;
+
+          // Draw PD indicator line (voltage across bulb)
+          this.ctx.strokeStyle = "#4fc3f7";
+          this.ctx.lineWidth = 3;
+          this.ctx.setLineDash([5, 3]);
+
+          const bulbCenterX = bulb.x + bulb.width / 2;
+          const bulbCenterY = bulb.y + bulb.height / 2;
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(bulbCenterX - 50, bulbCenterY - 40);
+          this.ctx.lineTo(bulbCenterX - 50, bulbCenterY + 40);
+          this.ctx.stroke();
+
+          // Draw arrow heads
+          this.drawArrow(
+            bulbCenterX - 50,
+            bulbCenterY - 40,
+            bulbCenterX - 50,
+            bulbCenterY - 55,
+            8,
+            "#4fc3f7"
+          );
+          this.drawArrow(
+            bulbCenterX - 50,
+            bulbCenterY + 40,
+            bulbCenterX - 50,
+            bulbCenterY + 55,
+            8,
+            "#4fc3f7"
+          );
+
+          // PD label with formula
+          this.ctx.fillStyle = "#4fc3f7";
+          this.ctx.font = "bold 16px Arial";
+          this.ctx.fillText(
+            `V = ${this.pdAcrossBulb.toFixed(2)}V`,
+            bulbCenterX - 100,
+            bulbCenterY
+          );
+
+          // Also show terminal voltage at battery
+          const bat = this.components.battery;
+          this.ctx.fillStyle = "#9b59b6";
+          this.ctx.font = "bold 14px Arial";
+          this.ctx.fillText(
+            `V_term = ${this.terminalVoltage.toFixed(2)}V`,
+            bat.x + bat.width + 20,
+            bat.y + bat.height / 2
+          );
+
+          this.ctx.setLineDash([]);
+        }
+
+        drawFormulas() {
+          // Draw EMF formula near battery
+          this.ctx.fillStyle = "#ff6b6b";
+          this.ctx.font = "bold 14px Arial";
+          this.ctx.fillText(
+            "ε = V_term + I×r",
+            this.components.battery.x - 80,
+            this.components.battery.y - 20
+          );
+
+          // Draw PD formula near bulb
+          if (this.circuitClosed) {
+            this.ctx.fillStyle = "#4fc3f7";
+            this.ctx.font = "bold 14px Arial";
+            this.ctx.fillText(
+              "V = I×R",
+              this.components.bulb.x + this.components.bulb.width + 20,
+              this.components.bulb.y - 20
+            );
+          }
+
+          // Draw terminal voltage formula
+          this.ctx.fillStyle = "#9b59b6";
+          this.ctx.font = "bold 14px Arial";
+          this.ctx.fillText(
+            "V_term = ε - I×r",
+            this.components.switch.x + this.components.switch.width / 2 - 50,
+            this.components.switch.y - 20
+          );
+        }
+
+        drawArrow(fromX, fromY, toX, toY, size, color) {
+          const angle = Math.atan2(toY - fromY, toX - fromX);
+
+          this.ctx.fillStyle = color;
+          this.ctx.beginPath();
+          this.ctx.moveTo(toX, toY);
+          this.ctx.lineTo(
+            toX - size * Math.cos(angle - Math.PI / 6),
+            toY - size * Math.sin(angle - Math.PI / 6)
+          );
+          this.ctx.lineTo(
+            toX - size * Math.cos(angle + Math.PI / 6),
+            toY - size * Math.sin(angle + Math.PI / 6)
+          );
+          this.ctx.closePath();
+          this.ctx.fill();
         }
 
         drawResistor() {
@@ -940,8 +1314,8 @@
           this.ctx.fillStyle = "#fff";
           this.ctx.font = "14px Arial";
           this.ctx.fillText(
-            `${this.resistance}Ω`,
-            res.x + res.width / 2 - 15,
+            `R = ${this.loadResistance}Ω`,
+            res.x + res.width / 2 - 20,
             res.y + res.height + 20
           );
         }
@@ -981,29 +1355,6 @@
           }
 
           this.ctx.stroke();
-
-          this.ctx.fillStyle = this.circuitClosed ? "#4caf50" : "#f44336";
-          if (this.circuitClosed) {
-            this.ctx.beginPath();
-            this.ctx.arc(
-              sw.x + sw.width - 25,
-              sw.y + sw.height / 2,
-              12,
-              0,
-              Math.PI * 2
-            );
-            this.ctx.fill();
-          } else {
-            this.ctx.beginPath();
-            this.ctx.arc(
-              sw.x + 25 + 40,
-              sw.y + sw.height / 2 - 30,
-              12,
-              0,
-              Math.PI * 2
-            );
-            this.ctx.fill();
-          }
         }
 
         drawBulb() {
@@ -1011,11 +1362,10 @@
           const centerX = bulb.x + bulb.width / 2;
           const centerY = bulb.y + bulb.height / 2;
 
-          // Draw glow effect when bulb is on and circuit is closed
+          // Draw glow effect when circuit is closed
           if (this.circuitClosed && this.bulbBrightness > 0) {
             const glowIntensity = this.bulbBrightness * (this.current / 0.15);
 
-            // Outer glow
             const outerGlow = this.ctx.createRadialGradient(
               centerX,
               centerY,
@@ -1038,56 +1388,13 @@
             this.ctx.beginPath();
             this.ctx.arc(centerX, centerY, 100 * glowIntensity, 0, Math.PI * 2);
             this.ctx.fill();
-
-            // Inner glow
-            const innerGlow = this.ctx.createRadialGradient(
-              centerX,
-              centerY,
-              0,
-              centerX,
-              centerY,
-              60 * glowIntensity
-            );
-            innerGlow.addColorStop(
-              0,
-              `rgba(255, 255, 200, ${0.6 * glowIntensity})`
-            );
-            innerGlow.addColorStop(1, `rgba(255, 255, 150, 0)`);
-
-            this.ctx.fillStyle = innerGlow;
-            this.ctx.beginPath();
-            this.ctx.arc(centerX, centerY, 60 * glowIntensity, 0, Math.PI * 2);
-            this.ctx.fill();
-
-            // Flicker effect for realism
-            if (Math.random() > 0.7) {
-              const flickerGlow = this.ctx.createRadialGradient(
-                centerX,
-                centerY,
-                0,
-                centerX,
-                centerY,
-                40
-              );
-              flickerGlow.addColorStop(
-                0,
-                `rgba(255, 255, 220, ${0.8 * glowIntensity})`
-              );
-              flickerGlow.addColorStop(1, `rgba(255, 255, 180, 0)`);
-
-              this.ctx.fillStyle = flickerGlow;
-              this.ctx.beginPath();
-              this.ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
-              this.ctx.fill();
-            }
           }
 
-          // Bulb glass (more realistic shape)
+          // Bulb glass
           this.ctx.fillStyle = this.circuitClosed
             ? `rgba(255, 255, 220, ${0.9 + 0.1 * this.bulbBrightness})`
             : "rgba(224, 224, 224, 0.9)";
 
-          // Draw bulb shape (teardrop)
           this.ctx.beginPath();
           this.ctx.moveTo(centerX, bulb.y + 10);
           this.ctx.bezierCurveTo(
@@ -1109,22 +1416,6 @@
           this.ctx.closePath();
           this.ctx.fill();
 
-          // Glass highlights
-          this.ctx.fillStyle = this.circuitClosed
-            ? "rgba(255, 255, 255, 0.6)"
-            : "rgba(255, 255, 255, 0.4)";
-          this.ctx.beginPath();
-          this.ctx.ellipse(
-            centerX - 10,
-            centerY - 15,
-            15,
-            25,
-            0.3,
-            0,
-            Math.PI * 2
-          );
-          this.ctx.fill();
-
           // Bulb base
           this.ctx.fillStyle = "#8b7355";
           this.ctx.beginPath();
@@ -1135,20 +1426,7 @@
           this.ctx.closePath();
           this.ctx.fill();
 
-          // Base screw threads
-          this.ctx.strokeStyle = "#6b5b45";
-          this.ctx.lineWidth = 2;
-          for (let i = 0; i < 4; i++) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(bulb.x + 15 + i * 5, centerY + 25 + i * 6);
-            this.ctx.lineTo(
-              bulb.x + bulb.width - 15 - i * 5,
-              centerY + 25 + i * 6
-            );
-            this.ctx.stroke();
-          }
-
-          // Filament (glows when on)
+          // Filament
           this.ctx.strokeStyle = this.circuitClosed
             ? `rgba(255, ${200 + 55 * this.bulbBrightness}, 0, 0.9)`
             : "rgba(160, 160, 160, 0.7)";
@@ -1174,57 +1452,14 @@
             centerY
           );
           this.ctx.stroke();
-
-          // Additional filament support wires
-          this.ctx.strokeStyle = "#ffd700";
-          this.ctx.lineWidth = 1;
-          this.ctx.beginPath();
-          this.ctx.moveTo(centerX - 20, centerY + 5);
-          this.ctx.lineTo(centerX - 15, centerY);
-          this.ctx.moveTo(centerX + 20, centerY + 5);
-          this.ctx.lineTo(centerX + 15, centerY);
-          this.ctx.stroke();
-
-          // Contact points
-          this.ctx.fillStyle = "#ffd700";
-          this.ctx.beginPath();
-          this.ctx.arc(
-            bulb.x + 25,
-            bulb.y + bulb.height - 8,
-            4,
-            0,
-            Math.PI * 2
-          );
-          this.ctx.fill();
-
-          this.ctx.beginPath();
-          this.ctx.arc(
-            bulb.x + bulb.width - 25,
-            bulb.y + bulb.height - 8,
-            4,
-            0,
-            Math.PI * 2
-          );
-          this.ctx.fill();
-
-          // Brightness indicator
-          if (this.circuitClosed) {
-            this.ctx.fillStyle = "#fff";
-            this.ctx.font = "12px Arial";
-            this.ctx.fillText(
-              `Brightness: ${Math.round(this.bulbBrightness * 100)}%`,
-              centerX - 35,
-              bulb.y + bulb.height + 20
-            );
-          }
         }
 
         drawLabels() {
           this.ctx.fillStyle = "#fff";
           this.ctx.font = "bold 16px Arial";
           this.ctx.fillText(
-            "Dry Cell",
-            this.components.battery.x + this.components.battery.width / 2 - 25,
+            "Battery (EMF Source)",
+            this.components.battery.x + this.components.battery.width / 2 - 50,
             this.components.battery.y + this.components.battery.height + 30
           );
           this.ctx.fillText(
@@ -1233,16 +1468,9 @@
             this.components.switch.y + this.components.switch.height + 30
           );
           this.ctx.fillText(
-            "Light Bulb",
-            this.components.bulb.x + this.components.bulb.width / 2 - 30,
+            "Light Bulb (Load)",
+            this.components.bulb.x + this.components.bulb.width / 2 - 40,
             this.components.bulb.y + this.components.bulb.height + 30
-          );
-          this.ctx.fillText(
-            "Resistor",
-            this.components.resistor.x +
-              this.components.resistor.width / 2 -
-              25,
-            this.components.resistor.y - 10
           );
         }
 
@@ -1290,32 +1518,6 @@
               Math.PI * 2
             );
             this.ctx.fill();
-
-            const glowGradient = this.ctx.createRadialGradient(
-              electron.x,
-              electron.y,
-              0,
-              electron.x,
-              electron.y,
-              electron.radius * 3
-            );
-            glowGradient.addColorStop(0, "rgba(79, 195, 247, 0.8)");
-            glowGradient.addColorStop(1, "rgba(79, 195, 247, 0)");
-
-            this.ctx.fillStyle = glowGradient;
-            this.ctx.beginPath();
-            this.ctx.arc(
-              electron.x,
-              electron.y,
-              electron.radius * 3,
-              0,
-              Math.PI * 2
-            );
-            this.ctx.fill();
-
-            this.ctx.fillStyle = "#fff";
-            this.ctx.font = "10px Arial";
-            this.ctx.fillText("-", electron.x - 3, electron.y + 3);
           });
 
           this.drawCurrentArrows();
@@ -1331,7 +1533,8 @@
               this.components.wires.top.width / 2 +
               30,
             this.components.wires.top.y + 3,
-            10
+            10,
+            "#ff5252"
           );
 
           this.drawArrow(
@@ -1342,86 +1545,26 @@
             this.components.wires.right.y +
               this.components.wires.right.height / 2 +
               30,
-            10
+            10,
+            "#ff5252"
           );
-
-          this.drawArrow(
-            this.components.wires.bottom.x +
-              this.components.wires.bottom.width / 2,
-            this.components.wires.bottom.y + 3,
-            this.components.wires.bottom.x +
-              this.components.wires.bottom.width / 2 -
-              30,
-            this.components.wires.bottom.y + 3,
-            10
-          );
-
-          this.drawArrow(
-            this.components.wires.left.x + 3,
-            this.components.wires.left.y +
-              this.components.wires.left.height / 2,
-            this.components.wires.left.x + 3,
-            this.components.wires.left.y +
-              this.components.wires.left.height / 2 -
-              30,
-            10
-          );
-        }
-
-        drawArrow(fromX, fromY, toX, toY, size) {
-          const angle = Math.atan2(toY - fromY, toX - fromX);
-
-          this.ctx.beginPath();
-          this.ctx.moveTo(fromX, fromY);
-          this.ctx.lineTo(toX, toY);
-          this.ctx.strokeStyle = "#ff5252";
-          this.ctx.lineWidth = 3;
-          this.ctx.stroke();
-
-          this.ctx.beginPath();
-          this.ctx.moveTo(toX, toY);
-          this.ctx.lineTo(
-            toX - size * Math.cos(angle - Math.PI / 6),
-            toY - size * Math.sin(angle - Math.PI / 6)
-          );
-          this.ctx.lineTo(
-            toX - size * Math.cos(angle + Math.PI / 6),
-            toY - size * Math.sin(angle + Math.PI / 6)
-          );
-          this.ctx.closePath();
-          this.ctx.fillStyle = "#ff5252";
-          this.ctx.fill();
         }
 
         updateMeasurements() {
-          if (this.circuitClosed) {
-            this.current = this.voltage / this.resistance;
-            this.power = this.voltage * this.current;
+          this.calculateCircuitValues();
 
-            this.currentValueElement.innerHTML = `${this.current.toFixed(
-              2
-            )}<span class="measurement-unit">A</span>`;
-            this.powerValueElement.innerHTML = `${this.power.toFixed(
-              2
-            )}<span class="measurement-unit">W</span>`;
-            this.powerEquationElement.textContent = `${this.power.toFixed(
-              2
-            )} W`;
-          } else {
-            this.current = 0;
-            this.power = 0;
-
-            this.currentValueElement.innerHTML = `0.00<span class="measurement-unit">A</span>`;
-            this.powerValueElement.innerHTML = `0.00<span class="measurement-unit">W</span>`;
-            this.powerEquationElement.textContent = `0.00 W`;
-          }
-
-          this.voltageValueElement.innerHTML = `${this.voltage.toFixed(
+          this.emfValueElement.innerHTML = `${this.emf.toFixed(
             2
           )}<span class="measurement-unit">V</span>`;
-          this.resistanceValueElement.innerHTML = `${this.resistance.toFixed(
-            1
-          )}<span class="measurement-unit">Ω</span>`;
+          this.pdValueElement.innerHTML = `${this.pdAcrossBulb.toFixed(
+            2
+          )}<span class="measurement-unit">V</span>`;
+          this.currentValueElement.innerHTML = `${this.current.toFixed(
+            2
+          )}<span class="measurement-unit">A</span>`;
+          this.powerValueElement.innerHTML = `${this.power.toFixed(
+            2
+          )}<span class="measurement-unit">W</span>`;
         }
 
         toggleCircuit() {
@@ -1433,7 +1576,7 @@
 
           if (this.circuitClosed) {
             stateIndicator.classList.add("active");
-            stateText.textContent = "Circuit Closed - Current Flowing";
+            stateText.textContent = "Circuit Closed - EMF Causes Current Flow";
             stateText.className = "state-text closed";
             currentFlow.classList.add("active");
 
@@ -1441,10 +1584,12 @@
               this.animate();
             }
 
-            this.showNotification("Circuit Closed - Bulb is ON!");
+            this.showNotification(
+              "Circuit Closed! EMF causes current to flow, creating PD across the bulb."
+            );
           } else {
             stateIndicator.classList.remove("active");
-            stateText.textContent = "Circuit Open - No Current Flow";
+            stateText.textContent = "Circuit Open - EMF Present, No PD";
             stateText.className = "state-text open";
             currentFlow.classList.remove("active");
 
@@ -1453,11 +1598,97 @@
               this.animationId = null;
             }
 
-            this.showNotification("Circuit Open - Bulb is OFF");
+            this.showNotification(
+              "Circuit Open! EMF is present but no current flows, so no PD across bulb."
+            );
           }
 
           this.updateMeasurements();
           this.drawCircuit();
+        }
+
+        toggleShowEMF() {
+          this.showingEMF = !this.showingEMF;
+          const emfBtn = document.getElementById("show-emf");
+
+          if (this.showingEMF) {
+            emfBtn.style.background =
+              "linear-gradient(to right, #ff5252, #ff6b6b)";
+            this.showNotification(
+              "EMF (ε) shown: Battery's total voltage = " +
+                this.emf.toFixed(2) +
+                "V"
+            );
+          } else {
+            emfBtn.style.background =
+              "linear-gradient(to right, #ff6b6b, #ff8e8e)";
+          }
+
+          this.drawCircuit();
+        }
+
+        toggleShowPD() {
+          this.showingPD = !this.showingPD;
+          const pdBtn = document.getElementById("show-pd");
+
+          if (this.showingPD) {
+            pdBtn.style.background =
+              "linear-gradient(to right, #0288d1, #4fc3f7)";
+            if (this.circuitClosed) {
+              this.showNotification(
+                `PD shown: Voltage drop across bulb = ${this.pdAcrossBulb.toFixed(
+                  2
+                )}V (PD < EMF due to internal resistance)`
+              );
+            } else {
+              this.showNotification(
+                "PD shown: No current flow, so PD = 0V across bulb"
+              );
+            }
+          } else {
+            pdBtn.style.background =
+              "linear-gradient(to right, #4fc3f7, #81d4fa)";
+          }
+
+          this.drawCircuit();
+        }
+
+        resetCircuit() {
+          this.circuitClosed = false;
+          this.emf = 1.5;
+          this.internalResistance = 0.5;
+          this.loadResistance = 10.0;
+          this.bulbBrightness = 1.0;
+          this.showingEMF = true;
+          this.showingPD = true;
+
+          const stateIndicator = document.querySelector(".state-indicator");
+          const stateText = document.querySelector(".state-text");
+          const currentFlow = document.querySelector(".current-flow");
+          const emfBtn = document.getElementById("show-emf");
+          const pdBtn = document.getElementById("show-pd");
+
+          stateIndicator.classList.remove("active");
+          stateText.textContent = "Circuit Open - EMF Present, No PD";
+          stateText.className = "state-text open";
+          currentFlow.classList.remove("active");
+
+          emfBtn.style.background =
+            "linear-gradient(to right, #ff6b6b, #ff8e8e)";
+          pdBtn.style.background =
+            "linear-gradient(to right, #4fc3f7, #81d4fa)";
+
+          if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+          }
+
+          this.updateMeasurements();
+          this.drawCircuit();
+
+          this.showNotification(
+            "Circuit reset. EMF = 1.5V present, but no PD until circuit is closed."
+          );
         }
 
         changeBulbBrightness() {
@@ -1472,48 +1703,30 @@
           const currentIndex = brightnessLevels.indexOf(this.bulbBrightness);
           this.bulbBrightness =
             brightnessLevels[(currentIndex + 1) % brightnessLevels.length];
+          this.loadResistance = 10.0 / this.bulbBrightness;
 
-          this.resistance = 10.0 / this.bulbBrightness;
           this.showNotification(
-            `Bulb brightness set to ${Math.round(this.bulbBrightness * 100)}%`
+            `Bulb brightness changed to ${Math.round(
+              this.bulbBrightness * 100
+            )}%. Resistance changed to ${this.loadResistance.toFixed(1)}Ω`
           );
 
           this.updateMeasurements();
           this.drawCircuit();
         }
 
-        resetCircuit() {
-          this.circuitClosed = false;
-          this.voltage = 1.5;
-          this.resistance = 10.0;
-          this.bulbBrightness = 1.0;
-
-          const stateIndicator = document.querySelector(".state-indicator");
-          const stateText = document.querySelector(".state-text");
-          const currentFlow = document.querySelector(".current-flow");
-
-          stateIndicator.classList.remove("active");
-          stateText.textContent = "Circuit Open - No Current Flow";
-          stateText.className = "state-text open";
-          currentFlow.classList.remove("active");
-
-          if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-          }
-
-          this.updateMeasurements();
-          this.drawCircuit();
-
-          this.showNotification("Circuit reset to initial state");
-        }
-
         changeVoltage() {
           const voltages = [1.5, 3.0, 4.5, 6.0, 9.0, 12.0];
-          const currentIndex = voltages.indexOf(this.voltage);
-          this.voltage = voltages[(currentIndex + 1) % voltages.length];
+          const currentIndex = voltages.indexOf(this.emf);
+          this.emf = voltages[(currentIndex + 1) % voltages.length];
 
-          this.showNotification(`Voltage changed to ${this.voltage}V`);
+          this.showNotification(
+            `EMF changed to ${this.emf}V. ${
+              this.circuitClosed
+                ? "Note how PD across bulb changes!"
+                : "EMF is present even with circuit open."
+            }`
+          );
 
           this.updateMeasurements();
           this.drawCircuit();
@@ -1523,20 +1736,20 @@
           const notification = document.createElement("div");
           notification.textContent = message;
           notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: rgba(0, 0, 0, 0.85);
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 10px;
-                    z-index: 1000;
-                    border-left: 5px solid #4fc3f7;
-                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-                    animation: slideIn 0.3s ease;
-                    font-size: 1rem;
-                    max-width: 300px;
-                `;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 1000;
+            border-left: 5px solid #4fc3f7;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+            font-size: 1rem;
+            max-width: 300px;
+          `;
 
           document.body.appendChild(notification);
 
@@ -1585,7 +1798,6 @@
             (x - bulbCenterX) ** 2 + (y - bulbCenterY) ** 2
           );
 
-          // Check if click is within bulb area (ellipse)
           if (distance < 50) {
             this.changeBulbBrightness();
             return;
@@ -1602,19 +1814,19 @@
       }
 
       window.addEventListener("DOMContentLoaded", () => {
-        const simulator = new CircuitSimulator();
+        const simulator = new EMFPDSimulator();
 
         const style = document.createElement("style");
         style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+          @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+          }
+        `;
         document.head.appendChild(style);
       });
     </script>

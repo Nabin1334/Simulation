@@ -1,560 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Newton's First Law: Pure Inertia</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            background: #f8fafc;
-            color: #1e293b;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
+      body {
+        background: #f8fafc;
+        color: #1e293b;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
 
+      .container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        padding: 15px;
+        gap: 15px;
+      }
+
+      @media (max-width: 768px) {
         .container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            padding: 15px;
-            gap: 15px;
+          flex-direction: column;
+          padding: 10px;
         }
+      }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                padding: 10px;
-            }
-        }
+      /* --- SIMULATION AREA --- */
+      .simulation-area {
+        flex: 3;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+      }
 
-        /* --- SIMULATION AREA --- */
-        .simulation-area {
-            flex: 3;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e2e8f0;
-        }
+      #simulationCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
 
-        #simulationCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+      /* --- CONTROLS PANEL --- */
+      .controls-panel {
+        flex: 1;
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        min-width: 320px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        overflow-y: auto;
+      }
 
-        /* --- CONTROLS PANEL --- */
+      .panel-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .panel-title {
+        color: #3b82f6;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        letter-spacing: -0.5px;
+      }
+
+      .panel-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        font-weight: 400;
+      }
+
+      /* --- LAW DISPLAY --- */
+      .law-card {
+        background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 5px solid #3b82f6;
+      }
+
+      .law-title {
+        color: #1e40af;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .law-icon {
+        font-size: 1.5rem;
+      }
+
+      .law-text {
+        color: #1e293b;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        font-weight: 500;
+      }
+
+      .law-highlight {
+        background: #dbeafe;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+        color: #1e40af;
+      }
+
+      /* --- MODE SELECTOR --- */
+      .mode-selector {
+        margin-bottom: 30px;
+      }
+
+      .mode-title {
+        color: #475569;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .mode-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .mode-btn {
+        padding: 16px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        border-radius: 12px;
+        color: #64748b;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+
+      .mode-btn:hover {
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+      }
+
+      .mode-btn.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
+      }
+
+      /* --- MASS SELECTOR --- */
+      .mass-selector {
+        margin-bottom: 30px;
+      }
+
+      .mass-title {
+        color: #475569;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .mass-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .mass-btn {
+        padding: 16px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        border-radius: 12px;
+        color: #64748b;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+
+      .mass-btn:hover {
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+      }
+
+      .mass-btn.active {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border-color: #3b82f6;
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
+      }
+
+      /* --- CONTROL BUTTONS --- */
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .action-btn {
+        padding: 18px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-push {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+      }
+
+      .btn-push:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-push:active {
+        transform: translateY(-1px);
+      }
+
+      .btn-reset {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+      }
+
+      .btn-reset:hover {
+        background: #e2e8f0;
+        color: #475569;
+      }
+
+      /* --- DATA DISPLAY --- */
+      .data-display {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: auto;
+        border: 1px solid #e2e8f0;
+      }
+
+      .data-title {
+        color: #475569;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .data-item {
+        background: white;
+        padding: 18px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+      }
+
+      .data-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .data-value {
+        color: #1e293b;
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+      }
+
+      .data-value.speed {
+        color: #10b981;
+      }
+
+      .data-value.mass {
+        color: #3b82f6;
+      }
+
+      /* --- SIMULATION OVERLAYS --- */
+      .simulation-label {
+        position: absolute;
+        top: 25px;
+        left: 25px;
+        font-size: 2rem;
+        font-weight: 900;
+        color: rgba(30, 41, 59, 0.03);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .status-display {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+      }
+
+      .status-space {
+        color: #3b82f6;
+        border-left: 4px solid #3b82f6;
+      }
+
+      .status-earth {
+        color: #ef4444;
+        border-left: 4px solid #ef4444;
+      }
+
+      .momentum-display {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px 25px;
+        border-radius: 12px;
+        border: 1px solid #10b981;
+        color: #10b981;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+      }
+
+      .physics-info {
+        position: absolute;
+        bottom: 25px;
+        right: 25px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 0.9rem;
+        max-width: 300px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+      }
+
+      .physics-info strong {
+        color: #1e293b;
+      }
+
+      /* --- RESPONSIVE DESIGN --- */
+      @media (max-width: 768px) {
         .controls-panel {
-            flex: 1;
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            min-width: 320px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            overflow-y: auto;
-        }
-
-        .panel-header {
-            text-align: center;
-            margin-bottom: 30px;
+          min-width: auto;
+          padding: 20px;
         }
 
         .panel-title {
-            color: #3b82f6;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
+          font-size: 1.5rem;
         }
 
-        .panel-subtitle {
-            color: #64748b;
-            font-size: 1rem;
-            font-weight: 400;
-        }
-
-        /* --- LAW DISPLAY --- */
-        .law-card {
-            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-left: 5px solid #3b82f6;
-        }
-
-        .law-title {
-            color: #1e40af;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .law-icon {
-            font-size: 1.5rem;
-        }
-
-        .law-text {
-            color: #1e293b;
-            font-size: 1.05rem;
-            line-height: 1.6;
-            font-weight: 500;
-        }
-
-        .law-highlight {
-            background: #dbeafe;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            color: #1e40af;
-        }
-
-        /* --- MODE SELECTOR --- */
-        .mode-selector {
-            margin-bottom: 30px;
-        }
-
-        .mode-title {
-            color: #475569;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .mode-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .mode-btn {
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            border-radius: 12px;
-            color: #64748b;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .mode-btn:hover {
-            border-color: #3b82f6;
-            transform: translateY(-2px);
-        }
-
-        .mode-btn.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
-        }
-
-        /* --- MASS SELECTOR --- */
-        .mass-selector {
-            margin-bottom: 30px;
-        }
-
-        .mass-title {
-            color: #475569;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        .mode-buttons,
         .mass-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .mass-btn {
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            border-radius: 12px;
-            color: #64748b;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .mass-btn:hover {
-            border-color: #3b82f6;
-            transform: translateY(-2px);
-        }
-
-        .mass-btn.active {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
-        }
-
-        /* --- CONTROL BUTTONS --- */
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .action-btn {
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-push {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
-        }
-
-        .btn-push:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-push:active {
-            transform: translateY(-1px);
-        }
-
-        .btn-reset {
-            background: #f1f5f9;
-            color: #64748b;
-            border: 2px solid #e2e8f0;
-        }
-
-        .btn-reset:hover {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        /* --- DATA DISPLAY --- */
-        .data-display {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: auto;
-            border: 1px solid #e2e8f0;
-        }
-
-        .data-title {
-            color: #475569;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+          grid-template-columns: 1fr;
         }
 
         .data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+          grid-template-columns: 1fr;
         }
 
-        .data-item {
-            background: white;
-            padding: 18px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-        }
-
-        .data-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .data-value {
-            color: #1e293b;
-            font-size: 1.5rem;
-            font-weight: 700;
-            font-family: 'Courier New', monospace;
-        }
-
-        .data-value.speed {
-            color: #10b981;
-        }
-
-        .data-value.mass {
-            color: #3b82f6;
-        }
-
-        /* --- SIMULATION OVERLAYS --- */
         .simulation-label {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            font-size: 2rem;
-            font-weight: 900;
-            color: rgba(30, 41, 59, 0.03);
-            z-index: 1;
-            pointer-events: none;
+          font-size: 1.5rem;
+          top: 15px;
+          left: 15px;
         }
 
-        .status-display {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            font-weight: 600;
-            font-size: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-        }
-
-        .status-space {
-            color: #3b82f6;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .status-earth {
-            color: #ef4444;
-            border-left: 4px solid #ef4444;
-        }
-
-        .momentum-display {
-            position: absolute;
-            bottom: 25px;
-            left: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid #10b981;
-            color: #10b981;
-            font-weight: 600;
-            font-size: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-        }
-
+        .status-display,
+        .momentum-display,
         .physics-info {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 0.9rem;
-            max-width: 300px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            z-index: 10;
+          padding: 12px 20px;
+          font-size: 0.9rem;
+          top: 15px;
+          right: 15px;
         }
 
-        .physics-info strong {
-            color: #1e293b;
+        .momentum-display,
+        .physics-info {
+          position: relative;
+          top: auto;
+          left: auto;
+          right: auto;
+          bottom: auto;
+          margin-top: 15px;
+          max-width: none;
         }
+      }
 
-        /* --- RESPONSIVE DESIGN --- */
-        @media (max-width: 768px) {
-            .controls-panel {
-                min-width: auto;
-                padding: 20px;
-            }
+      /* --- SCROLLBAR --- */
+      .controls-panel::-webkit-scrollbar {
+        width: 6px;
+      }
 
-            .panel-title {
-                font-size: 1.5rem;
-            }
+      .controls-panel::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+      }
 
-            .mode-buttons,
-            .mass-buttons {
-                grid-template-columns: 1fr;
-            }
+      .controls-panel::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
 
-            .data-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .simulation-label {
-                font-size: 1.5rem;
-                top: 15px;
-                left: 15px;
-            }
-
-            .status-display,
-            .momentum-display,
-            .physics-info {
-                padding: 12px 20px;
-                font-size: 0.9rem;
-                top: 15px;
-                right: 15px;
-            }
-
-            .momentum-display,
-            .physics-info {
-                position: relative;
-                top: auto;
-                left: auto;
-                right: auto;
-                bottom: auto;
-                margin-top: 15px;
-                max-width: none;
-            }
-        }
-
-        /* --- SCROLLBAR --- */
-        .controls-panel::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .controls-panel::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        .controls-panel::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .controls-panel::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+      .controls-panel::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <!-- SIMULATION AREA -->
-        <div class="simulation-area">
-            <canvas id="simulationCanvas"></canvas>
-            
-            <!-- Background Labels -->
-            <div class="simulation-label" id="modeLabel">SPACE</div>
-            
-            <!-- Status Overlay -->
-            <div class="status-display status-space" id="statusDisplay">
-                STATUS: Object at rest
-            </div>
-            
-            <!-- Momentum Display -->
-            <div class="momentum-display" id="momentumDisplay">
-                MOMENTUM: 0 kg·m/s
-            </div>
-            
-            <!-- Physics Info -->
-            <div class="physics-info" id="physicsInfo">
-                <strong>Current Physics:</strong><br>
-                • Zero friction in space<br>
-                • Object maintains velocity<br>
-                • Perfect Newton's First Law
-            </div>
+      <!-- CONTROLS PANEL -->
+      <div class="controls-panel">
+        <!-- Header -->
+        <div class="panel-header">
+          <h1 class="panel-title">Newton's First Law</h1>
+          <p class="panel-subtitle">Pure Inertia Demonstration</p>
         </div>
 
-        <!-- CONTROLS PANEL -->
-        <div class="controls-panel">
-            <!-- Header -->
-            <div class="panel-header">
-                <h1 class="panel-title">Newton's First Law</h1>
-                <p class="panel-subtitle">Pure Inertia Demonstration</p>
-            </div>
-
-            <!-- Law Display -->
-            <div class="law-card">
-                <div class="law-title">
-                    <span class="law-icon">⚖️</span>
-                    Law of Inertia
-                </div>
-                <p class="law-text">
-                    <span class="law-highlight">An object at rest stays at rest</span>, and 
-                    <span class="law-highlight">an object in motion stays in motion</span> 
-                    with the same speed and in the same direction, 
-                    <span class="law-highlight">unless acted upon by an unbalanced force.</span>
-                </p>
-            </div>
-
-            <!-- Mode Selector -->
-            <div class="mode-selector">
-                <div class="mode-title">Environment</div>
-                <div class="mode-buttons">
-                    <button class="mode-btn active" id="btnSpace">Space (Vacuum)</button>
-                    <button class="mode-btn" id="btnEarth">Earth (Friction)</button>
-                </div>
-            </div>
-
-            <!-- Mass Selector -->
-            <div class="mass-selector">
-                <div class="mass-title">Object Mass</div>
-                <div class="mass-buttons">
-                    <button class="mass-btn" data-mass="100">Small (100 kg)</button>
-                    <button class="mass-btn active" data-mass="1000">Medium (1000 kg)</button>
-                    <button class="mass-btn" data-mass="5000">Large (5000 kg)</button>
-                    <button class="mass-btn" data-mass="10000">Huge (10000 kg)</button>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="action-btn btn-push" id="btnPush">Apply Force</button>
-                <button class="action-btn btn-reset" id="btnReset">Reset</button>
-            </div>
-
-            <!-- Data Display -->
-            <div class="data-display">
-                <div class="data-title">Physics Data</div>
-                <div class="data-grid">
-                    <div class="data-item">
-                        <div class="data-label">Current Speed</div>
-                        <div class="data-value speed" id="speedValue">0.00 m/s</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Object Mass</div>
-                        <div class="data-value mass" id="massValue">1000 kg</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Distance</div>
-                        <div class="data-value" id="distanceValue">0 m</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Time</div>
-                        <div class="data-value" id="timeValue">0 s</div>
-                    </div>
-                </div>
-            </div>
+        <!-- Law Display -->
+        <div class="law-card">
+          <div class="law-title">
+            <span class="law-icon">⚖️</span>
+            Law of Inertia
+          </div>
+          <p class="law-text">
+            <span class="law-highlight">An object at rest stays at rest</span>,
+            and
+            <span class="law-highlight"
+              >an object in motion stays in motion</span
+            >
+            with the same speed and in the same direction,
+            <span class="law-highlight"
+              >unless acted upon by an unbalanced force.</span
+            >
+          </p>
         </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+          <div class="mode-title">Environment</div>
+          <div class="mode-buttons">
+            <button class="mode-btn active" id="btnSpace">
+              Space (Vacuum)
+            </button>
+            <button class="mode-btn" id="btnEarth">Earth (Friction)</button>
+          </div>
+        </div>
+
+        <!-- Mass Selector -->
+        <div class="mass-selector">
+          <div class="mass-title">Object Mass</div>
+          <div class="mass-buttons">
+            <button class="mass-btn" data-mass="100">Small (100 kg)</button>
+            <button class="mass-btn active" data-mass="1000">
+              Medium (1000 kg)
+            </button>
+            <button class="mass-btn" data-mass="5000">Large (5000 kg)</button>
+            <button class="mass-btn" data-mass="10000">Huge (10000 kg)</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="action-btn btn-push" id="btnPush">Apply Force</button>
+          <button class="action-btn btn-reset" id="btnReset">Reset</button>
+        </div>
+
+        <!-- Data Display -->
+        <div class="data-display">
+          <div class="data-title">Physics Data</div>
+          <div class="data-grid">
+            <div class="data-item">
+              <div class="data-label">Current Speed</div>
+              <div class="data-value speed" id="speedValue">0.00 m/s</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Object Mass</div>
+              <div class="data-value mass" id="massValue">1000 kg</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Distance</div>
+              <div class="data-value" id="distanceValue">0 m</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Time</div>
+              <div class="data-value" id="timeValue">0 s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATION AREA -->
+      <div class="simulation-area">
+        <canvas id="simulationCanvas"></canvas>
+
+        <!-- Background Labels -->
+        <div class="simulation-label" id="modeLabel">SPACE</div>
+
+        <!-- Status Overlay -->
+        <div class="status-display status-space" id="statusDisplay">
+          STATUS: Object at rest
+        </div>
+
+        <!-- Momentum Display -->
+        <div class="momentum-display" id="momentumDisplay">
+          MOMENTUM: 0 kg·m/s
+        </div>
+
+        <!-- Physics Info -->
+        <div class="physics-info" id="physicsInfo">
+          <strong>Current Physics:</strong><br />
+          • Zero friction in space<br />
+          • Object maintains velocity<br />
+          • Perfect Newton's First Law
+        </div>
+      </div>
     </div>
 
-    <script src="index.js">
-    </script>
-</body>
+    <script src="index.js"></script>
+  </body>
 </html>
