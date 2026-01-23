@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Telecommunication Network</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        #canvas-container { 
+            width: 100vw; 
+            height: 100vh; 
+            display: block;
+        }
+        #loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white; font-size: 20px;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 20px; left: 20px;
+            color: #fff;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+        }
+        h1 { margin: 0 0 10px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: #00aaff;}
+        p { font-size: 0.85rem; color: #ddd; line-height: 1.4; margin-bottom: 5px;}
+        .legend { display: flex; align-items: center; font-size: 0.8rem; margin-top: 8px; color: #bbb;}
+        .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+        .dot-sat { background: #ff3333; box-shadow: 0 0 5px #ff3333;}
+        .dot-fiber { background: #0088ff; box-shadow: 0 0 5px #0088ff;}
+    </style>
+</head>
+<body>
+    <div id="loading">Loading textures...</div>
+    <div id="ui-layer">
+        <h1>Global Telecommunication</h1>
+        <p>Real-time visualization of global data transfer technologies.</p>
+        <div class="legend"><div class="dot dot-fiber"></div>Fiber Optic / Submarine Cables</div>
+        <div class="legend"><div class="dot dot-sat"></div>Satellite & Microwave Uplinks</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script src="index.js">
+
+    </script>
+</body>
+</html>

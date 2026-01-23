@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Series Circuit Class 9</title>
+    <style>
+      :root {
+        --bg-color: #1e293b;
+        --panel-bg: #334155;
+        --wire-color: #64748b;
+        --electron-color: #facc15;
+        --accent-color: #38bdf8;
+        --text-color: #f1f5f9;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      h1 {
+        margin: 20px 0;
+        font-weight: 300;
+        text-align: center;
+        font-size: 2rem;
+      }
+
+      h1 span {
+        font-size: 0.6em;
+        color: #888;
+      }
+
+      /* Main Layout */
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        max-width: 1400px;
+        width: 100%;
+      }
+
+      /* Control Panel */
+      .control-panel {
+        width: 300px;
+        background: var(--panel-bg);
+        padding: 25px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      .control-panel h3 {
+        margin-bottom: 10px;
+        color: var(--accent-color);
+        font-size: 1.3rem;
+      }
+
+      .slider-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        color: #cbd5e1;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        height: 8px;
+        accent-color: var(--accent-color);
+        cursor: pointer;
+      }
+
+      .value-highlight {
+        color: var(--electron-color);
+        font-weight: bold;
+      }
+
+      /* Control Button */
+      .control-button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(145deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.05rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .control-button:hover {
+        background: linear-gradient(145deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.5);
+      }
+
+      .control-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+      }
+
+      .control-button.off {
+        background: linear-gradient(145deg, #6b7280, #4b5563);
+        box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+      }
+
+      .control-button.off:hover {
+        background: linear-gradient(145deg, #4b5563, #374151);
+        box-shadow: 0 6px 12px rgba(107, 114, 128, 0.5);
+      }
+
+      /* Current Indicator */
+      .current-indicator {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid var(--electron-color);
+        text-align: center;
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
+      }
+
+      .current-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--electron-color);
+        margin: 8px 0;
+        text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+      }
+
+      /* Educational Box */
+      .edu-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 18px;
+        border-radius: 10px;
+        border-left: 4px solid var(--accent-color);
+      }
+
+      .edu-title {
+        font-weight: bold;
+        color: var(--accent-color);
+        margin-bottom: 10px;
+        display: block;
+        font-size: 1.1rem;
+      }
+
+      .edu-formula {
+        font-family: "Courier New", monospace;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 8px;
+        border-radius: 6px;
+        display: block;
+        text-align: center;
+        margin: 12px 0;
+        font-size: 1.1rem;
+        color: #fbbf24;
+      }
+
+      /* Circuit Board */
+      .circuit-board {
+        position: relative;
+        width: 900px;
+        height: 500px;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        border: 3px solid #475569;
+        overflow: hidden;
+      }
+
+      /* SVG Layer */
+      .circuit-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .wire-path {
+        fill: none;
+        stroke: var(--wire-color);
+        stroke-width: 5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .electron-path {
+        fill: none;
+        stroke: var(--electron-color);
+        stroke-width: 5;
+        stroke-dasharray: 12 30;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: flow linear infinite;
+        animation-play-state: paused;
+      }
+
+      @keyframes flow {
+        to {
+          stroke-dashoffset: -420;
+        }
+      }
+
+      /* Component Labels */
+      .component-label {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: #fff;
+        font-weight: 500;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Battery */
+      .battery-box {
+        position: absolute;
+        left: 50px;
+        top: 180px;
+        width: 70px;
+        height: 120px;
+        background: linear-gradient(to right, #e5e7eb, #f9fafb);
+        border: 3px solid #6b7280;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: #000;
+        font-weight: bold;
+        z-index: 5;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      .battery-box::before {
+        content: "+";
+        position: absolute;
+        top: -30px;
+        color: #ef4444;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .battery-box::after {
+        content: "−";
+        position: absolute;
+        bottom: -30px;
+        color: #3b82f6;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .battery-terminal {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #c0c0c0;
+        border: 2px solid #888;
+        border-radius: 50%;
+        z-index: 6;
+      }
+
+      .battery-terminal.top {
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .battery-terminal.bottom {
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Resistor */
+      .resistor-box {
+        position: absolute;
+        top: 50px;
+        width: 120px;
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 5;
+      }
+
+      #r1-box {
+        left: 220px;
+      }
+      #r2-box {
+        left: 390px;
+      }
+      #r3-box {
+        left: 560px;
+      }
+
+      .resistor-label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .resistor-zig {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: #e8b86d;
+        stroke-width: 5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .voltage-drop {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--accent-color);
+        font-size: 0.85rem;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      /* Realistic Light Bulb */
+      .bulb-wrapper {
+        position: absolute;
+        right: 100px;
+        top: 160px;
+        width: 100px;
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 5;
+      }
+
+      .bulb-glass {
+        width: 70px;
+        height: 90px;
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        background: radial-gradient(
+          ellipse at 35% 35%,
+          rgba(255, 255, 255, 0.95),
+          rgba(230, 230, 230, 0.7)
+        );
+        border: 3px solid rgba(180, 180, 180, 0.9);
+        position: relative;
+        overflow: visible;
+        box-shadow: inset -8px -8px 20px rgba(0, 0, 0, 0.15),
+          inset 8px 8px 20px rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+      }
+
+      .bulb-filament {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 40px;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .filament-wire {
+        position: absolute;
+        width: 3px;
+        height: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(to bottom, transparent, #888, transparent);
+      }
+
+      .filament-coil {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(
+          circle,
+          #ffeb3b 0%,
+          #ff9800 60%,
+          transparent 80%
+        );
+        border-radius: 50%;
+        filter: blur(2px);
+      }
+
+      .filament-glow {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(
+          circle,
+          rgba(255, 235, 59, 0.6) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        filter: blur(5px);
+      }
+
+      .bulb-base {
+        width: 40px;
+        height: 30px;
+        background: linear-gradient(
+          to bottom,
+          #d4af37 0%,
+          #b8941f 50%,
+          #aa8c2d 100%
+        );
+        position: relative;
+        border-radius: 2px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4),
+          inset 0 2px 3px rgba(255, 255, 255, 0.3);
+      }
+
+      .bulb-screw {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to bottom, #8b7220, #6b5a18);
+        left: 0;
+      }
+
+      .bulb-screw:nth-child(1) {
+        top: 6px;
+      }
+      .bulb-screw:nth-child(2) {
+        top: 12px;
+      }
+      .bulb-screw:nth-child(3) {
+        top: 18px;
+      }
+      .bulb-screw:nth-child(4) {
+        top: 24px;
+      }
+
+      .bulb-contact {
+        width: 25px;
+        height: 10px;
+        background: linear-gradient(to bottom, #d0d0d0, #a0a0a0);
+        border-radius: 0 0 5px 5px;
+        margin: 0 auto;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .bulb-terminal {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #c0c0c0;
+        border: 2px solid #888;
+        border-radius: 50%;
+        z-index: 10;
+      }
+
+      .bulb-terminal.left {
+        left: -4px;
+        top: 45px;
+      }
+
+      .bulb-terminal.right {
+        right: -4px;
+        top: 45px;
+      }
+
+      /* Mechanical Switch */
+      .switch-container {
+        position: absolute;
+        bottom: 120px;
+        left: 450px;
+        z-index: 10;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .switch-housing {
+        width: 40px;
+        height: 100px;
+        background: linear-gradient(to bottom, #2c2c2c, #1a1a1a);
+        margin: 0 auto;
+        position: relative;
+        border: 3px solid #444;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
+          inset 0 2px 5px rgba(255, 255, 255, 0.1);
+      }
+
+      .switch-lever {
+        position: absolute;
+        width: 50px;
+        height: 12px;
+        background: linear-gradient(to right, #999, #777);
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%) rotate(0deg);
+        border-radius: 6px;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+        border: 2px solid #333;
+        z-index: 11;
+      }
+
+      .switch-lever::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        background: radial-gradient(circle, #e74c3c, #c0392b);
+        border-radius: 50%;
+        top: -3px;
+        right: -4px;
+        border: 2px solid #222;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+      }
+
+      .switch-lever.on {
+        transform: translateX(-50%) rotate(40deg);
+        top: 65px;
+      }
+
+      .switch-lever.on::after {
+        background: radial-gradient(circle, #27ae60, #229954);
+      }
+
+      .switch-contact {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, #666, #444);
+        border-radius: 50%;
+        border: 2px solid #222;
+        z-index: 10;
+      }
+
+      .contact-top {
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .contact-bottom {
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .contact-plate {
+        position: absolute;
+        width: 16px;
+        height: 2px;
+        background: linear-gradient(to right, #888, #aaa);
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 1px;
+      }
+
+      .plate-top {
+        top: 28px;
+      }
+
+      .plate-bottom {
+        bottom: 28px;
+      }
+
+      .switch-label {
+        display: block;
+        margin-top: 12px;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: color 0.3s;
+      }
+
+      .switch-label.on {
+        color: #4ade80;
+        text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+      }
+
+      .switch-label.off {
+        color: #f87171;
+      }
+
+      .switch-description {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 6px;
+      }
+
+      /* Switch Wire Terminals */
+      .switch-terminal {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #c0c0c0;
+        border: 2px solid #888;
+        border-radius: 50%;
+        z-index: 1;
+      }
+
+      .switch-terminal.top {
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .switch-terminal.bottom {
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .circuit-board {
+          width: 700px;
+          height: 400px;
+        }
+
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .circuit-board {
+          width: 100%;
+          max-width: 600px;
+          height: 350px;
+        }
+
+        .control-panel {
+          width: 100%;
+          max-width: 600px;
+        }
+      }
+</style>
+  </head>
+  <body>
+    <h1>Series Circuit Simulator </h1>
+
+    <div class="container">
+      <!-- CONTROL PANEL -->
+      <div class="control-panel">
+        <h3>⚡ Circuit Controls</h3>
+
+        <div class="slider-group">
+          <label>
+            <span>Battery Voltage (V)</span>
+            <span class="value-highlight" id="val-v">12 V</span>
+          </label>
+          <input
+            type="range"
+            id="in-v"
+            min="5"
+            max="50"
+            value="12"
+            oninput="updateCircuit()"
+          />
+        </div>
+
+        <div class="slider-group">
+          <label>
+            <span>Resistor 1 (Ω)</span>
+            <span class="value-highlight" id="val-r1">100 Ω</span>
+          </label>
+          <input
+            type="range"
+            id="in-r1"
+            min="10"
+            max="500"
+            value="100"
+            step="10"
+            oninput="updateCircuit()"
+          />
+        </div>
+
+        <div class="slider-group">
+          <label>
+            <span>Resistor 2 (Ω)</span>
+            <span class="value-highlight" id="val-r2">200 Ω</span>
+          </label>
+          <input
+            type="range"
+            id="in-r2"
+            min="10"
+            max="500"
+            value="200"
+            step="10"
+            oninput="updateCircuit()"
+          />
+        </div>
+
+        <div class="slider-group">
+          <label>
+            <span>Resistor 3 (Ω)</span>
+            <span class="value-highlight" id="val-r3">300 Ω</span>
+          </label>
+          <input
+            type="range"
+            id="in-r3"
+            min="10"
+            max="500"
+            value="300"
+            step="10"
+            oninput="updateCircuit()"
+          />
+        </div>
+
+        <!-- Switch Control Button -->
+        <button
+          class="control-button on"
+          id="switch-btn"
+          onclick="toggleSwitch()"
+        >
+          <span id="btn-text">🔌 SWITCH: ON</span>
+        </button>
+
+        <!-- Current Indicator -->
+        <div class="current-indicator">
+          <div style="font-size: 0.85rem; color: #cbd5e1">CURRENT FLOW</div>
+          <div class="current-value" id="calc-current">0.020 A</div>
+          <div style="font-size: 0.75rem; color: #94a3b8">Amperes</div>
+        </div>
+
+        <div class="edu-box">
+          <span class="edu-title">📚 Physics Principles</span>
+          <p style="font-size: 0.95rem; margin: 8px 0; color: #cbd5e1">
+            <strong>Ohm's Law:</strong>
+          </p>
+          <span class="edu-formula">I = V / R<sub>total</sub></span>
+          <p style="font-size: 0.95rem; margin: 8px 0; color: #cbd5e1">
+            <strong>Total Resistance:</strong>
+            <span id="calc-rtotal" style="color: #fbbf24">610</span> Ω
+          </p>
+          <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 8px">
+            <strong>Series Rule:</strong> Current is the same at all points in
+            the circuit
+          </p>
+          <p
+            style="
+              font-size: 0.85rem;
+              color: #6b7280;
+              margin-top: 12px;
+              font-style: italic;
+            "
+          >
+            💡 Adjust controls and flip the switch to see real-time changes!
+          </p>
+        </div>
+      </div>
+
+      <!-- CIRCUIT VISUALIZATION -->
+      <div class="circuit-board">
+        <svg
+          class="circuit-svg"
+          viewBox="0 0 900 500"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Main wire path -->
+          <path
+            d="
+                    M 85 240 
+                    V 100 
+                    H 280 
+                    M 340 100 
+                    H 450 
+                    M 510 100 
+                    H 620 
+                    M 680 100 
+                    H 750 
+                    V 205 
+                    M 750 245 
+                    V 400 
+                    H 450 
+                    M 450 420 
+                    V 350 
+                    H 425 
+                    V 475 
+                    H 475 
+                    V 350 
+                    H 450 
+                    V 315 
+                    H 85 
+                    V 300
+                "
+            class="wire-path"
+            id="main-wire"
+          />
+
+          <!-- Electron flow animation -->
+          <path
+            d="
+                    M 85 240 
+                    V 100 
+                    H 750 
+                    V 205 
+                    M 750 245 
+                    V 400 
+                    H 450 
+                    V 420 
+                    H 425 
+                    V 475 
+                    H 475 
+                    V 420 
+                    H 450 
+                    V 315 
+                    H 85 
+                    V 300
+                "
+            class="electron-path"
+            id="electronFlow"
+          />
+
+          <!-- Switch connection wires (now attached to lower wire) -->
+          <line
+            x1="450"
+            y1="420"
+            x2="490"
+            y2="420"
+            class="wire-path"
+            id="switch-wire1"
+          />
+          <line
+            x1="490"
+            y1="420"
+            x2="490"
+            y2="475"
+            class="wire-path"
+            id="switch-wire2"
+          />
+          <line
+            x1="425"
+            y1="420"
+            x2="425"
+            y2="475"
+            class="wire-path"
+            id="switch-wire3"
+          />
+          <line
+            x1="425"
+            y1="475"
+            x2="490"
+            y2="475"
+            class="wire-path"
+            id="switch-wire4"
+          />
+
+          <!-- Bulb wire connections -->
+          <line
+            x1="750"
+            y1="205"
+            x2="746"
+            y2="205"
+            stroke="#64748b"
+            stroke-width="4"
+            class="wire-path"
+          />
+          <line
+            x1="750"
+            y1="245"
+            x2="746"
+            y2="245"
+            stroke="#64748b"
+            stroke-width="4"
+            class="wire-path"
+          />
+        </svg>
+
+        <!-- Battery -->
+        <div class="battery-box">
+          <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px">
+            BATTERY
+          </div>
+          <div style="font-size: 1.3rem">
+            <span id="disp-voltage">12</span>V
+          </div>
+          <div class="battery-terminal top"></div>
+          <div class="battery-terminal bottom"></div>
+        </div>
+
+        <!-- Resistor 1 -->
+        <div id="r1-box" class="resistor-box">
+          <div class="resistor-label">R₁</div>
+          <svg viewBox="0 0 120 40" style="width: 100%; height: 40px">
+            <path
+              d="M0,20 L15,20 L20,5 L30,35 L40,5 L50,35 L60,5 L70,35 L80,5 L90,35 L100,20 L120,20"
+              class="resistor-zig"
+            />
+          </svg>
+          <div class="component-label" style="top: 50px">
+            <span id="disp-r1">100</span>Ω
+          </div>
+          <div class="voltage-drop">V₁: <span id="v-drop-1">0.0</span>V</div>
+        </div>
+
+        <!-- Resistor 2 -->
+        <div id="r2-box" class="resistor-box">
+          <div class="resistor-label">R₂</div>
+          <svg viewBox="0 0 120 40" style="width: 100%; height: 40px">
+            <path
+              d="M0,20 L15,20 L20,5 L30,35 L40,5 L50,35 L60,5 L70,35 L80,5 L90,35 L100,20 L120,20"
+              class="resistor-zig"
+            />
+          </svg>
+          <div class="component-label" style="top: 50px">
+            <span id="disp-r2">200</span>Ω
+          </div>
+          <div class="voltage-drop">V₂: <span id="v-drop-2">0.0</span>V</div>
+        </div>
+
+        <!-- Resistor 3 -->
+        <div id="r3-box" class="resistor-box">
+          <div class="resistor-label">R₃</div>
+          <svg viewBox="0 0 120 40" style="width: 100%; height: 40px">
+            <path
+              d="M0,20 L15,20 L20,5 L30,35 L40,5 L50,35 L60,5 L70,35 L80,5 L90,35 L100,20 L120,20"
+              class="resistor-zig"
+            />
+          </svg>
+          <div class="component-label" style="top: 50px">
+            <span id="disp-r3">300</span>Ω
+          </div>
+          <div class="voltage-drop">V₃: <span id="v-drop-3">0.0</span>V</div>
+        </div>
+
+        <!-- Realistic Light Bulb -->
+        <div class="bulb-wrapper">
+          <div class="bulb-glass" id="bulb-visual">
+            <div class="bulb-filament" id="bulb-filament">
+              <div class="filament-wire"></div>
+              <div class="filament-coil"></div>
+              <div class="filament-glow"></div>
+            </div>
+          </div>
+          <div class="bulb-base">
+            <div class="bulb-screw"></div>
+            <div class="bulb-screw"></div>
+            <div class="bulb-screw"></div>
+            <div class="bulb-screw"></div>
+          </div>
+          <div class="bulb-contact"></div>
+
+          <!-- Wire terminals -->
+          <div class="bulb-terminal left"></div>
+          <div class="bulb-terminal right"></div>
+
+          <div
+            style="
+              position: absolute;
+              right: 100px;
+              top: 50px;
+              width: 120px;
+              text-align: right;
+              color: #facc15;
+              font-weight: bold;
+              font-size: 0.9rem;
+            "
+          >
+            💡 Light Bulb
+          </div>
+        </div>
+
+        <!-- Mechanical Switch (now attached to lower wire) -->
+        <div
+          class="switch-container"
+          style="left: 490px; bottom: 15px"
+          onclick="toggleSwitch()"
+        >
+          <div class="switch-housing">
+            <div class="switch-terminal top"></div>
+            <div class="switch-contact contact-top"></div>
+            <div class="contact-plate plate-top"></div>
+            <div class="switch-lever on" id="switch-lever"></div>
+            <div class="switch-contact contact-bottom"></div>
+            <div class="contact-plate plate-bottom"></div>
+            <div class="switch-terminal bottom"></div>
+          </div>
+          <span class="switch-label on" id="switch-label">ON</span>
+          <div class="switch-description">Click to Toggle</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="index.js">
+    </script>
+  </body>
+</html>
