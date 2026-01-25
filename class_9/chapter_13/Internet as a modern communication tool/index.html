@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internet Communication - Interactive Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8f4f8 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header with Logo */
+        .header {
+            background: linear-gradient(90deg, #4a6fa5, #2c3e50);
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            background: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .logo {
+            font-size: 35px;
+            background: linear-gradient(45deg, #4a6fa5, #2c3e50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+        }
+        
+        .header-text h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .header-text p {
+            opacity: 0.9;
+        }
+        
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4a6fa5;
+            display: inline-block;
+        }
+        
+        h3 {
+            color: #4a6fa5;
+            margin: 15px 0 10px 0;
+        }
+        
+        /* Simulation Section */
+        .simulation-area {
+            grid-column: span 2;
+        }
+        
+        .simulation-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        .device-screen {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .screen-content {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            padding: 12px 18px;
+            margin: 10px 0;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 14px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .received {
+            background: #e3f2fd;
+            margin-right: auto;
+        }
+        
+        .sent {
+            background: #d4edda;
+            margin-left: auto;
+        }
+        
+        .system {
+            background: #f8f9fa;
+            text-align: center;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+        
+        .input-area button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .input-area button:hover {
+            background: #3a5a80;
+            transform: scale(1.05);
+        }
+        
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #4a6fa5;
+            color: #4a6fa5;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .control-btn:hover {
+            background: #4a6fa5;
+            color: white;
+        }
+        
+        .icon {
+            font-size: 20px;
+        }
+        
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .comparison-table th {
+            background: #4a6fa5;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            transition: background 0.3s;
+        }
+        
+        .comparison-table tr:hover td {
+            background: #f8f9fa;
+        }
+        
+        .old {
+            color: #d35400;
+            font-weight: bold;
+        }
+        
+        .new {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #4a6fa5, #27ae60);
+            height: 100%;
+            width: 0%;
+            transition: width 1s;
+            border-radius: 10px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4a6fa5;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Tool Cards */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .tool-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tool-card:hover {
+            border-color: #4a6fa5;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tool-card.active {
+            border-color: #4a6fa5;
+            background: #e8f4f8;
+        }
+        
+        .tool-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            color: #666;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        /* Highlight */
+        .highlight {
+            background: #ffeaa7;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        /* Live Counter */
+        .live-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">💬</div>
+            </div>
+            <div class="header-text">
+                <h1>Internet Communication Tool</h1>
+                <p>Interactive Guide - Experience Modern Communication</p>
+            </div>
+        </div>
+        
+        <!-- Live Counter -->
+        <div class="live-counter" id="liveCounter">
+            <span class="icon">📡</span>
+            <span id="messageCount">0</span> messages sent
+        </div>
+        
+        <!-- Simulation Section -->
+        <div class="simulation-area">
+            <div class="simulation-box">
+                <h2>💬 Real-Time Communication Simulation</h2>
+                <p>Try different communication methods and see how they work in real-time:</p>
+                
+                <div class="device-screen">
+                    <div class="screen-content" id="chatScreen">
+                        <div class="message received">
+                            <strong>Teacher:</strong> Welcome to the communication simulation! Try sending a message.
+                        </div>
+                        <div class="message received">
+                            <strong>Friend:</strong> Hey! Can you send me the project file?
+                        </div>
+                        <div class="message sent">
+                            <strong>You:</strong> Sure! I'll share it via Google Drive.
+                        </div>
+                        <div class="message system">
+                            📁 File "Science_Project.pdf" uploaded successfully
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type your message here...">
+                    <button id="sendBtn">
+                        <span class="icon">📤</span> Send
+                    </button>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn" id="emailBtn">
+                        <span class="icon">📧</span> Send Email
+                    </button>
+                    <button class="control-btn" id="videoBtn">
+                        <span class="icon">📹</span> Video Call
+                    </button>
+                    <button class="control-btn" id="whatsappBtn">
+                        <span class="icon">💬</span> WhatsApp Message
+                    </button>
+                    <button class="control-btn" id="shareBtn">
+                        <span class="icon">📎</span> Share File
+                    </button>
+                    <button class="control-btn" id="clearBtn">
+                        <span class="icon">🗑️</span> Clear Chat
+                    </button>
+                </div>
+                
+                <!-- Progress Indicator -->
+                <div style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Communication Speed</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p style="text-align: center; margin-top: 10px; color: #666;">
+                        <span class="highlight">Internet makes communication 100x faster!</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="main-content">
+            <!-- Left Column -->
+            <div class="card">
+                <h2>📊 Communication Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="speedStat">0.5s</div>
+                        <div class="stat-label">Email Delivery Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="costStat">₹0</div>
+                        <div class="stat-label">Cost per Message</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="reachStat">99%</div>
+                        <div class="stat-label">Global Reach</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="timeStat">24/7</div>
+                        <div class="stat-label">Availability</div>
+                    </div>
+                </div>
+                
+                <h3>📈 Real-Time Comparison</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Method</th>
+                        <th>Before Internet</th>
+                        <th>With Internet</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Letter Delivery</strong></td>
+                        <td class="old">3-5 days</td>
+                        <td class="new" id="emailTime">2 seconds</td>
+                    </tr>
+                    <tr>
+                        <td><strong>International Call</strong></td>
+                        <td class="old">₹50/minute</td>
+                        <td class="new" id="callCost">FREE</td>
+                    </tr>
+                    <tr>
+                        <td><strong>File Sharing</strong></td>
+                        <td class="old">Physical Copy</td>
+                        <td class="new">Instant Upload</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Group Meeting</strong></td>
+                        <td class="old">Travel Required</td>
+                        <td class="new">Video Conference</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="card">
+                <h2>🛠️ Communication Tools</h2>
+                <p>Click on any tool to learn more about it:</p>
+                
+                <div class="tools-grid" id="toolsGrid">
+                    <div class="tool-card" data-tool="email">
+                        <span class="tool-icon">📧</span>
+                        <h3>Email</h3>
+                        <p>Formal communication</p>
+                    </div>
+                    <div class="tool-card" data-tool="whatsapp">
+                        <span class="tool-icon">💬</span>
+                        <h3>WhatsApp</h3>
+                        <p>Instant messaging</p>
+                    </div>
+                    <div class="tool-card" data-tool="zoom">
+                        <span class="tool-icon">📹</span>
+                        <h3>Zoom</h3>
+                        <p>Video meetings</p>
+                    </div>
+                    <div class="tool-card" data-tool="drive">
+                        <span class="tool-icon">☁️</span>
+                        <h3>Google Drive</h3>
+                        <p>File sharing</p>
+                    </div>
+                </div>
+                
+                <div id="toolInfo">
+                    <h3>💡 Select a tool to see details</h3>
+                    <p>Click on any communication tool above to learn how it works.</p>
+                </div>
+                
+                <h3>🎯 Benefits for Students</h3>
+                <div style="margin: 15px 0;">
+                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: #f0f7ff; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-right: 15px;">⚡</span>
+                        <div>
+                            <strong>Instant Collaboration</strong> - Work on projects together in real-time
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: #f0f7ff; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-right: 15px;">📚</span>
+                        <div>
+                            <strong>Unlimited Resources</strong> - Access study materials anytime
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: #f0f7ff; border-radius: 8px;">
+                        <span style="font-size: 24px; margin-right: 15px;">👨‍🏫</span>
+                        <div>
+                            <strong>Teacher Support</strong> - Get help outside school hours
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examples Section -->
+        <div class="simulation-box">
+            <h2>🏫 Real Student Examples</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div style="background: #e8f4f8; padding: 20px; border-radius: 10px;">
+                    <h3>📚 Group Project</h3>
+                    <p><strong>Before:</strong> Meet physically, share notebooks</p>
+                    <p><strong>Now:</strong> Google Docs + WhatsApp group + Zoom meetings</p>
+                    <button class="control-btn" style="margin-top: 10px;" id="projectBtn">
+                        <span class="icon">🎮</span> Simulate This
+                    </button>
+                </div>
+                
+                <div style="background: #fff9e6; padding: 20px; border-radius: 10px;">
+                    <h3>👨‍🏫 Online Class</h3>
+                    <p><strong>Before:</strong> Physical classroom only</p>
+                    <p><strong>Now:</strong> Join from anywhere, record sessions, digital notes</p>
+                    <button class="control-btn" style="margin-top: 10px;" id="classBtn">
+                        <span class="icon">🎮</span> Simulate This
+                    </button>
+                </div>
+                
+                <div style="background: #e6ffe6; padding: 20px; border-radius: 10px;">
+                    <h3>📖 Homework Help</h3>
+                    <p><strong>Before:</strong> Library books, limited help</p>
+                    <p><strong>Now:</strong> YouTube + Online forums + Study groups</p>
+                    <button class="control-btn" style="margin-top: 10px;" id="homeworkBtn">
+                        <span class="icon">🎮</span> Simulate This
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <!-- <p>🌐 Internet Communication Interactive Guide • Made for Students</p>
+            <p style="margin-top: 10px; font-size: 14px;">Try all the buttons to experience modern communication!</p> -->
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const chatScreen = document.getElementById('chatScreen');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const emailBtn = document.getElementById('emailBtn');
+        const videoBtn = document.getElementById('videoBtn');
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const projectBtn = document.getElementById('projectBtn');
+        const classBtn = document.getElementById('classBtn');
+        const homeworkBtn = document.getElementById('homeworkBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const messageCount = document.getElementById('messageCount');
+        const toolsGrid = document.getElementById('toolsGrid');
+        const toolInfo = document.getElementById('toolInfo');
+        
+        // Statistics elements
+        const speedStat = document.getElementById('speedStat');
+        const costStat = document.getElementById('costStat');
+        const reachStat = document.getElementById('reachStat');
+        const timeStat = document.getElementById('timeStat');
+        const emailTime = document.getElementById('emailTime');
+        const callCost = document.getElementById('callCost');
+        
+        // Variables
+        let messagesSent = 0;
+        let progress = 0;
+        const toolData = {
+            email: {
+                name: "📧 Email",
+                description: "Send formal messages and documents instantly. Replaces postal mail completely.",
+                speed: "1-5 seconds",
+                cost: "Free",
+                example: "Sending homework to teacher"
+            },
+            whatsapp: {
+                name: "💬 WhatsApp",
+                description: "Instant messaging with friends and family. Free calls and video calls.",
+                speed: "Instant",
+                cost: "Free (with internet)",
+                example: "Group chat for project work"
+            },
+            zoom: {
+                name: "📹 Zoom",
+                description: "Video conferencing for classes and meetings. Share screen and collaborate.",
+                speed: "Real-time",
+                cost: "Free for 40 minutes",
+                example: "Online classes with teacher"
+            },
+            drive: {
+                name: "☁️ Google Drive",
+                description: "Cloud storage to share and collaborate on documents in real-time.",
+                speed: "Instant upload",
+                cost: "Free (15GB)",
+                example: "Group project document"
+            }
+        };
+        
+        // Initialize statistics with animation
+        function animateStatistics() {
+            // Animate speed from 5 days to 0.5s
+            let speed = 5;
+            const speedInterval = setInterval(() => {
+                if (speed > 0.5) {
+                    speed -= 0.1;
+                    speedStat.textContent = speed.toFixed(1) + 's';
+                } else {
+                    clearInterval(speedInterval);
+                    speedStat.textContent = '0.5s';
+                }
+            }, 50);
+            
+            // Animate cost from ₹20 to ₹0
+            let cost = 20;
+            const costInterval = setInterval(() => {
+                if (cost > 0) {
+                    cost -= 0.5;
+                    costStat.textContent = '₹' + cost.toFixed(0);
+                } else {
+                    clearInterval(costInterval);
+                    costStat.textContent = '₹0';
+                }
+            }, 50);
+            
+            // Animate reach from 0% to 99%
+            let reach = 0;
+            const reachInterval = setInterval(() => {
+                if (reach < 99) {
+                    reach += 1;
+                    reachStat.textContent = reach + '%';
+                } else {
+                    clearInterval(reachInterval);
+                }
+            }, 30);
+            
+            // Update progress bar
+            progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 100) {
+                    progress += 2;
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = progress + '%';
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 50);
+        }
+        
+        // Add message to chat
+        function addMessage(text, type = 'sent', sender = 'You') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            chatScreen.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            chatScreen.scrollTop = chatScreen.scrollHeight;
+            
+            // Update message count
+            messagesSent++;
+            messageCount.textContent = messagesSent;
+        }
+        
+        // Send message
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'sent');
+            messageInput.value = '';
+            
+            // Auto reply after delay
+            setTimeout(() => {
+                const replies = [
+                    "Thanks! Got your message.",
+                    "I'll check that and reply.",
+                    "That's interesting!",
+                    "Can we discuss this on call?",
+                    "Received. Thanks for sharing!"
+                ];
+                const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                const senders = ["Friend", "Teacher", "Mom", "Classmate"];
+                const randomSender = senders[Math.floor(Math.random() * senders.length)];
+                
+                addMessage(randomReply, 'received', randomSender);
+            }, 1000 + Math.random() * 2000);
+        }
+        
+        // Simulate email
+        function simulateEmail() {
+            addMessage('📧 Sending email with attachment...', 'sent');
+            
+            setTimeout(() => {
+                addMessage('Email delivered successfully!', 'system');
+                addMessage('Got your email with attachments. Thanks!', 'received', 'Teacher');
+            }, 800);
+        }
+        
+        // Simulate video call
+        function simulateVideoCall() {
+            addMessage('📹 Starting video call...', 'sent');
+            
+            setTimeout(() => {
+                addMessage('Video call connected!', 'system');
+                
+                setTimeout(() => {
+                    addMessage('Great session! Thanks for the help.', 'received', 'Friend');
+                    addMessage('Video call ended (5 minutes)', 'system');
+                }, 2000);
+            }, 1000);
+        }
+        
+        // Simulate WhatsApp
+        function simulateWhatsApp() {
+            addMessage('💬 Sending WhatsApp message...', 'sent');
+            
+            setTimeout(() => {
+                addMessage('Message delivered ✓', 'system');
+                addMessage('👍 Got it! Thanks for the update.', 'received', 'Friend');
+            }, 500);
+        }
+        
+        // Simulate file share
+        function simulateFileShare() {
+            const files = ['Science_Project.pdf', 'Math_Homework.docx', 'Presentation.pptx'];
+            const randomFile = files[Math.floor(Math.random() * files.length)];
+            
+            addMessage(`📎 Sharing file: ${randomFile}`, 'sent');
+            
+            setTimeout(() => {
+                addMessage('✅ File uploaded to cloud', 'system');
+                addMessage('Downloaded the file. Perfect!', 'received', 'Group Member');
+            }, 800);
+        }
+        
+        // Clear chat
+        function clearChat() {
+            chatScreen.innerHTML = `
+                <div class="message system">
+                    💬 Chat cleared. Start a new conversation!
+                </div>
+                <div class="message received">
+                    <strong>Tip:</strong> Try different communication methods using the buttons above.
+                </div>
+            `;
+        }
+        
+        // Simulate group project
+        function simulateGroupProject() {
+            chatScreen.innerHTML = `
+                <div class="message received">
+                    <strong>Group Project Simulation:</strong>
+                </div>
+                <div class="message received">
+                    <strong>Student 1:</strong> Created Google Doc for our science project
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Added research notes to the document
+                </div>
+                <div class="message received">
+                    <strong>Student 2:</strong> Added images and formatted the document
+                </div>
+                <div class="message system">
+                    📊 Real-time collaboration in progress...
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Shared final document with teacher via email
+                </div>
+                <div class="message received" style="background: #d4edda;">
+                    <strong>Result:</strong> Project completed online without any physical meetings! 🎉
+                </div>
+            `;
+        }
+        
+        // Simulate online class
+        function simulateOnlineClass() {
+            chatScreen.innerHTML = `
+                <div class="message received">
+                    <strong>Online Class Simulation:</strong>
+                </div>
+                <div class="message system">
+                    🎬 Joining Zoom class meeting...
+                </div>
+                <div class="message received">
+                    <strong>Teacher:</strong> Welcome everyone to today's online class!
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Joined with video and audio
+                </div>
+                <div class="message received">
+                    <strong>Teacher:</strong> Sharing screen now - please take notes
+                </div>
+                <div class="message system">
+                    📝 Screen sharing started
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Asking question via chat
+                </div>
+                <div class="message received">
+                    <strong>Teacher:</strong> Good question! Let me explain...
+                </div>
+                <div class="message system">
+                    💾 Class recorded for later review
+                </div>
+            `;
+        }
+        
+        // Simulate homework help
+        function simulateHomeworkHelp() {
+            chatScreen.innerHTML = `
+                <div class="message received">
+                    <strong>Homework Help Simulation:</strong>
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Searching for math problem help on Google
+                </div>
+                <div class="message system">
+                    🔍 Found 5,230,000 results in 0.45 seconds
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Watching YouTube tutorial on the topic
+                </div>
+                <div class="message system">
+                    📹 Video tutorial loaded
+                </div>
+                <div class="message sent">
+                    <strong>You:</strong> Asking question in study group WhatsApp
+                </div>
+                <div class="message received">
+                    <strong>Friend:</strong> Here's how to solve that problem...
+                </div>
+                <div class="message received" style="background: #d4edda;">
+                    <strong>Result:</strong> Problem solved using online resources! ✅
+                </div>
+            `;
+        }
+        
+        // Show tool information
+        function showToolInfo(tool) {
+            const data = toolData[tool];
+            
+            toolInfo.innerHTML = `
+                <h3>${data.name}</h3>
+                <p>${data.description}</p>
+                <div style="margin: 15px 0; padding: 15px; background: #f0f7ff; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <strong>Speed:</strong> <span>${data.speed}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <strong>Cost:</strong> <span>${data.cost}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <strong>Example:</strong> <span>${data.example}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update comparison table
+            emailTime.textContent = data.speed;
+            if (tool === 'whatsapp') {
+                callCost.textContent = data.cost;
+            }
+        }
+        
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        emailBtn.addEventListener('click', simulateEmail);
+        videoBtn.addEventListener('click', simulateVideoCall);
+        whatsappBtn.addEventListener('click', simulateWhatsApp);
+        shareBtn.addEventListener('click', simulateFileShare);
+        clearBtn.addEventListener('click', clearChat);
+        projectBtn.addEventListener('click', simulateGroupProject);
+        classBtn.addEventListener('click', simulateOnlineClass);
+        homeworkBtn.addEventListener('click', simulateHomeworkHelp);
+        
+        // Tool selection
+        toolsGrid.addEventListener('click', (e) => {
+            const toolCard = e.target.closest('.tool-card');
+            if (toolCard) {
+                // Remove active class from all cards
+                document.querySelectorAll('.tool-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Add active class to clicked card
+                toolCard.classList.add('active');
+                
+                // Show tool info
+                const tool = toolCard.dataset.tool;
+                showToolInfo(tool);
+            }
+        });
+        
+        // Initialize with animation
+        document.addEventListener('DOMContentLoaded', () => {
+            animateStatistics();
+            
+            // Auto demonstration every 10 seconds
+            setInterval(() => {
+                const demos = [simulateEmail, simulateWhatsApp, simulateFileShare];
+                const randomDemo = demos[Math.floor(Math.random() * demos.length)];
+                randomDemo();
+            }, 10000);
+            
+            // Auto scroll to keep bottom visible
+            setInterval(() => {
+                chatScreen.scrollTop = chatScreen.scrollHeight;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

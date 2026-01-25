@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Realistic Earth - Newton's Gravity</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
+        #overlay {
+            position: absolute; top: 30px; left: 30px; color: white;
+            background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 12px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+        h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; color: #4db8ff; }
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <h1>NEWTONIAN GRAVITATION</h1>
+    <p style="font-size: 0.8rem; opacity: 0.8;">Force: <span id="f-val">0</span> N</p>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- SCENE SETUP ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 40, 120);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.toneMapping = THREE.ReinhardToneMapping; // Better lighting
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    const loader = new THREE.TextureLoader();
+
+    // --- GALAXY BACKGROUND ---
+    const starGeo = new THREE.SphereGeometry(800, 64, 64);
+    const starMat = new THREE.MeshBasicMaterial({
+        map: loader.load('https://threejs.org/examples/textures/planets/stars.jpg'),
+        side: THREE.BackSide
+    });
+    scene.add(new THREE.Mesh(starGeo, starMat));
+
+    // --- THE SUN (Visual & Light) ---
+    const sunGroup = new THREE.Group();
+    scene.add(sunGroup);
+
+    // Sun Core
+    const sunGeo = new THREE.SphereGeometry(10, 32, 32);
+    const sunMat = new THREE.MeshBasicMaterial({
+        map: loader.load('https://threejs.org/examples/textures/lava/lavatile.jpg'), // Textures look like sun surface
+    });
+    const sun = new THREE.Mesh(sunGeo, sunMat);
+    sunGroup.add(sun);
+
+    // Sun Glow (Atmosphere)
+    const spriteMat = new THREE.SpriteMaterial({
+        map: loader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png'),
+        color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
+    });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(60, 60, 1);
+    sunGroup.add(sprite);
+
+    const sunLight = new THREE.PointLight(0xffffff, 10, 1000, 0.1);
+    scene.add(sunLight);
+    scene.add(new THREE.AmbientLight(0x050505)); // Pure black shadows
+
+    // --- THE EARTH ---
+    const earthGroup = new THREE.Group(); 
+    scene.add(earthGroup);
+
+    const earthGeo = new THREE.SphereGeometry(4, 64, 64);
+    const earthMat = new THREE.MeshStandardMaterial({
+        map: loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
+        bumpMap: loader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
+        bumpScale: 0.1,
+        specularMap: loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
+        roughness: 0.6
+    });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    
+    // Axial Tilt
+    earthGroup.rotation.z = THREE.MathUtils.degToRad(23.5);
+    earthGroup.add(earth);
+
+    // Clouds
+    const cloudMat = new THREE.MeshStandardMaterial({
+        map: loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
+        transparent: true, opacity: 0.4
+    });
+    const clouds = new THREE.Mesh(new THREE.SphereGeometry(4.08, 64, 64), cloudMat);
+    earthGroup.add(clouds);
+
+    // Atmosphere Glow (The "Halo")
+    const glowMat = new THREE.ShaderMaterial({
+        uniforms: { 'c': { type: 'f', value: 0.1 }, 'p': { type: 'f', value: 4.0 }, glowColor: { type: 'c', value: new THREE.Color(0x33ccff) }, viewVector: { type: 'v3', value: camera.position } },
+        vertexShader: `uniform vec3 viewVector; varying float intensity; void main() { gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); vec3 vNormal = normalize( normalMatrix * normal ); vec3 vNormel = normalize( viewVector ); intensity = pow( c - dot(vNormal, vNormel), p ); }`,
+        fragmentShader: `uniform vec3 glowColor; varying float intensity; void main() { vec3 glow = glowColor * intensity; gl_FragColor = vec4( glow, 1.0 ); }`,
+        side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true
+    });
+    const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(4.5, 64, 64), glowMat);
+    earthGroup.add(glowMesh);
+
+    // --- PHYSICS CONFIG ---
+    const G = 1.2;
+    const M_SUN = 4000;
+    const dt = 0.015;
+
+    let pPos = new THREE.Vector3(80, 0, 0);
+    let pVel = new THREE.Vector3(0, 0, -Math.sqrt((G * M_SUN) / 80));
+
+    // --- ANIMATION ---
+    const fDisplay = document.getElementById('f-val');
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // 1. Gravity Math
+        const rVec = new THREE.Vector3().subVectors(sun.position, pPos);
+        const dist = rVec.length();
+        const force = (G * M_SUN) / (dist * dist);
+        
+        pVel.add(rVec.normalize().multiplyScalar(force * dt));
+        pPos.add(pVel.clone().multiplyScalar(dt));
+
+        // 2. Position Updates
+        earthGroup.position.copy(pPos);
+        earth.rotation.y += 0.002;
+        clouds.rotation.y += 0.0025;
+        sun.rotation.y += 0.001;
+
+        // 3. Update Atmosphere Uniforms
+        glowMat.uniforms.viewVector.value = new THREE.Vector3().subVectors(camera.position, earthGroup.position);
+
+        fDisplay.innerText = force.toFixed(4);
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+</script>
+</body>
+</html>
