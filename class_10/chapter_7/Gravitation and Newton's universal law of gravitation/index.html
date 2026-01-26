@@ -2,167 +2,1232 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Realistic Earth - Newton's Gravity</title>
+    <title>Newton's Universal Law of Gravitation - Interactive Physics Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-        #overlay {
-            position: absolute; top: 30px; left: 30px; color: white;
-            background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 12px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-            pointer-events: none;
+        /* Reset and Base Styles */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            touch-action: manipulation;
         }
-        h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; color: #4db8ff; }
+        
+        body { 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; 
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
+        
+        #simulation-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Responsive UI Panel */
+        #ui-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: calc(100vw - 20px);
+            max-width: 400px;
+            max-height: 85vh;
+            background: rgba(10, 15, 30, 0.95); 
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(77, 184, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 100, 255, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 10;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+        
+        .ui-collapsed {
+            transform: translateX(-85%);
+            opacity: 0.8;
+        }
+        
+        /* Responsive Typography */
+        h2 { 
+            margin: 0 0 15px 0; 
+            color: #4db8ff; 
+            font-size: clamp(1.4rem, 4vw, 1.8rem); 
+            border-bottom: 2px solid rgba(77, 184, 255, 0.4); 
+            padding-bottom: 12px; 
+        }
+        
+        h3 {
+            color: #6cc0ff;
+            margin: 20px 0 15px 0;
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .definition { 
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem); 
+            line-height: 1.6; 
+            color: #d0e5ff; 
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 50, 100, 0.3));
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4db8ff;
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(0, 40, 80, 0.6)); 
+            padding: 15px; 
+            border-radius: 10px;
+            text-align: center; 
+            font-family: 'Courier New', monospace;
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem); 
+            color: #ffcc00; 
+            margin: 20px 0;
+            border: 2px solid rgba(255, 204, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem); 
+            margin: 20px 0;
+            background: rgba(0, 10, 30, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-label { 
+            color: #a0d2ff; 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-value { 
+            text-align: right; 
+            font-weight: bold; 
+            color: #fff; 
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.9rem, 2.8vw, 1.1rem);
+            word-break: break-word;
+        }
+
+        /* Responsive Controls Hint */
+        #controls-hint {
+            position: fixed; 
+            bottom: 10px; 
+            left: 10px;
+            right: 10px;
+            text-align: center;
+            color: #a0d2ff; 
+            font-size: clamp(0.75rem, 2.2vw, 0.85rem); 
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 15px;
+            border: 1px solid rgba(77, 184, 255, 0.3);
+            z-index: 5;
+        }
+        
+        /* Responsive Control Sections */
+        .control-section {
+            margin: 25px 0;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group {
+            background: rgba(0, 20, 40, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(77, 184, 255, 0.2);
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .slider-title {
+            color: #a0d2ff;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 2.8vw, 1.05rem);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .slider-value {
+            font-weight: bold;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.95rem, 2.8vw, 1.1rem);
+            background: rgba(77, 184, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        /* Touch-friendly Sliders */
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, rgba(77, 184, 255, 0.1), rgba(77, 184, 255, 0.8));
+            border-radius: 5px;
+            outline: none;
+            margin: 12px 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: clamp(22px, 6vw, 28px);
+            height: clamp(22px, 6vw, 28px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4db8ff, #2d8fd9);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(77, 184, 255, 0.8);
+            border: 3px solid #ffffff;
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(77, 184, 255, 1);
+        }
+        
+        .slider-impact {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            color: #88ccff;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        /* Responsive Buttons */
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .sim-button {
+            background: linear-gradient(135deg, #2d8fd9, #4db8ff);
+            color: white;
+            border: none;
+            padding: clamp(12px, 3vw, 14px);
+            border-radius: 10px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(77, 184, 255, 0.3);
+            min-height: 44px; /* Minimum touch target size */
+        }
+        
+        .sim-button:hover {
+            background: linear-gradient(135deg, #4db8ff, #66c2ff);
+            box-shadow: 0 6px 20px rgba(77, 184, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .sim-button:active {
+            transform: translateY(0);
+        }
+        
+        .button-icon {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+        
+        /* Responsive Theory Section */
+        .theory-section {
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.6), rgba(0, 40, 80, 0.4));
+            padding: 18px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #ff9900;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theory-section h4 {
+            color: #ffaa44;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+        
+        .mass-indicator {
+            display: inline-block;
+            width: clamp(12px, 3.5vw, 14px);
+            height: clamp(12px, 3.5vw, 14px);
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .sun-indicator {
+            background: radial-gradient(circle at 30% 30%, #ffcc00, #ff6600);
+            box-shadow: 0 0 10px #ffaa00;
+        }
+        
+        .earth-indicator {
+            background: radial-gradient(circle at 30% 30%, #4db8ff, #0066cc);
+            box-shadow: 0 0 10px #4db8ff;
+        }
+        
+        .physics-note {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff4444;
+            padding: 12px 15px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            color: #ffaaaa;
+        }
+        
+        /* Mobile Menu Button */
+        .close-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: none;
+            width: clamp(36px, 10vw, 44px);
+            height: clamp(36px, 10vw, 44px);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: clamp(18px, 5vw, 22px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 20;
+            pointer-events: auto;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(90deg);
+        }
+        
+        /* Visual Effects */
+        .visual-effect {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            flex-direction: column;
+        }
+        
+        .force-indicator {
+            width: 100%;
+            height: clamp(16px, 4vw, 20px);
+            background: linear-gradient(90deg, #0066cc, #ff4444);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .force-level {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            width: 50%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .force-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 8px;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: #88ccff;
+        }
+        
+        /* Responsive List Items */
+        .law-points {
+            margin: 12px 0;
+            padding-left: 0;
+        }
+        
+        .law-points li {
+            margin: 10px 0;
+            color: #ccc;
+            list-style-type: none;
+            padding-left: 22px;
+            position: relative;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            line-height: 1.5;
+        }
+        
+        .law-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #4db8ff;
+            font-weight: bold;
+        }
+        
+        /* Info Bubble */
+        .info-bubble {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(16px, 4vw, 18px);
+            height: clamp(16px, 4vw, 18px);
+            background: rgba(77, 184, 255, 0.2);
+            color: #4db8ff;
+            border-radius: 50%;
+            font-size: clamp(10px, 3vw, 12px);
+            line-height: 1;
+            cursor: help;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        /* Scrollbar Styling */
+        #ui-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #ui-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+        #ui-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4db8ff, #2d8fd9);
+            border-radius: 3px;
+        }
+        
+        /* Device-specific Responsive Rules */
+        @media (max-width: 768px) {
+            #ui-panel {
+                max-width: calc(100vw - 20px);
+                padding: 18px;
+                top: 5px;
+                left: 5px;
+                max-height: 90vh;
+            }
+            
+            .button-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .close-btn {
+                top: 10px;
+                right: 10px;
+            }
+            
+            #controls-hint {
+                bottom: 5px;
+                left: 5px;
+                right: 5px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+            
+            .ui-collapsed {
+                transform: translateX(-80%);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #ui-panel {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .stat-label {
+                justify-content: space-between;
+            }
+            
+            .stat-value {
+                text-align: left;
+                font-size: 0.9rem;
+            }
+            
+            .formula-box {
+                padding: 12px;
+                font-size: 1.1rem;
+            }
+            
+            .ui-collapsed {
+                transform: translateX(-75%);
+            }
+            
+            .sim-button {
+                min-height: 48px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            #ui-panel {
+                padding: 12px;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+                margin-bottom: 12px;
+            }
+            
+            h3 {
+                font-size: 1.1rem;
+                margin: 18px 0 12px 0;
+            }
+            
+            .definition {
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+            
+            .control-group {
+                padding: 12px;
+            }
+            
+            .slider-title {
+                font-size: 0.9rem;
+            }
+            
+            .slider-value {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Tablet Landscape */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #ui-panel {
+                max-width: 380px;
+            }
+            
+            .button-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Large Desktop */
+        @media (min-width: 1200px) {
+            #ui-panel {
+                max-width: 420px;
+            }
+        }
+        
+        /* Very Small Height Devices */
+        @media (max-height: 600px) {
+            #ui-panel {
+                max-height: 80vh;
+            }
+            
+            .control-section {
+                margin: 15px 0;
+                padding-top: 15px;
+            }
+            
+            .definition {
+                margin-bottom: 15px;
+                padding: 12px;
+            }
+            
+            .formula-box {
+                margin: 15px 0;
+                padding: 12px;
+            }
+            
+            .stats-grid {
+                margin: 15px 0;
+                padding: 12px;
+            }
+            
+            .theory-section {
+                padding: 15px;
+                margin: 15px 0;
+            }
+        }
+        
+        /* Prevent text selection on mobile */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
+    <div id="simulation-container">
+        <!-- Canvas will be inserted here by Three.js -->
+    </div>
 
-<div id="overlay">
-    <h1>NEWTONIAN GRAVITATION</h1>
-    <p style="font-size: 0.8rem; opacity: 0.8;">Force: <span id="f-val">0</span> N</p>
-</div>
-
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-</script>
-
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-    // --- SCENE SETUP ---
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.set(0, 40, 120);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMapping = THREE.ReinhardToneMapping; // Better lighting
-    document.body.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    const loader = new THREE.TextureLoader();
-
-    // --- GALAXY BACKGROUND ---
-    const starGeo = new THREE.SphereGeometry(800, 64, 64);
-    const starMat = new THREE.MeshBasicMaterial({
-        map: loader.load('https://threejs.org/examples/textures/planets/stars.jpg'),
-        side: THREE.BackSide
-    });
-    scene.add(new THREE.Mesh(starGeo, starMat));
-
-    // --- THE SUN (Visual & Light) ---
-    const sunGroup = new THREE.Group();
-    scene.add(sunGroup);
-
-    // Sun Core
-    const sunGeo = new THREE.SphereGeometry(10, 32, 32);
-    const sunMat = new THREE.MeshBasicMaterial({
-        map: loader.load('https://threejs.org/examples/textures/lava/lavatile.jpg'), // Textures look like sun surface
-    });
-    const sun = new THREE.Mesh(sunGeo, sunMat);
-    sunGroup.add(sun);
-
-    // Sun Glow (Atmosphere)
-    const spriteMat = new THREE.SpriteMaterial({
-        map: loader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png'),
-        color: 0xffaa00, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
-    });
-    const sprite = new THREE.Sprite(spriteMat);
-    sprite.scale.set(60, 60, 1);
-    sunGroup.add(sprite);
-
-    const sunLight = new THREE.PointLight(0xffffff, 10, 1000, 0.1);
-    scene.add(sunLight);
-    scene.add(new THREE.AmbientLight(0x050505)); // Pure black shadows
-
-    // --- THE EARTH ---
-    const earthGroup = new THREE.Group(); 
-    scene.add(earthGroup);
-
-    const earthGeo = new THREE.SphereGeometry(4, 64, 64);
-    const earthMat = new THREE.MeshStandardMaterial({
-        map: loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
-        bumpMap: loader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
-        bumpScale: 0.1,
-        specularMap: loader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
-        roughness: 0.6
-    });
-    const earth = new THREE.Mesh(earthGeo, earthMat);
-    
-    // Axial Tilt
-    earthGroup.rotation.z = THREE.MathUtils.degToRad(23.5);
-    earthGroup.add(earth);
-
-    // Clouds
-    const cloudMat = new THREE.MeshStandardMaterial({
-        map: loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
-        transparent: true, opacity: 0.4
-    });
-    const clouds = new THREE.Mesh(new THREE.SphereGeometry(4.08, 64, 64), cloudMat);
-    earthGroup.add(clouds);
-
-    // Atmosphere Glow (The "Halo")
-    const glowMat = new THREE.ShaderMaterial({
-        uniforms: { 'c': { type: 'f', value: 0.1 }, 'p': { type: 'f', value: 4.0 }, glowColor: { type: 'c', value: new THREE.Color(0x33ccff) }, viewVector: { type: 'v3', value: camera.position } },
-        vertexShader: `uniform vec3 viewVector; varying float intensity; void main() { gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); vec3 vNormal = normalize( normalMatrix * normal ); vec3 vNormel = normalize( viewVector ); intensity = pow( c - dot(vNormal, vNormel), p ); }`,
-        fragmentShader: `uniform vec3 glowColor; varying float intensity; void main() { vec3 glow = glowColor * intensity; gl_FragColor = vec4( glow, 1.0 ); }`,
-        side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true
-    });
-    const glowMesh = new THREE.Mesh(new THREE.SphereGeometry(4.5, 64, 64), glowMat);
-    earthGroup.add(glowMesh);
-
-    // --- PHYSICS CONFIG ---
-    const G = 1.2;
-    const M_SUN = 4000;
-    const dt = 0.015;
-
-    let pPos = new THREE.Vector3(80, 0, 0);
-    let pVel = new THREE.Vector3(0, 0, -Math.sqrt((G * M_SUN) / 80));
-
-    // --- ANIMATION ---
-    const fDisplay = document.getElementById('f-val');
-
-    function animate() {
-        requestAnimationFrame(animate);
-
-        // 1. Gravity Math
-        const rVec = new THREE.Vector3().subVectors(sun.position, pPos);
-        const dist = rVec.length();
-        const force = (G * M_SUN) / (dist * dist);
+    <div id="ui-panel" class="no-select">
+        <h2>Universal Gravitation Simulator</h2>
         
-        pVel.add(rVec.normalize().multiplyScalar(force * dt));
-        pPos.add(pVel.clone().multiplyScalar(dt));
+        <div class="definition">
+            Newton's Law states that the gravitational force between two objects depends on their masses and the distance between them. Adjust the controls below to see how changing these variables affects the orbit.
+        </div>
 
-        // 2. Position Updates
-        earthGroup.position.copy(pPos);
-        earth.rotation.y += 0.002;
-        clouds.rotation.y += 0.0025;
-        sun.rotation.y += 0.001;
+        <div class="formula-box">
+            F = G × (m₁ × m₂) ÷ r²
+        </div>
+        
+        <div class="visual-effect">
+            <div class="force-indicator">
+                <div class="force-level" id="force-indicator-bar"></div>
+            </div>
+            <div class="force-labels">
+                <span>Weak Gravity</span>
+                <span>Strong Gravity</span>
+            </div>
+        </div>
 
-        // 3. Update Atmosphere Uniforms
-        glowMat.uniforms.viewVector.value = new THREE.Vector3().subVectors(camera.position, earthGroup.position);
+        <div class="stats-grid">
+            <span class="stat-label"><span class="mass-indicator sun-indicator"></span>Sun Mass (m₁):</span>
+            <span class="stat-value" id="val-m1">5000 units</span>
+            
+            <span class="stat-label"><span class="mass-indicator earth-indicator"></span>Earth Mass (m₂):</span>
+            <span class="stat-value" id="val-m2">10 units</span>
+            
+            <span class="stat-label">Distance (r):</span>
+            <span class="stat-value" id="val-r">120 units</span>
+            
+            <span class="stat-label">Orbital Velocity:</span>
+            <span class="stat-value" id="val-v">0 u/s</span>
+            
+            <span class="stat-label">Gravitational Force:</span>
+            <span class="stat-value" id="val-f" style="color:#ff4444;">0 N</span>
+            
+            <span class="stat-label">Orbit Period:</span>
+            <span class="stat-value" id="val-period">0 s</span>
+        </div>
+        
+        <div class="control-section">
+            <h3><span class="mass-indicator sun-indicator"></span>Mass Controls</h3>
+            
+            <div class="control-group">
+                <div class="slider-header">
+                    <div class="slider-title">
+                        <span>Sun Mass</span>
+                        <span class="info-bubble" title="Increasing mass increases gravitational force linearly">i</span>
+                    </div>
+                    <div class="slider-value" id="sun-mass-value">5000</div>
+                </div>
+                <input type="range" id="sun-mass" min="100" max="20000" value="5000" step="100">
+                <div class="slider-impact">
+                    <div class="impact-label">Effect on Gravity:</div>
+                    <div class="impact-value" id="sun-impact">×1.0</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="slider-header">
+                    <div class="slider-title">
+                        <span>Earth Mass</span>
+                        <span class="info-bubble" title="Both masses contribute equally to gravitational force">i</span>
+                    </div>
+                    <div class="slider-value" id="earth-mass-value">10</div>
+                </div>
+                <input type="range" id="earth-mass" min="1" max="200" value="10" step="1">
+                <div class="slider-impact">
+                    <div class="impact-label">Effect on Gravity:</div>
+                    <div class="impact-value" id="earth-impact">×1.0</div>
+                </div>
+            </div>
+            
+            <div class="physics-note">
+                <strong>Physics Insight:</strong> Doubling either mass doubles the gravitational force (F ∝ m₁ × m₂)
+            </div>
+        </div>
+        
+        <div class="control-section">
+            <h3>Orbit Controls</h3>
+            
+            <div class="control-group">
+                <div class="slider-header">
+                    <div class="slider-title">
+                        <span>Orbital Distance</span>
+                        <span class="info-bubble" title="Inverse square law: force decreases with distance squared">i</span>
+                    </div>
+                    <div class="slider-value" id="distance-value">120</div>
+                </div>
+                <input type="range" id="distance" min="50" max="500" value="120" step="10">
+                <div class="slider-impact">
+                    <div class="impact-label">Effect on Gravity:</div>
+                    <div class="impact-value" id="distance-impact">×1.0</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="slider-header">
+                    <div class="slider-title">Time Scale</div>
+                    <div class="slider-value" id="time-value">1.0x</div>
+                </div>
+                <input type="range" id="time-scale" min="5" max="50" value="10" step="5">
+            </div>
+            
+            <div class="button-container">
+                <button class="sim-button" id="circular-btn">
+                    <span class="button-icon">○</span> Circular Orbit
+                </button>
+                <button class="sim-button" id="elliptical-btn">
+                    <span class="button-icon">⬬</span> Elliptical Orbit
+                </button>
+                <button class="sim-button" id="reset-btn">
+                    <span class="button-icon">↺</span> Reset All
+                </button>
+                <button class="sim-button" id="real-values-btn">
+                    <span class="button-icon">🌍</span> Real Values
+                </button>
+            </div>
+        </div>
+        
+        <div class="theory-section">
+            <h4>How Mass & Distance Affect Gravity</h4>
+            <ul class="law-points">
+                <li><strong>Mass Increase:</strong> More mass = Stronger gravity = Faster orbit</li>
+                <li><strong>Mass Decrease:</strong> Less mass = Weaker gravity = Slower orbit</li>
+                <li><strong>Distance Increase:</strong> Further apart = Much weaker gravity = Slower orbit</li>
+                <li><strong>Distance Decrease:</strong> Closer together = Much stronger gravity = Faster orbit</li>
+            </ul>
+            <div class="physics-note">
+                <strong>Key Formula:</strong> v = √(G × M ÷ r) — Orbital speed depends on central mass and distance
+            </div>
+        </div>
+    </div>
 
-        fDisplay.innerText = force.toFixed(4);
+    <button class="close-btn" id="toggle-panel">☰</button>
 
-        controls.update();
-        renderer.render(scene, camera);
-    }
+    <div id="controls-hint" class="no-select">
+        Use sliders to change mass and distance | Watch how gravity and orbit change in real-time
+    </div>
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- PHYSICS CONFIGURATION ---
+        const PHYSICS = {
+            G: 1.5,                    // Gravitational constant
+            sunMass: 5000,             // Initial sun mass
+            earthMass: 10,             // Initial earth mass
+            initDist: 120,             // Initial distance
+            dt: 0.015,                 // Physics time step
+            timeScale: 1.0,            // Simulation speed
+            minDistance: 50,           // Minimum orbital distance
+            maxDistance: 500           // Maximum orbital distance
+        };
+
+        // --- THREE.JS SCENE SETUP ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.set(0, 80, 250);
+
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        
+        // Insert canvas into container
+        const container = document.getElementById('simulation-container');
+        container.appendChild(renderer.domElement);
 
-    animate();
-</script>
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enablePan = true;
+        controls.enableZoom = true;
+        controls.enableRotate = true;
+
+        // Improve touch experience
+        controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN
+        };
+
+        const loader = new THREE.TextureLoader();
+
+        // --- UNIVERSE BACKGROUND ---
+        const starGeo = new THREE.SphereGeometry(1000, 32, 32); // Reduced complexity for mobile
+        const starMat = new THREE.MeshBasicMaterial({
+            map: loader.load('https://threejs.org/examples/textures/planets/stars.jpg'),
+            side: THREE.BackSide
+        });
+        scene.add(new THREE.Mesh(starGeo, starMat));
+
+        // --- SUN CREATION ---
+        const sunGroup = new THREE.Group();
+        scene.add(sunGroup);
+
+        const sunGeo = new THREE.SphereGeometry(12, 32, 32); // Reduced complexity
+        const sunMat = new THREE.MeshBasicMaterial({
+            map: loader.load('https://threejs.org/examples/textures/lava/lavatile.jpg'),
+            color: 0xffddaa
+        });
+        const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+        sunGroup.add(sunMesh);
+
+        const glowMat = new THREE.SpriteMaterial({
+            map: loader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png'),
+            color: 0xffaa00,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        const sunGlow = new THREE.Sprite(glowMat);
+        sunGlow.scale.set(100, 100, 1);
+        sunGroup.add(sunGlow);
+
+        const sunLight = new THREE.PointLight(0xffffff, 5, 2000, 0);
+        sunLight.position.set(0, 0, 0);
+        scene.add(sunLight);
+        
+        scene.add(new THREE.AmbientLight(0x111111));
+
+        // --- EARTH CREATION ---
+        const earthOrbitGroup = new THREE.Group();
+        scene.add(earthOrbitGroup);
+
+        const earthTiltGroup = new THREE.Group();
+        earthTiltGroup.rotation.z = 23.5 * (Math.PI / 180);
+        earthOrbitGroup.add(earthTiltGroup);
+
+        const earthGeo = new THREE.SphereGeometry(5, 32, 32); // Reduced complexity
+        const earthMat = new THREE.MeshStandardMaterial({
+            map: loader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
+            roughness: 0.6,
+            metalness: 0.1
+        });
+        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+        earthTiltGroup.add(earthMesh);
+
+        const cloudGeo = new THREE.SphereGeometry(5.1, 32, 32);
+        const cloudMat = new THREE.MeshStandardMaterial({
+            map: loader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide
+        });
+        const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+        earthTiltGroup.add(cloudMesh);
+
+        // Atmosphere glow (simplified for performance)
+        const atmosGeo = new THREE.SphereGeometry(5.35, 24, 24);
+        const atmosMat = new THREE.MeshBasicMaterial({
+            color: 0x3399ff,
+            transparent: true,
+            opacity: 0.3,
+            side: THREE.BackSide
+        });
+        const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+        earthTiltGroup.add(atmosMesh);
+
+        // --- PHYSICS VARIABLES ---
+        let r_vec = new THREE.Vector3();
+        let pos = new THREE.Vector3(PHYSICS.initDist, 0, 0);
+        let vel = new THREE.Vector3();
+        let orbitPeriod = 0;
+        let orbitTimer = 0;
+        let lastAngle = 0;
+        let totalForce = 0;
+
+        // Store initial state for reset
+        const initialState = {
+            sunMass: PHYSICS.sunMass,
+            earthMass: PHYSICS.earthMass,
+            distance: PHYSICS.initDist,
+            timeScale: PHYSICS.timeScale
+        };
+
+        // --- UI ELEMENTS ---
+        const uiElements = {
+            sunMass: document.getElementById('val-m1'),
+            earthMass: document.getElementById('val-m2'),
+            distance: document.getElementById('val-r'),
+            velocity: document.getElementById('val-v'),
+            force: document.getElementById('val-f'),
+            period: document.getElementById('val-period'),
+            sunMassValue: document.getElementById('sun-mass-value'),
+            earthMassValue: document.getElementById('earth-mass-value'),
+            distanceValue: document.getElementById('distance-value'),
+            timeValue: document.getElementById('time-value'),
+            forceIndicator: document.getElementById('force-indicator-bar'),
+            sunImpact: document.getElementById('sun-impact'),
+            earthImpact: document.getElementById('earth-impact'),
+            distanceImpact: document.getElementById('distance-impact')
+        };
+
+        // --- PHYSICS FUNCTIONS ---
+        function calculateOrbitalVelocity() {
+            // Circular orbit velocity: v = √(G * M / r)
+            return Math.sqrt((PHYSICS.G * PHYSICS.sunMass) / pos.length());
+        }
+
+        function updateOrbitParameters() {
+            const r = pos.length();
+            const currentVelocity = vel.length();
+            
+            // Calculate orbital period for circular/elliptical orbits
+            if (r > 0 && currentVelocity > 0) {
+                const specificEnergy = (currentVelocity * currentVelocity) / 2 - (PHYSICS.G * PHYSICS.sunMass) / r;
+                const semiMajorAxis = -PHYSICS.G * PHYSICS.sunMass / (2 * specificEnergy);
+                orbitPeriod = 2 * Math.PI * Math.sqrt(Math.abs(semiMajorAxis * semiMajorAxis * semiMajorAxis) / (PHYSICS.G * PHYSICS.sunMass));
+            }
+            
+            // Update orbit timer
+            const currentAngle = Math.atan2(pos.z, pos.x);
+            const angleDiff = Math.abs(currentAngle - lastAngle);
+            if (angleDiff > 0.1) {
+                orbitTimer += PHYSICS.dt * PHYSICS.timeScale;
+                lastAngle = currentAngle;
+            }
+            
+            // Calculate gravitational force
+            totalForce = (PHYSICS.G * PHYSICS.sunMass * PHYSICS.earthMass) / (r * r);
+            
+            // Update force indicator
+            const maxForce = (PHYSICS.G * 20000 * 200) / (50 * 50);
+            const forceRatio = Math.min(totalForce / maxForce, 1);
+            uiElements.forceIndicator.style.width = `${forceRatio * 100}%`;
+            
+            // Update UI
+            uiElements.sunMass.textContent = `${PHYSICS.sunMass} units`;
+            uiElements.earthMass.textContent = `${PHYSICS.earthMass} units`;
+            uiElements.distance.textContent = `${r.toFixed(1)} units`;
+            uiElements.velocity.textContent = `${currentVelocity.toFixed(2)} u/s`;
+            uiElements.force.textContent = `${totalForce.toFixed(2)} N`;
+            uiElements.period.textContent = orbitPeriod > 0 ? `${orbitPeriod.toFixed(1)} s` : 'Calculating...';
+            
+            // Update impact indicators
+            const baseSunMass = initialState.sunMass;
+            const baseEarthMass = initialState.earthMass;
+            const baseDistance = initialState.distance;
+            
+            uiElements.sunImpact.textContent = `×${(PHYSICS.sunMass / baseSunMass).toFixed(2)}`;
+            uiElements.earthImpact.textContent = `×${(PHYSICS.earthMass / baseEarthMass).toFixed(2)}`;
+            uiElements.distanceImpact.textContent = `×${((baseDistance * baseDistance) / (r * r)).toFixed(2)}`;
+        }
+
+        function applyGravity() {
+            // Calculate gravitational force
+            r_vec.subVectors(new THREE.Vector3(0, 0, 0), pos);
+            const r = r_vec.length();
+            
+            const forceMagnitude = (PHYSICS.G * PHYSICS.sunMass * PHYSICS.earthMass) / (r * r);
+            r_vec.normalize();
+            const acceleration = r_vec.multiplyScalar(forceMagnitude / PHYSICS.earthMass);
+
+            // Apply physics with time scaling
+            const scaledDt = PHYSICS.dt * PHYSICS.timeScale;
+            vel.add(acceleration.multiplyScalar(scaledDt));
+            pos.add(vel.clone().multiplyScalar(scaledDt));
+        }
+
+        function updateVisualScales() {
+            // Update sun scale based on mass (cube root for volume)
+            const sunScale = Math.pow(PHYSICS.sunMass / initialState.sunMass, 1/3);
+            sunMesh.scale.set(sunScale, sunScale, sunScale);
+            sunGlow.scale.set(100 * sunScale, 100 * sunScale, 1);
+            sunLight.intensity = 5 * (PHYSICS.sunMass / initialState.sunMass);
+            
+            // Update earth scale based on mass
+            const earthScale = Math.pow(PHYSICS.earthMass / initialState.earthMass, 1/3);
+            earthMesh.scale.set(earthScale, earthScale, earthScale);
+            cloudMesh.scale.set(earthScale, earthScale, earthScale);
+            atmosMesh.scale.set(earthScale, earthScale, earthScale);
+        }
+
+        function setCircularOrbit() {
+            const vCirc = calculateOrbitalVelocity();
+            const perpendicular = new THREE.Vector3(-pos.z, 0, pos.x).normalize();
+            vel.copy(perpendicular.multiplyScalar(vCirc));
+        }
+
+        function setEllipticalOrbit() {
+            const vCirc = calculateOrbitalVelocity();
+            const vElliptical = vCirc * 0.7;
+            const perpendicular = new THREE.Vector3(-pos.z, 0, pos.x).normalize();
+            vel.copy(perpendicular.multiplyScalar(vElliptical));
+        }
+
+        function resetSimulation() {
+            PHYSICS.sunMass = initialState.sunMass;
+            PHYSICS.earthMass = initialState.earthMass;
+            PHYSICS.initDist = initialState.distance;
+            PHYSICS.timeScale = initialState.timeScale;
+            
+            // Reset position and velocity
+            pos.set(PHYSICS.initDist, 0, 0);
+            setCircularOrbit();
+            
+            // Reset sliders
+            document.getElementById('sun-mass').value = PHYSICS.sunMass;
+            document.getElementById('earth-mass').value = PHYSICS.earthMass;
+            document.getElementById('distance').value = PHYSICS.initDist;
+            document.getElementById('time-scale').value = 10;
+            
+            // Update UI
+            updateSliders();
+            updateVisualScales();
+            orbitTimer = 0;
+            lastAngle = 0;
+        }
+
+        function setRealisticValues() {
+            PHYSICS.sunMass = 330000;
+            PHYSICS.earthMass = 1;
+            PHYSICS.initDist = 150;
+            
+            // Update sliders
+            document.getElementById('sun-mass').value = PHYSICS.sunMass;
+            document.getElementById('earth-mass').value = PHYSICS.earthMass;
+            document.getElementById('distance').value = PHYSICS.initDist;
+            
+            // Reset position
+            pos.set(PHYSICS.initDist, 0, 0);
+            setCircularOrbit();
+            
+            updateSliders();
+            updateVisualScales();
+        }
+
+        function updateSliders() {
+            uiElements.sunMassValue.textContent = PHYSICS.sunMass;
+            uiElements.earthMassValue.textContent = PHYSICS.earthMass;
+            uiElements.distanceValue.textContent = PHYSICS.initDist;
+            uiElements.timeValue.textContent = `${PHYSICS.timeScale.toFixed(1)}x`;
+        }
+
+        // --- RESPONSIVE EVENT HANDLERS ---
+        function setupEventListeners() {
+            // Mass sliders
+            document.getElementById('sun-mass').addEventListener('input', (e) => {
+                PHYSICS.sunMass = parseInt(e.target.value);
+                updateSliders();
+                updateVisualScales();
+                setCircularOrbit();
+            });
+            
+            document.getElementById('earth-mass').addEventListener('input', (e) => {
+                PHYSICS.earthMass = parseInt(e.target.value);
+                updateSliders();
+                updateVisualScales();
+            });
+            
+            // Distance slider
+            document.getElementById('distance').addEventListener('input', (e) => {
+                PHYSICS.initDist = parseInt(e.target.value);
+                updateSliders();
+                
+                const direction = pos.clone().normalize();
+                pos.copy(direction.multiplyScalar(PHYSICS.initDist));
+                setCircularOrbit();
+            });
+            
+            // Time scale slider
+            document.getElementById('time-scale').addEventListener('input', (e) => {
+                const sliderValue = parseInt(e.target.value);
+                PHYSICS.timeScale = sliderValue / 10;
+                updateSliders();
+            });
+            
+            // Control buttons
+            document.getElementById('circular-btn').addEventListener('click', setCircularOrbit);
+            document.getElementById('elliptical-btn').addEventListener('click', setEllipticalOrbit);
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            document.getElementById('real-values-btn').addEventListener('click', setRealisticValues);
+            
+            // Panel toggle
+            const toggleButton = document.getElementById('toggle-panel');
+            toggleButton.addEventListener('click', () => {
+                const panel = document.getElementById('ui-panel');
+                panel.classList.toggle('ui-collapsed');
+                toggleButton.textContent = panel.classList.contains('ui-collapsed') ? '☰' : '✕';
+            });
+            
+            // Touch event for panel on mobile
+            let touchStartX = 0;
+            const panel = document.getElementById('ui-panel');
+            
+            panel.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            }, { passive: true });
+            
+            panel.addEventListener('touchmove', (e) => {
+                if (!panel.classList.contains('ui-collapsed')) return;
+                
+                const touchX = e.touches[0].clientX;
+                const deltaX = touchX - touchStartX;
+                
+                if (deltaX > 50) { // Swipe right to open
+                    panel.classList.remove('ui-collapsed');
+                    toggleButton.textContent = '✕';
+                }
+            }, { passive: true });
+            
+            // Responsive resize handler
+            let resizeTimeout;
+            function handleResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    // Update camera aspect ratio
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    
+                    // Update renderer size
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    
+                    // Update pixel ratio (limited for performance)
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    
+                    // Update hint position for mobile
+                    const hint = document.getElementById('controls-hint');
+                    if (window.innerWidth < 768) {
+                        hint.textContent = "Drag to rotate | Pinch to zoom | Use sliders above";
+                    } else {
+                        hint.textContent = "Use sliders to change mass and distance | Watch how gravity and orbit change in real-time";
+                    }
+                }, 250);
+            }
+            
+            // Orientation change handler
+            function handleOrientationChange() {
+                setTimeout(handleResize, 100);
+            }
+            
+            // Add event listeners
+            window.addEventListener('resize', handleResize);
+            window.addEventListener('orientationchange', handleOrientationChange);
+            
+            // Disable context menu on mobile
+            document.addEventListener('contextmenu', (e) => {
+                if (window.innerWidth < 768) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Apply physics
+            applyGravity();
+            
+            // Update orbit parameters
+            updateOrbitParameters();
+            
+            // Update visuals
+            earthOrbitGroup.position.copy(pos);
+            earthMesh.rotation.y += 0.002 * PHYSICS.timeScale;
+            cloudMesh.rotation.y += 0.0025 * PHYSICS.timeScale;
+            sunMesh.rotation.y += 0.001 * PHYSICS.timeScale;
+            
+            // Update controls
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- INITIALIZATION ---
+        function init() {
+            // Set initial velocity for circular orbit
+            setCircularOrbit();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initial slider update
+            updateSliders();
+            updateVisualScales();
+            
+            // Update hint for initial device type
+            const hint = document.getElementById('controls-hint');
+            if (window.innerWidth < 768) {
+                hint.textContent = "Drag to rotate | Pinch to zoom | Use sliders above";
+            }
+            
+            // Start animation
+            animate();
+        }
+
+        // Initialize everything
+        init();
+
+        // Preload textures
+        window.addEventListener('load', () => {
+            // Textures are already loaded via THREE.TextureLoader
+            console.log('Simulation fully loaded and responsive');
+        });
+
+    </script>
 </body>
 </html>
