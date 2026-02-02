@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thermal Energy Lab </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+   <style>
+/* =========================================================
+   COMPLETE CSS (FULL PAGE)
+   ========================================================= */
+
+:root {
+  /* Dark Theme (Default) */
+  --bg-dark: #0f172a;
+  --bg-panel: #1e293b;
+  --primary: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.4);
+  --accent: #06b6d4;
+  --fire: #f59e0b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass: rgba(30, 41, 59, 0.7);
+  --radius: 24px;
+  --sidebar-width: 280px;
+  --success: #10b981;
+  --error: #ef4444;
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bottom-nav-height: 70px;
+}
+
+.light-theme {
+  /* Light Theme */
+  --bg-dark: #f1f5f9;
+  --bg-panel: #ffffff;
+  --primary: #4f46e5;
+  --primary-glow: rgba(79, 70, 229, 0.2);
+  --accent: #0891b2;
+  --fire: #d97706;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: rgba(15, 23, 42, 0.1);
+  --glass: rgba(255, 255, 255, 0.9);
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  transition: var(--transition);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  z-index: 100;
+  transition: var(--transition);
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.brand {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 3rem;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand i {
+  font-size: 1.5rem;
+  -webkit-text-fill-color: initial;
+  color: var(--primary);
+}
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.nav-item { position: relative; }
+
+.nav-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(99,102,241,0.08);
+  color: var(--text-main);
+  padding-left: 1.5rem;
+}
+
+.nav-btn:hover:before { transform: scaleY(1); }
+
+.nav-btn.active {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.18), transparent);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-btn.active:before { transform: scaleY(1); }
+
+.nav-btn i {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+/* --- Theme Toggle --- */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.theme-toggle:hover {
+  background: rgba(99,102,241,0.14);
+}
+
+.theme-toggle i { font-size: 1.2rem; }
+
+/* --- Main Stage --- */
+.main-stage {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-dark) 100%);
+  overflow: hidden;
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+}
+
+/* --- Tab System --- */
+.tab-content {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  display: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-content.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =========================================================
+   SIMULATION TAB (FULL AREA + FIXED OVERLAY)
+   ========================================================= */
+#tab-simulation {
+  position:absolute;
+  inset:0;
+  padding:0 !important;
+  overflow:hidden !important;
+  display:block !important;
+}
+
+#canvas-container {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+#canvas-container canvas {
+  width:100% !important;
+  height:100% !important;
+  display:block;
+  outline: none;
+}
+
+/* Enhanced Overlay UI - Centered Bar */
+.sim-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  width: min(1100px, 92vw);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  gap: 20px;
+  border-radius: 24px;
+  z-index: 30;
+
+  /* Glass morphism effect */
+  background: rgba(10, 18, 36, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  /* Smooth transition */
+  transition: all 0.3s ease;
+}
+
+body.light-theme .sim-overlay {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Control Groups */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.control-group label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.control-group:first-child { flex: 1.2; }
+.control-group:nth-child(2) { flex: 2; }
+.control-group:last-child { flex: 1.2; }
+
+/* Material Selector */
+.material-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.material-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px solid transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.material-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--text-main);
+  transform: translateY(-2px);
+}
+
+.material-btn.active {
+  background: rgba(99, 102, 241, 0.22);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
+}
+
+/* Range Slider */
+.slider-container {
+  position: relative;
+  margin-top: 4px;
+  padding: 0 5px;
+}
+
+input[type="range"] {
+  
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(90deg, 
+    rgba(99, 102, 241, 0.2), 
+    rgba(245, 158, 11, 0.8));
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid var(--border);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 20px var(--primary-glow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 3px solid var(--bg-panel);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 25px var(--primary);
+}
+
+/* Mobile Touch Target for Slider */
+@media (hover: none) {
+    input[type="range"]::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+.temp-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.temp-display {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--fire);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+  pointer-events: none;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn-action {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-action:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+
+.btn-action:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: rgba(99,102,241,0.1);
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 5px 15px rgba(99,102,241,0.2);
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+
+.pulse { animation: pulse 2s infinite; }
+
+/* HUD Panel */
+.sim-hud {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(18, 24, 38, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 18px;
+  font-family: 'Outfit', sans-serif;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: var(--card-shadow);
+  min-width: 240px;
+  z-index: 25;
+  transition: var(--transition);
+  pointer-events: none;
+}
+
+body.light-theme .sim-hud {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(15,23,42,0.12);
+  box-shadow: 0 20px 40px rgba(15,23,42,0.1);
+}
+
+.hud-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.hud-item:last-child { 
+  margin-bottom: 0; 
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.hud-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-value {
+  font-weight: 800;
+  font-size: 1.2rem;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Enhanced Stats Bar */
+.stats-bar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(18, 24, 38, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 15px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  gap: 25px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* =========================================================
+   EDUCATIONAL PAGES (Concepts / Activities)
+   ========================================================= */
+.page-header { 
+  margin-bottom: 3rem; 
+  max-width: 900px;
+}
+
+h1 {
+  font-family: 'Space Grotesk';
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  margin: 3rem 0 1.5rem;
+  color: var(--accent);
+  font-weight: 800;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  border-radius: 2px;
+}
+
+p {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.info-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2rem;
+  transition: var(--transition);
+  box-shadow: var(--card-shadow);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 30px 60px rgba(99,102,241,0.15);
+}
+
+.info-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.info-card:hover:before {
+  opacity: 1;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.tag.blue { background: rgba(6, 182, 212, 0.15); color: var(--accent); }
+.tag.orange { background: rgba(245, 158, 11, 0.15); color: var(--fire); }
+.tag.purple { background: rgba(99, 102, 241, 0.15); color: var(--primary); }
+
+/* Highlight Card */
+.highlight-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  color: white;
+  margin: 4rem 0;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-card:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.highlight-card h2 {
+  color: white;
+  -webkit-text-fill-color: white;
+  margin-top: 0;
+}
+
+.highlight-card p {
+  color: rgba(255,255,255,0.9);
+}
+
+.temp-big-display {
+    display: flex; 
+    align-items: center; 
+    gap: 2rem; 
+    margin-top: 1.5rem; 
+    flex-wrap: wrap;
+}
+
+/* Graph Container Styles (Preserved but unused) */
+.graph-container {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2rem;
+    height: 70vh;
+    box-shadow: var(--card-shadow);
+    position: relative;
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN SYSTEM
+   ========================================================= */
+
+/* Tablets and Narrow Desktops */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 80px; /* Slim sidebar for tablets */
+  }
+
+  .sidebar {
+    padding: 1.5rem 0.8rem;
+    align-items: center;
+  }
+  
+  .brand span, .nav-btn span, .theme-toggle div {
+    display: none;
+  }
+  
+  .brand {
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  
+  .nav-btn {
+    justify-content: center;
+    padding: 1rem;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .nav-btn:hover {
+    padding-left: 1rem; /* Reset hover effect */
+  }
+  
+  .theme-toggle {
+    justify-content: center;
+    padding: 0.8rem;
+  }
+
+  .sim-overlay { 
+    width: 95%; 
+    bottom: 20px;
+  }
+}
+
+/* Mobile Devices (Phones) */
+@media (max-width: 768px) {
+  body { 
+    flex-direction: column; 
+    height: 100vh;
+    height: 100dvh; /* Dynamic Viewport Height for mobile browsers */
+  }
+  
+  /* Bottom Navigation */
+  .sidebar {
+    width: 100%;
+    height: var(--bottom-nav-height);
+    flex-direction: row;
+    align-items: center;
+    padding: 0 15px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    order: 2; /* Sidebar goes to bottom */
+    justify-content: space-around;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  
+  .brand { display: none; }
+  
+  .nav-menu { 
+    flex-direction: row; 
+    flex: 1; 
+    gap: 5px; 
+    justify-content: space-around;
+  }
+  
+  .nav-item { width: auto; }
+  
+  .nav-btn {
+    width: auto;
+    height: 44px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  
+  .nav-btn i { font-size: 1.3rem; margin-bottom: 0; }
+  .nav-btn span { display: none; } /* Keeping text hidden for clean look */
+  .nav-btn:before { 
+    top: auto; bottom: 0; left: 50%; transform: translateX(-50%) scaleX(0);
+    width: 20px; height: 3px; border-radius: 2px;
+  }
+  .nav-btn.active:before { transform: translateX(-50%) scaleX(1); }
+  .nav-btn:hover { padding-left: 16px; background: transparent; }
+  
+  .theme-toggle { display: none; } 
+  
+  .main-stage { 
+    order: 1; 
+    height: calc(100% - var(--bottom-nav-height));
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Overlay Stacking for Mobile */
+  .sim-overlay {
+    bottom: 0;
+    width: 100%;
+    padding: 20px 16px;
+    gap: 15px;
+    border-radius: 24px 24px 0 0;
+    flex-direction: column;
+    align-items: stretch;
+    max-height: 55vh;
+    overflow-y: auto;
+    background: rgba(10, 18, 36, 0.98);
+    border-bottom: none;
+    border-left: none; 
+    border-right: none;
+  }
+  
+  /* Ensure overlay doesn't block scrolling on small phones */
+  .sim-overlay::-webkit-scrollbar { width: 4px; }
+  
+  .control-group { width: 100%; flex: none; margin-bottom: 5px; }
+  .action-buttons { margin-top: 5px; flex-direction: row; }
+  
+  .material-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .material-btn { padding: 12px 5px; font-size: 0.8rem; gap: 4px; }
+  .material-btn i { font-size: 0.9rem; }
+  
+  /* Stats & HUD Mobile Scaling */
+  .stats-bar { 
+    top: 10px; left: 10px; right: 10px;
+    padding: 10px; 
+    gap: 10px; 
+    justify-content: space-around;
+    background: rgba(18, 24, 38, 0.85);
+  }
+  
+  .stat-item { flex: 1; }
+  .stat-value { font-size: 1rem; }
+  .stat-label { font-size: 0.6rem; }
+  
+  .sim-hud {
+    top: 85px; right: 10px;
+    padding: 12px;
+    transform-origin: top right;
+    scale: 0.9;
+    max-width: 160px;
+    min-width: auto;
+  }
+  
+  .hud-item { margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .hud-label { font-size: 0.7rem; }
+  .hud-value { font-size: 1rem; }
+  
+  /* Content Pages */
+  .tab-content { padding: 1.5rem; padding-bottom: 6rem; /* Extra padding for bottom nav */ }
+  .content-grid { gap: 1.5rem; }
+  
+  .highlight-card { padding: 2rem 1.5rem; margin: 2rem 0; }
+  .temp-big-display h1 { font-size: 3rem; }
+  
+  /* Graph responsive */
+  .graph-container { height: 50vh; padding: 1rem; }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+    body { flex-direction: row; }
+    .sidebar { 
+        width: 60px; height: 100vh; flex-direction: column; order: 0; justify-content: center; padding: 10px 0;
+        border-right: 1px solid var(--border); border-top: none;
+    }
+    .main-stage { height: 100vh; width: calc(100% - 60px); }
+    .nav-btn { height: 50px; width: 40px; }
+    .nav-btn:before { left: 0; top: 0; height: 100%; width: 3px; transform: scaleY(0); }
+    .nav-btn.active:before { transform: scaleY(1); }
+    
+    .sim-overlay {
+        flex-direction: row;
+        width: 96%;
+        bottom: 10px;
+        padding: 10px 15px;
+        max-height: 80px;
+        align-items: center;
+        border-radius: 16px;
+    }
+    .control-group { margin-bottom: 0; }
+    .control-group label { display: none; } /* Hide labels to save space */
+    .material-btn { padding: 6px 10px; }
+    .temp-labels { display: none; }
+    .temp-display { top: -25px; font-size: 0.75rem; padding: 2px 8px; }
+    
+    .stats-bar { padding: 5px 15px; top: 10px; left: 10px; right: auto; gap: 15px; }
+    .stat-value { font-size: 1rem; }
+    
+    .sim-hud { display: none; } /* Hide HUD in landscape to prevent clutter */
+}
+
+/* =========================================================
+   Custom Scrollbar
+   ========================================================= */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track {
+  background: rgba(99,102,241,0.06);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,0.35);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99,102,241,0.55);
+}
+
+</style>
+
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">
+            <i class="fas fa-flask"></i>
+            <span>Thermal Lab</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <button class="nav-btn active" id="btn-tab-sim">
+                    <i class="fas fa-fire"></i>
+                    <span>Simulation</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-btn" id="btn-tab-ov">
+                    <i class="fas fa-book-open"></i>
+                    <span>Concepts</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-btn" id="btn-tab-act">
+                    <i class="fas fa-hands"></i>
+                    <span>Activities</span>
+                </button>
+            </li>
+        </ul>
+        <div style="margin-top: auto; padding-top: 1rem;" class="hide-mobile">
+            <div class="theme-toggle" id="theme-btn">
+                <div>
+                    <i class="fas fa-moon"></i>
+                    <span style="margin-left: 10px;">Dark Mode</span>
+                </div>
+                <i class="fas fa-toggle-off" id="theme-icon"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-stage">
+        
+        <div id="tab-simulation" class="tab-content active">
+            <div id="canvas-container"></div>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-conductivity">Medium</div>
+                    <div class="stat-label">Conductivity</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-heat-flow">0 W/m²</div>
+                    <div class="stat-label">Heat Flow</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-time">0s</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+            
+            <div class="sim-overlay">
+                <div class="control-group">
+                    <label><i class="fas fa-layer-group"></i> Material</label>
+                    <div class="material-selector">
+                        <button class="material-btn" id="btn-mat-glass">
+                            <i class="fas fa-wine-glass-alt"></i> Glass
+                        </button>
+                        <button class="material-btn active" id="btn-mat-iron">
+                            <i class="fas fa-weight-hanging"></i> Iron
+                        </button>
+                        <button class="material-btn" id="btn-mat-copper">
+                            <i class="fas fa-coins"></i> Copper
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label><i class="fas fa-thermometer-half"></i> Intensity</label>
+                    <div class="slider-container">
+                        <div class="temp-display" id="temp-display">800°C</div>
+                        <input type="range" id="heat-slider" min="0" max="100" value="50">
+                    </div>
+                    <div class="temp-labels">
+                        <span><i class="fas fa-snowflake"></i> Low</span>
+                        <span><i class="fas fa-fire"></i> Max</span>
+                    </div>
+                </div>
+
+                <div class="control-group action-buttons">
+                    <button id="play-btn" class="btn-action pulse">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <button id="reset-btn" class="btn-action btn-ghost">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sim-hud">
+                <div class="hud-item">
+                    <span class="hud-label"><i class="fas fa-fire" style="color:var(--fire);"></i> Hot End</span>
+                    <span class="hud-value" id="hud-temp-hot" style="color:var(--fire)">20°C</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label"><i class="fas fa-snowflake" style="color:var(--accent);"></i> Far End</span>
+                    <span class="hud-value" id="hud-temp" style="color:var(--accent)">20°C</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label"><i class="fas fa-exchange-alt" style="color:var(--primary);"></i> Heat Flow</span>
+                    <span class="hud-value" id="hud-state" style="color:var(--primary)">Equilibrium</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label"><i class="fas fa-bolt" style="color:#10b981;"></i> Status</span>
+                    <span class="hud-value" id="hud-status" style="color:#10b981">Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-overview" class="tab-content">
+            <div class="page-header">
+                <h1>Thermal Energy & Heat Transfer</h1>
+                <p>Explore the microscopic world of particles in motion through the Kinetic Theory of Matter. Learn how energy flows and temperature changes affect materials at the molecular level.</p>
+            </div>
+            
+            <div class="content-grid">
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Temperature</h3>
+                        <span class="tag orange">Definition</span>
+                    </div>
+                    <p>Temperature is <strong>not energy itself</strong>. It is a measure of the <strong>average kinetic energy</strong> of the particles in a substance. Faster particles = Higher Temperature.</p>
+                    <div style="margin-top: auto; padding: 1rem; background: rgba(var(--fire), 0.05); border-radius: 12px;">
+                        <p style="margin:0; font-size:0.9rem;"><i class="fas fa-lightbulb" style="color:var(--fire); margin-right:8px;"></i> <strong>Key Insight:</strong> Two objects can have the same temperature but different thermal energy if their masses differ.</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Thermal Energy</h3>
+                        <span class="tag blue">Concept</span>
+                    </div>
+                    <p>The total energy (Kinetic + Potential) of all particles in a substance. A large iceberg has more thermal energy than a cup of boiling water because of its massive number of particles.</p>
+                    <div style="margin-top: auto;">
+                        <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fas fa-calculator" style="margin-right:8px;"></i> Thermal Energy = Particle Count × Average Energy</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3>Heat Transfer</h3>
+                        <span class="tag orange">Process</span>
+                    </div>
+                    <p>Heat is the flow of thermal energy from a region of high temperature to low temperature. It stops when <strong>Thermal Equilibrium</strong> is reached.</p>
+                    <div style="margin-top: auto;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:100%; height:4px; background:linear-gradient(90deg, var(--fire), var(--accent)); border-radius:2px;"></div>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Heat Flow Direction</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-card">
+                <h2>Absolute Zero</h2>
+                <div class="temp-big-display">
+                    <div>
+                        <h1 style="margin:0; opacity: 0.9; -webkit-text-fill-color: white; color:white;">0 K</h1>
+                        <p style="color: rgba(255,255,255,0.9); font-weight: 500; font-size: 1.2rem;">−273.15°C / −459.67°F</p>
+                    </div>
+                    <div>
+                        <p style="color: white; margin:0;">The theoretical temperature at which molecular motion stops completely. At this point, particles have minimal vibrational motion, and entropy reaches its minimum value.</p>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle" style="color:white;"></i>
+                    <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Absolute zero has never been achieved in experiments.</span>
+                </div>
+            </div>
+            
+            <h2>Conduction, Convection & Radiation</h2>
+            <div class="content-grid" style="margin-top: 1rem;">
+                <div class="info-card">
+                    <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-exchange-alt" style="color:var(--primary);"></i> Conduction</h3>
+                    <p>Direct transfer through physical contact. Faster in metals due to free electrons.</p>
+                </div>
+                <div class="info-card">
+                    <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-wind" style="color:var(--accent);"></i> Convection</h3>
+                    <p>Transfer through fluid movement (liquids/gases). Creates convection currents.</p>
+                </div>
+                <div class="info-card">
+                    <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-sun" style="color:var(--fire);"></i> Radiation</h3>
+                    <p>Transfer through electromagnetic waves. Does not require a medium (works in vacuum).</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-activities" class="tab-content">
+            <div class="page-header">
+                <h1>Interactive Activities</h1>
+                <p>Explore these experiments to understand how our senses perceive temperature and how heat transfers through different materials.</p>
+            </div>
+
+            <div class="content-grid">
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-vial"></i> Activity 9.1(a)</h3>
+                        <span class="tag purple">Diffusion</span>
+                    </div>
+                    <p><strong>Diffusion in Water</strong></p>
+                    <p>Drop food coloring into hot vs. cold water and observe the rate of diffusion.</p>
+                    <div style="background: rgba(var(--accent), 0.05); padding: 1.2rem; border-radius: 12px; margin: 1.5rem 0;">
+                        <ul style="padding-left: 1.2rem; color: var(--text-muted);">
+                            <li style="margin-bottom:8px;"><strong>Hot Water:</strong> Color spreads rapidly due to faster molecular motion.</li>
+                            <li><strong>Cold Water:</strong> Color spreads slowly due to slower molecular motion.</li>
+                        </ul>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:auto;">
+                        <i class="fas fa-clock" style="color:var(--text-muted);"></i>
+                        <span style="font-size:0.9rem; color:var(--text-muted);"><strong>Time Required:</strong> 5-10 minutes</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-hand-paper"></i> Activity 9.1(b)</h3>
+                        <span class="tag purple">Perception</span>
+                    </div>
+                    <p><strong>The Trick of Touch</strong></p>
+                    <p>Place left hand in cold water, right in warm water for 60s. Then place both in tap water.</p>
+                    <p><strong>Result:</strong> Left hand feels hot, Right hand feels cold.</p>
+                    <div style="margin-top: auto; padding: 1rem; background: rgba(var(--primary), 0.05); border-radius: 12px;">
+                        <p style="margin:0; font-size:0.9rem;"><i class="fas fa-brain" style="color:var(--primary); margin-right:8px;"></i> This demonstrates why subjective temperature perception can be misleading!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2>Real-World Applications</h2>
+            <div class="content-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-home" style="color:var(--accent); margin-right:10px;"></i> Home Insulation</h3>
+                    <p>Materials with low thermal conductivity (like fiberglass) slow heat transfer, keeping homes warm in winter and cool in summer.</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-car" style="color:var(--primary); margin-right:10px;"></i> Engine Cooling</h3>
+                    <p>Car engines use coolant (high specific heat capacity) to absorb excess heat and radiators to dissipate it through convection.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+<script src="index.js">
+</script>
+
+</body>
+</html>

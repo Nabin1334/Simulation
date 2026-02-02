@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪂 Skydiving Physics Lab - Learn by Doing!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Left Panel - Controls */
+        .control-panel {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 3px solid #4CAF50;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #90CAF9;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-start:hover { background: #45a049; transform: translateY(-2px); }
+
+        .btn-deploy {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-deploy:hover { background: #FB8C00; transform: translateY(-2px); }
+
+        .btn-reset {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-reset:hover { background: #1976D2; transform: translateY(-2px); }
+
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Section Headers */
+        .section {
+            margin: 20px 0;
+        }
+
+        .section-title {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        /* Sliders */
+        .slider-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .slider-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Info Display */
+        .info-box {
+            background: rgba(33, 150, 243, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #90CAF9;
+        }
+
+        .info-value {
+            color: white;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        /* Status Box */
+        .status-box {
+            background: rgba(76, 175, 80, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 15px 0;
+            border: 2px solid #4CAF50;
+        }
+
+        .status-falling { background: rgba(255, 152, 0, 0.3); border-color: #FF9800; }
+        .status-parachute { background: rgba(76, 175, 80, 0.3); border-color: #4CAF50; }
+        .status-danger { background: rgba(244, 67, 54, 0.3); border-color: #F44336; animation: blink 1s infinite; }
+        .status-landed { background: rgba(156, 39, 176, 0.3); border-color: #9C27B0; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Simulation Area */
+        .sim-area {
+            flex: 1;
+            position: relative;
+            background: #87CEEB;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Simple HUD */
+        .hud {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            border: 2px solid #4CAF50;
+        }
+
+        .hud-title {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        .hud-value {
+            font-family: monospace;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Physics Explanation Box */
+        .physics-explain {
+            background: rgba(255, 193, 7, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #FFC107;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 8px 0;
+            text-align: center;
+            color: #FFD54F;
+        }
+
+        /* Help Button */
+        .help-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-btn:hover {
+            background: #1976D2;
+            transform: scale(1.1);
+        }
+
+        /* Help Modal */
+        .help-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .help-modal.show {
+            display: block;
+        }
+
+        .help-title {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .help-section {
+            margin: 15px 0;
+        }
+
+        .help-section h3 {
+            color: #FFC107;
+            margin-bottom: 10px;
+        }
+
+        .help-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .help-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .help-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .close-help {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .control-panel { width: 100%; max-height: 50vh; }
+            .hud { transform: scale(0.8); top: 10px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <h1 class="title">🪂 Free Fall</h1>
+        <p class="subtitle">Learn Gravity, Air Resistance & Motion!</p>
+
+        <div class="status-box" id="status">
+            Ready to jump from 4000 meters!
+        </div>
+
+        <!-- Control Buttons -->
+        <button class="btn btn-start" id="startBtn">🚀 START JUMP</button>
+        <button class="btn btn-deploy" id="deployBtn" disabled>🪂 OPEN PARACHUTE</button>
+        <button class="btn btn-reset" id="resetBtn">🔄 RESET</button>
+
+        <!-- Settings -->
+        <div class="section">
+            <div class="section-title">⚙️ Experiment Settings</div>
+            
+            <div class="slider-box">
+                <div class="slider-label">
+                    <span>Starting Height:</span>
+                    <span class="slider-value" id="heightVal">4000m</span>
+                </div>
+                <input type="range" id="heightSlider" min="2000" max="5000" step="100" value="4000">
+            </div>
+
+            <div class="slider-box">
+                <div class="slider-label">
+                    <span>Weight (with gear):</span>
+                    <span class="slider-value" id="weightVal">85kg</span>
+                </div>
+                <input type="range" id="weightSlider" min="60" max="120" step="5" value="85">
+            </div>
+
+            <div class="slider-box">
+                <div class="slider-label">
+                    <span>Wind Speed:</span>
+                    <span class="slider-value" id="windVal">5 m/s</span>
+                </div>
+                <input type="range" id="windSlider" min="0" max="15" step="1" value="5">
+            </div>
+        </div>
+
+        <!-- Live Data -->
+        <div class="section">
+            <div class="section-title">📊 Live Measurements</div>
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">Current Speed:</span>
+                    <span class="info-value" id="speed">0 m/s</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Height Above Ground:</span>
+                    <span class="info-value" id="height">4000 m</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Falling:</span>
+                    <span class="info-value" id="time">0.0 s</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Distance to Ground:</span>
+                    <span class="info-value" id="distance">4000 m</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Physics Explanation -->
+        <div class="section">
+            <div class="section-title">📚 Physics Concepts</div>
+            <div class="physics-explain">
+                <strong>Why do we fall?</strong><br>
+                Gravity pulls everything down at 9.8 m/s²
+                <div class="formula">Force = Mass × 9.8</div>
+                
+                <strong>What slows us down?</strong><br>
+                Air resistance (drag) increases with speed
+                <div class="formula">Drag ∝ Speed²</div>
+                
+                <strong>Terminal Velocity:</strong><br>
+                When drag equals gravity, speed becomes constant (~55 m/s or 200 km/h!)
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation Area -->
+    <div class="sim-area">
+        <canvas id="canvas"></canvas>
+
+        <!-- Simple HUD -->
+        <div class="hud">
+            <div class="hud-title">FLIGHT DATA</div>
+            <div class="hud-row">
+                <span>Speed:</span>
+                <span class="hud-value" id="hudSpeed">0 m/s</span>
+            </div>
+            <div class="hud-row">
+                <span>Height:</span>
+                <span class="hud-value" id="hudHeight">4000 m</span>
+            </div>
+            <div class="hud-row">
+                <span>Status:</span>
+                <span class="hud-value" id="hudStatus">Ready</span>
+            </div>
+            <div class="hud-row">
+                <span>Impact Speed:</span>
+                <span class="hud-value" id="hudImpact">0 m/s</span>
+            </div>
+        </div>
+
+        <!-- Help Button -->
+        <button class="help-btn" id="helpBtn">?</button>
+
+        <!-- Help Modal -->
+        <div class="help-modal" id="helpModal">
+            <h2 class="help-title">📖 How to Use This Simulator</h2>
+            
+            <div class="help-section">
+                <h3>🎮 Controls:</h3>
+                <ul class="help-list">
+                    <li>Click "START JUMP" to begin</li>
+                    <li>Click "OPEN PARACHUTE" when falling (deploy between 500-1000m)</li>
+                    <li>Press SPACE key to deploy parachute quickly</li>
+                    <li>Click "RESET" to start over</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>🔬 What You'll Learn:</h3>
+                <ul class="help-list">
+                    <li><strong>Gravity:</strong> Constant force pulling you down (9.8 m/s²)</li>
+                    <li><strong>Acceleration:</strong> Speed increases as you fall</li>
+                    <li><strong>Air Resistance:</strong> Wind pushes back harder as you go faster</li>
+                    <li><strong>Terminal Velocity:</strong> Maximum speed when forces balance</li>
+                    <li><strong>Parachute Effect:</strong> Increases drag, slows descent safely</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>🎯 Try These Experiments:</h3>
+                <ul class="help-list">
+                    <li>Change weight - heavier objects reach higher terminal velocity</li>
+                    <li>Change height - more time to accelerate from higher altitude</li>
+                    <li>Deploy parachute at different heights - see the effect!</li>
+                    <li>Watch how speed increases then levels off (terminal velocity)</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>⚠️ Safety Tips:</h3>
+                <ul class="help-list">
+                    <li>Deploy parachute above 500m for safe landing</li>
+                    <li>Below 500m = DANGER ZONE!</li>
+                    <li>Watch your speed - it should slow down after parachute opens</li>
+                    <li>Safe landing speed is below 8 m/s</li>
+                </ul>
+            </div>
+
+            <button class="close-help" onclick="closeHelp()">Got It! Let's Jump!</button>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+       
+    </script>
+</body>
+</html>

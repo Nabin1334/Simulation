@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Experiment: Calculate Acceleration due to Gravity</title>
+    <style>
+        :root {
+            --sky: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            --building: #F5F5DC;
+            --accent: #E74C3C;
+            --accent-light: #FF6B6B;
+            --text: #2C3E50;
+            --text-light: #5D6D7E;
+            --success: #27ae60;
+            --ground: #7DCEA0;
+            --measurement: #3498DB;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            background-image: linear-gradient(to bottom, #f0f4f8, #d9e4ec);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: var(--text);
+            margin: 15px 0 5px 0;
+            font-size: 28px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 16px;
+            max-width: 800px;
+            z-index: 10;
+        }
+        
+        /* Floating Control Panel in Upper Left */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            min-width: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: var(--text);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .control-group h3 i {
+            margin-right: 8px;
+            color: var(--accent);
+        }
+
+        #action-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(231, 76, 60, 0.3);
+        }
+
+        #action-btn:hover { 
+            background-color: #c0392b; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(231, 76, 60, 0.4);
+        }
+
+        #action-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+        }
+
+        #action-btn:disabled { 
+            background-color: #95a5a6; 
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #reset-btn {
+            background-color: var(--text-light);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #reset-btn:hover {
+            background-color: var(--text);
+        }
+
+        /* Height selector */
+        .height-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .height-option {
+            padding: 12px;
+            background: #f0f4f8;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .height-option:hover {
+            background: #e3e8ef;
+        }
+
+        .height-option.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .height-info {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* The container for the simulation */
+        #sim-container {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--sky);
+            width: 800px;
+            height: 500px;
+            border: 1px solid rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+
+        /* Data Display Panel */
+        #data-panel {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            width: 800px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 15px;
+            box-sizing: border-box;
+        }
+
+        .data-group {
+            text-align: center;
+            padding: 15px;
+            background: #F8F9FA;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #E9ECEF;
+        }
+
+        .data-group.active {
+            background-color: #E3F2FD;
+            border-color: var(--measurement);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .value {
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .unit {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: normal;
+            margin-left: 2px;
+        }
+
+        /* The Formula Display */
+        #calculation {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 800px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        #calculation h3 {
+            color: var(--text);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        #calculation h3 i {
+            margin-right: 10px;
+            color: var(--success);
+        }
+
+        .formula {
+            font-size: 20px;
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            background-color: #F8F9FA;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .result {
+            font-size: 22px;
+            color: var(--success);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(39, 174, 96, 0.1);
+            border-radius: 8px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error {
+            color: #E74C3C;
+        }
+
+        .info-box {
+            background-color: #E3F2FD;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text);
+            border-left: 4px solid var(--measurement);
+        }
+
+        .info-box p {
+            margin: 5px 0;
+        }
+
+        .info-box .accent {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Measurement lines */
+        .measurement-line {
+            stroke: var(--measurement);
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+        }
+
+        .measurement-text {
+            fill: var(--measurement);
+            font-size: 14px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        /* Real-time data indicator */
+        .realtime-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            display: none;
+            z-index: 100;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* Physics speed info */
+        .physics-info {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+            border: 1px dashed rgba(52, 152, 219, 0.3);
+        }
+
+        .physics-info .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Height visualization */
+        .height-visual {
+            position: absolute;
+            right: 20px;
+            bottom: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid var(--measurement);
+            z-index: 50;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .height-visual h4 {
+            margin: 0 0 3px 0;
+            color: var(--measurement);
+            font-size: 12px;
+        }
+
+        .height-visual .value {
+            font-size: 18px;
+            color: var(--accent);
+        }
+
+        /* Scale indicator */
+        .scale-indicator {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Control Panel -->
+    <div id="control-panel">
+        <div class="control-group">
+            <h3><i>⚙️</i> Experiment Controls</h3>
+            <button id="action-btn">START EXPERIMENT</button>
+            <button id="reset-btn" disabled>RESET</button>
+        </div>
+        
+        <div class="control-group">
+            <h3><i>📏</i> Drop Height</h3>
+            <div class="height-selector">
+                <div class="height-option active" data-height="5">
+                    <span>5 meters</span>
+                    <span class="height-info">~1.01s fall</span>
+                </div>
+                <div class="height-option" data-height="10">
+                    <span>10 meters</span>
+                    <span class="height-info">~1.43s fall</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3><i>⏱️</i> Physics Settings</h3>
+            <div class="physics-info">
+                Using <span class="highlight">REAL EARTH GRAVITY</span><br>
+                g = 9.80665 m/s²<br>
+                Scale: 1m = 40 pixels
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time indicator -->
+    <div id="realtime-indicator" class="realtime-indicator">REAL-TIME PHYSICS</div>
+
+    <!-- Height visual indicator -->
+    <div id="height-visual" class="height-visual">
+        <h4>REMAINING HEIGHT</h4>
+        <div class="value">5.00 <span class="unit">m</span></div>
+    </div>
+
+    <!-- Scale indicator -->
+    <div class="scale-indicator">Scale: 1 meter = 40 pixels</div>
+
+    <h1>Acceleration due to Gravity</h1>
+    <p class="subtitle">Drop a stone from a known height and measure the time of fall to calculate g using the equation: h = ½gt²</p>
+
+    <div id="sim-container">
+        <!-- Simulation will be rendered here by Two.js -->
+    </div>
+
+    <div id="data-panel">
+        <div class="data-group">
+            <label>Drop Height (h)</label>
+            <div class="value" id="height-display">5.00 <span class="unit">m</span></div>
+        </div>
+        
+        <div class="data-group" id="time-group">
+            <label>Fall Time (t)</label>
+            <div class="value" id="timer-display">0.00 <span class="unit">s</span></div>
+        </div>
+
+        <div class="data-group" id="velocity-group">
+            <label>Impact Velocity (v)</label>
+            <div class="value" id="velocity-display">0.00 <span class="unit">m/s</span></div>
+        </div>
+
+        <div class="data-group" id="acceleration-group">
+            <label>Calculated g</label>
+            <div class="value" id="g-display">0.00 <span class="unit">m/s²</span></div>
+        </div>
+    </div>
+
+    <div id="calculation">
+        <h3><i>📐</i> Calculation of Acceleration due to Gravity (g)</h3>
+        <div class="formula">
+            <span style="margin: 0 5px;">Equation of motion:</span>
+            <span style="margin: 0 10px; font-weight: bold; color: var(--accent);">h = ½gt²</span>
+            <span style="margin: 0 5px;">→</span>
+            <span style="margin: 0 10px; font-weight: bold; color: var(--success);">g = 2h / t²</span>
+        </div>
+        <div id="result-display" class="result">Select a drop height and click "START EXPERIMENT" to begin</div>
+        <div class="info-box">
+            <p><span class="accent">Standard Earth gravity:</span> g = 9.80665 m/s²</p>
+            <p><span class="accent">Current experiment:</span> h = <span id="current-height-display">5.00</span> m</p>
+            <p><span class="accent">Theoretical fall time:</span> t = √(2h/g) = <span id="theoretical-time">1.01</span> s</p>
+            <p><span class="accent">Impact velocity:</span> v = gt = <span id="theoretical-velocity">9.90</span> m/s</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.10/two.min.js"></script>
+
+    <script>
+        // --- PHYSICS CONSTANTS ---
+        const STANDARD_G = 9.80665; // Standard Earth gravity in m/s² (EXACT VALUE)
+        const METERS_TO_PIXELS = 40; // 1 meter = 40 pixels on screen
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 500;
+        const GROUND_HEIGHT = 50; // Height of ground area at bottom
+        
+        // Simulation parameters
+        let currentHeight = 5.0; // Default drop height in meters
+        let groundY; // Y-coordinate of ground level
+        
+        // Simulation state
+        let isSimulating = false;
+        let simulationStartTime = 0;
+        let currentPhysicsTime = 0;
+        let stonePosition = 0;
+        let stoneVelocity = 0;
+        let calculatedG = 0;
+        let animationId = null;
+        let lastFrameTime = 0;
+        
+        // DOM Elements
+        const actionBtn = document.getElementById('action-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const heightDisplay = document.getElementById('height-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const velocityDisplay = document.getElementById('velocity-display');
+        const gDisplay = document.getElementById('g-display');
+        const resultDisplay = document.getElementById('result-display');
+        const currentHeightDisplay = document.getElementById('current-height-display');
+        const theoreticalTimeDisplay = document.getElementById('theoretical-time');
+        const theoreticalVelocityDisplay = document.getElementById('theoretical-velocity');
+        const heightVisual = document.getElementById('height-visual');
+        const timeGroup = document.getElementById('time-group');
+        const velocityGroup = document.getElementById('velocity-group');
+        const accelerationGroup = document.getElementById('acceleration-group');
+        const realtimeIndicator = document.getElementById('realtime-indicator');
+        
+        // Two.js setup
+        const two = new Two({ 
+            width: CANVAS_WIDTH, 
+            height: CANVAS_HEIGHT,
+            type: Two.Types.svg
+        }).appendTo(document.getElementById('sim-container'));
+
+        // Store visual elements
+        const visuals = {
+            ground: null,
+            building: null,
+            balcony: null,
+            person: null,
+            stone: null,
+            measurementLine: null,
+            measurementText: null,
+            velocityVector: null,
+            velocityLabel: null,
+            trajectoryPath: null,
+            timeDisplay: null,
+            heightScale: []
+        };
+
+        // Initialize the simulation
+        function initSimulation() {
+            createScene();
+            setupEventListeners();
+            updateHeightDisplay();
+            updateTheoreticalValues();
+            resetSimulation();
+        }
+
+        // Create the visual scene
+        function createScene() {
+            // Clear any existing elements
+            two.clear();
+            
+            // Calculate ground position
+            groundY = CANVAS_HEIGHT - GROUND_HEIGHT / 2;
+            
+            // 1. The Ground
+            visuals.ground = two.makeRectangle(CANVAS_WIDTH/2, groundY, CANVAS_WIDTH, GROUND_HEIGHT);
+            visuals.ground.fill = '#7DCEA0';
+            visuals.ground.noStroke();
+            
+            // 2. The Building - Scale for max 10m height
+            const buildingVisualHeight = currentHeight + 3; // Building extends 3m above drop point
+            const buildingHeightPixels = buildingVisualHeight * METERS_TO_PIXELS;
+            const buildingY = groundY - buildingHeightPixels/2;
+            
+            const buildingWidth = 220;
+            const buildingX = 150;
+            visuals.building = two.makeRectangle(buildingX, buildingY, buildingWidth, buildingHeightPixels);
+            visuals.building.fill = '#F5F5DC';
+            visuals.building.stroke = '#D3D3D3';
+            visuals.building.linewidth = 2;
+            
+            // Add windows to building (scaled based on building height)
+            const windowRows = Math.floor(buildingVisualHeight / 3);
+            for(let i = 0; i < windowRows; i++) {
+                for(let j = 0; j < 2; j++) {
+                    const windowX = buildingX - buildingWidth/2 + 50 + j * 80;
+                    const windowY = buildingY - buildingHeightPixels/2 + 70 + i * (buildingHeightPixels/windowRows * 0.7);
+                    const window = two.makeRectangle(windowX, windowY, 30, 35);
+                    window.fill = '#A3D1FF';
+                    window.stroke = '#85A8C9';
+                    window.linewidth = 1;
+                }
+            }
+            
+            // Calculate stone starting position
+            const stoneStartY = groundY - (currentHeight * METERS_TO_PIXELS);
+            
+            // 3. The Balcony
+            visuals.balcony = two.makeRectangle(buildingX + buildingWidth/2 + 25, stoneStartY + 8, 55, 16);
+            visuals.balcony.fill = '#5D6D7E';
+            visuals.balcony.stroke = '#2C3E50';
+            visuals.balcony.linewidth = 2;
+            
+            // 4. The Person
+            visuals.person = createPerson(buildingX + buildingWidth/2, stoneStartY);
+            
+            // 5. Measurement Line
+            const measureX = buildingX + buildingWidth/2 + 120;
+            visuals.measurementLine = two.makeLine(measureX, stoneStartY, measureX, groundY);
+            visuals.measurementLine.stroke = '#3498DB';
+            visuals.measurementLine.linewidth = 2;
+            visuals.measurementLine.dashes = [5, 5];
+            
+            // Arrowheads
+            const topArrow = two.makePolygon(measureX, stoneStartY, 5, 6);
+            topArrow.fill = '#3498DB';
+            topArrow.noStroke();
+            topArrow.rotation = Math.PI/2;
+            
+            const bottomArrow = two.makePolygon(measureX, groundY, 5, 6);
+            bottomArrow.fill = '#3498DB';
+            bottomArrow.noStroke();
+            bottomArrow.rotation = -Math.PI/2;
+            
+            // Measurement Text
+            visuals.measurementText = two.makeText(`${currentHeight.toFixed(1)} m`, measureX + 50, (stoneStartY + groundY)/2);
+            visuals.measurementText.size = 16;
+            visuals.measurementText.fill = '#3498DB';
+            visuals.measurementText.style.fontWeight = 'bold';
+            
+            // 6. The Stone
+            visuals.stone = two.makeCircle(buildingX + buildingWidth/2 + 25, stoneStartY - 5, 10);
+            visuals.stone.fill = '#2C3D50';
+            visuals.stone.stroke = '#1A252F';
+            visuals.stone.linewidth = 2;
+            
+            // 7. Velocity Vector
+            visuals.velocityVector = two.makeLine(0, 0, 0, 0);
+            visuals.velocityVector.stroke = '#E74C3C';
+            visuals.velocityVector.linewidth = 2;
+            visuals.velocityVector.visible = false;
+            
+            visuals.velocityLabel = two.makeText("", 0, 0);
+            visuals.velocityLabel.size = 12;
+            visuals.velocityLabel.fill = '#E74C3C';
+            visuals.velocityLabel.style.fontWeight = 'bold';
+            visuals.velocityLabel.visible = false;
+            
+            // 8. Trajectory path
+            visuals.trajectoryPath = two.makePath(0, 0, 0, 0);
+            visuals.trajectoryPath.stroke = 'rgba(231, 76, 60, 0.3)';
+            visuals.trajectoryPath.linewidth = 2;
+            visuals.trajectoryPath.dashes = [2, 4];
+            visuals.trajectoryPath.visible = false;
+            
+            // 9. Height scale markers
+            createHeightScale(measureX - 15, stoneStartY, groundY);
+            
+            // 10. Time display
+            visuals.timeDisplay = two.makeText("Time: 0.00 s", CANVAS_WIDTH - 80, 25);
+            visuals.timeDisplay.size = 14;
+            visuals.timeDisplay.fill = '#2C3E50';
+            visuals.timeDisplay.style.fontWeight = 'bold';
+            
+            two.update();
+        }
+        
+        // Create height scale markers
+        function createHeightScale(x, topY, bottomY) {
+            visuals.heightScale = [];
+            const totalHeightMeters = currentHeight;
+            const markerCount = Math.min(5, Math.floor(totalHeightMeters));
+            
+            for(let i = 0; i <= markerCount; i++) {
+                const heightMeters = i * (totalHeightMeters / markerCount);
+                const markerY = topY + (heightMeters / totalHeightMeters) * (bottomY - topY);
+                
+                // Marker line
+                const marker = two.makeLine(x - 8, markerY, x, markerY);
+                marker.stroke = '#666';
+                marker.linewidth = 1;
+                visuals.heightScale.push(marker);
+                
+                // Marker label
+                const label = two.makeText(`${heightMeters.toFixed(1)} m`, x - 20, markerY);
+                label.size = 10;
+                label.fill = '#666';
+                label.alignment = 'right';
+                visuals.heightScale.push(label);
+            }
+        }
+        
+        // Create a stick figure person
+        function createPerson(x, y) {
+            const personGroup = two.makeGroup();
+            
+            // Head
+            const head = two.makeCircle(0, -20, 8);
+            head.fill = '#FAD7A0';
+            head.stroke = '#333';
+            head.linewidth = 1.5;
+            
+            // Body
+            const body = two.makeLine(0, -12, 0, 8);
+            body.stroke = '#333';
+            body.linewidth = 1.5;
+            
+            // Arms
+            const leftArm = two.makeLine(-4, -6, -16, 4);
+            leftArm.stroke = '#333';
+            leftArm.linewidth = 1.5;
+            
+            const rightArm = two.makeLine(4, -6, 20, -4);
+            rightArm.stroke = '#333';
+            rightArm.linewidth = 1.5;
+            
+            // Legs
+            const leftLeg = two.makeLine(0, 8, -8, 20);
+            leftLeg.stroke = '#333';
+            leftLeg.linewidth = 1.5;
+            
+            const rightLeg = two.makeLine(0, 8, 8, 20);
+            rightLeg.stroke = '#333';
+            rightLeg.linewidth = 1.5;
+            
+            // Clothing
+            const shirt = two.makeRectangle(0, 0, 16, 16);
+            shirt.fill = '#E74C3C';
+            shirt.noStroke();
+            
+            personGroup.add(head, body, leftArm, rightArm, leftLeg, rightLeg, shirt);
+            personGroup.translation.set(x, y);
+            
+            return personGroup;
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            actionBtn.addEventListener('click', toggleSimulation);
+            resetBtn.addEventListener('click', resetSimulation);
+            
+            // Height selector
+            document.querySelectorAll('.height-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    if (isSimulating) return;
+                    
+                    // Update active state
+                    document.querySelectorAll('.height-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Update height
+                    currentHeight = parseFloat(this.getAttribute('data-height'));
+                    updateHeightDisplay();
+                    createScene();
+                    updateTheoreticalValues();
+                    resetSimulation();
+                });
+            });
+        }
+        
+        // Toggle simulation state
+        function toggleSimulation() {
+            if (isSimulating) {
+                stopSimulation();
+            } else {
+                startSimulation();
+            }
+        }
+        
+        // Start the simulation
+        function startSimulation() {
+            if (isSimulating) return;
+            
+            // Reset simulation state
+            isSimulating = true;
+            simulationStartTime = Date.now();
+            currentPhysicsTime = 0;
+            stonePosition = groundY - (currentHeight * METERS_TO_PIXELS);
+            stoneVelocity = 0;
+            calculatedG = 0;
+            lastFrameTime = performance.now();
+            
+            // Update UI
+            actionBtn.textContent = "STOP EXPERIMENT";
+            actionBtn.style.backgroundColor = "#3498DB";
+            resetBtn.disabled = true;
+            realtimeIndicator.style.display = 'block';
+            
+            // Activate data groups
+            timeGroup.classList.add('active');
+            velocityGroup.classList.add('active');
+            accelerationGroup.classList.add('active');
+            
+            // Show velocity vector
+            visuals.velocityVector.visible = true;
+            visuals.velocityLabel.visible = true;
+            visuals.trajectoryPath.visible = true;
+            
+            // Reset result display
+            resultDisplay.textContent = `Experiment in progress: Dropping from ${currentHeight}m height...`;
+            resultDisplay.style.color = "#3498DB";
+            
+            // Update height visual
+            updateHeightVisual(currentHeight);
+            
+            // Start animation loop
+            if (animationId) cancelAnimationFrame(animationId);
+            animationId = requestAnimationFrame(updateSimulation);
+        }
+        
+        // Update simulation with real physics
+        function updateSimulation(currentTime) {
+            if (!isSimulating) return;
+            
+            // Calculate delta time
+            const deltaTime = (currentTime - lastFrameTime) / 1000;
+            lastFrameTime = currentTime;
+            
+            // Update physics time
+            currentPhysicsTime += deltaTime;
+            
+            // Calculate fallen distance using REAL physics: s = ½gt²
+            const fallenDistance = 0.5 * STANDARD_G * currentPhysicsTime * currentPhysicsTime;
+            
+            // Check if stone is still falling
+            if (fallenDistance <= currentHeight) {
+                // Update stone position in pixels
+                stonePosition = groundY - (currentHeight * METERS_TO_PIXELS) + (fallenDistance * METERS_TO_PIXELS);
+                
+                // Calculate velocity (v = gt)
+                stoneVelocity = STANDARD_G * currentPhysicsTime;
+                
+                // Calculate remaining height
+                const remainingHeight = currentHeight - fallenDistance;
+                
+                // Update displays
+                timerDisplay.textContent = currentPhysicsTime.toFixed(2);
+                velocityDisplay.textContent = stoneVelocity.toFixed(2);
+                
+                // Calculate acceleration from measured values
+                if (currentPhysicsTime > 0) {
+                    calculatedG = (2 * fallenDistance) / (currentPhysicsTime * currentPhysicsTime);
+                    gDisplay.textContent = calculatedG.toFixed(2);
+                }
+                
+                // Update stone position visually
+                visuals.stone.translation.y = stonePosition;
+                
+                // Update velocity vector
+                updateVelocityVector();
+                
+                // Update trajectory path
+                updateTrajectoryPath();
+                
+                // Update in-simulation time display
+                visuals.timeDisplay.value = `Time: ${currentPhysicsTime.toFixed(2)} s`;
+                
+                // Update height visual indicator
+                updateHeightVisual(remainingHeight);
+                
+                // Continue animation
+                animationId = requestAnimationFrame(updateSimulation);
+            } else {
+                // Stone has hit the ground
+                finishSimulation();
+            }
+        }
+        
+        // Update velocity vector
+        function updateVelocityVector() {
+            const vectorScale = 3;
+            visuals.velocityVector.vertices[0].set(
+                visuals.stone.translation.x + 10,
+                visuals.stone.translation.y
+            );
+            visuals.velocityVector.vertices[1].set(
+                visuals.stone.translation.x + 10,
+                visuals.stone.translation.y + stoneVelocity * vectorScale
+            );
+            
+            // Update velocity label
+            visuals.velocityLabel.translation.set(
+                visuals.stone.translation.x + 30,
+                visuals.stone.translation.y + (stoneVelocity * vectorScale) / 2
+            );
+            visuals.velocityLabel.value = `${stoneVelocity.toFixed(1)} m/s`;
+        }
+        
+        // Update trajectory path
+        function updateTrajectoryPath() {
+            const startX = visuals.stone.translation.x;
+            const startY = groundY - (currentHeight * METERS_TO_PIXELS);
+            
+            visuals.trajectoryPath.vertices[0].set(startX, startY);
+            visuals.trajectoryPath.vertices[1].set(visuals.stone.translation.x, visuals.stone.translation.y);
+        }
+        
+        // Update height visual indicator
+        function updateHeightVisual(remainingHeight) {
+            const heightVisualValue = heightVisual.querySelector('.value');
+            heightVisualValue.textContent = `${remainingHeight.toFixed(2)} m`;
+            
+            // Position the height visual near the stone
+            const stoneY = visuals.stone.translation.y;
+            heightVisual.style.bottom = `${CANVAS_HEIGHT - stoneY + 50}px`;
+            
+            // Change color based on height
+            if (remainingHeight < currentHeight * 0.2) {
+                heightVisual.style.borderColor = '#E74C3C';
+                heightVisual.style.background = 'rgba(231, 76, 60, 0.9)';
+                heightVisual.querySelector('h4').style.color = 'white';
+                heightVisual.querySelector('.value').style.color = 'white';
+            } else if (remainingHeight < currentHeight * 0.5) {
+                heightVisual.style.borderColor = '#F39C12';
+                heightVisual.style.background = 'rgba(243, 156, 18, 0.9)';
+            } else {
+                heightVisual.style.borderColor = '#3498DB';
+                heightVisual.style.background = 'rgba(255, 255, 255, 0.9)';
+            }
+        }
+        
+        // Update height visual position
+        function updateHeightVisualPosition() {
+            const heightVisualValue = heightVisual.querySelector('.value');
+            heightVisualValue.textContent = `${currentHeight.toFixed(2)} m`;
+            
+            heightVisual.style.bottom = '80px';
+            heightVisual.style.borderColor = '#3498DB';
+            heightVisual.style.background = 'rgba(255, 255, 255, 0.9)';
+            heightVisual.querySelector('h4').style.color = '#3498DB';
+            heightVisual.querySelector('.value').style.color = '#E74C3C';
+        }
+        
+        // Stop the simulation
+        function stopSimulation() {
+            isSimulating = false;
+            
+            // Update UI
+            actionBtn.textContent = "RESUME";
+            actionBtn.style.backgroundColor = "var(--accent)";
+            resetBtn.disabled = false;
+            realtimeIndicator.style.display = 'none';
+        }
+        
+        // Finish simulation
+        function finishSimulation() {
+            isSimulating = false;
+            
+            // Calculate exact theoretical time for the drop
+            const theoreticalTime = Math.sqrt((2 * currentHeight) / STANDARD_G);
+            
+            // Use theoretical time for final calculation
+            calculatedG = (2 * currentHeight) / (theoreticalTime * theoreticalTime);
+            
+            // Snap stone to ground
+            visuals.stone.translation.y = groundY - 10;
+            
+            // Calculate impact velocity
+            const impactVelocity = STANDARD_G * theoreticalTime;
+            
+            // Update displays with final values
+            timerDisplay.textContent = theoreticalTime.toFixed(2);
+            velocityDisplay.textContent = impactVelocity.toFixed(2);
+            gDisplay.textContent = calculatedG.toFixed(2);
+            
+            // Update height visual to show ground impact
+            const heightVisualValue = heightVisual.querySelector('.value');
+            heightVisualValue.textContent = "0.00 m";
+            heightVisual.style.borderColor = '#E74C3C';
+            heightVisual.style.background = 'rgba(231, 76, 60, 0.9)';
+            heightVisual.querySelector('h4').style.color = 'white';
+            heightVisual.querySelector('.value').style.color = 'white';
+            
+            // Update result display
+            const formula = `g = 2 × ${currentHeight}m / (${theoreticalTime.toFixed(2)}s)²`;
+            const result = `= ${calculatedG.toFixed(2)} m/s²`;
+            
+            resultDisplay.innerHTML = `
+                <div style="margin-bottom: 5px;">${formula}</div>
+                <div style="font-size: 24px; color: var(--success)">${result}</div>
+                <div style="font-size: 14px; margin-top: 10px; color: var(--text-light)">
+                    <strong>Experiment Complete!</strong><br>
+                    Stone fell ${currentHeight}m in ${theoreticalTime.toFixed(2)} seconds<br>
+                    Impact velocity: ${impactVelocity.toFixed(2)} m/s
+                </div>
+            `;
+            
+            // Update theoretical values display
+            updateTheoreticalValues();
+            
+            // Update in-simulation time display
+            visuals.timeDisplay.value = `Time: ${theoreticalTime.toFixed(2)} s`;
+            
+            // Update UI
+            actionBtn.textContent = "START EXPERIMENT";
+            actionBtn.style.backgroundColor = "var(--accent)";
+            resetBtn.disabled = false;
+            realtimeIndicator.style.display = 'none';
+            
+            // Deactivate data groups
+            timeGroup.classList.remove('active');
+            velocityGroup.classList.remove('active');
+            accelerationGroup.classList.remove('active');
+            
+            // Hide velocity vector
+            visuals.velocityVector.visible = false;
+            visuals.velocityLabel.visible = false;
+            
+            two.update();
+        }
+        
+        // Reset the simulation
+        function resetSimulation() {
+            // Stop any running animation
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            // Reset simulation state
+            isSimulating = false;
+            currentPhysicsTime = 0;
+            stonePosition = groundY - (currentHeight * METERS_TO_PIXELS);
+            stoneVelocity = 0;
+            calculatedG = 0;
+            
+            // Reset stone position
+            if (visuals.stone) {
+                visuals.stone.translation.y = stonePosition;
+            }
+            
+            // Reset UI displays
+            timerDisplay.textContent = "0.00";
+            velocityDisplay.textContent = "0.00";
+            gDisplay.textContent = "0.00";
+            
+            // Reset result display
+            resultDisplay.textContent = `Select a drop height and click "START EXPERIMENT" to begin`;
+            resultDisplay.style.color = "var(--text-light)";
+            
+            // Update height visual
+            updateHeightVisualPosition();
+            
+            // Reset buttons
+            actionBtn.textContent = "START EXPERIMENT";
+            actionBtn.style.backgroundColor = "var(--accent)";
+            actionBtn.disabled = false;
+            resetBtn.disabled = true;
+            realtimeIndicator.style.display = 'none';
+            
+            // Reset in-simulation time display
+            if (visuals.timeDisplay) {
+                visuals.timeDisplay.value = "Time: 0.00 s";
+            }
+            
+            // Deactivate data groups
+            timeGroup.classList.remove('active');
+            velocityGroup.classList.remove('active');
+            accelerationGroup.classList.remove('active');
+            
+            // Hide visual elements
+            if (visuals.velocityVector) {
+                visuals.velocityVector.visible = false;
+                visuals.velocityLabel.visible = false;
+                visuals.trajectoryPath.visible = false;
+            }
+            
+            two.update();
+        }
+        
+        // Update height display
+        function updateHeightDisplay() {
+            heightDisplay.textContent = currentHeight.toFixed(2);
+            currentHeightDisplay.textContent = currentHeight.toFixed(2);
+            
+            if (visuals.measurementText) {
+                visuals.measurementText.value = `${currentHeight.toFixed(1)} m`;
+            }
+        }
+        
+        // Update theoretical values display
+        function updateTheoreticalValues() {
+            const theoreticalTime = Math.sqrt((2 * currentHeight) / STANDARD_G);
+            const impactVelocity = STANDARD_G * theoreticalTime;
+            
+            theoreticalTimeDisplay.textContent = theoreticalTime.toFixed(2);
+            theoreticalVelocityDisplay.textContent = impactVelocity.toFixed(2);
+            
+            // Update height selector info
+            document.querySelectorAll('.height-option').forEach(option => {
+                const height = parseFloat(option.getAttribute('data-height'));
+                const time = Math.sqrt((2 * height) / STANDARD_G).toFixed(2);
+                option.querySelector('.height-info').textContent = `~${time}s fall`;
+            });
+        }
+        
+        // Start the Two.js animation loop
+        two.play();
+        
+        // Initialize the simulation
+        initSimulation();
+
+    </script>
+</body>
+</html>

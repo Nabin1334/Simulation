@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Spring Balance: Mass vs Weight Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.10/two.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #f1c40f;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --text-dark: #333;
+            --text-light: #fff;
+            --background: #f0f2f5;
+            --panel-bg: #fff;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            height: 100vh;
+            padding: 10px;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: clamp(0.8rem, 2vw, 1.1rem);
+        }
+
+        .simulation-area {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .simulation-container {
+            flex: 1.5;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        #simulation-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Enhanced Digital Meter Display */
+        .digital-meter {
+            flex: 1;
+            min-width: 280px;
+            max-width: 400px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 40px rgba(0, 100, 255, 0.1);
+            border: 2px solid rgba(0, 150, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Realistic metal effect border */
+        .digital-meter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                #0066ff 0%, 
+                #00ffff 25%, 
+                #0066ff 50%, 
+                #00ffff 75%, 
+                #0066ff 100%);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.5),
+                0 2px 10px rgba(0, 100, 255, 0.3);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* Realistic ventilation grilles */
+        .meter-vents {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 8px);
+            gap: 3px;
+        }
+
+        .vent-slot {
+            width: 8px;
+            height: 2px;
+            background: rgba(0, 150, 255, 0.3);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .meter-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+            position: relative;
+        }
+
+        /* Brand label */
+        .meter-brand {
+            font-family: 'Orbitron', monospace;
+            color: #4a9eff;
+            font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            font-weight: 900;
+            text-shadow: 
+                0 0 10px rgba(74, 158, 255, 0.6),
+                0 0 20px rgba(74, 158, 255, 0.3);
+        }
+
+        .meter-title {
+            font-family: 'Orbitron', monospace;
+            color: #00ffff;
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.5),
+                0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .meter-subtitle {
+            color: #888;
+            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+            letter-spacing: 1px;
+        }
+
+        /* Power indicator LED */
+        .power-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            color: #00ff00;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .led {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 
+                0 0 10px #00ff00,
+                0 0 20px #00ff00,
+                inset 0 0 5px rgba(255, 255, 255, 0.5);
+            animation: pulse-led 2s infinite;
+        }
+
+        @keyframes pulse-led {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; }
+            50% { opacity: 0.6; box-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; }
+        }
+
+        /* Main LCD Display */
+        .display-container {
+            background: linear-gradient(145deg, #000000, #0a0a15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 3px solid #1a1a2e;
+            box-shadow: 
+                inset 0 2px 10px rgba(0, 0, 0, 0.8),
+                inset 0 -2px 5px rgba(255, 255, 255, 0.03),
+                0 5px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* LCD screen effect overlay */
+        .display-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glass reflection effect */
+        .display-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 100%
+            );
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .display-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .display-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .display-label {
+            color: #4a9eff;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(74, 158, 255, 0.3);
+        }
+
+        /* Seven-segment LED style display */
+        .digital-display {
+            background: #000;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            color: #00ff00;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            text-align: right;
+            letter-spacing: 3px;
+            border: 2px solid rgba(0, 100, 0, 0.5);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 50, 0, 0.8),
+                inset 0 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 30px rgba(0, 255, 0, 0.2),
+                0 2px 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* LED glow background */
+        .digital-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 255, 0, 0.1) 0%,
+                transparent 70%
+            );
+            pointer-events: none;
+        }
+
+        /* Subtle scanline effect */
+        .digital-display::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 255, 0, 0.05) 50%,
+                transparent 100%
+            );
+            pointer-events: none;
+            animation: flicker 0.15s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            100% { opacity: 1; }
+        }
+
+        .display-unit {
+            color: #00ffaa;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            margin-left: 5px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(0, 255, 170, 0.6);
+        }
+
+        /* Enhanced formula display */
+        .formula-display {
+            background: linear-gradient(145deg, rgba(20, 30, 50, 0.9), rgba(10, 20, 40, 0.9));
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 15px;
+            border-left: 4px solid #ff6b6b;
+            border-right: 1px solid rgba(255, 107, 107, 0.3);
+            box-shadow: 
+                inset 0 1px 3px rgba(0, 0, 0, 0.5),
+                0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .formula-title {
+            color: #ff6b6b;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.3);
+        }
+
+        .formula-content {
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            width: 100%;
+        }
+
+        .info-panel h3 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .info-item h4 {
+            color: var(--primary-color);
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+            margin-bottom: 6px;
+        }
+
+        .info-item p {
+            color: #666;
+            font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+            line-height: 1.4;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+            text-align: center;
+            z-index: 10;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(0, 200, 255, 0.3);
+            border: 1px solid rgba(0, 200, 255, 0.4);
+            white-space: nowrap;
+        }
+
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+            padding: 10px;
+            width: 100%;
+        }
+
+        /* Weight indicators */
+        .weight-info {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .weight-tag {
+            background: rgba(0, 100, 200, 0.15);
+            padding: 6px 12px;
+            border-radius: 15px;
+            color: #4a9eff;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Glow effect for active values */
+        .glow {
+            text-shadow: 
+                0 0 10px currentColor,
+                0 0 20px currentColor,
+                0 0 30px currentColor;
+            animation: glow-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 10px currentColor,
+                    0 0 20px currentColor,
+                    0 0 30px currentColor;
+            }
+            50% { 
+                text-shadow: 
+                    0 0 15px currentColor,
+                    0 0 30px currentColor,
+                    0 0 45px currentColor;
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .simulation-area {
+                flex-direction: column;
+            }
+            
+            .digital-meter {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .panel {
+                min-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .main-container {
+                gap: 10px;
+            }
+            
+            header {
+                padding: 10px 15px;
+            }
+            
+            .digital-meter {
+                padding: 15px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .instruction {
+                font-size: 0.7rem;
+                padding: 8px 15px;
+                white-space: normal;
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .weight-info {
+                gap: 5px;
+            }
+            
+            .weight-tag {
+                font-size: 0.6rem;
+                padding: 4px 8px;
+            }
+            
+            .display-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+            
+            .digital-display {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Touch device optimization */
+        @media (hover: none) and (pointer: coarse) {
+            .panel {
+                touch-action: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>DIGITAL SPRING BALANCE</h1>
+            <p class="subtitle">Precision Measurement of Mass and Weight</p>
+        </header>
+
+        <div class="simulation-area">
+            <div class="simulation-container">
+                <div class="panel">
+                    <div class="instruction">DRAG AND DROP WEIGHTS ONTO THE HOOK</div>
+                    <div id="simulation-canvas"></div>
+                </div>
+            </div>
+
+            <div class="digital-meter">
+                <!-- Ventilation grilles -->
+                <div class="meter-vents">
+                    <div class="vent-slot"></div>
+                    <div class="vent-slot"></div>
+                    <div class="vent-slot"></div>
+                    <div class="vent-slot"></div>
+                    <div class="vent-slot"></div>
+                    <div class="vent-slot"></div>
+                </div>
+
+                <div class="meter-header">
+                    <div class="meter-brand">PROLAB™</div>
+                    <div class="meter-title">Digital Readout</div>
+                    <div class="meter-subtitle">Real-time Measurement Display</div>
+                    <div class="power-indicator">
+                        <div class="led"></div>
+                        <span>POWER</span>
+                    </div>
+                </div>
+
+                <div class="display-container">
+                    <div class="display-row">
+                        <div class="display-label">Weight Force</div>
+                        <div class="digital-display">
+                            <span id="weight-value" class="glow">0.00</span>
+                            <span class="display-unit">N</span>
+                        </div>
+                    </div>
+
+                    <div class="display-row">
+                        <div class="display-label">Mass Equivalent</div>
+                        <div class="digital-display">
+                            <span id="mass-value">0.00</span>
+                            <span class="display-unit">kg</span>
+                        </div>
+                    </div>
+
+                    <div class="display-row">
+                        <div class="display-label">Attached Mass</div>
+                        <div class="digital-display">
+                            <span id="attached-mass-value">0.00</span>
+                            <span class="display-unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-display">
+                    <div class="formula-title">⚡ CALCULATION</div>
+                    <div class="formula-content" id="formula-display">
+                        F = 0.00 kg × 9.81 m/s²
+                    </div>
+                </div>
+
+                <div class="weight-info">
+                    <div class="weight-tag">🌍 Gravity: 9.81 m/s²</div>
+                    <div class="weight-tag">🔧 Spring: 0.8 N/m</div>
+                    <div class="weight-tag">📏 ±0.01 N</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 Measurement Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>Weight (Newtons)</h4>
+                    <p>The force measured by the spring balance. Changes with gravity.</p>
+                </div>
+                <div class="info-item">
+                    <h4>Mass (Kilograms)</h4>
+                    <p>Constant property of matter. Calculated from weight using Earth's gravity.</p>
+                </div>
+                <div class="info-item">
+                    <h4>Spring Extension</h4>
+                    <p>Directly proportional to the applied force (Hooke's Law: F = kx).</p>
+                </div>
+                <div class="info-item">
+                    <h4>Precision Readout</h4>
+                    <p>Digital display updates in real-time with 0.01 resolution.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <!-- <p>Educational Physics Simulation | Demonstrating Hooke's Law and Mass-Weight Relationship</p> -->
+        </div>
+    </div>
+
+    <script src="index.js">
+        
+    </script>
+</body>
+</html>

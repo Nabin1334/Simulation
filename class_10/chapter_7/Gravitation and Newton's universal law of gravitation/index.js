@@ -2,6 +2,8 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
+
+    
     // --- PHYSICS CONFIGURATION ---
     const PHYSICS = {
         G: 1.5,                    // Gravitational constant

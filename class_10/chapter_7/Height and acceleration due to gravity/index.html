@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height and Gravity Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #0d1b2a, #1b263b);
+            color: white;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .panel {
+            position: absolute;
+            background: rgba(20, 30, 50, 0.95);
+            border-radius: 12px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        
+        #controls {
+            top: 15px;
+            left: 15px;
+            width: min(320px, calc(100vw - 340px));
+        }
+        
+        #data {
+            top: 15px;
+            right: 15px;
+            width: min(320px, calc(100vw - 340px));
+        }
+        
+        h1 {
+            color: #64b5f6;
+            font-size: 1.6em;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #81c784;
+            font-size: 1.2em;
+            margin: 18px 0 14px 0;
+            border-bottom: 2px solid #81c784;
+            padding-bottom: 6px;
+        }
+        
+        .slider-group {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            font-size: 1em;
+            margin-bottom: 8px;
+            color: #b3d9ff;
+        }
+        
+        .value {
+            float: right;
+            color: #64b5f6;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(100, 181, 246, 0.3);
+            outline: none;
+            
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #64b5f6;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(100, 181, 246, 0.8);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #64b5f6;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .info-box {
+            background: rgba(129, 199, 132, 0.15);
+            border: 2px solid rgba(129, 199, 132, 0.4);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 0.9em;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 6px 0;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            border-left: 4px solid #64b5f6;
+            font-size: 0.9em;
+        }
+        
+        .data-label {
+            color: #b3d9ff;
+            font-size: 0.95em;
+        }
+        
+        .data-value {
+            color: #64b5f6;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        
+        .formula {
+            background: rgba(100, 181, 246, 0.15);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            text-align: center;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+        }
+        
+        button {
+            width: 48%;
+            padding: 10px;
+            margin: 8px 1%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            #controls, #data {
+                width: min(300px, calc(50vw - 25px));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            #controls, #data {
+                width: min(280px, calc(50vw - 25px));
+            }
+            
+            h1 {
+                font-size: 1.4em;
+            }
+            
+            h2 {
+                font-size: 1.1em;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .panel {
+                position: relative;
+                width: calc(100vw - 30px) !important;
+                margin: 15px auto;
+                max-height: none;
+                left: auto !important;
+                right: auto !important;
+                top: auto !important;
+            }
+            
+            #controls {
+                margin-bottom: 0;
+            }
+            
+            #data {
+                margin-top: 10px;
+            }
+            
+            button {
+                width: 100%;
+                margin: 4px 0;
+            }
+            
+            #container {
+                padding-top: 15px;
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .panel {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.3em;
+            }
+            
+            h2 {
+                font-size: 1em;
+            }
+            
+            .data-item {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+            
+            button {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+        }
+        
+        /* Scrollbar styling */
+        .panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+        .panel::-webkit-scrollbar-thumb {
+            background: rgba(100, 181, 246, 0.5);
+            border-radius: 3px;
+        }
+        
+        .panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 181, 246, 0.7);
+        }
+        
+        /* Compact layout for very small screens */
+        @media (max-height: 700px) {
+            .panel {
+                max-height: 85vh;
+            }
+            
+            h1 {
+                margin-bottom: 12px;
+                font-size: 1.4em;
+            }
+            
+            h2 {
+                margin: 12px 0 10px 0;
+                font-size: 1.1em;
+            }
+            
+            .slider-group {
+                margin: 15px 0;
+            }
+            
+            .data-item {
+                padding: 8px;
+                margin: 4px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    
+    <div id="controls" class="panel">
+        <h1>🌍 Height & Gravity</h1>
+        
+        <div class="info-box">
+            <p style="text-align: center; line-height: 1.4;">
+                <strong>Real Physics Simulation</strong><br>
+                Move slider to see how gravity and orbital speed change with height
+            </p>
+        </div>
+        
+        <div class="slider-group">
+            <label>
+                Height Above Earth
+                <span class="value" id="height-value">400 km</span>
+            </label>
+            <input type="range" id="height-slider" min="200" max="36000" value="400" step="50">
+        </div>
+        
+        <h2>📊 Real-Time Values</h2>
+        
+        <div class="data-item">
+            <span class="data-label">Gravity (g)</span>
+            <span class="data-value" id="gravity">8.70 m/s²</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Orbital Speed</span>
+            <span class="data-value" id="speed">7.66 km/s</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Orbital Period</span>
+            <span class="data-value" id="period">92.7 min</span>
+        </div>
+        
+        <div class="formula">
+            g = G × M / r²
+        </div>
+        
+        <h2>🎯 Quick Presets</h2>
+        
+        <button onclick="setHeight(400)">🛰️ ISS (400 km)</button>
+        <button onclick="setHeight(550)">🔭 Hubble (550 km)</button>
+        <button onclick="setHeight(20200)">📍 GPS (20,200 km)</button>
+        <button onclick="setHeight(35786)">🌐 Geo (35,786 km)</button>
+    </div>
+    
+    <div id="data" class="panel">
+        <h2>📈 Detailed Data</h2>
+        
+        <div class="data-item">
+            <span class="data-label">Height</span>
+            <span class="data-value" id="height2">400 km</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Distance from Center</span>
+            <span class="data-value" id="distance">6,771 km</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Gravity</span>
+            <span class="data-value" id="gravity2">8.70 m/s²</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">% of Surface Gravity</span>
+            <span class="data-value" id="percent">88.7%</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Your Weight</span>
+            <span class="data-value" id="weight">88.7%</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Orbital Speed</span>
+            <span class="data-value" id="speed2">7.66 km/s</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Speed (km/h)</span>
+            <span class="data-value" id="speed-kmh">27,576 km/h</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Orbital Period</span>
+            <span class="data-value" id="period2">92.7 min</span>
+        </div>
+        
+        <div class="data-item">
+            <span class="data-label">Orbits Completed</span>
+            <span class="data-value" id="orbits">0</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="index.js">
+       
+    </script>
+</body>
+</html>
