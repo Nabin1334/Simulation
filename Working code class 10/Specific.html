@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Specific Heat Capacity - Premium 3D Lab</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    :root{
+      --bg-body:#0f172a;
+      --sidebar-bg:rgba(15,23,42,.98);
+      --panel-bg:rgba(30,41,59,.75);
+      --panel-border:rgba(255,255,255,.10);
+      --primary:#3b82f6;
+      --accent:#f59e0b;
+      --text-main:#f8fafc;
+      --text-dim:#94a3b8;
+      --glass-shadow:0 8px 32px rgba(0,0,0,.37);
+      --canvas-overlay-text:#fff;
+      --hud-bg: rgba(0,0,0,.68);
+      --hud-border: rgba(255,255,255,.18);
+    }
+
+    body.light-theme{
+      --bg-body:#f1f5f9;
+      --sidebar-bg:#ffffff;
+      --panel-bg:rgba(255,255,255,.86);
+      --panel-border:rgba(0,0,0,.10);
+      --primary:#2563eb;
+      --accent:#f59e0b;
+      --text-main:#1e293b;
+      --text-dim:#64748b;
+      --glass-shadow:0 8px 32px rgba(0,0,0,.12);
+      --canvas-overlay-text:#1e293b;
+      --hud-bg: rgba(15,23,42,.78);
+      --hud-border: rgba(255,255,255,.14);
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Outfit',sans-serif;
+      background:var(--bg-body);
+      color:var(--text-main);
+      overflow:hidden;
+      height:100vh;width:100vw;
+      display:flex;
+      transition:background-color .3s ease,color .3s ease;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      width:260px;
+      background:var(--sidebar-bg);
+      border-right:1px solid var(--panel-border);
+      display:flex;flex-direction:column;
+      padding:20px;
+      z-index:10;
+      transition:background-color .3s ease,width .25s ease,padding .25s ease;
+      flex-shrink: 0;
+    }
+    .brand{
+      font-size:1.2rem;font-weight:700;color:var(--primary);
+      margin-bottom:34px;
+      display:flex;align-items:center;gap:10px;white-space:nowrap;
+    }
+    .nav-btn{
+      background:transparent;border:none;color:var(--text-dim);
+      padding:15px;text-align:left;font-size:1rem;cursor:pointer;
+      border-radius:12px;transition:all .25s ease;margin-bottom:8px;
+      font-weight:500;display:flex;align-items:center;gap:10px;
+    }
+    .nav-btn:hover{background:rgba(125,125,125,.10);color:var(--text-main)}
+    .nav-btn.active{
+      background:var(--primary);color:#fff;
+      box-shadow:0 4px 12px rgba(59,130,246,.4);
+    }
+    .nav-ico{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 22px}
+    .theme-toggle-container{margin-top:auto;border-top:1px solid var(--panel-border);padding-top:18px}
+
+    /* Compact sidebar only on simulation */
+    .sidebar.sim-compact{width:86px;padding:16px 12px;align-items:center}
+    .sidebar.sim-compact .brand{justify-content:center;gap:0;margin-bottom:18px}
+    .sidebar.sim-compact .brand-text{display:none}
+    .sidebar.sim-compact .nav-btn{justify-content:center;padding:14px;width:100%}
+    .sidebar.sim-compact .nav-text{display:none}
+    .sidebar.sim-compact .theme-toggle-container{width:100%}
+    .sidebar.sim-compact .theme-toggle-container .btn{justify-content:center}
+    .sidebar.sim-compact .theme-toggle-container .btn .btn-text{display:none}
+
+    /* MAIN */
+    .main-content{flex:1;position:relative;overflow:hidden; display:flex; flex-direction:column;}
+    .tab-panel{display:none;height:100%;width:100%;padding:0;opacity:0;transition:opacity .25s ease;overflow-y:auto}
+    .tab-panel.active{display:block;opacity:1}
+
+    /* SIM */
+    #sim-container{position:relative;width:100%;height:100%;display:flex;flex-direction:column}
+    #canvas-container{
+      flex:1;position:relative;width:100%;height:100%;
+      background: radial-gradient(circle at 78% 18%, rgba(255,255,255,0.95) 0%, rgba(190,240,255,0.92) 22%, rgba(120,210,255,0.80) 56%, rgba(90,170,240,0.60) 100%);
+    }
+    #canvas-container canvas{width:100% !important;height:100% !important;display:block}
+
+    .glass-panel{
+      background:var(--panel-bg);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid var(--panel-border);
+      border-radius:16px;
+      padding:20px;
+      box-shadow:var(--glass-shadow);
+      transition:background .3s ease,border-color .3s ease;
+    }
+
+    .sim-topbar{
+      position:absolute;
+      top:14px;left:20px;right:20px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+      z-index:7;
+      pointer-events:none;
+      flex-wrap: wrap;
+    }
+    .sim-topbar .chip{
+      pointer-events:auto;
+      background:var(--hud-bg);
+      border:1px solid var(--hud-border);
+      color:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;align-items:center;gap:10px;
+      box-shadow:0 10px 22px rgba(0,0,0,.20);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-weight:600;
+      font-size:.95rem;
+      max-width:100%;
+    }
+    .sim-topbar .chip .muted{opacity:.85;font-weight:500}
+    .sim-topbar .chip .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(245,158,11,.45);
+      flex:0 0 10px;
+    }
+    .sim-topbar .right{
+      display:flex;gap:10px;align-items:center;justify-content:flex-end;
+      pointer-events:auto;
+      flex-wrap: wrap;
+    }
+    .mini-chip{
+      background:var(--hud-bg);
+      border:1px solid var(--hud-border);
+      border-radius:14px;
+      padding:10px 12px;
+      color:#fff;
+      font-weight:600;
+      font-size:.92rem;
+      display:flex;gap:10px;align-items:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.20);
+    }
+    .mini-chip kbd{
+      font-family:inherit;
+      font-weight:700;
+      padding:3px 8px;
+      border-radius:10px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+    }
+
+    /* CONTROL CENTER */
+    .controls-overlay{
+      position:absolute;
+      top:74px;
+      left:20px;
+      width:250px;
+      max-height:85vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      color:var(--text-main);
+      z-index:6;
+      scrollbar-width: thin;
+    }
+    .controls-overlay h3{font-size:1rem;margin-bottom:12px;color:var(--accent)}
+    .control-group{margin-bottom:14px}
+    .control-group label{display:block;font-size:.85rem;color:var(--text-dim);margin-bottom:6px}
+
+    input[type="range"]{
+      width:100%;height:6px;background:rgba(128,128,128,.30);
+      border-radius:3px;appearance:none;outline:none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      appearance:none;width:18px;height:18px;background:var(--primary);
+      border: 2px solid #fff;
+      border-radius:50%;cursor:pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .btn-row{display:flex;gap:10px;margin-top:10px}
+    .btn{
+      flex:1;padding:8px;border:none;border-radius:10px;
+      background:rgba(128,128,128,.20);
+      color:var(--text-main);cursor:pointer;font-weight:700;
+      transition:.2s;font-family:'Outfit',sans-serif;font-size:.92rem;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn:hover{background:rgba(128,128,128,.38)}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:#2563eb}
+    .btn-icon{display:flex;align-items:center;justify-content:center;gap:8px}
+    .mini-toggle{width:100%;margin-bottom:12px;background:rgba(128,128,128,.18);border:1px solid var(--panel-border)}
+    .controls-collapsed .control-group,
+    .controls-collapsed .btn-row,
+    .controls-collapsed .controls-extra{display:none !important}
+
+    .temp-label{
+      position:absolute;
+      background:rgba(0,0,0,.72);
+      color:#fff;
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:12px;
+      pointer-events:none;
+      transform:translate(-50%,-50%);
+      white-space:nowrap;
+      transition:opacity .2s;
+      border:1px solid rgba(255,255,255,.18);
+      font-weight:700;
+      box-shadow:0 10px 22px rgba(0,0,0,.20);
+    }
+
+    .content-layout{padding:40px;max-width:1000px;margin:0 auto}
+    h1{font-size:2.5rem;margin-bottom:20px;color:var(--text-main)}
+    h2{font-size:1.8rem;margin:30px 0 15px;color:var(--primary)}
+    p{line-height:1.6;color:var(--text-dim);margin-bottom:15px;font-size:1.1rem}
+    .highlight-box{
+      background:rgba(59,130,246,.10);
+      border-left:4px solid var(--primary);
+      padding:20px;border-radius:0 8px 8px 0;margin:20px 0;color:var(--text-main)
+    }
+    .lab-station{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px}
+    .beaker-card{background:rgba(125,125,125,.05);border:1px solid var(--panel-border);border-radius:16px;padding:25px;text-align:center}
+    .beaker-visual{
+      width:120px;height:150px;
+      background:linear-gradient(to top, rgba(59,130,246,.3) 0%, rgba(59,130,246,.1) 70%, transparent 100%);
+      border:2px solid rgba(125,125,125,.3);border-top:none;border-radius:0 0 20px 20px;
+      margin:0 auto 20px;position:relative
+    }
+    .water-level{position:absolute;bottom:0;left:0;width:100%;background:rgba(59,130,246,.5);border-radius:0 0 18px 18px;transition:height .5s}
+    .heater-coil{width:80%;height:10px;background:#ef4444;position:absolute;bottom:-15px;left:10%;border-radius:5px;opacity:.3;transition:opacity .3s}
+    .heater-active .heater-coil{opacity:1;box-shadow:0 0 15px #ef4444}
+    .fade-in{animation:fadeIn .5s ease forwards}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* RESPONSIVE */
+    @media (max-width:900px){
+      body{flex-direction:column;height:auto;overflow-y:auto}
+      .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:10px; height: auto; flex-shrink: 0;}
+      .nav-btn{margin-bottom:0;margin-right:10px;white-space:nowrap; padding: 10px 15px;}
+
+      .controls-overlay{
+        position:static;
+        width:100%;
+        margin:0;
+        padding: 15px;
+        background: var(--panel-bg);
+        border-radius: 0;
+        border-top: 1px solid var(--panel-border);
+        max-height: none;
+      }
+
+      .lab-station{grid-template-columns:1fr}
+      #canvas-container{height:60vh; min-height: 400px;}
+      .sidebar.sim-compact{width:100%;padding:10px;align-items:stretch;height:auto;}
+      .sidebar.sim-compact .nav-text{display:inline}
+      .sim-topbar{position:static;pointer-events:auto;margin:10px 0 0; padding:0 10px}
+      .sim-topbar .chip,.mini-chip{max-width:100%; margin-bottom: 5px;}
+      .right { justify-content: flex-start; }
+
+      h1 { font-size: 2rem; }
+      .content-layout { padding: 20px; }
+    }
+
+    @media (max-width: 600px) {
+        .brand { font-size: 1rem; margin-bottom: 0; margin-right: 15px;}
+        .sidebar { align-items: center; }
+        .nav-btn { font-size: 0.9rem; padding: 8px 12px; }
+        .nav-ico { display: none; }
+        .theme-toggle-container { display: none; }
+    }
+  </style>
+</head>
+
+<body class="">
+  <nav class="sidebar">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93" stroke-opacity="0.5"/>
+        <circle cx="12" cy="12" r="4" fill="currentColor"/>
+      </svg>
+      Heat Lab 3D
+    </div>
+
+    <!-- removed inline onclick; use data-tab -->
+    <button class="nav-btn active" data-tab="simulation">Simulation</button>
+    <button class="nav-btn" data-tab="activity">Activity Mode</button>
+    <button class="nav-btn" data-tab="concept">Core Concepts</button>
+    <button class="nav-btn" data-tab="summary">Summary & Notes</button>
+
+    <div class="theme-toggle-container">
+      <button class="btn btn-icon" id="themeToggleBtn" type="button" style="width:100%">
+        <span id="theme-icon">☀</span> <span class="btn-text">Toggle UI Theme</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div id="simulation" class="tab-panel active">
+      <div id="sim-container">
+        <div id="canvas-container">
+          <div class="sim-topbar">
+            <div class="chip" id="selectedHud">
+              <span class="dot"></span>
+              <span id="hudTitle">Click an object</span>
+              <span class="muted" id="hudTemp">to pin its temperature</span>
+            </div>
+
+            <div class="right">
+              <div class="mini-chip">
+                <span>Elapsed</span> <kbd id="timerDisplayTop">00:00</kbd>
+              </div>
+              <div class="mini-chip" id="envChip">
+                <span id="envLabel">Time</span> <kbd id="envKey">12:00 PM</kbd>
+              </div>
+            </div>
+          </div>
+
+          <div id="labels-container"></div>
+        </div>
+
+        <div id="controlsPanel" class="glass-panel controls-overlay">
+            <button class="btn mini-toggle" id="toggleControlsBtn" type="button">⫶ Minimize / Expand</button>
+
+            <h3>Environment Controls</h3>
+
+            <div class="control-group">
+              <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <label>Time of Day</label>
+                <span id="timeValDisplay" style="font-size:0.9rem; font-weight:700; color:var(--primary)">12:00 PM</span>
+              </div>
+              <input type="range" id="timeSlider" min="0" max="24" step="0.1" value="12">
+              <div class="controls-extra" style="margin-top:6px;font-size:.8rem;color:var(--text-dim)">
+                Sun moves & intensity changes with time.
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Fog Density (Controls Heat)</label>
+              <input type="range" id="intensitySlider" min="0" max="100" step="1" value="20">
+              <div class="controls-extra" style="margin-top:6px;font-size:.8rem;color:var(--text-dim)">
+                Higher density = More fog = Less heat.
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Simulation Speed</label>
+              <select id="speedSelect" class="btn" style="width:100%;text-align:left;">
+                <option value="1">1x (Real-time)</option>
+                <option value="5" selected>5x (Fast)</option>
+                <option value="20">20x (Super Fast)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label>Display Options</label>
+              <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+                <input type="checkbox" id="showArrows">
+                <span style="font-size:.9rem;color:var(--text-dim)">Heat Flow Arrows</span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn" id="floodBtn" type="button" style="padding:4px 10px; font-size:0.8rem; width:auto;">
+                  <span>💡</span> Floodlights: OFF
+                </button>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="startBtn" type="button">Start</button>
+              <button class="btn" id="resetBtn" type="button">Reset</button>
+            </div>
+
+            <div style="margin-top:14px;border-top:1px solid var(--panel-border);padding-top:10px;">
+              <p style="font-size:.85rem;color:var(--accent)">
+                Elapsed: <span id="timerDisplay">00:00</span>
+              </p>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <div id="activity" class="tab-panel content-layout">
+      <h1 class="fade-in">Guided Experiment</h1>
+      <!-- CONTENT + FORMULA CORRECTION (no LaTeX needed) -->
+      <p class="fade-in">Replicating the textbook activity: understanding the relationship between mass (m), temperature change (ΔT), and heat energy (Q).</p>
+
+      <div class="glass-panel" style="margin-top:20px;">
+        <div style="display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--panel-border);padding-bottom:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="activityABtn" type="button">Activity A: Different Mass</button>
+          <button class="btn" id="activityBBtn" type="button">Activity B: Different ΔT</button>
+        </div>
+
+        <div id="activityContent"></div>
+      </div>
+    </div>
+
+    <div id="concept" class="tab-panel content-layout">
+      <h1 class="fade-in">Specific Heat Capacity Concept</h1>
+      <!-- CONTENT + FORMULA CORRECTION -->
+      <div class="highlight-box fade-in">
+        <strong>Definition:</strong> Specific heat capacity (c) is the amount of heat energy required to raise the temperature of 1 kg of a substance by 1°C (or 1 K).
+      </div>
+      <h2 class="fade-in">The Formula</h2>
+      <div class="glass-panel fade-in" style="text-align:center;font-size:1.5rem;color:var(--accent);margin:20px 0; overflow-x: auto;">
+        Q = m × c × ΔT
+      </div>
+      <p class="fade-in">Where:</p>
+      <ul style="list-style:none;color:var(--text-dim);padding-left:20px;" class="fade-in">
+        <li><strong style="color:var(--text-main)">Q</strong> = Heat energy (J)</li>
+        <li><strong style="color:var(--text-main)">m</strong> = Mass (kg)</li>
+        <li><strong style="color:var(--text-main)">c</strong> = Specific heat capacity (J/(kg·°C))</li>
+        <li><strong style="color:var(--text-main)">ΔT</strong> = Temperature change (°C) = (Final − Initial)</li>
+      </ul>
+    </div>
+
+    <div id="summary" class="tab-panel content-layout">
+      <h1>Summary & Notes</h1>
+      <div class="glass-panel fade-in">
+        <h3 style="color:var(--primary);margin-bottom:10px;">Key Takeaways</h3>
+        <!-- CONTENT + FORMULA CORRECTION -->
+        <ul style="margin-left:20px;line-height:1.8;color:var(--text-dim);">
+          <li><strong>Water</strong> has a high specific heat capacity (≈ 4200 J/(kg·°C)), meaning it heats up slowly.</li>
+          <li><strong>Metals</strong> usually have lower specific heat capacity, meaning they heat up quickly.</li>
+          <li>Darker objects absorb more radiation (heat) than lighter ones.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ===========================
+       1) UI THEME + NAV
+    =========================== */
+    function toggleUITheme(){
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      document.getElementById('theme-icon').textContent = isLight ? '☾' : '☀';
+    }
+
+    function toggleControlsMini(){
+      document.getElementById('controlsPanel').classList.toggle('controls-collapsed');
+    }
+
+    function setupNavIcons(){
+      const btns = document.querySelectorAll('.nav-btn');
+      const icons = ['🧪','🧭','📘','📝'];
+      btns.forEach((b,i)=>{
+        if(b.querySelector('.nav-ico')) return;
+        const raw = b.textContent;
+        b.textContent = '';
+        const ico = document.createElement('span');
+        ico.className = 'nav-ico';
+        ico.textContent = icons[i] || '•';
+        const txt = document.createElement('span');
+        txt.className = 'nav-text';
+        txt.textContent = raw;
+        b.appendChild(ico);
+        b.appendChild(txt);
+      });
+
+      const brand = document.querySelector('.brand');
+      if(brand && !brand.querySelector('.brand-text')){
+        const nodes = Array.from(brand.childNodes);
+        const t = nodes.find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length);
+        if(t){
+          const span = document.createElement('span');
+          span.className = 'brand-text';
+          span.textContent = t.textContent.trim();
+          brand.removeChild(t);
+          brand.appendChild(span);
+        }
+      }
+    }
+
+    function setSidebarCompact(on){
+      // Only compact on desktop
+      if(window.innerWidth < 900) return;
+      const sb = document.querySelector('.sidebar');
+      if(!sb) return;
+      sb.classList.toggle('sim-compact', !!on);
+      setTimeout(()=>onWindowResize(), 280);
+    }
+
+    function switchTab(tabId){
+      document.querySelectorAll('.tab-panel').forEach(el=>el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+
+      const btns = document.querySelectorAll('.nav-btn');
+      const map = {simulation:0, activity:1, concept:2, summary:3};
+      if(map[tabId] !== undefined) btns[map[tabId]].classList.add('active');
+
+      setSidebarCompact(tabId === 'simulation');
+      if(tabId === 'simulation') onWindowResize();
+    }
+
+    /* ===========================
+       2) THREE.JS SCENE
+    =========================== */
+    let scene, camera, renderer, controls, sunLight, ambientLight, floorMesh;
+    let objects = [];
+    let isRunning = false;
+    let simTime = 0;
+    let speed = 5;
+
+    // Time & Sky Variables
+    let currentTimeOfDay = 12.0; // 0 to 24
+    let sunMesh, sunGlow, moonMesh, moonGlow;
+    let sunCloudGroup;
+    let cloudClusters = [];
+    let skyDome;
+
+    // Floodlights
+    let floodlightsOn = false;
+    let floodLights = [];
+    let floodLightBulbs = [];
+
+    // selection + raycast
+    let raycaster, mouse;
+    let selectedIndex = -1;
+
+    // heat arrows
+    let heatArrows = [];
+
+    const ITEM_SCALE = 2.5;
+
+    // Updated with specific Max Temps
+    const MAT_DATA = [
+      { name:"Steel Plate",  c:450,  mass:1.0, color:0x888899, metalness:0.85, roughness:0.18, absorption:0.60, type:'box', dims:[1,0.1,1], pos:[-8.0, 0, -5.0], maxTemp: 88 },
+      { name:"Ceramic Tile", c:850,  mass:0.8, color:0xf7f7ff, metalness:0.05, roughness:0.75, absorption:0.20, type:'box', dims:[1,0.1,1], pos:[0, 0, -5.0], maxTemp: 75 },
+      { name:"Sand Pile",    c:830,  mass:1.2, color:0xbda07a, metalness:0.0,  roughness:1.00, absorption:0.75, type:'cone',dims:[0.6,0.5,32], pos:[8.0, 0.25, -5.0], maxTemp: 85 },
+      { name:"Dark Soil",    c:800,  mass:1.2, color:0x2a1a16, metalness:0.0,  roughness:1.00, absorption:0.95, type:'cone',dims:[0.6,0.5,32], pos:[-4.5, 0.25, 5.0], maxTemp: 80 },
+      { name:"Water (Cup)",  c:4200, mass:0.5, color:0x22aaff, metalness:0.0,  roughness:0.08, absorption:0.30, type:'cyl', dims:[0.4,0.5,32], pos:[4.5, 0.25, 5.0], transparent:true, maxTemp: 60 }
+    ];
+
+    function roundRect(ctx,x,y,w,h,r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    // High roughness/contrast floor procedural texture
+    function createStoneFloorTextures(){
+      const size = 1024;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Base color: Dark Slate Grey (Rougher look)
+      ctx.fillStyle = '#1e2430';
+      ctx.fillRect(0,0,size,size);
+
+      const rows = 8, cols = 8;
+      const tileW = size / cols;
+      const tileH = size / rows;
+      const gap = 16;
+
+      for(let y=0; y<rows; y++){
+        for(let x=0; x<cols; x++){
+          const shade = 50 + Math.random() * 30;
+
+          const px = x*tileW + gap/2;
+          const py = y*tileH + gap/2;
+          const pw = tileW - gap;
+          const ph = tileH - gap;
+
+          // Tile base
+          ctx.fillStyle = `rgb(${shade}, ${shade+5}, ${shade+10})`;
+          roundRect(ctx, px, py, pw, ph, 8);
+          ctx.fill();
+
+          // Noise/Roughness overlay per tile
+          for(let k=0; k<80; k++){
+              ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)';
+              const nx = px + Math.random()*pw;
+              const ny = py + Math.random()*ph;
+              const nw = 2 + Math.random()*4;
+              ctx.fillRect(nx, ny, nw, nw);
+          }
+        }
+      }
+
+      const colorTex = new THREE.CanvasTexture(canvas);
+      colorTex.wrapS = THREE.RepeatWrapping;
+      colorTex.wrapT = THREE.RepeatWrapping;
+      colorTex.repeat.set(4, 4);
+      colorTex.anisotropy = 16;
+
+      return { colorTex };
+    }
+
+    function createGranularTexture(colorHex) {
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const c = new THREE.Color(colorHex);
+      const rBase = Math.floor(c.r * 255);
+      const gBase = Math.floor(c.g * 255);
+      const bBase = Math.floor(c.b * 255);
+
+      ctx.fillStyle = `rgb(${rBase}, ${gBase}, ${bBase})`;
+      ctx.fillRect(0, 0, size, size);
+
+      for(let i = 0; i < 40000; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const shade = Math.random();
+        ctx.fillStyle = shade > 0.5 ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+        ctx.fillRect(x, y, 1.5, 1.5);
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    function createCloudTexture(){
+      const size = 256;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,size,size);
+
+      const drawPuff = (cx, cy, r) => {
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, 'rgba(255,255,255,0.8)');
+        g.addColorStop(0.4, 'rgba(255,255,255,0.4)');
+        g.addColorStop(1, 'rgba(255,255,255,0.0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fill();
+      };
+
+      drawPuff(128, 128, 90);
+      drawPuff(90, 110, 60);
+      drawPuff(166, 110, 60);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      return tex;
+    }
+
+    function createGlowSprite(colorA='rgba(255,220,120,1)', colorB='rgba(255,220,120,0)'){
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(128,128,0,128,128,128);
+      g.addColorStop(0, colorA);
+      g.addColorStop(0.25, 'rgba(255,255,255,0.45)');
+      g.addColorStop(1, colorB);
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,256,256);
+      const tex = new THREE.CanvasTexture(c);
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+      const spr = new THREE.Sprite(mat);
+      spr.scale.set(6,6,1);
+      return spr;
+    }
+
+    function createWoodTexture(){
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#8B5A2B';
+      ctx.fillRect(0, 0, size, size);
+
+      ctx.strokeStyle = '#654321';
+      ctx.lineWidth = 2;
+      for(let i=0; i<60; i++){
+        ctx.beginPath();
+        const startY = Math.random() * size;
+        ctx.moveTo(0, startY);
+        ctx.bezierCurveTo(size/3, startY + (Math.random()-0.5)*100, size*2/3, startY + (Math.random()-0.5)*100, size, startY);
+        ctx.globalAlpha = 0.3;
+        ctx.stroke();
+      }
+
+      for(let i=0; i<10000; i++){
+        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.05)';
+        ctx.fillRect(Math.random()*size, Math.random()*size, 2, 2);
+      }
+
+      const tex = new THREE.CanvasTexture(canvas);
+      return tex;
+    }
+
+    function init3D(){
+      const container = document.getElementById('canvas-container');
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 200);
+      camera.position.set(-20, 18, 30);
+
+      renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.maxPolarAngle = Math.PI/2 - 0.05;
+      controls.minDistance = 5;
+      controls.maxDistance = 35;
+
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+      scene.add(ambientLight);
+
+      sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      sunLight.position.set(10, 20, 10);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.bias = -0.0001;
+      scene.add(sunLight);
+
+      const skyGeo = new THREE.SphereGeometry(120, 32, 32);
+      const skyMat = new THREE.MeshBasicMaterial({ color: 0x87ceeb, side: THREE.BackSide });
+      skyDome = new THREE.Mesh(skyGeo, skyMat);
+      scene.add(skyDome);
+
+      const { colorTex } = createStoneFloorTextures();
+      const floorGeo = new THREE.PlaneGeometry(40, 40);
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: colorTex,
+        bumpMap: colorTex,
+        bumpScale: 0.15,
+        roughness: 1.0,
+        metalness: 0.0
+      });
+      floorMesh = new THREE.Mesh(floorGeo, floorMat);
+      floorMesh.rotation.x = -Math.PI/2;
+      floorMesh.receiveShadow = true;
+      scene.add(floorMesh);
+
+      createSkyObjects();
+      createObjects();
+      createHeatArrows();
+      createFloodlights();
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+      renderer.domElement.addEventListener('pointerdown', onPickObject, { passive:true });
+
+      updateTimeFromSlider(12);
+
+      const ro = new ResizeObserver(()=>onWindowResize());
+      ro.observe(container);
+
+      animate();
+    }
+
+    function createFloodlights(){
+      const positions = [
+        [-18, 0, -18],
+        [ 18, 0, -18],
+        [ 0,  0,  19]
+      ];
+
+      positions.forEach(pos => {
+        const poleGeo = new THREE.CylinderGeometry(0.2, 0.3, 14);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.6 });
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.set(pos[0], 7, pos[2]);
+        scene.add(pole);
+
+        const jointGeo = new THREE.SphereGeometry(0.4);
+        const joint = new THREE.Mesh(jointGeo, poleMat);
+        joint.position.set(0, 7, 0);
+        pole.add(joint);
+
+        const headGeo = new THREE.BoxGeometry(2, 1.5, 1);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+        const head = new THREE.Mesh(headGeo, headMat);
+        head.position.set(0, 0, 0.5);
+        joint.add(head);
+
+        const bulbGeo = new THREE.PlaneGeometry(1.6, 1.1);
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.set(0, 0, 0.51);
+        head.add(bulb);
+        floodLightBulbs.push(bulbMat);
+
+        const light = new THREE.SpotLight(0xffffee, 0);
+        light.angle = Math.PI / 2.2;
+        light.penumbra = 1.0;
+        light.decay = 1.5;
+        light.distance = 60;
+        light.position.set(0, 0, 0.2);
+        light.target.position.set(0, -20, 20);
+        head.add(light);
+        head.add(light.target);
+
+        joint.lookAt(0, 0, 0);
+
+        floodLights.push(light);
+      });
+    }
+
+    function toggleFloodlights(){
+      floodlightsOn = !floodlightsOn;
+      const btn = document.getElementById('floodBtn');
+      btn.innerHTML = floodlightsOn ? "<span>💡</span> Floodlights: ON" : "<span>💡</span> Floodlights: OFF";
+      if(floodlightsOn) btn.classList.add('btn-primary');
+      else btn.classList.remove('btn-primary');
+
+      floodLights.forEach(l => l.intensity = floodlightsOn ? 5.0 : 0);
+      floodLightBulbs.forEach(mat => {
+        if(floodlightsOn) mat.color.setHex(0xffffff);
+        else mat.color.setHex(0x222222);
+      });
+    }
+
+    function createSkyObjects(){
+      const sunGeo = new THREE.SphereGeometry(3, 32, 32);
+      const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      sunMesh = new THREE.Mesh(sunGeo, sunMat);
+      scene.add(sunMesh);
+
+      sunGlow = createGlowSprite('rgba(255,200,50,1)','rgba(255,200,50,0)');
+      sunGlow.scale.set(20,20,1);
+      scene.add(sunGlow);
+
+      const moonGeo = new THREE.SphereGeometry(1.5, 32, 32);
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xeeeeff });
+      moonMesh = new THREE.Mesh(moonGeo, moonMat);
+      scene.add(moonMesh);
+
+      moonGlow = createGlowSprite('rgba(200,220,255,0.8)','rgba(200,220,255,0)');
+      moonGlow.scale.set(12,12,1);
+      scene.add(moonGlow);
+
+      // FOG LAYER
+      sunCloudGroup = new THREE.Group();
+      scene.add(sunCloudGroup);
+
+      const baseTex = createCloudTexture();
+
+      for(let i=0; i<60; i++){
+          const mat = new THREE.SpriteMaterial({
+             map: baseTex,
+             transparent: true,
+             opacity: 0.0,
+             depthWrite: false,
+             color: 0xeeeeee
+          });
+          const sprite = new THREE.Sprite(mat);
+          sprite.position.set(
+            (Math.random()-0.5) * 120,
+            9 + Math.random() * 5,
+            (Math.random()-0.5) * 120
+          );
+          const s = 15 + Math.random() * 15;
+          sprite.scale.set(s, s*0.6, 1);
+
+          sunCloudGroup.add(sprite);
+
+          cloudClusters.push({
+             sprite: sprite,
+             driftSpeed: 0.005 + Math.random()*0.01
+          });
+      }
+    }
+
+    function createObjects(){
+      const boxGeo = new THREE.BoxGeometry(1*ITEM_SCALE, 0.1*ITEM_SCALE, 1*ITEM_SCALE, 2, 1, 2);
+      const coneGeo = new THREE.ConeGeometry(0.6*ITEM_SCALE, 0.6*ITEM_SCALE, 80, 1);
+      const cylGeo = new THREE.CylinderGeometry(0.4*ITEM_SCALE, 0.4*ITEM_SCALE, 0.6*ITEM_SCALE, 40, 1, false);
+
+      const labelContainer = document.getElementById('labels-container');
+      labelContainer.innerHTML = '';
+      objects = [];
+
+      const woodTex = createWoodTexture();
+      const woodMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.9, metalness: 0 });
+
+      function approxTopArea(d){
+        const s2 = ITEM_SCALE * ITEM_SCALE;
+        if(d.type === 'box') return Math.max(0.2, (d.dims[0] * d.dims[2]) * s2);
+        if(d.type === 'cone' || d.type === 'cyl'){
+          const r = d.dims[0] * ITEM_SCALE;
+          return Math.max(0.2, Math.PI * r * r);
+        }
+        return 1.0 * s2;
+      }
+
+      MAT_DATA.forEach((data) => {
+        const baseGeo = new THREE.CylinderGeometry(1.2 * ITEM_SCALE, 1.3 * ITEM_SCALE, 0.1 * ITEM_SCALE, 32);
+        const baseMesh = new THREE.Mesh(baseGeo, woodMat);
+        baseMesh.position.set(data.pos[0], 0.05 * ITEM_SCALE, data.pos[2]);
+        baseMesh.receiveShadow = true;
+        baseMesh.castShadow = true;
+        scene.add(baseMesh);
+
+        let mesh;
+        let mat;
+
+        if(data.name.includes('Water')){
+          const glassGeo = new THREE.CylinderGeometry(0.4*ITEM_SCALE, 0.4*ITEM_SCALE, 0.6*ITEM_SCALE, 32);
+          const glassMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff, metalness: 0, roughness: 0,
+            transmission: 0.95, transparent: true, thickness: 0.1,
+          });
+          mesh = new THREE.Mesh(glassGeo, glassMat);
+
+          const liquidGeo = new THREE.CylinderGeometry(0.38*ITEM_SCALE, 0.38*ITEM_SCALE, 0.5*ITEM_SCALE, 32);
+          const liquidMat = new THREE.MeshPhysicalMaterial({
+            color: 0x0088ff,
+            metalness: 0.1,
+            roughness: 0.2,
+            transmission: 0.2,
+            thickness: 0.1,
+            ior: 1.33,
+            transparent: true,
+            opacity: 0.85
+          });
+          const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
+          liquidMesh.position.y = -0.04 * ITEM_SCALE;
+          mesh.add(liquidMesh);
+          mesh.castShadow = true;
+        } else {
+          let geo = (data.type === 'box') ? boxGeo : (data.type === 'cone') ? coneGeo : cylGeo;
+
+          if(data.name.includes('Steel')){
+             mat = new THREE.MeshPhysicalMaterial({
+               color: data.color, roughness: data.roughness, metalness: data.metalness,
+               clearcoat: 0.65, clearcoatRoughness: 0.20, reflectivity: 0.6
+             });
+          } else if(data.name === 'Sand Pile' || data.name === 'Dark Soil'){
+             const grainTex = createGranularTexture(data.color);
+             mat = new THREE.MeshStandardMaterial({
+               map: grainTex, bumpMap: grainTex, bumpScale: 0.12, roughness: 1.0, metalness: 0.0
+             });
+          } else {
+             mat = new THREE.MeshStandardMaterial({
+               color: data.color, roughness: data.roughness, metalness: data.metalness,
+               transparent: !!data.transparent, opacity: data.transparent ? 0.7 : 1.0
+             });
+          }
+          if(!mat.emissive) mat.emissive = new THREE.Color(0x000000);
+          mesh = new THREE.Mesh(geo, mat);
+        }
+
+        mesh.position.set(...data.pos);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        const baseHeight = 0.1 * ITEM_SCALE;
+        if(data.type === 'cone') mesh.position.y = (0.3 * ITEM_SCALE) + baseHeight;
+        if(data.type === 'cyl')  mesh.position.y = (0.3 * ITEM_SCALE) + baseHeight;
+        if(data.type === 'box')  mesh.position.y = (0.05 * ITEM_SCALE) + baseHeight;
+
+        scene.add(mesh);
+
+        const div = document.createElement('div');
+        div.className = 'temp-label';
+        div.textContent = `${data.name}: 20°C`;
+        labelContainer.appendChild(div);
+
+        objects.push({
+          mesh,
+          labelElement: div,
+          data: { ...data, temp: 20.0, area: approxTopArea(data) }
+        });
+      });
+
+      selectObject(0);
+    }
+
+    function updateTimeFromSlider(val){
+      currentTimeOfDay = parseFloat(val);
+      let hours = Math.floor(currentTimeOfDay);
+      let minutes = Math.floor((currentTimeOfDay - hours) * 60);
+      let ampm = hours >= 12 ? 'PM' : 'AM';
+      let dispHour = hours % 12;
+      dispHour = dispHour ? dispHour : 12;
+      let timeStr = `${dispHour}:${minutes.toString().padStart(2,'0')} ${ampm}`;
+
+      document.getElementById('timeValDisplay').innerText = timeStr;
+      document.getElementById('envKey').innerText = timeStr;
+
+      updateEnvironment();
+    }
+
+    function updateEnvironment(){
+      if(!sunMesh || !skyDome) return;
+
+      const time = currentTimeOfDay;
+      const angle = ((time - 6) / 12) * Math.PI;
+      const radius = 60;
+
+      let sx = Math.cos(angle) * -radius;
+      let sy = Math.sin(angle) * radius;
+
+      const rawSlider = parseFloat(document.getElementById('intensitySlider').value);
+      const densityFactor = rawSlider / 100;
+
+      if(time < 6 || time > 18){
+        sunMesh.visible = false;
+        sunGlow.visible = false;
+
+        const moonAngle = angle + Math.PI;
+        const mx = Math.cos(moonAngle) * -radius;
+        const my = Math.sin(moonAngle) * radius;
+
+        moonMesh.position.set(mx, my, -20);
+        moonGlow.position.copy(moonMesh.position);
+        moonMesh.visible = true;
+        moonGlow.visible = true;
+
+        sunLight.position.set(mx, my, 10);
+        sunLight.color.setHex(0xaaaaff);
+        sunLight.intensity = 0.35;
+
+        ambientLight.intensity = 0.25;
+        ambientLight.color.setHex(0x223355);
+        scene.fog = new THREE.FogExp2(0x050510, 0.015);
+        renderer.setClearColor(0x050510);
+        skyDome.material.color.setHex(0x050510);
+
+      } else {
+        sunMesh.visible = true;
+        sunGlow.visible = true;
+        sunMesh.position.set(sx, sy, -20);
+        sunGlow.position.copy(sunMesh.position);
+
+        moonMesh.visible = false;
+        moonGlow.visible = false;
+
+        sunLight.position.set(sx, sy, 10);
+
+        const heightFactor = Math.max(0, Math.sin(angle));
+
+        const sunColor = new THREE.Color().setHSL(0.1, 1.0, 0.5 + heightFactor * 0.5);
+        sunMesh.material.color.copy(sunColor);
+        sunLight.color.copy(sunColor);
+
+        const baseIntensity = 1.5 * heightFactor;
+
+        const lightMultiplier = 1.0 - (densityFactor * 0.9);
+        sunLight.intensity = Math.max(0.1, baseIntensity * lightMultiplier);
+
+        ambientLight.intensity = 0.3 + (0.4 * heightFactor);
+        ambientLight.color.setHex(0xffffff);
+
+        const skyColor = new THREE.Color().setHSL(0.6, 0.5, 0.1 + heightFactor * 0.5);
+        skyDome.material.color.copy(skyColor);
+        scene.fog = new THREE.FogExp2(skyColor, 0.008);
+        renderer.setClearColor(skyColor);
+      }
+
+      if(sunCloudGroup){
+         const targetOp = Math.max(0, (densityFactor * 0.6) - 0.05);
+         cloudClusters.forEach(c => {
+             c.sprite.material.opacity = targetOp;
+         });
+         sunCloudGroup.visible = targetOp > 0.01;
+      }
+
+      updateHeatArrows();
+    }
+
+    function createHeatArrows(){
+      heatArrows.forEach(a => scene.remove(a));
+      heatArrows = [];
+
+      const sunPos = new THREE.Vector3();
+      if(sunMesh) sunMesh.getWorldPosition(sunPos);
+
+      objects.forEach((obj)=>{
+        const origin = sunPos.clone();
+        const dir = new THREE.Vector3().subVectors(obj.mesh.position, origin).normalize();
+        const len = 5;
+        const arrow = new THREE.ArrowHelper(dir, origin, len, 0xf59e0b, 0.35, 0.25);
+        arrow.visible = false;
+        scene.add(arrow);
+        heatArrows.push(arrow);
+      });
+    }
+
+    function updateHeatArrows(){
+      if(!heatArrows.length || !sunMesh || !objects.length) return;
+      const show = document.getElementById('showArrows')?.checked;
+
+      const isDay = currentTimeOfDay >= 6 && currentTimeOfDay <= 18;
+
+      heatArrows.forEach((arrow, i)=>{
+        const obj = objects[i];
+        if(!obj) return;
+
+        if(!isDay || !show){
+          arrow.visible = false;
+          return;
+        }
+
+        arrow.visible = true;
+
+        const sunPos = sunMesh.position.clone();
+        const objPos = obj.mesh.position.clone();
+        const dir = new THREE.Vector3().subVectors(objPos, sunPos).normalize();
+        const dist = sunPos.distanceTo(objPos);
+
+        arrow.position.copy(sunPos);
+        arrow.setDirection(dir);
+        arrow.setLength(dist - 1, 0.5, 0.4);
+      });
+    }
+
+    function updateTimerUI(){
+      const minutes = Math.floor(simTime / 60);
+      const seconds = Math.floor(simTime % 60);
+      const s = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+      document.getElementById('timerDisplay').textContent = s;
+      document.getElementById('timerDisplayTop').textContent = s;
+    }
+
+    function updatePhysics(dt){
+      const rawSlider = parseFloat(document.getElementById('intensitySlider').value);
+      const densityFactor = rawSlider / 100;
+
+      simTime += dt * speed;
+      updateTimerUI();
+
+      cloudClusters.forEach(c => {
+         c.sprite.position.x += c.driftSpeed;
+         if(c.sprite.position.x > 60) c.sprite.position.x = -60;
+      });
+
+      const amb = 20.0;
+
+      const n = 1.0 - (densityFactor * 0.95);
+
+      let solarFactor = 0;
+      if(currentTimeOfDay > 6 && currentTimeOfDay < 18){
+         const angle = ((currentTimeOfDay - 6) / 12) * Math.PI;
+         solarFactor = Math.sin(angle);
+      }
+
+      const baseSolar = 1200;
+      const kCool = 0.018;
+
+      const heatRateMultiplier = 0.15;
+
+      objects.forEach((obj)=>{
+        const heatIn = baseSolar * n * solarFactor * obj.data.absorption * obj.data.area;
+
+        const dT_heat = (heatIn * dt * speed * heatRateMultiplier) / (obj.data.mass * obj.data.c);
+        const dT_cool = -kCool * (obj.data.temp - amb) * (dt * speed * heatRateMultiplier);
+
+        obj.data.temp += (dT_heat + dT_cool);
+
+        obj.data.temp = Math.max(amb - 10, Math.min(obj.data.temp, obj.data.maxTemp));
+
+        obj.labelElement.textContent = `${obj.data.name}: ${obj.data.temp.toFixed(1)}°C`;
+      });
+
+      refreshSelectedHud();
+    }
+
+    function updateLabelPosition(obj){
+      const vector = new THREE.Vector3();
+      obj.mesh.getWorldPosition(vector);
+      vector.y += 0.85 * ITEM_SCALE;
+      vector.project(camera);
+
+      const container = document.getElementById('canvas-container');
+      const x = (vector.x * .5 + .5) * container.clientWidth;
+      const y = (-(vector.y * .5) + .5) * container.clientHeight;
+
+      obj.labelElement.style.left = `${x}px`;
+      obj.labelElement.style.top  = `${y}px`;
+      obj.labelElement.style.opacity = (vector.z > 1) ? 0 : 1;
+    }
+
+    function animate(){
+      requestAnimationFrame(animate);
+      controls.update();
+
+      if(isRunning){
+        updatePhysics(0.016);
+        updateEnvironment();
+      }
+
+      objects.forEach(obj => updateLabelPosition(obj));
+
+      renderer.render(scene, camera);
+    }
+
+    function selectObject(index){
+      if(index < 0 || index >= objects.length) return;
+
+      if(selectedIndex >= 0 && objects[selectedIndex]){
+         const oldObj = objects[selectedIndex];
+         if(oldObj.data.name.includes('Water')){
+            oldObj.mesh.children[0].material.emissiveIntensity = 1.0;
+         } else {
+            oldObj.mesh.material.emissiveIntensity = 1.0;
+         }
+      }
+
+      selectedIndex = index;
+
+      if(objects[selectedIndex]){
+         const newObj = objects[selectedIndex];
+         if(newObj.data.name.includes('Water')){
+            newObj.mesh.children[0].material.emissiveIntensity = 1.35;
+         } else {
+            newObj.mesh.material.emissiveIntensity = 1.35;
+         }
+      }
+
+      refreshSelectedHud();
+    }
+
+    function refreshSelectedHud(){
+      const title = document.getElementById('hudTitle');
+      const temp  = document.getElementById('hudTemp');
+
+      if(selectedIndex < 0 || !objects[selectedIndex]){
+        title.textContent = "Click an object";
+        temp.textContent  = "to pin its temperature";
+        return;
+      }
+      const o = objects[selectedIndex];
+      title.textContent = o.data.name;
+      temp.textContent  = `Temp: ${o.data.temp.toFixed(1)}°C`;
+    }
+
+    function onPickObject(e){
+      if(!renderer || !camera || !raycaster) return;
+
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouse.set(x, y);
+
+      raycaster.setFromCamera(mouse, camera);
+      const meshes = objects.map(o => o.mesh);
+      const hits = raycaster.intersectObjects(meshes, true);
+
+      if(hits && hits.length){
+        let hitObj = hits[0].object;
+        while(hitObj.parent && hitObj.parent.type !== 'Scene'){
+           if(meshes.includes(hitObj)) break;
+           hitObj = hitObj.parent;
+        }
+
+        const idx = meshes.indexOf(hitObj);
+        if(idx !== -1) selectObject(idx);
+      }
+    }
+
+    function toggleSim(){
+      const btn = document.getElementById('startBtn');
+      isRunning = !isRunning;
+      btn.textContent = isRunning ? "Pause" : "Resume";
+      btn.classList.toggle('btn-primary');
+    }
+
+    function resetSim(){
+      isRunning = false;
+      simTime = 0;
+      document.getElementById('startBtn').textContent = "Start";
+      updateTimerUI();
+
+      objects.forEach(obj=>{
+        obj.data.temp = 20.0;
+        if(obj.data.name.includes('Water')){
+           obj.mesh.children[0].material.emissive.setHex(0x000000);
+           obj.mesh.children[0].material.emissiveIntensity = 1.0;
+        } else {
+           obj.mesh.material.emissive.setHex(0x000000);
+           obj.mesh.material.emissiveIntensity = 1.0;
+        }
+      });
+
+      updateTimeFromSlider(12);
+      document.getElementById('timeSlider').value = 12;
+
+      selectObject(0);
+      updateHeatArrows();
+    }
+
+    window.addEventListener('resize', onWindowResize, false);
+
+    function onWindowResize(){
+      const container = document.getElementById('canvas-container');
+      if(camera && renderer && container){
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if(w < 10 || h < 10) return;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h, false);
+      }
+    }
+
+    /* ===========================
+       8) ACTIVITY LOGIC
+       (UPDATED: no inline onclick inside injected HTML)
+    =========================== */
+    const activityContent = document.getElementById('activityContent');
+
+    const activityA_HTML = `
+      <h3>Experiment A: Same Heat (Q), Different Mass (m)</h3>
+      <p>Two beakers of water start at 20°C. We apply the same energy to both: 500 W for 10 s → Q = 5000 J.</p>
+      <div class="lab-station">
+        <div class="beaker-card" id="beaker1">
+          <h4>Beaker 1 (200g)</h4>
+          <div class="beaker-visual"><div class="water-level" style="height: 40%"></div><div class="heater-coil"></div></div>
+          <div class="data-readout">Temp: <span id="t1">20</span>°C</div>
+          <div class="data-readout">Energy: <span id="q1">0</span> J</div>
+        </div>
+        <div class="beaker-card" id="beaker2">
+          <h4>Beaker 2 (400g)</h4>
+          <div class="beaker-visual"><div class="water-level" style="height: 70%"></div><div class="heater-coil"></div></div>
+          <div class="data-readout">Temp: <span id="t2">20</span>°C</div>
+          <div class="data-readout">Energy: <span id="q2">0</span> J</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;text-align:center;">
+        <button class="btn btn-primary" id="heatBothBtn" type="button">Heat Both!</button>
+        <div id="resultA" class="highlight-box fade-in" style="display:none;margin-top:20px;"></div>
+      </div>
+    `;
+
+    const activityB_HTML = `
+      <h3>Experiment B: Same Mass (m), Different Temperature Change (ΔT)</h3>
+      <p>We heat 400g (0.4 kg) of water. Compare the energy needed for different temperature rises.</p>
+      <div class="lab-station">
+        <div class="beaker-card">
+          <h4>Target: Raise by 10°C</h4>
+          <div class="beaker-visual"><div class="water-level" style="height: 60%"></div></div>
+          <p>Calculated Q = <span id="q_b1">?</span> J</p>
+          <button class="btn btn-primary" id="heat10Btn" type="button">Heat</button>
+        </div>
+        <div class="beaker-card">
+          <h4>Target: Raise by 20°C</h4>
+          <div class="beaker-visual"><div class="water-level" style="height: 60%"></div></div>
+          <p>Calculated Q = <span id="q_b2">?</span> J</p>
+          <button class="btn btn-primary" id="heat20Btn" type="button">Heat</button>
+        </div>
+      </div>
+      <div id="resultB" class="highlight-box fade-in" style="display:none;">
+        <strong>Conclusion:</strong> If you double the temperature change (ΔT), you need double the heat energy (Q). So, Q ∝ ΔT (when m and c are constant).
+      </div>
+    `;
+
+    function setActivityMode(mode){
+      activityContent.innerHTML = (mode === 'A') ? activityA_HTML : activityB_HTML;
+
+      // attach listeners for newly injected buttons
+      if(mode === 'A'){
+        const heatBtn = document.getElementById('heatBothBtn');
+        if(heatBtn) heatBtn.addEventListener('click', runActivityA);
+      } else {
+        const b10 = document.getElementById('heat10Btn');
+        const b20 = document.getElementById('heat20Btn');
+        if(b10) b10.addEventListener('click', ()=>calcB(10, 'q_b1'));
+        if(b20) b20.addEventListener('click', ()=>calcB(20, 'q_b2'));
+      }
+    }
+
+    function runActivityA(){
+      const Q = 5000;
+      const m1 = 0.2, m2 = 0.4, c = 4200;
+      const dt1 = Q / (m1 * c);
+      const dt2 = Q / (m2 * c);
+
+      document.querySelectorAll('.heater-coil').forEach(el => el.parentElement.parentElement.classList.add('heater-active'));
+
+      setTimeout(()=>{
+        document.getElementById('t1').innerText = (20 + dt1).toFixed(1);
+        document.getElementById('q1').innerText = Q;
+        document.getElementById('t2').innerText = (20 + dt2).toFixed(1);
+        document.getElementById('q2').innerText = Q;
+
+        const resDiv = document.getElementById('resultA');
+        resDiv.style.display = 'block';
+        resDiv.innerHTML = `<strong>Conclusion:</strong> With the same energy (Q), the smaller mass heats more: Beaker 1 rose by ${dt1.toFixed(1)}°C, while Beaker 2 rose by ${dt2.toFixed(1)}°C.`;
+
+        document.querySelectorAll('.heater-coil').forEach(el => el.parentElement.parentElement.classList.remove('heater-active'));
+      }, 800);
+    }
+
+    let countB = 0;
+    function calcB(dt, domId){
+      const m = 0.4, c = 4200;
+      const Q = m * c * dt;
+      document.getElementById(domId).innerText = Q.toLocaleString();
+      countB++;
+      if(countB >= 2){
+        document.getElementById('resultB').style.display = 'block';
+        countB = 0;
+      }
+    }
+
+    /* ===========================
+       9) BIND ALL UI EVENTS (NO INLINE onclick)
+    =========================== */
+    function bindUIEvents(){
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if(themeBtn) themeBtn.addEventListener('click', toggleUITheme);
+
+      // Controls minimize
+      const miniBtn = document.getElementById('toggleControlsBtn');
+      if(miniBtn) miniBtn.addEventListener('click', toggleControlsMini);
+
+      // Nav tab switching
+      document.querySelectorAll('.nav-btn[data-tab]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const tab = btn.getAttribute('data-tab');
+          switchTab(tab);
+        });
+      });
+
+      // Time slider
+      const timeSlider = document.getElementById('timeSlider');
+      if(timeSlider) timeSlider.addEventListener('input', (e)=> updateTimeFromSlider(e.target.value));
+
+      // Fog slider updates environment too
+      const fogSlider = document.getElementById('intensitySlider');
+      if(fogSlider) fogSlider.addEventListener('input', ()=> updateEnvironment());
+
+      // Speed select
+      const speedSelect = document.getElementById('speedSelect');
+      if(speedSelect) speedSelect.addEventListener('change', (e)=> speed = parseInt(e.target.value, 10));
+
+      // Heat arrows toggle
+      const arrows = document.getElementById('showArrows');
+      if(arrows) arrows.addEventListener('change', ()=> updateHeatArrows());
+
+      // Floodlights
+      const floodBtn = document.getElementById('floodBtn');
+      if(floodBtn) floodBtn.addEventListener('click', toggleFloodlights);
+
+      // Start/Pause
+      const startBtn = document.getElementById('startBtn');
+      if(startBtn) startBtn.addEventListener('click', toggleSim);
+
+      // Reset
+      const resetBtn = document.getElementById('resetBtn');
+      if(resetBtn) resetBtn.addEventListener('click', resetSim);
+
+      // Activity mode buttons
+      const aBtn = document.getElementById('activityABtn');
+      const bBtn = document.getElementById('activityBBtn');
+      if(aBtn) aBtn.addEventListener('click', ()=>{
+        aBtn.classList.add('btn-primary');
+        if(bBtn) bBtn.classList.remove('btn-primary');
+        setActivityMode('A');
+      });
+      if(bBtn) bBtn.addEventListener('click', ()=>{
+        bBtn.classList.add('btn-primary');
+        if(aBtn) aBtn.classList.remove('btn-primary');
+        setActivityMode('B');
+      });
+    }
+
+    // Boot
+    setupNavIcons();
+    setSidebarCompact(true);
+    bindUIEvents();
+    setActivityMode('A');
+    init3D();
+    updateTimerUI();
+  </script>
+</body>
+</html>

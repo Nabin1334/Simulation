@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thermal Energy Lab | Grade 10</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+/* =========================================================
+   COMPLETE CSS (FULL PAGE)
+   ========================================================= */
+
+:root {
+  /* Dark Theme (Default) */
+  --bg-dark: #0f172a;
+  --bg-panel: #1e293b;
+  --primary: #6366f1;
+  --primary-glow: rgba(99, 102, 241, 0.4);
+  --accent: #06b6d4;
+  --fire: #f59e0b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass: rgba(30, 41, 59, 0.7);
+  --radius: 24px;
+  --sidebar-width: 280px;
+  --success: #10b981;
+  --error: #ef4444;
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bottom-nav-height: 70px;
+}
+
+.light-theme {
+  /* Light Theme */
+  --bg-dark: #f1f5f9;
+  --bg-panel: #ffffff;
+  --primary: #4f46e5;
+  --primary-glow: rgba(79, 70, 229, 0.2);
+  --accent: #0891b2;
+  --fire: #d97706;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: rgba(15, 23, 42, 0.1);
+  --glass: rgba(255, 255, 255, 0.9);
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  transition: var(--transition);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  z-index: 100;
+  transition: var(--transition);
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.brand {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 3rem;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand i {
+  font-size: 1.5rem;
+  -webkit-text-fill-color: initial;
+  color: var(--primary);
+}
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.nav-item { position: relative; }
+
+.nav-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(99,102,241,0.08);
+  color: var(--text-main);
+  padding-left: 1.5rem;
+}
+
+.nav-btn:hover:before { transform: scaleY(1); }
+
+.nav-btn.active {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.18), transparent);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-btn.active:before { transform: scaleY(1); }
+
+.nav-btn i {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+/* --- Theme Toggle --- */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.theme-toggle:hover { background: rgba(99,102,241,0.14); }
+.theme-toggle i { font-size: 1.2rem; }
+
+/* --- Main Stage --- */
+.main-stage {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-dark) 100%);
+  overflow: hidden;
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+}
+
+/* --- Tab System --- */
+.tab-content {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  display: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-content.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* =========================================================
+   SIMULATION TAB (FULL AREA)
+   ========================================================= */
+#tab-simulation {
+  position:absolute;
+  inset:0;
+  padding:0 !important;
+  overflow:hidden !important;
+  display:block !important;
+}
+
+#canvas-container {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+#canvas-container canvas {
+  width:100% !important;
+  height:100% !important;
+  display:block;
+  outline: none;
+}
+
+/* =========================================================
+   LEFT CONTROL PANEL (COLLAPSIBLE)
+   ========================================================= */
+.sim-panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 40;
+  width: 340px;
+  max-width: min(340px, calc(100vw - 36px));
+  border-radius: 18px;
+  overflow: hidden;
+
+  background: rgba(10, 18, 36, 0.72);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+  transition: transform 0.25s ease, width 0.25s ease, opacity 0.25s ease;
+}
+
+body.light-theme .sim-panel {
+  background: rgba(255,255,255,0.62);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 45px rgba(15,23,42,0.12);
+}
+
+.sim-panel.collapsed { width: 58px; }
+
+.sim-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(99,102,241,0.10);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+body.light-theme .sim-panel-header {
+  background: rgba(79,70,229,0.08);
+  border-bottom: 1px solid rgba(15,23,42,0.10);
+}
+
+.sim-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--text-main);
+}
+
+.sim-panel-title i { color: var(--primary); }
+
+.sim-panel-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+body.light-theme .sim-panel-toggle {
+  background: rgba(15,23,42,0.05);
+  border: 1px solid rgba(15,23,42,0.10);
+}
+
+.sim-panel-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  /* NEW: no extra blank space */
+  flex: 0 0 auto;     /* don't stretch */
+  overflow: visible;  /* no scroll unless needed by mobile override */
+}
+
+.sim-panel.collapsed .sim-panel-body { display: none; }
+.sim-panel.collapsed .sim-panel-title span { display: none; }
+
+/* Control Groups (reused) */
+.control-group { display: flex; flex-direction: column; gap: 8px; }
+
+.control-group label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.material-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.material-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px solid transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.material-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--text-main);
+  transform: translateY(-2px);
+}
+
+.material-btn.active {
+  background: rgba(99, 102, 241, 0.22);
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
+}
+
+/* Range Slider */
+.slider-container { position: relative; margin-top: 4px; padding: 0 4px; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(245, 158, 11, 0.8));
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid var(--border);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 20px var(--primary-glow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 3px solid var(--bg-panel);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 25px var(--primary);
+}
+
+.temp-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.temp-display {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--fire);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 0.9rem;
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+  pointer-events: none;
+}
+
+.action-buttons { display: flex; gap: 10px; }
+
+.btn-action {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border: none;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: rgba(99,102,241,0.1);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+.pulse { animation: pulse 2s infinite; }
+
+/* HUD Panel */
+.sim-hud {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(18, 24, 38, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 18px;
+  font-family: 'Outfit', sans-serif;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: var(--card-shadow);
+  min-width: 240px;
+  z-index: 25;
+  transition: var(--transition);
+  pointer-events: none;
+}
+
+body.light-theme .sim-hud {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(15,23,42,0.12);
+  box-shadow: 0 20px 40px rgba(15,23,42,0.1);
+}
+
+.hud-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.hud-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.hud-label { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.hud-value { font-weight: 900; font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif; }
+
+/* Enhanced Stats Bar */
+.stats-bar {
+  position: absolute;
+  top: 20px;
+  left: 380px; /* leave space for left panel */
+  background: rgba(18, 24, 38, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 15px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  gap: 25px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+body.light-theme .stats-bar {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(15,23,42,0.12);
+}
+
+.sim-panel.collapsed ~ .stats-bar { left: 95px; }
+
+.stat-item { display: flex; flex-direction: column; align-items: center; }
+.stat-value { font-size: 1.4rem; font-weight: 900; font-family: 'Space Grotesk', sans-serif; color: var(--primary); }
+.stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* =========================================================
+   EDUCATIONAL PAGES (Concepts / Activities)
+   ========================================================= */
+.page-header { margin-bottom: 3rem; max-width: 900px; }
+
+h1 {
+  font-family: 'Space Grotesk';
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  margin: 3rem 0 1.5rem;
+  color: var(--accent);
+  font-weight: 900;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  border-radius: 2px;
+}
+
+p {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.info-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2rem;
+  transition: var(--transition);
+  box-shadow: var(--card-shadow);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: 0 30px 60px rgba(99,102,241,0.15);
+}
+
+.info-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.info-card:hover:before { opacity: 1; }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.tag.blue { background: rgba(6, 182, 212, 0.15); color: var(--accent); }
+.tag.orange { background: rgba(245, 158, 11, 0.15); color: var(--fire); }
+.tag.purple { background: rgba(99, 102, 241, 0.15); color: var(--primary); }
+
+/* Highlight Card */
+.highlight-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  color: white;
+  margin: 4rem 0;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-card:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.highlight-card h2 { color: white; -webkit-text-fill-color: white; margin-top: 0; }
+.highlight-card p { color: rgba(255,255,255,0.9); }
+
+.temp-big-display { display: flex; align-items: center; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+/* =========================================================
+   SIMULATION PAGE -> SIDEBAR ICON-ONLY
+   ========================================================= */
+body.sim-mode .sidebar {
+  width: 86px;
+  padding: 1.6rem 0.8rem;
+  align-items: center;
+}
+body.sim-mode .brand { justify-content: center; margin-bottom: 2rem; }
+body.sim-mode .brand span { display: none; }
+body.sim-mode .nav-btn {
+  justify-content: center;
+  padding: 1rem;
+  width: 54px;
+  height: 54px;
+}
+body.sim-mode .nav-btn span { display: none; }
+body.sim-mode .nav-btn:hover { padding-left: 1rem; }
+body.sim-mode .theme-toggle { justify-content: center; }
+body.sim-mode .theme-toggle div span { display:none; }
+body.sim-mode .theme-toggle div { display:flex; align-items:center; justify-content:center; gap:0; }
+
+/* =========================================================
+   RESPONSIVE DESIGN
+   ========================================================= */
+
+/* Tablets and Narrow Desktops */
+@media (max-width: 1024px) {
+  :root { --sidebar-width: 80px; }
+  .sidebar { padding: 1.5rem 0.8rem; align-items: center; }
+  .brand span, .nav-btn span, .theme-toggle div span { display: none; }
+  .brand { justify-content: center; margin-bottom: 2rem; }
+  .nav-btn { justify-content: center; padding: 1rem; width: 50px; height: 50px; }
+  .nav-btn:hover { padding-left: 1rem; }
+  .theme-toggle { justify-content: center; padding: 0.8rem; }
+}
+
+/* Mobile Devices (Phones) */
+@media (max-width: 768px) {
+  body { flex-direction: column; height: 100vh; height: 100dvh; }
+
+  .sidebar {
+    width: 100%;
+    height: var(--bottom-nav-height);
+    flex-direction: row;
+    align-items: center;
+    padding: 0 15px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    order: 2;
+    justify-content: space-around;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+
+  .brand { display: none; }
+
+  .nav-menu {
+    flex-direction: row;
+    flex: 1;
+    gap: 5px;
+    justify-content: space-around;
+  }
+
+  .nav-item { width: auto; }
+
+  .nav-btn {
+    width: auto;
+    height: 44px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+
+  .nav-btn i { font-size: 1.3rem; margin-bottom: 0; }
+  .nav-btn span { display: none; }
+  .nav-btn:before {
+    top: auto; bottom: 0; left: 50%; transform: translateX(-50%) scaleX(0);
+    width: 20px; height: 3px; border-radius: 2px;
+  }
+  .nav-btn.active:before { transform: translateX(-50%) scaleX(1); }
+  .nav-btn:hover { padding-left: 16px; background: transparent; }
+
+  .theme-toggle { display: none; }
+
+  .main-stage {
+    order: 1;
+    height: calc(100% - var(--bottom-nav-height));
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Left panel becomes bottom drawer on mobile for space */
+  .sim-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 22px 22px 0 0;
+  }
+  .sim-panel.collapsed { width: 100%; }
+  .sim-panel.collapsed .sim-panel-body { display: none; }
+
+  .stats-bar {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    padding: 10px;
+    gap: 10px;
+    justify-content: space-around;
+    background: rgba(18, 24, 38, 0.85);
+  }
+  body.light-theme .stats-bar { background: rgba(255,255,255,0.40); }
+
+  .stat-value { font-size: 1rem; }
+  .stat-label { font-size: 0.6rem; }
+
+  .sim-hud {
+    top: 85px; right: 10px;
+    padding: 12px;
+    transform-origin: top right;
+    scale: 0.9;
+    max-width: 160px;
+    min-width: auto;
+  }
+
+  .hud-item { margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .hud-label { font-size: 0.7rem; }
+  .hud-value { font-size: 1rem; }
+
+  .tab-content { padding: 1.5rem; padding-bottom: 6rem; }
+  .content-grid { gap: 1.5rem; }
+  .highlight-card { padding: 2rem 1.5rem; margin: 2rem 0; }
+
+  /* Mobile: allow the drawer body to scroll if needed */
+  .sim-panel-body{
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+  body { flex-direction: row; }
+  .sidebar {
+    width: 60px; height: 100vh; flex-direction: column; order: 0; justify-content: center; padding: 10px 0;
+    border-right: 1px solid var(--border); border-top: none;
+  }
+  .main-stage { height: 100vh; width: calc(100% - 60px); }
+  .nav-btn { height: 50px; width: 40px; }
+  .nav-btn:before { left: 0; top: 0; height: 100%; width: 3px; transform: scaleY(0); }
+  .nav-btn.active:before { transform: scaleY(1); }
+
+  .sim-panel { top: 12px; left: 12px; width: 320px; }
+  .stats-bar { left: 355px; top: 12px; padding: 8px 12px; gap: 15px; }
+  .sim-panel.collapsed ~ .stats-bar { left: 88px; }
+
+  .sim-hud { display:none; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(99,102,241,0.06); }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.55); }
+
+/* =========================================================
+   FIX: Control panel longer + thinner (override)
+   - UPDATED to remove extra blank space
+   ========================================================= */
+.sim-panel{
+  width: 280px;
+  max-width: min(280px, calc(100vw - 36px));
+  height: auto;          /* <-- CHANGED: no forced full height */
+  max-height: none;      /* <-- CHANGED */
+  display: block;        /* <-- CHANGED: remove flex stretching */
+}
+
+/* remove flex-grow blank space */
+.sim-panel-body{
+  flex: 0 0 auto;        /* <-- CHANGED */
+  overflow: visible;     /* <-- CHANGED */
+  padding: 12px;
+}
+
+/* keep collapse width */
+.sim-panel.collapsed{ width: 58px; }
+
+/* adjust stats position to match thinner panel */
+.stats-bar{ left: 320px; }
+
+/* slight tightness for thin panel */
+.sim-panel .material-btn{ padding: 9px 10px; font-size: 0.85rem; }
+
+/* Mobile: keep drawer behavior */
+@media (max-width: 768px){
+  .sim-panel{
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 55vh;
+  }
+  .sim-panel-body{ max-height: 45vh; overflow-y:auto; }
+}
+  </style>
+</head>
+
+<body>
+  <nav class="sidebar">
+    <div class="brand">
+      <i class="fas fa-flask"></i>
+      <span>Thermal Lab</span>
+    </div>
+
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <button class="nav-btn active" id="btn-tab-sim" aria-label="Simulation">
+          <i class="fas fa-fire"></i>
+          <span>Simulation</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" id="btn-tab-ov" aria-label="Concepts">
+          <i class="fas fa-book-open"></i>
+          <span>Concepts</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" id="btn-tab-act" aria-label="Activities">
+          <i class="fas fa-hands"></i>
+          <span>Activities</span>
+        </button>
+      </li>
+    </ul>
+
+    <div style="margin-top: auto; padding-top: 1rem;" class="hide-mobile">
+      <div class="theme-toggle" id="theme-btn" role="button" tabindex="0" aria-label="Toggle theme">
+        <div>
+          <i class="fas fa-moon"></i>
+          <span style="margin-left: 10px;">Dark Mode</span>
+        </div>
+        <i class="fas fa-toggle-off" id="theme-icon"></i>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-stage">
+    <!-- SIMULATION -->
+    <div id="tab-simulation" class="tab-content active">
+      <div id="canvas-container"></div>
+
+      <!-- LEFT CONTROL PANEL -->
+      <div class="sim-panel" id="sim-panel">
+        <div class="sim-panel-header" id="sim-panel-header" title="Click to hide/show">
+          <div class="sim-panel-title">
+            <i class="fas fa-sliders"></i>
+            <span>Controls</span>
+          </div>
+          <div class="sim-panel-toggle">
+            <i class="fas fa-chevron-left" id="panel-chevron"></i>
+          </div>
+        </div>
+
+        <div class="sim-panel-body">
+          <div class="control-group">
+            <label><i class="fas fa-layer-group"></i> Material</label>
+            <div class="material-selector">
+              <button class="material-btn" id="btn-mat-glass">
+                <i class="fas fa-wine-glass-alt"></i> Glass
+              </button>
+              <button class="material-btn active" id="btn-mat-iron">
+                <i class="fas fa-weight-hanging"></i> Iron
+              </button>
+              <button class="material-btn" id="btn-mat-copper">
+                <i class="fas fa-coins"></i> Copper
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label><i class="fas fa-thermometer-half"></i> Intensity</label>
+            <div class="slider-container">
+              <div class="temp-display" id="temp-display">800°C</div>
+              <input type="range" id="heat-slider" min="0" max="100" value="50">
+            </div>
+            <div class="temp-labels">
+              <span><i class="fas fa-snowflake"></i> Low</span>
+              <span><i class="fas fa-fire"></i> Max</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label><i class="fas fa-play-circle"></i> Actions</label>
+            <div class="action-buttons">
+              <button id="play-btn" class="btn-action pulse">
+                <i class="fas fa-play"></i> Start
+              </button>
+              <button id="reset-btn" class="btn-action btn-ghost">
+                <i class="fas fa-redo"></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="stat-conductivity">Medium</div>
+          <div class="stat-label">Conductivity</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-heat-flow">0 W/m²</div>
+          <div class="stat-label">Heat Flow</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-time">0s</div>
+          <div class="stat-label">Time</div>
+        </div>
+      </div>
+
+      <!-- HUD -->
+      <div class="sim-hud">
+        <div class="hud-item">
+          <span class="hud-label"><i class="fas fa-fire" style="color:var(--fire);"></i> Hot End</span>
+          <span class="hud-value" id="hud-temp-hot" style="color:var(--fire)">20°C</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label"><i class="fas fa-snowflake" style="color:var(--accent);"></i> Far End</span>
+          <span class="hud-value" id="hud-temp" style="color:var(--accent)">20°C</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label"><i class="fas fa-exchange-alt" style="color:var(--primary);"></i> Heat Flow</span>
+          <span class="hud-value" id="hud-state" style="color:var(--primary)">Equilibrium</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label"><i class="fas fa-bolt" style="color:#10b981;"></i> Status</span>
+          <span class="hud-value" id="hud-status" style="color:#10b981">Ready</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPTS -->
+    <div id="tab-overview" class="tab-content">
+      <div class="page-header">
+        <h1>Thermal Energy & Heat Transfer</h1>
+        <p>Explore the microscopic world of particles in motion through the Kinetic Theory of Matter. Learn how energy flows and temperature changes affect materials at the molecular level.</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="info-card">
+          <div class="card-header">
+            <h3>Temperature</h3>
+            <span class="tag orange">Definition</span>
+          </div>
+          <p>Temperature is <strong>not energy itself</strong>. It is a measure of the <strong>average kinetic energy</strong> of the particles in a substance. Faster particles = Higher Temperature.</p>
+          <div style="margin-top: auto; padding: 1rem; background: rgba(245, 158, 11, 0.08); border-radius: 12px;">
+            <p style="margin:0; font-size:0.9rem;"><i class="fas fa-lightbulb" style="color:var(--fire); margin-right:8px;"></i> <strong>Key Insight:</strong> Two objects can have the same temperature but different thermal energy if their masses differ.</p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-header">
+            <h3>Thermal Energy</h3>
+            <span class="tag blue">Concept</span>
+          </div>
+          <p>The total energy (Kinetic + Potential) of all particles in a substance. A large iceberg has more thermal energy than a cup of boiling water because of its massive number of particles.</p>
+          <div style="margin-top: auto;">
+            <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fas fa-calculator" style="margin-right:8px;"></i> Thermal Energy = Particle Count × Average Energy</p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-header">
+            <h3>Heat Transfer</h3>
+            <span class="tag orange">Process</span>
+          </div>
+          <p>Heat is the flow of thermal energy from a region of high temperature to low temperature. It stops when <strong>Thermal Equilibrium</strong> is reached.</p>
+          <div style="margin-top: auto;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:100%; height:4px; background:linear-gradient(90deg, var(--fire), var(--accent)); border-radius:2px;"></div>
+              <span style="font-size:0.8rem; color:var(--text-muted);">Heat Flow Direction</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-card">
+        <h2>Absolute Zero</h2>
+        <div class="temp-big-display">
+          <div>
+            <h1 style="margin:0; opacity: 0.9; -webkit-text-fill-color: white; color:white;">0 K</h1>
+            <p style="color: rgba(255,255,255,0.9); font-weight: 600; font-size: 1.2rem;">−273.15°C / −459.67°F</p>
+          </div>
+          <div>
+            <p style="color: white; margin:0;">The theoretical temperature at which molecular motion stops completely.</p>
+          </div>
+        </div>
+        <div style="margin-top: 2rem; display: flex; align-items: center; gap: 10px;">
+          <i class="fas fa-exclamation-triangle" style="color:white;"></i>
+          <span style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Absolute zero has never been achieved in experiments.</span>
+        </div>
+      </div>
+
+      <h2>Conduction, Convection & Radiation</h2>
+      <div class="content-grid" style="margin-top: 1rem;">
+        <div class="info-card">
+          <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-exchange-alt" style="color:var(--primary);"></i> Conduction</h3>
+          <p>Direct transfer through physical contact. Faster in metals due to free electrons.</p>
+        </div>
+        <div class="info-card">
+          <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-wind" style="color:var(--accent);"></i> Convection</h3>
+          <p>Transfer through fluid movement (liquids/gases). Creates convection currents.</p>
+        </div>
+        <div class="info-card">
+          <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-sun" style="color:var(--fire);"></i> Radiation</h3>
+          <p>Transfer through electromagnetic waves. Does not require a medium (works in vacuum).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITIES -->
+    <div id="tab-activities" class="tab-content">
+      <div class="page-header">
+        <h1>Interactive Activities</h1>
+        <p>Explore these experiments to understand how our senses perceive temperature and how heat transfers through different materials.</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="info-card">
+          <div class="card-header">
+            <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-vial"></i> Activity 9.1(a)</h3>
+            <span class="tag purple">Diffusion</span>
+          </div>
+          <p><strong>Diffusion in Water</strong></p>
+          <p>Drop food coloring into hot vs. cold water and observe the rate of diffusion.</p>
+          <div style="background: rgba(6, 182, 212, 0.08); padding: 1.2rem; border-radius: 12px; margin: 1.5rem 0;">
+            <ul style="padding-left: 1.2rem; color: var(--text-muted);">
+              <li style="margin-bottom:8px;"><strong>Hot Water:</strong> Color spreads rapidly due to faster molecular motion.</li>
+              <li><strong>Cold Water:</strong> Color spreads slowly due to slower molecular motion.</li>
+            </ul>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:auto;">
+            <i class="fas fa-clock" style="color:var(--text-muted);"></i>
+            <span style="font-size:0.9rem; color:var(--text-muted);"><strong>Time Required:</strong> 5-10 minutes</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-header">
+            <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-hand-paper"></i> Activity 9.1(b)</h3>
+            <span class="tag purple">Perception</span>
+          </div>
+          <p><strong>The Trick of Touch</strong></p>
+          <p>Place left hand in cold water, right in warm water for 60s. Then place both in tap water.</p>
+          <p><strong>Result:</strong> Left hand feels hot, Right hand feels cold.</p>
+          <div style="margin-top: auto; padding: 1rem; background: rgba(99, 102, 241, 0.08); border-radius: 12px;">
+            <p style="margin:0; font-size:0.9rem;"><i class="fas fa-brain" style="color:var(--primary); margin-right:8px;"></i> This demonstrates why subjective temperature perception can be misleading!</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Real-World Applications</h2>
+      <div class="content-grid">
+        <div class="info-card">
+          <h3><i class="fas fa-home" style="color:var(--accent); margin-right:10px;"></i> Home Insulation</h3>
+          <p>Materials with low thermal conductivity (like fiberglass) slow heat transfer.</p>
+        </div>
+        <div class="info-card">
+          <h3><i class="fas fa-car" style="color:var(--primary); margin-right:10px;"></i> Engine Cooling</h3>
+          <p>Car engines use coolant (high specific heat capacity) to absorb excess heat.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+/* =========================================================
+   HEAT CONDUCTION VISUALIZATION ENGINE
+   ========================================================= */
+
+let isDarkMode = true;
+let currentMaterial = 'iron';
+let heatFlowRate = 0;
+
+/* ---------------- Tabs ---------------- */
+const tabs = document.querySelectorAll('.tab-content');
+const navBtns = document.querySelectorAll('.nav-btn');
+
+function setSimMode(on) {
+  document.body.classList.toggle('sim-mode', on);
+}
+
+function switchTab(tabId, btnId){
+  navBtns.forEach(btn => btn.classList.remove('active'));
+
+  if(btnId) {
+    const activeBtn = document.getElementById(btnId);
+    if(activeBtn) activeBtn.classList.add('active');
+  }
+
+  tabs.forEach(tab => {
+    const isActive = (tab.id === tabId);
+    tab.classList.toggle('active', isActive);
+  });
+
+  const isSim = (tabId === 'tab-simulation');
+  setSimMode(isSim);
+
+  if(isSim) setTimeout(handleResize, 80);
+}
+
+/* ---------------- Theme Toggle ---------------- */
+const themeBtn = document.getElementById('theme-btn');
+let themeIconEl = document.getElementById('theme-icon');
+
+function refreshThemeUI(){
+  const leftIcon = themeBtn.querySelector('.fa-moon, .fa-sun');
+  const labelEl  = themeBtn.querySelector('span');
+
+  if(isDarkMode){
+    document.body.classList.remove('light-theme');
+    if(leftIcon) leftIcon.className = 'fas fa-moon';
+    if(labelEl) labelEl.textContent = 'Dark Mode';
+    if(themeIconEl) themeIconEl.className = 'fas fa-toggle-off';
+  }else{
+    document.body.classList.add('light-theme');
+    if(leftIcon) leftIcon.className = 'fas fa-sun';
+    if(labelEl) labelEl.textContent = 'Light Mode';
+    if(themeIconEl) themeIconEl.className = 'fas fa-toggle-on';
+  }
+}
+
+themeBtn.addEventListener('click', () => {
+  isDarkMode = !isDarkMode;
+  applyThemeScene();
+  refreshThemeUI();
+});
+
+/* Keyboard accessibility for theme toggle */
+themeBtn.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    themeBtn.click();
+  }
+});
+
+/* ---------------- Collapsible Simulation Panel ---------------- */
+const simPanel = document.getElementById('sim-panel');
+const simPanelHeader = document.getElementById('sim-panel-header');
+const panelChevron = document.getElementById('panel-chevron');
+
+function setPanelCollapsed(collapsed){
+  simPanel.classList.toggle('collapsed', collapsed);
+  if (panelChevron) panelChevron.className = collapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+  setTimeout(() => { if(document.body.classList.contains('sim-mode')) handleResize(); }, 220);
+}
+
+simPanelHeader.addEventListener('click', () => {
+  setPanelCollapsed(!simPanel.classList.contains('collapsed'));
+});
+
+/* ---------------- THREE Setup ---------------- */
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 160);
+camera.position.set(0, 3.8, 14.5);
+camera.lookAt(0, -1.1, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, logarithmicDepthBuffer:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ReinhardToneMapping;
+container.appendChild(renderer.domElement);
+
+/* ---------------- Lights ---------------- */
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(6, 10, 8);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.width = 1024;
+keyLight.shadow.mapSize.height = 1024;
+scene.add(keyLight);
+
+const hemi = new THREE.HemisphereLight(0xdff3ff, 0xffffff, 0.7);
+scene.add(hemi);
+
+const rim = new THREE.DirectionalLight(0x8bdcff, 0.25);
+rim.position.set(-8, 6, -8);
+scene.add(rim);
+
+/* ---------------- Textures ---------------- */
+function makeSkyTexture(){
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 512;
+  const g = c.getContext("2d");
+
+  const grad = g.createLinearGradient(0,0,0,c.height);
+  grad.addColorStop(0,"#4aa3ff");
+  grad.addColorStop(0.55,"#bfe9ff");
+  grad.addColorStop(1,"#eaf6ff");
+  g.fillStyle = grad; g.fillRect(0,0,c.width,c.height);
+
+  for(let i=0;i<18;i++){
+    const x=Math.random()*c.width;
+    const y=Math.random()*c.height*0.55;
+    const r=45+Math.random()*75;
+    const cloud=g.createRadialGradient(x,y,0,x,y,r);
+    cloud.addColorStop(0,"rgba(255,255,255,0.45)");
+    cloud.addColorStop(0.65,"rgba(255,255,255,0.14)");
+    cloud.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle=cloud;
+    g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+  }
+
+  const v = g.createRadialGradient(c.width/2, c.height/2, 80, c.width/2, c.height/2, 340);
+  v.addColorStop(0,"rgba(0,0,0,0)");
+  v.addColorStop(1,"rgba(0,0,0,0.10)");
+  g.fillStyle = v; g.fillRect(0,0,c.width,c.height);
+
+  const tex = new THREE.CanvasTexture(c);
+  if(tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function makeWoodTexture(){
+  const c=document.createElement("canvas");
+  c.width=512; c.height=512;
+  const g=c.getContext("2d");
+
+  g.fillStyle="#7a4a23"; g.fillRect(0,0,c.width,c.height);
+
+  for(let y=0;y<c.height;y+=2){
+    g.fillStyle=`rgba(30,15,5,${0.05+Math.random()*0.07})`;
+    g.fillRect(0,y,c.width,1);
+    if(Math.random()<0.07){
+      g.fillStyle=`rgba(20,10,4,${0.12+Math.random()*0.18})`;
+      g.fillRect(0,y,c.width,2);
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2,2);
+  if(tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/* ---------------- Rod + Table + Supports ---------------- */
+const rodLen = 10;
+const segments = 100;
+
+const rodGeo = new THREE.CylinderGeometry(0.25,0.25,rodLen,32,segments,true);
+rodGeo.rotateZ(Math.PI/2);
+const vCount = rodGeo.attributes.position.count;
+rodGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vCount*3), 3));
+
+const rodMat = new THREE.MeshStandardMaterial({
+  vertexColors:true,
+  metalness:0.95,
+  roughness:0.20,
+  envMapIntensity:1.6
+});
+const rod = new THREE.Mesh(rodGeo, rodMat);
+rod.castShadow = true;
+scene.add(rod);
+
+const table = new THREE.Mesh(
+  new THREE.BoxGeometry(22, 0.55, 12),
+  new THREE.MeshStandardMaterial({
+    map: makeWoodTexture(),
+    roughness: 0.62,
+    metalness: 0.05
+  })
+);
+table.position.y = -3.6;
+table.receiveShadow = true;
+scene.add(table);
+
+function createSupport(x){
+  const group = new THREE.Group();
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.65,0.85,0.22,32),
+    new THREE.MeshStandardMaterial({ color:0x334155, roughness:0.75 })
+  );
+  base.position.y = -3.25;
+
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.11,0.11,3.35,16),
+    new THREE.MeshStandardMaterial({ color:0x94a3b8, metalness:1, roughness:0.22 })
+  );
+  pole.position.y = -1.55;
+
+  const clamp = new THREE.Mesh(
+    new THREE.BoxGeometry(0.45,0.45,0.85),
+    new THREE.MeshStandardMaterial({ color:0x334155, roughness:0.65 })
+  );
+  clamp.position.y = 0.05;
+
+  group.add(base,pole,clamp);
+  group.position.x = x;
+  scene.add(group);
+}
+createSupport(-3);
+createSupport(3);
+
+/* =========================================================
+   TORCH + REALISTIC FLAME
+   ========================================================= */
+const torch = new THREE.Group();
+torch.position.set(-rodLen/2 + 0.65, -2.7, 0);
+scene.add(torch);
+
+const handle = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.18, 0.20, 1.8, 32),
+  new THREE.MeshStandardMaterial({ color: 0x2b3442, metalness: 0.95, roughness: 0.35 })
+);
+handle.position.y = 0.1;
+handle.rotation.z = 0.06;
+handle.castShadow = true;
+torch.add(handle);
+
+const grip = new THREE.Mesh(
+  new THREE.TorusGeometry(0.21, 0.03, 14, 32),
+  new THREE.MeshStandardMaterial({ color:0x111827, metalness:0.6, roughness:0.6 })
+);
+grip.position.y = 0.65;
+grip.rotation.x = Math.PI/2;
+grip.castShadow = true;
+torch.add(grip);
+
+const head = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.22, 0.28, 0.55, 32),
+  new THREE.MeshStandardMaterial({ color: 0xbec6d2, metalness: 1.0, roughness: 0.18 })
+);
+head.position.y = 1.15;
+head.castShadow = true;
+torch.add(head);
+
+const nozzle = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.08, 0.12, 0.28, 24),
+  new THREE.MeshStandardMaterial({ color: 0x6b7280, metalness: 1.0, roughness: 0.12 })
+);
+nozzle.position.y = 1.45;
+nozzle.castShadow = true;
+torch.add(nozzle);
+
+const ring = new THREE.Mesh(
+  new THREE.TorusGeometry(0.11, 0.02, 10, 24),
+  new THREE.MeshStandardMaterial({
+    color: 0x444b55,
+    emissive: 0xff6a00,
+    emissiveIntensity: 0.7,
+    metalness: 0.9,
+    roughness: 0.25
+  })
+);
+ring.position.y = 1.58;
+ring.rotation.x = Math.PI/2;
+torch.add(ring);
+
+function makeGlowSprite(colorA, colorB){
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+
+  const grad = g.createRadialGradient(64,70,5,64,70,60);
+  grad.addColorStop(0, colorA);
+  grad.addColorStop(0.35, colorB);
+  grad.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = grad;
+  g.fillRect(0,0,128,128);
+
+  const tex = new THREE.CanvasTexture(c);
+  if(tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+const flameTexOuter = makeGlowSprite("rgba(255,170,0,0.95)", "rgba(255,70,0,0.45)");
+const flameTexInner = makeGlowSprite("rgba(255,255,255,0.95)", "rgba(255,190,0,0.55)");
+
+const flameOuter = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: flameTexOuter, transparent:true, blending: THREE.AdditiveBlending, depthWrite:false
+}));
+flameOuter.position.set(0, 2.05, 0.05);
+flameOuter.scale.set(1.2, 2.1, 1);
+torch.add(flameOuter);
+
+const flameInner = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: flameTexInner, transparent:true, blending: THREE.AdditiveBlending, depthWrite:false
+}));
+flameInner.position.set(0, 1.92, 0.06);
+flameInner.scale.set(0.75, 1.45, 1);
+torch.add(flameInner);
+
+const flameLight = new THREE.PointLight(0xff7a00, 2.4, 10);
+flameLight.position.set(0, 1.95, 0.25);
+flameLight.castShadow = true;
+torch.add(flameLight);
+
+/* =========================================================
+   HEAT SHIMMER PARTICLES
+   ========================================================= */
+const heatParticleCount = 180;
+const heatGeom = new THREE.BufferGeometry();
+const heatPos = new Float32Array(heatParticleCount*3);
+for(let i=0;i<heatParticleCount;i++){
+  heatPos[i*3+0] = torch.position.x + (Math.random()-0.5)*2.2;
+  heatPos[i*3+1] = -2.3 + Math.random()*2.4;
+  heatPos[i*3+2] = (Math.random()-0.5)*3.2;
+}
+heatGeom.setAttribute('position', new THREE.BufferAttribute(heatPos,3));
+const heatMat = new THREE.PointsMaterial({
+  color: 0xff6a00,
+  size: 0.05,
+  transparent:true,
+  opacity: 0.30,
+  blending: THREE.AdditiveBlending,
+  depthWrite:false
+});
+const heatPoints = new THREE.Points(heatGeom, heatMat);
+scene.add(heatPoints);
+
+/* =========================================================
+   HEAT FLOW PARTICLES
+   ========================================================= */
+const flowCount = 100;
+const flowGeom = new THREE.BufferGeometry();
+const flowPos = new Float32Array(flowCount*3);
+const flowVel = new Float32Array(flowCount);
+
+for(let i=0;i<flowCount;i++){
+  const t = Math.random();
+  flowPos[i*3+0] = -rodLen/2 + t*rodLen;
+  flowPos[i*3+1] = -0.05 + (Math.random()-0.5)*0.2;
+  flowPos[i*3+2] = (Math.random()-0.5)*0.22;
+  flowVel[i] = 0.8 + Math.random()*1.6;
+}
+flowGeom.setAttribute('position', new THREE.BufferAttribute(flowPos,3));
+const flowMat = new THREE.PointsMaterial({
+  color: 0xffcc66,
+  size: 0.045,
+  transparent:true,
+  opacity: 0.0,
+  blending: THREE.AdditiveBlending,
+  depthWrite:false
+});
+const flow = new THREE.Points(flowGeom, flowMat);
+scene.add(flow);
+
+/* =========================================================
+   PHYSICS
+   ========================================================= */
+const physics = {
+  temps: new Float32Array(segments).fill(20),
+  k: 0.22,
+  playing: false,
+  sourceTemp: 20,
+  targetTemp: 800,
+  time: 0,
+  elapsedTime: 0,
+  maxTemp: 1200
+};
+
+const clock = new THREE.Clock();
+
+/* HUD */
+function updateHUD() {
+  const hot = physics.temps[0];
+  const far = physics.temps[segments-1];
+  const diff = hot - far;
+
+  document.getElementById('hud-temp-hot').innerText = Math.round(hot) + "°C";
+  document.getElementById('hud-temp').innerText = Math.round(far) + "°C";
+
+  const heatFlowEl = document.getElementById('hud-state');
+  if (diff > 200) { heatFlowEl.innerText = "Rapid Heating"; heatFlowEl.style.color = "#ef4444"; }
+  else if (diff > 100) { heatFlowEl.innerText = "Strong Flow"; heatFlowEl.style.color = "#f59e0b"; }
+  else if (diff > 30) { heatFlowEl.innerText = "Heat Flowing"; heatFlowEl.style.color = "#06b6d4"; }
+  else if (diff > 5) { heatFlowEl.innerText = "Slow Transfer"; heatFlowEl.style.color = "#6366f1"; }
+  else { heatFlowEl.innerText = "Equilibrium"; heatFlowEl.style.color = "#10b981"; }
+
+  const statusEl = document.getElementById('hud-status');
+  if (physics.playing) { statusEl.innerText = "Heating"; statusEl.style.color = "#f59e0b"; }
+  else if (physics.sourceTemp > 25) { statusEl.innerText = "Cooling"; statusEl.style.color = "#06b6d4"; }
+  else { statusEl.innerText = "Ready"; statusEl.style.color = "#10b981"; }
+
+  heatFlowRate = Math.round((hot - far) * physics.k * 12);
+  document.getElementById('stat-heat-flow').textContent = heatFlowRate + " W/m²";
+  document.getElementById('stat-time').textContent = Math.round(physics.elapsedTime) + "s";
+}
+
+/* Buttons */
+document.getElementById('play-btn').addEventListener('click', function(){
+  physics.playing = !physics.playing;
+
+  if (physics.playing) {
+    this.innerHTML = '<i class="fas fa-pause"></i> Pause';
+    this.classList.remove('pulse');
+    physics.sourceTemp = physics.targetTemp;
+  } else {
+    this.innerHTML = '<i class="fas fa-play"></i> Start';
+    this.classList.add('pulse');
+  }
+
+  updateHUD();
+});
+
+document.getElementById('reset-btn').addEventListener('click', function(){
+  physics.playing = false;
+  physics.temps.fill(20);
+  physics.elapsedTime = 0;
+  physics.sourceTemp = 20;
+
+  const playBtn = document.getElementById('play-btn');
+  playBtn.innerHTML = '<i class="fas fa-play"></i> Start';
+  playBtn.classList.add('pulse');
+
+  rod.scale.set(1, 1, 1);
+  flowMat.opacity = 0.0;
+  updateHUD();
+});
+
+/* Slider */
+document.getElementById('heat-slider').addEventListener('input', (e) => {
+  physics.targetTemp = 200 + e.target.value * 10;
+  document.getElementById('temp-display').innerText = Math.round(physics.targetTemp) + "°C";
+  if (physics.playing) updateRodColors();
+});
+
+/* Material */
+const BASE_COLORS = {
+  glass: new THREE.Color(0x78c7ff),
+  iron:  new THREE.Color(0xffffff),
+  copper:new THREE.Color(0xffdec0)
+};
+
+const materialBtns = Array.from(document.querySelectorAll('.material-btn'));
+function setMaterial(type){
+  currentMaterial = type;
+
+  materialBtns.forEach(b=>b.classList.remove('active'));
+  const btn = materialBtns.find(b => b.textContent.toLowerCase().includes(type));
+  if(btn) btn.classList.add('active');
+
+  physics.playing = false;
+  physics.temps.fill(20);
+  physics.elapsedTime = 0;
+  physics.sourceTemp = 20;
+
+  const playBtn = document.getElementById('play-btn');
+  playBtn.innerHTML = '<i class="fas fa-play"></i> Start';
+  playBtn.classList.add('pulse');
+
+  flowMat.opacity = 0.0;
+  rod.scale.set(1,1,1);
+
+  let conductivityText = "Medium";
+
+  if(type==='glass'){
+    physics.k = 0.03;
+    conductivityText = "Low";
+    rodMat.metalness = 0.10;
+    rodMat.roughness = 0.10;
+    rodMat.opacity = 0.35;
+    rodMat.transparent = true;
+  }
+  if(type==='iron'){
+    physics.k = 0.15;
+    conductivityText = "Medium";
+    rodMat.metalness = 0.50;
+    rodMat.roughness = 0.30;
+    rodMat.opacity = 1;
+    rodMat.transparent = false;
+  }
+  if(type==='copper'){
+    physics.k = 0.40;
+    conductivityText = "High";
+    rodMat.metalness = 0.50;
+    rodMat.roughness = 0.30;
+    rodMat.opacity = 1;
+    rodMat.transparent = false;
+  }
+
+  rodMat.needsUpdate = true;
+  document.getElementById('stat-conductivity').innerText = conductivityText;
+
+  updateHUD();
+}
+
+/* Theme (scene) */
+function applyThemeScene(){
+  if(isDarkMode){
+    scene.background = new THREE.Color(0x0a0f1d);
+    scene.fog = new THREE.FogExp2(0x0a0f1d, 0.045);
+    keyLight.intensity = 1.2;
+    hemi.intensity = 0.8;
+    flameLight.intensity = 2.4;
+    heatMat.opacity = 0.30;
+  }else{
+    scene.background = makeSkyTexture();
+    scene.fog = new THREE.FogExp2(0xbfe6ff, 0.014);
+    keyLight.intensity = 1.35;
+    hemi.intensity = 0.85;
+    flameLight.intensity = 2.0;
+    heatMat.opacity = 0.22;
+  }
+}
+
+/* Physics */
+function updatePhysics(dtReal){
+  const dt = Math.min(0.05, dtReal);
+
+  if (physics.playing) {
+    physics.elapsedTime += dt;
+
+    physics.sourceTemp += (physics.targetTemp - physics.sourceTemp) * 0.1;
+
+    const flameWidth = 5;
+    for(let i=0; i<flameWidth; i++) {
+      const factor = 1 - (i / flameWidth);
+      physics.temps[i] += (physics.sourceTemp - physics.temps[i]) * 0.3 * factor;
+    }
+
+    let diffusionRate, coolingRate;
+    if(currentMaterial === 'glass') { diffusionRate = 1.0; coolingRate = 0.02; }
+    else if(currentMaterial === 'iron') { diffusionRate = 8.0; coolingRate = 0.005; }
+    else { diffusionRate = 18.0; coolingRate = 0.002; }
+
+    const iterations = 8;
+    for(let k=0; k<iterations; k++) {
+      for (let i = 1; i < segments - 1; i++) {
+        const leftTemp = physics.temps[i - 1];
+        const centerTemp = physics.temps[i];
+        const rightTemp = physics.temps[i + 1];
+
+        const conduction = (diffusionRate / iterations) * (leftTemp + rightTemp - 2 * centerTemp);
+        const cooling = (coolingRate / iterations) * (centerTemp - 20);
+
+        physics.temps[i] += (conduction - cooling) * dt;
+      }
+      physics.temps[segments-1] += (
+        (diffusionRate/iterations) * (physics.temps[segments-2] - physics.temps[segments-1]) -
+        (coolingRate/iterations) * (physics.temps[segments-1]-20)
+      ) * dt;
+    }
+
+  } else {
+    for(let i = 0; i < segments; i++){
+      physics.temps[i] -= 0.005 * (physics.temps[i] - 20) * dt;
+    }
+    physics.sourceTemp -= 0.1 * (physics.sourceTemp - 20) * dt;
+  }
+
+  let totalTemp = 0;
+  for(let i=0; i<segments; i++) totalTemp += physics.temps[i];
+  const avgTemp = totalTemp / segments;
+
+  let expansionCoeff = 0.00005;
+  if(currentMaterial === 'iron') expansionCoeff = 0.00012;
+  if(currentMaterial === 'copper') expansionCoeff = 0.00018;
+  if(currentMaterial === 'glass') expansionCoeff = 0.00002;
+
+  const expansion = 1.0 + (avgTemp - 20) * expansionCoeff;
+  rod.scale.y = expansion;
+
+  updateHUD();
+}
+
+/* Rod colors */
+function updateRodColors(){
+  const colors = rodGeo.attributes.color;
+  const pos = rodGeo.attributes.position;
+  const base = BASE_COLORS[currentMaterial];
+
+  const heatColor2 = new THREE.Color(0xcc0000);
+  const heatColor3 = new THREE.Color(0xff4400);
+  const heatColor4 = new THREE.Color(0xffaa00);
+
+  const col = new THREE.Color();
+  const mixColor = new THREE.Color();
+
+  for (let i = 0; i < vCount; i++) {
+    const x = pos.getX(i);
+    const ratio = (x + rodLen / 2) / rodLen;
+    const idx = Math.min(segments - 1, Math.max(0, Math.floor(ratio * segments)));
+    const temp = physics.temps[idx];
+
+    col.copy(base);
+
+    if (temp > 180) {
+      let t = 0;
+      if (temp < 400) {
+        t = (temp - 180) / 220;
+        mixColor.copy(heatColor2);
+        col.lerp(mixColor, t * 0.85);
+      } else if (temp < 750) {
+        t = (temp - 400) / 350;
+        col.copy(heatColor2).lerp(heatColor3, t);
+      } else {
+        t = (temp - 750) / 450;
+        t = Math.min(1, t);
+        col.copy(heatColor3).lerp(heatColor4, t);
+      }
+    }
+
+    colors.setXYZ(i, col.r, col.g, col.b);
+  }
+  colors.needsUpdate = true;
+}
+
+/* Effects */
+function updateEffects(){
+  physics.time += 0.08;
+
+  const flameIntensity = physics.playing ? Math.min(1, physics.targetTemp / physics.maxTemp) : 0;
+  const flick = 0.25 + flameIntensity * 1.35 + Math.sin(physics.time * 7) * 0.08;
+
+  flameOuter.visible = physics.playing;
+  flameInner.visible = physics.playing;
+  flameOuter.scale.set(1.2 * flick, 2.2 * flick, 1);
+  flameInner.scale.set(0.75 * flick, 1.5 * flick, 1);
+  flameLight.intensity = physics.playing ? 2.5 * flameIntensity : 0;
+
+  const pAttr = heatPoints.geometry.attributes.position;
+  const particleSpeed = physics.playing ? 0.04 : 0.01;
+
+  for(let i=0;i<heatParticleCount;i++){
+    const y = pAttr.getY(i) + particleSpeed + Math.random()*0.01;
+    pAttr.setY(i, y);
+    if(y > 2.2){
+      pAttr.setX(i, torch.position.x + (Math.random()-0.5)*2.2);
+      pAttr.setY(i, -2.2 + Math.random()*0.6);
+      pAttr.setZ(i, (Math.random()-0.5)*3.2);
+    }
+  }
+  pAttr.needsUpdate = true;
+
+  const fAttr = flow.geometry.attributes.position;
+  if(physics.playing){
+    const flowSpeed = 0.025 * (1 + physics.k * 2);
+
+    for(let i=0;i<flowCount;i++){
+      let x = fAttr.getX(i);
+      x += flowSpeed * flowVel[i];
+
+      if(x > rodLen/2){
+        x = -rodLen/2 + Math.random()*0.8;
+        fAttr.setY(i, -0.05 + (Math.random()-0.5)*0.2);
+        fAttr.setZ(i, (Math.random()-0.5)*0.22);
+      }
+      fAttr.setX(i, x);
+    }
+
+    const diff = physics.temps[0] - physics.temps[segments-1];
+    const maxDiff = physics.maxTemp - 20;
+    flowMat.opacity = Math.min(0.6, (diff / maxDiff) * 1.2);
+
+    const tempRatio = physics.temps[0] / physics.maxTemp;
+    flowMat.color.setHSL(0.08 + tempRatio * 0.05, 0.8, 0.6 + tempRatio * 0.3);
+  } else {
+    flowMat.opacity *= 0.92;
+  }
+  fAttr.needsUpdate = true;
+}
+
+/* Resize */
+function handleResize(){
+  const w = container.clientWidth || 1;
+  const h = container.clientHeight || 1;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+window.addEventListener('resize', handleResize);
+window.addEventListener('orientationchange', () => setTimeout(handleResize, 100));
+
+/* Navigation Events */
+document.getElementById('btn-tab-sim').addEventListener('click', () => switchTab('tab-simulation', 'btn-tab-sim'));
+document.getElementById('btn-tab-ov').addEventListener('click', () => switchTab('tab-overview', 'btn-tab-ov'));
+document.getElementById('btn-tab-act').addEventListener('click', () => switchTab('tab-activities', 'btn-tab-act'));
+
+/* Material Events */
+document.getElementById('btn-mat-glass').addEventListener('click', () => setMaterial('glass'));
+document.getElementById('btn-mat-iron').addEventListener('click', () => setMaterial('iron'));
+document.getElementById('btn-mat-copper').addEventListener('click', () => setMaterial('copper'));
+
+/* Animate */
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  updatePhysics(dt);
+  updateRodColors();
+  updateEffects();
+  renderer.render(scene, camera);
+}
+
+/* INIT */
+refreshThemeUI();
+applyThemeScene();
+setMaterial('iron');
+setSimMode(true);
+setTimeout(handleResize, 60);
+animate();
+</script>
+
+</body>
+</html>

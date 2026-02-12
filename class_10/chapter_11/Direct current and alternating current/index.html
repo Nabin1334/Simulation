@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra-Realistic DC & AC Circuit Simulation with Switch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 2.3em;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            background: rgba(255,255,255,0.08);
+            padding: 18px 35px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            padding: 14px 45px;
+            font-size: 1.05em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-dc {
+            background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
+            color: white;
+        }
+
+        .btn-ac {
+            background: linear-gradient(135deg, #4ecdc4 0%, #1a535c 100%);
+            color: white;
+        }
+
+        .btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 8px 35px rgba(255,255,255,0.4);
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .switch {
+            position: relative;
+            width: 70px;
+            height: 35px;
+            background: #444;
+            border-radius: 35px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .switch.on {
+            background: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .switch-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 29px;
+            height: 29px;
+            background: linear-gradient(145deg, #fff, #ddd);
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .switch.on .switch-knob {
+            left: 38px;
+        }
+
+        .switch-label {
+            color: #eee;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+
+        .simulation-area {
+            background: linear-gradient(135deg, #1e1e2e 0%, #12121c 100%);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 15px;
+            background: radial-gradient(circle at 30% 30%, #252540, #1a1a2a);
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.6);
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.06);
+            padding: 18px 28px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            min-width: 140px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .stat-value {
+            color: #4ecdc4;
+            font-size: 1.7em;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .info-panel {
+            margin-top: 25px;
+            padding: 22px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 15px;
+            border-left: 5px solid;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-panel.dc {
+            border-color: #ff6b6b;
+        }
+
+        .info-panel.ac {
+            border-color: #4ecdc4;
+        }
+
+        .info-panel h2 {
+            margin-bottom: 12px;
+            color: #eee;
+            font-size: 1.4em;
+        }
+
+        .info-panel p {
+            color: #bbb;
+            line-height: 1.8;
+            font-size: 1.02em;
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #eee;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .clickable-area {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .circuit-switch {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ ULTRA-REALISTIC ELECTRICAL CIRCUIT SIMULATION ⚡</h1>
+        <p class="subtitle">Detailed Wire Connections with Physical Switch Mechanism</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button class="btn btn-dc active" onclick="switchMode('dc')">
+                    🔋 DIRECT CURRENT (DC)
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <button class="btn btn-ac" onclick="switchMode('ac')">
+                    ⚡ ALTERNATING CURRENT (AC)
+                </button>
+            </div>
+
+            <div class="control-group switch-container">
+                <span class="switch-label">Circuit Power</span>
+                <div class="switch on" id="powerSwitch" onclick="togglePower()">
+                    <div class="switch-knob"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="simulation-area">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Live/Hot Wire</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4ecdc4;"></div>
+                    <span>Neutral/Return Wire</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffd700;"></div>
+                    <span>Electron Flow</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00ff00;"></div>
+                    <span>Switch Indicator</span>
+                </div>
+            </div>
+
+            <div id="switchClickArea" class="clickable-area" style="left: 820px; top: 210px;"></div>
+            
+            <canvas id="simulationCanvas" width="1300" height="700"></canvas>
+            
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">Voltage</div>
+                    <div class="stat-value" id="voltageDisplay">12V</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Current</div>
+                    <div class="stat-value" id="currentDisplay">0.5A</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Frequency</div>
+                    <div class="stat-value" id="frequencyDisplay">0 Hz</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Power</div>
+                    <div class="stat-value" id="powerDisplay">6W</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Switch State</div>
+                    <div class="stat-value" id="switchStateDisplay">ON</div>
+                </div>
+            </div>
+            
+            <div id="infoPanel" class="info-panel dc">
+                <h2>⚡ Direct Current (DC) Circuit with Physical Switch</h2>
+                <p>
+                    In a DC circuit, current flows in one constant direction. The battery's positive terminal connects 
+                    to the <strong>physical wall switch</strong> (shown in the middle of the circuit), then to the bulb's center contact through the hot wire (red). 
+                    When the switch is <strong>OPEN</strong>, the circuit is broken and no current flows. When <strong>CLOSED</strong>, current passes through the 
+                    switch contacts, through the tungsten filament, heating it to 2500°C to produce light. Click on the switch to toggle it ON/OFF.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentMode = 'dc';
+        let powerOn = true;
+        let circuitSwitchClosed = true;
+        let time = 0;
+        let electrons = [];
+        let sparks = [];
+        let switchAnimationProgress = 0;
+        let switchTargetState = true;
+        let arcing = false;
+        let arcTime = 0;
+        
+        const electronSpeed = 1.5;
+        const acFrequency = 0.04;
+
+        class Electron {
+            constructor(x, y, pathPoints, segment = 0) {
+                this.x = x;
+                this.y = y;
+                this.pathPoints = pathPoints;
+                this.segment = segment;
+                this.progress = 0;
+                this.speed = electronSpeed + (Math.random() - 0.5) * 0.5;
+                this.size = 3 + Math.random() * 2;
+                this.glow = Math.random() * 0.5 + 0.5;
+                this.angle = Math.random() * Math.PI * 2;
+                this.blockedAtSwitch = false;
+            }
+
+            update() {
+                if (!powerOn || !circuitSwitchClosed) {
+                    this.glow = Math.max(0.1, this.glow - 0.05);
+                    return;
+                }
+
+                if (currentMode === 'dc') {
+                    this.progress += this.speed * 0.015;
+                    
+                    if (this.progress >= 1) {
+                        this.segment = (this.segment + 1) % (this.pathPoints.length - 1);
+                        this.progress = 0;
+                    }
+                } else {
+                    const oscillation = Math.sin(time * acFrequency);
+                    this.progress += this.speed * 0.015 * oscillation;
+                    
+                    if (this.progress > 1) {
+                        this.segment = (this.segment + 1) % (this.pathPoints.length - 1);
+                        this.progress = 0;
+                    } else if (this.progress < 0) {
+                        this.segment = (this.segment - 1 + this.pathPoints.length - 1) % (this.pathPoints.length - 1);
+                        this.progress = 1;
+                    }
+                }
+
+                const p1 = this.pathPoints[this.segment];
+                const p2 = this.pathPoints[this.segment + 1];
+                
+                this.x = p1.x + (p2.x - p1.x) * this.progress;
+                this.y = p1.y + (p2.y - p1.y) * this.progress;
+                
+                this.angle += 0.1;
+                this.glow = 0.5 + Math.sin(time * 0.1 + this.angle) * 0.5;
+                
+                this.blockedAtSwitch = false;
+            }
+
+            draw() {
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+                gradient.addColorStop(0, `rgba(255, 220, 100, ${this.glow})`);
+                gradient.addColorStop(0.4, `rgba(255, 180, 50, ${this.glow * 0.6})`);
+                gradient.addColorStop(1, 'rgba(255, 150, 0, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = `rgba(255, 255, 200, ${this.glow})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Spark {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 3;
+                this.vy = (Math.random() - 0.5) * 3;
+                this.life = 1;
+                this.decay = 0.02 + Math.random() * 0.02;
+                this.size = 2 + Math.random() * 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.1;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 200, 100, ${this.life})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class ElectricArc {
+            constructor(x1, y1, x2, y2) {
+                this.x1 = x1;
+                this.y1 = y1;
+                this.x2 = x2;
+                this.y2 = y2;
+                this.life = 1;
+                this.decay = 0.03;
+                this.points = [];
+                this.generateArcPoints();
+            }
+
+            generateArcPoints() {
+                const numPoints = 15;
+                this.points = [];
+                
+                // Main curve points
+                for (let i = 0; i <= numPoints; i++) {
+                    const t = i / numPoints;
+                    const x = this.x1 + (this.x2 - this.x1) * t;
+                    const y = this.y1 + (this.y2 - this.y1) * t;
+                    
+                    // Add some randomness to create arc shape
+                    const offsetX = Math.sin(t * Math.PI) * 30 * (Math.random() - 0.5);
+                    const offsetY = Math.sin(t * Math.PI) * 30 * (Math.random() - 0.5);
+                    
+                    this.points.push({
+                        x: x + offsetX,
+                        y: y + offsetY
+                    });
+                }
+            }
+
+            update() {
+                this.life -= this.decay;
+                
+                // Add some movement to the arc
+                this.points.forEach((point, i) => {
+                    const t = i / this.points.length;
+                    point.x += (Math.random() - 0.5) * 3;
+                    point.y += (Math.random() - 0.5) * 3;
+                });
+            }
+
+            draw() {
+                if (this.life <= 0) return;
+                
+                // Draw multiple lines for arc effect
+                for (let j = 0; j < 3; j++) {
+                    ctx.strokeStyle = `rgba(${255 - j * 30}, ${200 - j * 40}, ${50 + j * 20}, ${this.life * 0.6})`;
+                    ctx.lineWidth = 4 - j;
+                    ctx.lineCap = 'round';
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.points[0].x, this.points[0].y);
+                    
+                    for (let i = 1; i < this.points.length; i++) {
+                        const cp1x = (this.points[i-1].x + this.points[i].x) / 2;
+                        const cp1y = (this.points[i-1].y + this.points[i].y) / 2;
+                        ctx.quadraticCurveTo(cp1x, cp1y, this.points[i].x, this.points[i].y);
+                    }
+                    ctx.stroke();
+                }
+                
+                // Glow effect
+                ctx.fillStyle = `rgba(255, 220, 100, ${this.life * 0.2})`;
+                ctx.beginPath();
+                ctx.arc(this.x2, this.y2, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        let arcs = [];
+
+        function drawRealisticBattery(x, y, width, height) {
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(x + 6, y + 6, width, height);
+            
+            // Main body
+            const bodyGrad = ctx.createLinearGradient(x, y, x + width, y);
+            bodyGrad.addColorStop(0, '#1a1a1a');
+            bodyGrad.addColorStop(0.3, '#2d2d2d');
+            bodyGrad.addColorStop(0.7, '#2d2d2d');
+            bodyGrad.addColorStop(1, '#1a1a1a');
+            ctx.fillStyle = bodyGrad;
+            ctx.fillRect(x, y, width, height);
+            
+            // Edge highlight
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, width, height);
+            
+            // Label area
+            const labelGrad = ctx.createLinearGradient(x, y + 25, x, y + height - 25);
+            labelGrad.addColorStop(0, '#c92a2a');
+            labelGrad.addColorStop(0.5, '#e74c3c');
+            labelGrad.addColorStop(1, '#c92a2a');
+            ctx.fillStyle = labelGrad;
+            ctx.fillRect(x + 8, y + 25, width - 16, height - 50);
+            
+            // Text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 22px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('12V', x + width/2, y + height/2 - 5);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('DC BATTERY', x + width/2, y + height/2 + 15);
+            
+            // Positive terminal
+            const posGrad = ctx.createRadialGradient(x + width/2, y - 15, 0, x + width/2, y - 15, 20);
+            posGrad.addColorStop(0, '#daa520');
+            posGrad.addColorStop(1, '#b8860b');
+            ctx.fillStyle = posGrad;
+            ctx.beginPath();
+            ctx.arc(x + width/2, y - 8, 16, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#8b6914';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('+', x + width/2, y - 2);
+            
+            // Negative terminal
+            const negGrad = ctx.createRadialGradient(x + width/2, y + height + 15, 0, x + width/2, y + height + 15, 20);
+            negGrad.addColorStop(0, '#9a9a9a');
+            negGrad.addColorStop(1, '#6a6a6a');
+            ctx.fillStyle = negGrad;
+            ctx.beginPath();
+            ctx.arc(x + width/2, y + height + 8, 16, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#4a4a4a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('−', x + width/2, y + height + 14);
+            
+            ctx.textAlign = 'left';
+        }
+
+        function drawRealisticBulbWithConnections(x, y, radius, isOn) {
+            const bulbCenterY = y - 80;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 55, radius * 0.9, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // ===== BULB BASE (SCREW SOCKET) =====
+            // Side contact (screw threads) - connects to NEUTRAL wire
+            const baseGrad = ctx.createLinearGradient(x - 28, y, x + 28, y);
+            baseGrad.addColorStop(0, '#9a7d0a');
+            baseGrad.addColorStop(0.5, '#d4af37');
+            baseGrad.addColorStop(1, '#9a7d0a');
+            
+            // Draw screw threads (side contact)
+            for (let i = 0; i < 7; i++) {
+                ctx.fillStyle = i % 2 === 0 ? '#d4af37' : '#b8860b';
+                ctx.fillRect(x - 25, y - 10 + i * 7, 50, 5);
+                
+                // Thread grooves
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.fillRect(x - 25, y - 10 + i * 7 + 4, 50, 1);
+            }
+            
+            // Bottom contact - connects to HOT wire
+            const bottomContactGrad = ctx.createRadialGradient(x, y + 45, 0, x, y + 45, 18);
+            bottomContactGrad.addColorStop(0, '#c0c0c0');
+            bottomContactGrad.addColorStop(0.7, '#a0a0a0');
+            bottomContactGrad.addColorStop(1, '#707070');
+            ctx.fillStyle = bottomContactGrad;
+            ctx.beginPath();
+            ctx.arc(x, y + 45, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Contact point detail
+            ctx.strokeStyle = '#505050';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Insulator ring (between contacts)
+            ctx.fillStyle = '#2c2c2c';
+            ctx.fillRect(x - 26, y + 35, 52, 8);
+            
+            // ===== WIRE CONNECTIONS - VERY DETAILED =====
+            
+            // BOTTOM CENTER CONTACT CONNECTION (Hot wire - Red)
+            // Connection point terminal
+            ctx.fillStyle = '#c0c0c0';
+            ctx.beginPath();
+            ctx.arc(x, y + 45, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // SIDE SCREW THREAD CONNECTION (Neutral wire - Blue)
+            // Connection point on threads
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath();
+            ctx.arc(x - 25, y + 15, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // ===== INTERNAL WIRING (visible through base) =====
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // Wire from bottom contact to filament
+            ctx.beginPath();
+            ctx.moveTo(x, y + 35);
+            ctx.lineTo(x, y - 10);
+            ctx.stroke();
+            
+            // Wire from side contact to filament
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y + 15);
+            ctx.lineTo(x - 15, y);
+            ctx.lineTo(x - 10, y - 10);
+            ctx.stroke();
+            
+            // ===== GLASS BULB =====
+            const glassGrad = ctx.createRadialGradient(
+                x - radius * 0.4, bulbCenterY - radius * 0.4, 0,
+                x, bulbCenterY, radius * 1.3
+            );
+            
+            if (isOn && powerOn && circuitSwitchClosed) {
+                glassGrad.addColorStop(0, '#fffef0');
+                glassGrad.addColorStop(0.3, '#fffacd');
+                glassGrad.addColorStop(0.7, '#fff4d6');
+                glassGrad.addColorStop(1, 'rgba(255, 255, 255, 0.6)');
+            } else {
+                glassGrad.addColorStop(0, '#f5f5f5');
+                glassGrad.addColorStop(0.6, '#e8e8e8');
+                glassGrad.addColorStop(1, 'rgba(230, 230, 230, 0.6)');
+            }
+            
+            ctx.fillStyle = glassGrad;
+            ctx.beginPath();
+            ctx.arc(x, bulbCenterY, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Glass outline
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Glass reflection/shine
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.45, bulbCenterY - radius * 0.45, radius * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // ===== FILAMENT =====
+            ctx.strokeStyle = isOn && powerOn && circuitSwitchClosed ? '#ff6600' : '#555';
+            ctx.lineWidth = isOn && powerOn && circuitSwitchClosed ? 4 : 3;
+            ctx.shadowBlur = isOn && powerOn && circuitSwitchClosed ? 15 : 0;
+            ctx.shadowColor = '#ff6600';
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 18, bulbCenterY + 20);
+            
+            // Coiled filament shape
+            for (let i = 0; i < 5; i++) {
+                const yOffset = bulbCenterY - 10 + i * 8;
+                ctx.bezierCurveTo(
+                    x - 12, yOffset,
+                    x - 8, yOffset - 5,
+                    x, yOffset
+                );
+                ctx.bezierCurveTo(
+                    x + 8, yOffset - 5,
+                    x + 12, yOffset,
+                    x + 18, yOffset
+                );
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Filament support wires
+            ctx.strokeStyle = isOn && powerOn && circuitSwitchClosed ? '#ff8833' : '#666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x - 10, y - 10);
+            ctx.lineTo(x - 18, bulbCenterY + 15);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 10);
+            ctx.lineTo(x + 18, bulbCenterY + 15);
+            ctx.stroke();
+            
+            // ===== GLOW EFFECT =====
+            if (isOn && powerOn && circuitSwitchClosed) {
+                const glowGrad = ctx.createRadialGradient(x, bulbCenterY, 0, x, bulbCenterY, radius * 2.5);
+                glowGrad.addColorStop(0, 'rgba(255, 255, 180, 0.5)');
+                glowGrad.addColorStop(0.3, 'rgba(255, 255, 120, 0.3)');
+                glowGrad.addColorStop(0.6, 'rgba(255, 255, 60, 0.15)');
+                glowGrad.addColorStop(1, 'rgba(255, 255, 0, 0)');
+                ctx.fillStyle = glowGrad;
+                ctx.beginPath();
+                ctx.arc(x, bulbCenterY, radius * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Occasional sparks
+                if (Math.random() < 0.015) {
+                    sparks.push(new Spark(x, bulbCenterY));
+                }
+            }
+        }
+
+        function drawRealisticGenerator(x, y, width, height) {
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(x + 6, y + 6, width, height);
+            
+            // Main housing
+            const housingGrad = ctx.createLinearGradient(x, y, x, y + height);
+            housingGrad.addColorStop(0, '#34495e');
+            housingGrad.addColorStop(0.5, '#2c3e50');
+            housingGrad.addColorStop(1, '#1a252f');
+            ctx.fillStyle = housingGrad;
+            ctx.fillRect(x, y, width, height);
+            
+            // Housing outline
+            ctx.strokeStyle = '#1a252f';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(x, y, width, height);
+            
+            // Ventilation slots
+            ctx.strokeStyle = '#0d1318';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + 15, y + 20 + i * 14);
+                ctx.lineTo(x + width - 15, y + 20 + i * 14);
+                ctx.stroke();
+            }
+            
+            // Output terminals
+            const terminal1Grad = ctx.createRadialGradient(x + 25, y + height - 25, 0, x + 25, y + height - 25, 12);
+            terminal1Grad.addColorStop(0, '#d4af37');
+            terminal1Grad.addColorStop(1, '#b8860b');
+            ctx.fillStyle = terminal1Grad;
+            ctx.beginPath();
+            ctx.arc(x + 25, y + height - 25, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const terminal2Grad = ctx.createRadialGradient(x + width - 25, y + height - 25, 0, x + width - 25, y + height - 25, 12);
+            terminal2Grad.addColorStop(0, '#9a9a9a');
+            terminal2Grad.addColorStop(1, '#6a6a6a');
+            ctx.fillStyle = terminal2Grad;
+            ctx.beginPath();
+            ctx.arc(x + width - 25, y + height - 25, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Labels
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('AC GENERATOR', x + width/2, y + height - 8);
+            ctx.font = '13px Arial';
+            ctx.fillText('220V ~ 50Hz', x + width/2, y + height + 12);
+            
+            // Rotating mechanism
+            const angle = time * 0.05;
+            ctx.save();
+            ctx.translate(x + width/2, y + height/2);
+            ctx.rotate(angle);
+            
+            // Rotor (magnet)
+            const rotorGrad = ctx.createLinearGradient(-35, -10, 35, 10);
+            rotorGrad.addColorStop(0, '#e74c3c');
+            rotorGrad.addColorStop(0.2, '#c0392b');
+            rotorGrad.addColorStop(0.5, '#7f8c8d');
+            rotorGrad.addColorStop(0.8, '#3498db');
+            rotorGrad.addColorStop(1, '#2980b9');
+            ctx.fillStyle = rotorGrad;
+            ctx.fillRect(-35, -10, 70, 20);
+            
+            // Pole markings
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('N', -20, 5);
+            ctx.fillText('S', 20, 5);
+            
+            // Coil winding
+            ctx.strokeStyle = '#e67e22';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Inner coil
+            ctx.strokeStyle = '#d35400';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, 22, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.restore();
+            ctx.textAlign = 'left';
+        }
+
+        function drawPhysicalWallSwitch(x, y, isClosed) {
+            // Switch box (wall plate)
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(x - 50, y - 70, 100, 140);
+            
+            // Shadow for 3D effect
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(x - 45, y - 65, 90, 130);
+            
+            // Switch mechanism housing
+            const housingGrad = ctx.createLinearGradient(x - 35, y - 50, x - 35, y + 50);
+            housingGrad.addColorStop(0, '#2c3e50');
+            housingGrad.addColorStop(0.5, '#34495e');
+            housingGrad.addColorStop(1, '#2c3e50');
+            ctx.fillStyle = housingGrad;
+            ctx.fillRect(x - 35, y - 50, 70, 100);
+            
+            // Screws on wall plate
+            ctx.fillStyle = '#bdc3c7';
+            ctx.beginPath();
+            ctx.arc(x - 35, y - 55, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 35, y - 55, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x - 35, y + 55, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 35, y + 55, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Switch toggle mechanism
+            const switchHeight = isClosed ? 40 : -40;
+            const animatedHeight = isClosed ? 
+                40 * switchAnimationProgress : 
+                -40 + (40 + 40) * switchAnimationProgress;
+            
+            // Toggle lever
+            const leverGrad = ctx.createLinearGradient(x, y - 30, x, y + 30);
+            leverGrad.addColorStop(0, '#95a5a6');
+            leverGrad.addColorStop(0.5, '#ecf0f1');
+            leverGrad.addColorStop(1, '#95a5a6');
+            ctx.fillStyle = leverGrad;
+            ctx.fillRect(x - 10, y + animatedHeight - 25, 20, 50);
+            
+            // Lever details
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 10, y + animatedHeight - 25, 20, 50);
+            
+            // Lever pivot
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Contact points
+            ctx.fillStyle = isClosed ? '#2ecc71' : '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(x - 15, y + 35, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = isClosed ? '#2ecc71' : '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(x + 15, y + 35, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(x - 15, y - 35, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(x + 15, y - 35, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Wire connections to switch
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x - 15, y + 35);
+            ctx.lineTo(x - 15, y + 70);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x + 15, y - 35);
+            ctx.lineTo(x + 15, y - 70);
+            ctx.stroke();
+            
+            // Switch state indicator
+            ctx.fillStyle = isClosed ? '#2ecc71' : '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(x, y - 90, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(isClosed ? 'ON' : 'OFF', x, y - 86);
+            
+            // Label
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('WALL SWITCH', x, y + 85);
+            
+            // Animate switch transition
+            if (switchAnimationProgress < 1) {
+                switchAnimationProgress += 0.1;
+                if (switchAnimationProgress >= 1) {
+                    switchAnimationProgress = 1;
+                    circuitSwitchClosed = switchTargetState;
+                }
+            }
+            
+            // Draw electric arc if switching while powered
+            if (arcing && powerOn) {
+                const arcStartX = x - 15;
+                const arcStartY = y + 35;
+                const arcEndX = x - 15;
+                const arcEndY = y + animatedHeight - 25;
+                
+                arcs.push(new ElectricArc(arcStartX, arcStartY, arcEndX, arcEndY));
+                
+                arcTime++;
+                if (arcTime > 30) {
+                    arcing = false;
+                    arcTime = 0;
+                }
+            }
+            
+            // Update and draw arcs
+            arcs = arcs.filter(arc => arc.life > 0);
+            arcs.forEach(arc => {
+                arc.update();
+                arc.draw();
+            });
+            
+            ctx.textAlign = 'left';
+        }
+
+        function drawThickWire(x1, y1, x2, y2, color, width = 10, showConnection = false, hasElectricity = true) {
+            // Wire shadow
+            ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+            ctx.lineWidth = width + 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x1 + 3, y1 + 3);
+            ctx.lineTo(x2 + 3, y2 + 3);
+            ctx.stroke();
+            
+            // Wire insulation (outer layer)
+            const wireGrad = ctx.createLinearGradient(x1, y1, x2, y2);
+            const baseColor = color === 'red' ? '#c92a2a' : '#1a535c';
+            const lightColor = color === 'red' ? '#e74c3c' : '#2b8a9e';
+            const darkColor = color === 'red' ? '#a61e1e' : '#14404a';
+            
+            wireGrad.addColorStop(0, darkColor);
+            wireGrad.addColorStop(0.3, baseColor);
+            wireGrad.addColorStop(0.7, lightColor);
+            wireGrad.addColorStop(1, darkColor);
+            
+            ctx.strokeStyle = wireGrad;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            // Highlight reflection
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1 - width/3);
+            ctx.lineTo(x2, y2 - width/3);
+            ctx.stroke();
+            
+            // Inner copper core (partially visible at ends)
+            if (showConnection) {
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(x2, y2, width/2 - 1, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Stranded wire detail
+                for (let i = 0; i < 5; i++) {
+                    const angle = (Math.PI * 2 / 5) * i;
+                    const cx = x2 + Math.cos(angle) * (width/4);
+                    const cy = y2 + Math.sin(angle) * (width/4);
+                    ctx.fillStyle = '#b8860b';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Electrical energy glow
+            if (hasElectricity && powerOn && circuitSwitchClosed) {
+                const glowColor = color === 'red' ? 'rgba(255, 100, 100, 0.4)' : 'rgba(100, 200, 255, 0.4)';
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = width + 6;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+        function drawConnectionPoint(x, y, size, label, color) {
+            // Connection terminal
+            const termGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
+            termGrad.addColorStop(0, color === 'red' ? '#d4af37' : '#c0c0c0');
+            termGrad.addColorStop(1, color === 'red' ? '#b8860b' : '#808080');
+            
+            ctx.fillStyle = termGrad;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = color === 'red' ? '#8b6914' : '#505050';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Screw detail
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.moveTo(x - size/2, y);
+            ctx.lineTo(x + size/2, y);
+            ctx.stroke();
+            
+            // Label
+            if (label) {
+                ctx.fillStyle = '#eee';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, x, y - size - 8);
+            }
+            
+            ctx.textAlign = 'left';
+        }
+
+        function drawArrow(x, y, rotation, color, label = '') {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            
+            // Arrow shaft with gradient
+            const shaftGrad = ctx.createLinearGradient(-20, 0, 20, 0);
+            shaftGrad.addColorStop(0, 'rgba(255, 215, 0, 0)');
+            shaftGrad.addColorStop(0.5, color);
+            shaftGrad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            
+            ctx.fillStyle = shaftGrad;
+            ctx.fillRect(-20, -3, 40, 6);
+            
+            // Arrow head
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(20, 0);
+            ctx.lineTo(10, -10);
+            ctx.lineTo(10, 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Outline
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Label
+            if (label) {
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, 0, -15);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawDCCircuit() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Component positions
+            const battery = {x: 100, y: 250, width: 90, height: 200};
+            const wallSwitch = {x: 820, y: 250};
+            const bulb = {x: 1050, y: 320};
+            
+            // Draw battery
+            drawRealisticBattery(battery.x, battery.y, battery.width, battery.height);
+            
+            // Connection points
+            const battPosTerminal = {x: battery.x + battery.width/2, y: battery.y - 8};
+            const battNegTerminal = {x: battery.x + battery.width/2, y: battery.y + battery.height + 8};
+            
+            const switchInput = {x: wallSwitch.x - 15, y: wallSwitch.y + 70};
+            const switchOutput = {x: wallSwitch.x + 15, y: wallSwitch.y - 70};
+            
+            const bulbHotContact = {x: bulb.x, y: bulb.y + 45};
+            const bulbNeutralContact = {x: bulb.x - 25, y: bulb.y + 15};
+            
+            // Wire from battery positive to switch input
+            drawThickWire(battPosTerminal.x, battPosTerminal.y, battPosTerminal.x, 150, 'red', 10, false, powerOn);
+            drawThickWire(battPosTerminal.x, 150, 600, 150, 'red', 10, false, powerOn);
+            drawThickWire(600, 150, 600, switchInput.y, 'red', 10, false, powerOn);
+            drawThickWire(600, switchInput.y, switchInput.x, switchInput.y, 'red', 10, true, powerOn);
+            
+            // Wire from switch output to bulb
+            drawThickWire(switchOutput.x, switchOutput.y, switchOutput.x, 80, 'red', 10, true, powerOn && circuitSwitchClosed);
+            drawThickWire(switchOutput.x, 80, bulbHotContact.x, 80, 'red', 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(bulbHotContact.x, 80, bulbHotContact.x, bulbHotContact.y, 'red', 10, true, powerOn && circuitSwitchClosed);
+            
+            // Wire from bulb back to battery negative (neutral path)
+            drawThickWire(bulbNeutralContact.x, bulbNeutralContact.y, bulbNeutralContact.x, 570, 'blue', 10, true, powerOn && circuitSwitchClosed);
+            drawThickWire(bulbNeutralContact.x, 570, 600, 570, 'blue', 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(600, 570, 600, battNegTerminal.y, 'blue', 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(600, battNegTerminal.y, battNegTerminal.x, battNegTerminal.y, 'blue', 10, false, powerOn && circuitSwitchClosed);
+            
+            // Draw connection points
+            drawConnectionPoint(battPosTerminal.x, battPosTerminal.y, 10, '', 'red');
+            drawConnectionPoint(battNegTerminal.x, battNegTerminal.y, 10, '', 'blue');
+            
+            // Draw physical wall switch
+            drawPhysicalWallSwitch(wallSwitch.x, wallSwitch.y, circuitSwitchClosed);
+            
+            // Draw bulb with connections
+            drawRealisticBulbWithConnections(bulb.x, bulb.y, 65, powerOn && circuitSwitchClosed);
+            
+            // Draw current flow arrows (only if switch is closed)
+            if (powerOn && circuitSwitchClosed) {
+                drawArrow(350, 150, 0, 'rgba(255, 100, 100, 0.9)', 'Current →');
+                drawArrow(600, 200, Math.PI/2, 'rgba(255, 100, 100, 0.9)');
+                drawArrow(700, switchInput.y, 0, 'rgba(255, 100, 100, 0.9)');
+                drawArrow(switchOutput.x, 40, Math.PI/2, 'rgba(255, 100, 100, 0.9)');
+                drawArrow(925, 80, 0, 'rgba(255, 100, 100, 0.9)');
+                
+                drawArrow(925, 570, Math.PI, 'rgba(100, 180, 255, 0.9)', '← Return');
+                drawArrow(600, 490, -Math.PI/2, 'rgba(100, 180, 255, 0.9)');
+                drawArrow(350, battNegTerminal.y, Math.PI, 'rgba(100, 180, 255, 0.9)');
+            } else if (powerOn && !circuitSwitchClosed) {
+                // Show current stopping at switch
+                drawArrow(350, 150, 0, 'rgba(255, 100, 100, 0.9)', 'Current →');
+                drawArrow(600, 200, Math.PI/2, 'rgba(255, 100, 100, 0.9)');
+                drawArrow(700, switchInput.y, 0, 'rgba(255, 100, 100, 0.9)');
+                
+                // Show "blocked" symbol at switch
+                ctx.fillStyle = 'rgba(255, 50, 50, 0.8)';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('✗', wallSwitch.x, wallSwitch.y);
+                ctx.textAlign = 'left';
+            }
+            
+            // Circuit labels
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('DC BATTERY', 70, 490);
+            ctx.fillText('12V', 115, 515);
+            
+            ctx.fillText('WALL SWITCH', 780, 400);
+            
+            ctx.fillText('INCANDESCENT BULB', 920, 520);
+            
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText('HOT WIRE (+)', 350, 130);
+            ctx.fillText('(Through Switch)', 790, 160);
+            
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillText('NEUTRAL WIRE (−)', 350, 595);
+            
+            // Detailed annotations
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '13px Arial';
+            ctx.fillText('Click the switch to open/close circuit', 770, 430);
+            ctx.fillText('Switch must be closed for current flow', 770, 450);
+        }
+
+        function drawACCircuit() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const generator = {x: 80, y: 270, width: 150, height: 180};
+            const wallSwitch = {x: 820, y: 250};
+            const bulb = {x: 1050, y: 320};
+            
+            drawRealisticGenerator(generator.x, generator.y, generator.width, generator.height);
+            
+            const acPhase = Math.sin(time * acFrequency);
+            const bulbIntensity = Math.abs(acPhase);
+            const bulbOn = bulbIntensity > 0.3 && powerOn && circuitSwitchClosed;
+            
+            const genTopTerminal = {x: generator.x + 25, y: generator.y + generator.height - 25};
+            const genBottomTerminal = {x: generator.x + generator.width - 25, y: generator.y + generator.height - 25};
+            
+            const switchInput = {x: wallSwitch.x - 15, y: wallSwitch.y + 70};
+            const switchOutput = {x: wallSwitch.x + 15, y: wallSwitch.y - 70};
+            
+            const bulbHotContact = {x: bulb.x, y: bulb.y + 45};
+            const bulbNeutralContact = {x: bulb.x - 25, y: bulb.y + 15};
+            
+            const wireColor = acPhase > 0 ? 'red' : 'blue';
+            
+            // Wire from generator to switch input
+            drawThickWire(genTopTerminal.x, genTopTerminal.y, genTopTerminal.x, 150, wireColor, 10, false, powerOn);
+            drawThickWire(genTopTerminal.x, 150, 600, 150, wireColor, 10, false, powerOn);
+            drawThickWire(600, 150, 600, switchInput.y, wireColor, 10, false, powerOn);
+            drawThickWire(600, switchInput.y, switchInput.x, switchInput.y, wireColor, 10, true, powerOn);
+            
+            // Wire from switch output to bulb
+            drawThickWire(switchOutput.x, switchOutput.y, switchOutput.x, 80, wireColor, 10, true, powerOn && circuitSwitchClosed);
+            drawThickWire(switchOutput.x, 80, bulbHotContact.x, 80, wireColor, 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(bulbHotContact.x, 80, bulbHotContact.x, bulbHotContact.y, wireColor, 10, true, powerOn && circuitSwitchClosed);
+            
+            // Wire from bulb back to generator
+            drawThickWire(bulbNeutralContact.x, bulbNeutralContact.y, bulbNeutralContact.x, 570, wireColor, 10, true, powerOn && circuitSwitchClosed);
+            drawThickWire(bulbNeutralContact.x, 570, 600, 570, wireColor, 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(600, 570, 600, genBottomTerminal.y, wireColor, 10, false, powerOn && circuitSwitchClosed);
+            drawThickWire(600, genBottomTerminal.y, genBottomTerminal.x, genBottomTerminal.y, wireColor, 10, false, powerOn && circuitSwitchClosed);
+            
+            drawConnectionPoint(genTopTerminal.x, genTopTerminal.y, 10, '', wireColor);
+            drawConnectionPoint(genBottomTerminal.x, genBottomTerminal.y, 10, '', wireColor);
+            
+            // Draw physical wall switch
+            drawPhysicalWallSwitch(wallSwitch.x, wallSwitch.y, circuitSwitchClosed);
+            
+            drawRealisticBulbWithConnections(bulb.x, bulb.y, 65, bulbOn);
+            
+            // Arrows
+            if (powerOn && circuitSwitchClosed) {
+                const arrowColor = acPhase > 0 ? 'rgba(255, 100, 100, 0.9)' : 'rgba(100, 180, 255, 0.9)';
+                const direction = acPhase > 0;
+                
+                if (direction) {
+                    drawArrow(350, 150, 0, arrowColor, 'Forward →');
+                    drawArrow(600, 200, Math.PI/2, arrowColor);
+                    drawArrow(700, switchInput.y, 0, arrowColor);
+                    drawArrow(switchOutput.x, 40, Math.PI/2, arrowColor);
+                    drawArrow(925, 80, 0, arrowColor);
+                    drawArrow(925, 570, Math.PI, arrowColor);
+                    drawArrow(600, 490, -Math.PI/2, arrowColor);
+                    drawArrow(350, genBottomTerminal.y, Math.PI, arrowColor);
+                } else {
+                    drawArrow(350, 150, Math.PI, arrowColor, '← Reverse');
+                    drawArrow(600, 200, -Math.PI/2, arrowColor);
+                    drawArrow(700, switchInput.y, Math.PI, arrowColor);
+                    drawArrow(switchOutput.x, 40, -Math.PI/2, arrowColor);
+                    drawArrow(925, 80, Math.PI, arrowColor);
+                    drawArrow(925, 570, 0, arrowColor);
+                    drawArrow(600, 490, Math.PI/2, arrowColor);
+                    drawArrow(350, genBottomTerminal.y, 0, arrowColor);
+                }
+            }
+            
+            drawSineWave(270, 630, time);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('AC GENERATOR', 60, 490);
+            ctx.fillText('220V ~ 50Hz', 70, 515);
+            ctx.fillText('WALL SWITCH', 780, 400);
+            ctx.fillText('INCANDESCENT BULB', 920, 520);
+            
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = acPhase > 0 ? '#ff6b6b' : '#4ecdc4';
+            ctx.fillText(acPhase > 0 ? 'FORWARD CYCLE' : 'REVERSE CYCLE', 420, 130);
+            
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '13px Arial';
+            ctx.fillText('Current alternates direction', 410, 595);
+            ctx.fillText('50 times per second', 430, 615);
+        }
+
+        function drawSineWave(x, y, t) {
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(x - 10, y - 50, 760, 90);
+            
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x, y - 40 + i * 16);
+                ctx.lineTo(x + 740, y - 40 + i * 16);
+                ctx.stroke();
+            }
+            
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            
+            for (let i = 0; i < 740; i++) {
+                const xPos = x + i;
+                const yPos = y + Math.sin((i - t * 2) * acFrequency * 5) * 35;
+                
+                if (i === 0) {
+                    ctx.moveTo(xPos, yPos);
+                } else {
+                    ctx.lineTo(xPos, yPos);
+                }
+            }
+            ctx.stroke();
+            
+            ctx.strokeStyle = 'rgba(78, 205, 196, 0.4)';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#eee';
+            ctx.font = 'bold 15px Arial';
+            ctx.fillText('AC VOLTAGE WAVEFORM (50 Hz)', x + 220, y - 55);
+            
+            ctx.fillStyle = '#4ecdc4';
+            ctx.font = '12px Arial';
+            ctx.fillText('+220V', x - 60, y - 35);
+            ctx.fillText('0V', x - 60, y);
+            ctx.fillText('-220V', x - 60, y + 35);
+        }
+
+        function createElectronPath() {
+            if (currentMode === 'dc') {
+                return [
+                    {x: 145, y: 150}, {x: 350, y: 150}, {x: 600, y: 150},
+                    {x: 600, y: 200}, {x: 700, y: 250}, // To switch input
+                    {x: 805, y: 180}, // Switch contact point
+                    {x: 835, y: 80}, // From switch output
+                    {x: 925, y: 80}, {x: 1050, y: 80},
+                    {x: 1050, y: 365}, {x: 1025, y: 570}, {x: 925, y: 570},
+                    {x: 600, y: 570}, {x: 600, y: 458}, {x: 350, y: 458},
+                    {x: 145, y: 458}, {x: 145, y: 350}, {x: 145, y: 150}
+                ];
+            } else {
+                return [
+                    {x: 105, y: 150}, {x: 350, y: 150}, {x: 600, y: 150},
+                    {x: 600, y: 200}, {x: 700, y: 250}, // To switch input
+                    {x: 805, y: 180}, // Switch contact point
+                    {x: 835, y: 80}, // From switch output
+                    {x: 925, y: 80}, {x: 1050, y: 80},
+                    {x: 1050, y: 365}, {x: 1025, y: 570}, {x: 925, y: 570},
+                    {x: 600, y: 570}, {x: 600, y: 425}, {x: 350, y: 425},
+                    {x: 105, y: 425}, {x: 105, y: 300}, {x: 105, y: 150}
+                ];
+            }
+        }
+
+        function initElectrons() {
+            electrons = [];
+            const path = createElectronPath();
+            const numElectrons = 45;
+            
+            for (let i = 0; i < numElectrons; i++) {
+                const segment = Math.floor(Math.random() * (path.length - 1));
+                const progress = Math.random();
+                const p1 = path[segment];
+                const p2 = path[segment + 1];
+                const x = p1.x + (p2.x - p1.x) * progress;
+                const y = p1.y + (p2.y - p1.y) * progress;
+                
+                electrons.push(new Electron(x, y, path, segment));
+            }
+        }
+
+        function updateStats() {
+            if (currentMode === 'dc') {
+                document.getElementById('voltageDisplay').textContent = powerOn ? '12V' : '0V';
+                document.getElementById('currentDisplay').textContent = (powerOn && circuitSwitchClosed) ? '0.5A' : '0A';
+                document.getElementById('frequencyDisplay').textContent = '0 Hz';
+                document.getElementById('powerDisplay').textContent = (powerOn && circuitSwitchClosed) ? '6W' : '0W';
+                document.getElementById('switchStateDisplay').textContent = circuitSwitchClosed ? 'ON' : 'OFF';
+                document.getElementById('switchStateDisplay').style.color = circuitSwitchClosed ? '#2ecc71' : '#e74c3c';
+            } else {
+                const voltage = (powerOn && circuitSwitchClosed) ? Math.abs(Math.sin(time * acFrequency) * 220).toFixed(0) : '0';
+                const current = (powerOn && circuitSwitchClosed) ? Math.abs(Math.sin(time * acFrequency) * 0.5).toFixed(2) : '0';
+                const power = (powerOn && circuitSwitchClosed) ? Math.abs(Math.sin(time * acFrequency) * 110).toFixed(0) : '0';
+                
+                document.getElementById('voltageDisplay').textContent = voltage + 'V';
+                document.getElementById('currentDisplay').textContent = current + 'A';
+                document.getElementById('frequencyDisplay').textContent = '50 Hz';
+                document.getElementById('powerDisplay').textContent = power + 'W';
+                document.getElementById('switchStateDisplay').textContent = circuitSwitchClosed ? 'ON' : 'OFF';
+                document.getElementById('switchStateDisplay').style.color = circuitSwitchClosed ? '#2ecc71' : '#e74c3c';
+            }
+        }
+
+        function toggleCircuitSwitch() {
+            if (switchAnimationProgress < 1) return;
+            
+            switchTargetState = !circuitSwitchClosed;
+            switchAnimationProgress = 0;
+            
+            // Create arcing effect if switching while powered
+            if (powerOn) {
+                arcing = true;
+                arcTime = 0;
+            }
+            
+            // Play switch click sound effect
+            playSwitchSound();
+        }
+
+        function playSwitchSound() {
+            // Create audio context for switch click sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Quick click sound
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        function animate() {
+            if (powerOn) {
+                time++;
+            }
+            
+            if (currentMode === 'dc') {
+                drawDCCircuit();
+            } else {
+                drawACCircuit();
+            }
+            
+            if (powerOn && circuitSwitchClosed) {
+                electrons.forEach(e => {
+                    e.update();
+                    e.draw();
+                });
+                
+                sparks = sparks.filter(s => s.life > 0);
+                sparks.forEach(s => {
+                    s.update();
+                    s.draw();
+                });
+            } else {
+                // Fade out electrons when switch is open
+                electrons.forEach(e => {
+                    e.glow = Math.max(0.1, e.glow - 0.05);
+                    e.draw();
+                });
+            }
+            
+            updateStats();
+            requestAnimationFrame(animate);
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const dcBtn = document.querySelector('.btn-dc');
+            const acBtn = document.querySelector('.btn-ac');
+            const infoPanel = document.getElementById('infoPanel');
+            
+            if (mode === 'dc') {
+                dcBtn.classList.add('active');
+                acBtn.classList.remove('active');
+                infoPanel.className = 'info-panel dc';
+                infoPanel.innerHTML = `
+                    <h2>⚡ Direct Current (DC) Circuit with Physical Switch</h2>
+                    <p>
+                        In a DC circuit, current flows in one constant direction. The battery's positive terminal connects 
+                        to the <strong>physical wall switch</strong> (shown in the middle of the circuit), then to the bulb's center contact through the hot wire (red). 
+                        When the switch is <strong>OPEN</strong>, the circuit is broken and no current flows. When <strong>CLOSED</strong>, current passes through the 
+                        switch contacts, through the tungsten filament, heating it to 2500°C to produce light. Click on the switch to toggle it ON/OFF.
+                        Notice how electrons stop at the switch when it's open, and arcing may occur when switching while powered.
+                    </p>
+                `;
+            } else {
+                acBtn.classList.add('active');
+                dcBtn.classList.remove('active');
+                infoPanel.className = 'info-panel ac';
+                infoPanel.innerHTML = `
+                    <h2>⚡ Alternating Current (AC) Circuit with Physical Switch</h2>
+                    <p>
+                        In an AC circuit, current reverses direction 50 times per second (50 Hz). The rotating magnet in the 
+                        generator induces alternating voltage in the coils. This oscillating current flows through the same 
+                        wire connections - through the wall switch, then to center contact and screw threads - but changes direction continuously. 
+                        The switch works the same way - when open, it breaks the circuit regardless of current direction. 
+                        During the positive cycle, current flows forward; during the negative cycle, it reverses. 
+                        Click the switch to see how it controls AC current flow.
+                    </p>
+                `;
+            }
+            
+            time = 0;
+            initElectrons();
+        }
+
+        function togglePower() {
+            powerOn = !powerOn;
+            const powerSwitch = document.getElementById('powerSwitch');
+            powerSwitch.classList.toggle('on');
+            
+            if (!powerOn) {
+                sparks = [];
+                arcs = [];
+            }
+        }
+
+        // Setup click handler for the switch
+        document.getElementById('switchClickArea').addEventListener('click', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if click is near the switch (simplified)
+            toggleCircuitSwitch();
+        });
+
+        // Make the click area follow the switch position
+        function updateClickArea() {
+            const switchArea = document.getElementById('switchClickArea');
+            const canvasRect = canvas.getBoundingClientRect();
+            const containerRect = document.querySelector('.simulation-area').getBoundingClientRect();
+            
+            // Position click area over the switch
+            switchArea.style.left = (820 - 60) + 'px';
+            switchArea.style.top = (250 - 60) + 'px';
+        }
+
+        initElectrons();
+        updateClickArea();
+        animate();
+    </script>
+</body>
+</html>

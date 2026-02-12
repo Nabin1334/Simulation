@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HydroLab: Anomalous Expansion</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=JetBrains+Mono:wght@400;700&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --glass-panel: rgba(15, 23, 42, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --sidebar-bg: rgba(15, 23, 42, 0.95);
+
+      --accent-blue: #38bdf8;
+      --accent-purple: #c084fc;
+      --accent-red: #fb7185;
+      --accent-green: #4ade80;
+
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 70px;
+    }
+
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --glass-panel: rgba(255, 255, 255, 0.78);
+      --glass-border: rgba(0, 0, 0, 0.1);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --sidebar-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      transition: color 0.3s, background-color 0.3s;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      transition: width 0.4s cubic-bezier(0.2, 0, 0, 1), background 0.3s;
+      z-index: 20;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+      padding: 20px 10px;
+      align-items: center;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .logo-icon { font-size: 1.8rem; min-width: 40px; text-align: center; }
+    .logo-text {
+      font-weight: 800; font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      opacity: 1; transition: opacity 0.2s;
+    }
+    .sidebar.collapsed .logo-text { opacity: 0; width: 0; }
+
+    .nav-items { flex: 1; display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      background: transparent;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { background: rgba(125,125,125,0.1); color: var(--text-main); }
+    .nav-btn.active { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.2); }
+    .nav-icon { font-size: 1.2rem; min-width: 24px; text-align: center; }
+    .sidebar.collapsed .nav-text { opacity: 0; width: 0; }
+
+    .main-view { flex: 1; position: relative; background: #000; overflow: hidden; }
+
+    #canvas-bg { position: absolute; inset: 0; z-index: 0; transition: opacity 1s ease; }
+    .bg-night {
+      background: radial-gradient(circle at 50% 10%, #23324a 0%, #071028 45%, #020617 100%);
+      opacity: 1;
+    }
+    .bg-day {
+      background:
+        radial-gradient(circle at 70% 0%, rgba(255,255,255,0.72) 0%, rgba(224,242,254,0.78) 30%, rgba(125,211,252,0.88) 100%),
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 55%);
+      opacity: 0;
+    }
+    body.light-mode .bg-night { opacity: 0; }
+    body.light-mode .bg-day { opacity: 1; }
+
+    #canvas-container { position: absolute; inset: 0; z-index: 1; outline: none; }
+
+    .controls-overlay {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      right: auto;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .control-deck {
+      pointer-events: auto;
+      background: var(--glass-panel);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      padding: 20px 22px;
+      border-radius: 22px;
+      width: 420px;
+      max-width: min(420px, calc(100vw - 120px));
+      box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: background 0.3s, border 0.3s, transform 0.25s;
+    }
+
+    .deck-header { display: flex; justify-content: space-between; align-items: flex-end; }
+    .temp-big { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; line-height: 1; color: var(--accent-blue); }
+    .state-badge { font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: rgba(125,125,125,0.1); color: var(--text-muted); }
+
+    .slider-container { position: relative; width: 100%; height: 32px; display: flex; align-items: center; }
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      background: linear-gradient(90deg, #3b82f6 0%, #a855f7 20%, #ef4444 100%);
+      border-radius: 10px; outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+      background: #fff; margin-top: -9px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2); border: 4px solid #3b82f6;
+      transition: transform 0.1s;
+    }
+    input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+    .hud-overlay {
+      position: absolute; top: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 12px;
+      z-index: 10; pointer-events: none;
+    }
+    .hud-card {
+      background: var(--glass-panel);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      padding: 16px; border-radius: 16px; width: 220px;
+      pointer-events: auto;
+      transition: background 0.3s, border 0.3s;
+    }
+    .hud-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .hud-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .hud-val { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; }
+    .hud-unit { font-size: 0.8rem; color: var(--text-muted); }
+
+    #theory-view {
+      position: absolute; inset: 0; z-index: 30;
+      background: var(--bg-color);
+      padding: 40px; overflow-y: auto;
+      display: none;
+      transition: background 0.3s;
+    }
+    #theory-view.active { display: block; }
+
+    .theory-content { max-width: 800px; margin: 0 auto; }
+    .theory-content h1 { font-size: 2.5rem; margin-bottom: 20px; color: var(--accent-blue); }
+    .theory-content p { font-size: 1.1rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 24px; }
+    .theory-card { background: rgba(125,125,125,0.05); padding: 24px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
+
+    .label-3d {
+      position: absolute; top: 0; left: 0;
+      background: rgba(0,0,0,0.6); color: white;
+      padding: 4px 10px; border-radius: 6px;
+      font-size: 0.8rem; font-weight: 600;
+      pointer-events: none; opacity: 0; transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+    }
+
+    @media (max-width: 700px) {
+      .controls-overlay { left: 14px; bottom: 14px; }
+      .control-deck { width: calc(100vw - 28px); max-width: 520px; }
+      .hud-overlay { top: 14px; right: 14px; }
+    }
+  </style>
+</head>
+
+<body class="">
+  <aside class="sidebar collapsed" id="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">⚗️</div>
+      <div class="logo-text">HydroLab</div>
+    </div>
+
+    <div class="nav-items">
+      <!-- onclick removed; use data-mode -->
+      <button class="nav-btn active" data-mode="simulation">
+        <div class="nav-icon">🏞️</div>
+        <span class="nav-text">Simulation</span>
+      </button>
+      <button class="nav-btn" data-mode="theory">
+        <div class="nav-icon">📖</div>
+        <span class="nav-text">Theory & Concepts</span>
+      </button>
+    </div>
+
+    <div style="margin-top:auto;">
+      <!-- onclick removed; use id -->
+      <button class="nav-btn" id="theme-btn" type="button">
+        <div class="nav-icon" id="theme-icon">☀️</div>
+        <span class="nav-text" id="theme-text">Switch to Light</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-view">
+    <div id="canvas-bg" class="bg-night"></div>
+    <div id="canvas-bg-day" class="bg-day" style="position:absolute; inset:0; z-index:0;"></div>
+
+    <div id="canvas-container"></div>
+    <div id="label-ice" class="label-3d">🧊 Ice Layer</div>
+
+    <div id="simulation-ui">
+      <div class="hud-overlay">
+        <div class="hud-card">
+          <div class="hud-row">
+            <span class="hud-label">Volume</span>
+            <span class="hud-val" id="val-vol" style="color: var(--accent-green)">1.000</span>
+          </div>
+          <div class="hud-unit">Liters</div>
+        </div>
+
+        <div class="hud-card">
+          <div class="hud-row">
+            <span class="hud-label">Density</span>
+            <span class="hud-val" id="val-den" style="color: var(--accent-purple)">0.999</span>
+          </div>
+          <div class="hud-unit">g/cm³</div>
+        </div>
+
+        <div class="hud-card">
+          <div class="hud-label" style="margin-bottom:6px;">Status</div>
+          <div id="val-note" style="font-size:0.9rem; line-height:1.4;">Cooling...</div>
+        </div>
+      </div>
+
+      <div class="controls-overlay">
+        <div class="control-deck">
+          <div class="deck-header">
+            <div class="temp-big" id="val-temp">10.0°C</div>
+            <div class="state-badge" id="val-state">Liquid</div>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="temp-slider" min="-15" max="105" step="0.1" value="10">
+          </div>
+          <div class="slider-labels">
+            <span>-15°C</span>
+            <span style="color: var(--accent-purple)">4°C (Anomaly)</span>
+            <span>100°C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="theory-view">
+      <div class="theory-content">
+        <h1>Anomalous Expansion</h1>
+        <div class="theory-card">
+          <h3>The Rule Breaker</h3>
+          <p>Almost all liquids contract (shrink) as they get colder. Water does this too, but only until it hits <strong>4°C</strong>.</p>
+        </div>
+        <div class="theory-card">
+          <h3>The Anomaly (4°C to 0°C)</h3>
+          <p>Below 4°C, water starts to <strong>expand</strong> as it cools down to 0°C. This makes colder water (like 1°C or 0°C) <em>lighter</em> (less dense) than 4°C water.</p>
+        </div>
+        <div class="theory-card">
+          <h3>Why does Ice Float?</h3>
+          <p>Because of this expansion, ice (solid water) is about 9% less dense than liquid water. This is why ice floats on top of lakes, insulating the fish below!</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // --- LOGIC ---
+    const State = {
+      temp: 10,
+      volume: 1.0,
+      iceThick: 0,      // smoothed thickness (visual)
+      iceTarget: 0,     // target thickness from slider
+      isLight: false,
+      waterScale: 10.5, // ✅ Increased base scale for larger tank
+      waterTarget: 10.5,
+      tankTopY: 0       // ✅ will be set after tank is built
+    };
+
+    const UI = {
+      sidebar: document.getElementById('sidebar'),
+      simUI: document.getElementById('simulation-ui'),
+      theoryView: document.getElementById('theory-view'),
+      tempDisplay: document.getElementById('val-temp'),
+      stateBadge: document.getElementById('val-state'),
+      volDisplay: document.getElementById('val-vol'),
+      denDisplay: document.getElementById('val-den'),
+      noteDisplay: document.getElementById('val-note'),
+      labelIce: document.getElementById('label-ice'),
+      slider: document.getElementById('temp-slider'),
+      themeIcon: document.getElementById('theme-icon'),
+      themeText: document.getElementById('theme-text'),
+      themeBtn: document.getElementById('theme-btn')
+    };
+
+    // --- THREE.JS ---
+    let scene, camera, renderer, controls;
+    let tankGroup, waterMesh, iceMesh, iceEdges, glassMesh;
+    let glassEdges = null;
+    let bubbles = [], steams = [];
+    let stars, cloudsGroup, floorGrid, floorPlane;
+    let snowPoints, snowData = null;
+    let sunDisc = null;
+
+    // slush particles
+    let slushPoints = null, slushData = null;
+
+    let lights = {};
+
+    // procedural textures
+    let woodTex = null;
+    let woodNormal = null;
+    let waterNormal = null;
+    let steamTex = null;
+
+    // ice crack textures
+    let iceCrackMap = null;
+    let iceCrackAlpha = null;
+
+    // time
+    let lastTime = performance.now();
+
+    function init() {
+      const container = document.getElementById('canvas-container');
+
+      scene = new THREE.Scene();
+
+      // Camera pulled back significantly for the larger container
+      // ✅ Adjusted camera position for larger tank
+      camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(22, 16, 55);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      // ✅ Make glass/water visibility stronger (physically-based transparency needs this)
+      renderer.physicallyCorrectLights = true;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxDistance = 100;
+      controls.minDistance = 10;
+      controls.maxPolarAngle = Math.PI / 2 - 0.1;
+
+      // Lights
+      lights.amb = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(lights.amb);
+
+      lights.sun = new THREE.DirectionalLight(0xffffff, 1);
+      lights.sun.position.set(7, 16, 6);
+      lights.sun.castShadow = true;
+      lights.sun.shadow.mapSize.width = 2048;
+      lights.sun.shadow.mapSize.height = 2048;
+      lights.sun.shadow.camera.near = 1;
+      lights.sun.shadow.camera.far = 100;
+      lights.sun.shadow.camera.left = -35;
+      lights.sun.shadow.camera.right = 35;
+      lights.sun.shadow.camera.top = 35;
+      lights.sun.shadow.camera.bottom = -35;
+      scene.add(lights.sun);
+
+      lights.glow = new THREE.PointLight(0x38bdf8, 1, 30);
+      lights.glow.position.set(0, -1.0, 2.0);
+      scene.add(lights.glow);
+
+      // textures first
+      buildProceduralTextures();
+      buildIceTextures();
+
+      buildEnvironment();
+      buildLab();
+      buildSnow();
+      buildSlush();
+      animate();
+
+      UI.slider.addEventListener('input', updatePhysics);
+      window.addEventListener('resize', onResize);
+
+      bindUIEvents();     // ✅ no onclick
+      toggleTheme(true);
+      updatePhysics();
+    }
+
+    // ✅ Replace inline onclick handlers with event listeners (PHP-safe)
+    function bindUIEvents() {
+      // Nav buttons
+      document.querySelectorAll('.nav-btn[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-mode');
+          switchMode(mode, btn);
+        });
+      });
+
+      // Theme toggle
+      if (UI.themeBtn) UI.themeBtn.addEventListener('click', () => toggleTheme(false));
+    }
+
+    // ---------- Procedural textures ----------
+    function buildProceduralTextures() {
+      // WOOD COLOR TEXTURE
+      const woodCanvas = document.createElement('canvas');
+      woodCanvas.width = 512;
+      woodCanvas.height = 512;
+      const wctx = woodCanvas.getContext('2d');
+
+      const g = wctx.createLinearGradient(0, 0, 512, 512);
+      g.addColorStop(0, '#7a4a2a');
+      g.addColorStop(0.5, '#5b341d');
+      g.addColorStop(1, '#8b5a33');
+      wctx.fillStyle = g;
+      wctx.fillRect(0, 0, 512, 512);
+
+      const plankCount = 9;
+      const plankH = 512 / plankCount;
+      for (let i = 0; i < plankCount; i++) {
+        const y = i * plankH;
+        const tint = (Math.random() * 20 - 10);
+        wctx.fillStyle = `rgba(${90+tint}, ${55+tint/2}, ${30+tint/3}, 0.18)`;
+        wctx.fillRect(0, y, 512, plankH);
+
+        wctx.fillStyle = 'rgba(0,0,0,0.25)';
+        wctx.fillRect(0, y, 512, 2);
+
+        for (let k = 0; k < 22; k++) {
+          const yy = y + Math.random() * plankH;
+          wctx.strokeStyle = `rgba(0,0,0,${0.08 + Math.random()*0.08})`;
+          wctx.lineWidth = 1;
+          wctx.beginPath();
+          const amp = 6 + Math.random() * 10;
+          for (let x = 0; x <= 512; x += 16) {
+            const wave = Math.sin((x * 0.02) + (i * 0.7) + k) * amp;
+            wctx.lineTo(x, yy + wave * 0.08);
+          }
+          wctx.stroke();
+        }
+
+        for (let n = 0; n < 3; n++) {
+          if (Math.random() < 0.5) continue;
+          const cx = Math.random() * 512;
+          const cy = y + Math.random() * plankH;
+          const r = 6 + Math.random() * 14;
+          const rg = wctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+          rg.addColorStop(0, 'rgba(0,0,0,0.20)');
+          rg.addColorStop(1, 'rgba(0,0,0,0)');
+          wctx.fillStyle = rg;
+          wctx.beginPath();
+          wctx.arc(cx, cy, r, 0, Math.PI * 2);
+          wctx.fill();
+        }
+      }
+
+      const vg = wctx.createRadialGradient(256, 256, 40, 256, 256, 330);
+      vg.addColorStop(0, 'rgba(0,0,0,0)');
+      vg.addColorStop(1, 'rgba(0,0,0,0.28)');
+      wctx.fillStyle = vg;
+      wctx.fillRect(0, 0, 512, 512);
+
+      woodTex = new THREE.CanvasTexture(woodCanvas);
+      woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping;
+      woodTex.repeat.set(2.8, 2.8);
+      woodTex.anisotropy = 8;
+
+      // WOOD NORMAL
+      const nCanvas = document.createElement('canvas');
+      nCanvas.width = 512;
+      nCanvas.height = 512;
+      const nctx = nCanvas.getContext('2d');
+      nctx.fillStyle = 'rgb(128,128,255)';
+      nctx.fillRect(0, 0, 512, 512);
+
+      for (let i = 0; i < 1400; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const len = 10 + Math.random() * 40;
+        const a = (Math.random() - 0.5) * 0.4;
+        nctx.strokeStyle = `rgba(130, 125, 255, ${0.05 + Math.random()*0.06})`;
+        nctx.lineWidth = 1;
+        nctx.beginPath();
+        nctx.moveTo(x, y);
+        nctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        nctx.stroke();
+      }
+      woodNormal = new THREE.CanvasTexture(nCanvas);
+      woodNormal.wrapS = woodNormal.wrapT = THREE.RepeatWrapping;
+      woodNormal.repeat.set(2.8, 2.8);
+      woodNormal.anisotropy = 8;
+
+      // WATER NORMAL
+      const wn = document.createElement('canvas');
+      wn.width = 256;
+      wn.height = 256;
+      const wnctx = wn.getContext('2d');
+      wnctx.fillStyle = 'rgb(128,128,255)';
+      wnctx.fillRect(0, 0, 256, 256);
+
+      for (let i = 0; i < 80; i++) {
+        const cx = Math.random() * 256;
+        const cy = Math.random() * 256;
+        const r = 10 + Math.random() * 60;
+        const grad = wnctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+        grad.addColorStop(0, 'rgba(140,140,255,0.18)');
+        grad.addColorStop(1, 'rgba(120,120,255,0)');
+        wnctx.fillStyle = grad;
+        wnctx.beginPath();
+        wnctx.arc(cx, cy, r, 0, Math.PI * 2);
+        wnctx.fill();
+      }
+      waterNormal = new THREE.CanvasTexture(wn);
+      waterNormal.wrapS = waterNormal.wrapT = THREE.RepeatWrapping;
+      waterNormal.repeat.set(2.0, 2.0);
+
+      // STEAM SPRITE
+      const st = document.createElement('canvas');
+      st.width = 128;
+      st.height = 128;
+      const stx = st.getContext('2d');
+      const grd = stx.createRadialGradient(64, 64, 8, 64, 64, 64);
+      grd.addColorStop(0, 'rgba(255,255,255,0.85)');
+      grd.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      stx.fillStyle = grd;
+      stx.fillRect(0, 0, 128, 128);
+
+      for (let i = 0; i < 450; i++) {
+        const x = Math.random() * 128;
+        const y = Math.random() * 128;
+        stx.fillStyle = `rgba(255,255,255,${Math.random()*0.06})`;
+        stx.fillRect(x, y, 2, 2);
+      }
+      steamTex = new THREE.CanvasTexture(st);
+    }
+
+    // ---------- Ice texture (white + cracks) ----------
+    function buildIceTextures() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
+
+      // White base
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,512,512);
+
+      // crack lines
+      ctx.lineWidth = 1.2;
+      for (let k = 0; k < 85; k++) {
+        const sx = Math.random() * 512;
+        const sy = Math.random() * 512;
+        const len = 40 + Math.random() * 220;
+        const ang = Math.random() * Math.PI * 2;
+
+        ctx.strokeStyle = `rgba(175,205,230,0.55)`; // soft icy cracks
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+
+        let x = sx, y = sy;
+        for (let s = 0; s < 20; s++) {
+          const step = len / 20;
+          const wob = (Math.random() - 0.5) * 0.55;
+          x += Math.cos(ang + wob) * step;
+          y += Math.sin(ang + wob) * step;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // frosty speckles
+      for (let i = 0; i < 9000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const a = 0.02 + Math.random() * 0.05;
+        ctx.fillStyle = `rgba(235,248,255,${a})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      iceCrackMap = new THREE.CanvasTexture(c);
+      iceCrackMap.wrapS = iceCrackMap.wrapT = THREE.RepeatWrapping;
+      iceCrackMap.repeat.set(1.2, 1.2);
+    }
+
+    function buildEnvironment() {
+      // Stars
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 1400;
+      const starPos = new Float32Array(starCount * 3);
+      const starSize = new Float32Array(starCount);
+
+      for (let i = 0; i < starCount; i++) {
+        const idx = i * 3;
+        starPos[idx] = (Math.random() - 0.5) * 90;
+        starPos[idx + 1] = (Math.random() - 0.2) * 60 + 18;
+        starPos[idx + 2] = (Math.random() - 0.5) * 90;
+        starSize[i] = 0.06 + Math.random() * 0.14;
+      }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      starGeo.setAttribute('size', new THREE.BufferAttribute(starSize, 1));
+
+      const starMat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.12,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false
+      });
+      stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
+
+      // Clouds
+      cloudsGroup = new THREE.Group();
+      const cloudCount = 7;
+
+      const cc = document.createElement('canvas');
+      cc.width = 128; cc.height = 128;
+      const cctx = cc.getContext('2d');
+      const cgr = cctx.createRadialGradient(60, 60, 10, 64, 64, 64);
+      cgr.addColorStop(0, 'rgba(255,255,255,0.9)');
+      cgr.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+      cgr.addColorStop(1, 'rgba(255,255,255,0)');
+      cctx.fillStyle = cgr;
+      cctx.fillRect(0,0,128,128);
+      const cloudTex = new THREE.CanvasTexture(cc);
+
+      for (let i = 0; i < cloudCount; i++) {
+        const mat = new THREE.SpriteMaterial({
+          map: cloudTex,
+          transparent: true,
+          opacity: 0.65,
+          depthWrite: false
+        });
+        const spr = new THREE.Sprite(mat);
+        spr.position.set((Math.random()-0.5)*32, 13 + Math.random()*5, (Math.random()-0.5)*22);
+        const s = 10 + Math.random()*10;
+        spr.scale.set(s, s*0.6, 1);
+        spr.userData.speed = 0.15 + Math.random() * 0.2;
+        cloudsGroup.add(spr);
+      }
+      cloudsGroup.visible = false;
+      scene.add(cloudsGroup);
+
+      // Sun disc
+      const sunGeo = new THREE.SphereGeometry(1.2, 20, 20);
+      const sunMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 });
+      sunDisc = new THREE.Mesh(sunGeo, sunMat);
+      sunDisc.position.set(14, 18, -18);
+      sunDisc.visible = false;
+      scene.add(sunDisc);
+
+      // Floor
+      const floorGroup = new THREE.Group();
+
+      floorPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(90, 90),
+        new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          map: woodTex,
+          normalMap: woodNormal,
+          normalScale: new THREE.Vector2(0.35, 0.35),
+          roughness: 0.55,
+          metalness: 0.06
+        })
+      );
+      floorPlane.rotation.x = -Math.PI / 2;
+      floorPlane.position.y = -6.2;
+      floorPlane.receiveShadow = true;
+      floorGroup.add(floorPlane);
+
+      floorGrid = new THREE.GridHelper(90, 90, 0x38bdf8, 0x334155);
+      floorGrid.position.y = -6.195;
+      floorGrid.material.transparent = true;
+      floorGrid.material.opacity = 0.18;
+      floorGroup.add(floorGrid);
+
+      scene.add(floorGroup);
+    }
+
+    function buildLab() {
+      tankGroup = new THREE.Group();
+      scene.add(tankGroup);
+
+      // ✅ LARGER Aquarium Dimensions
+      const TANK_W = 22.0;
+      const TANK_H = 15.0;
+      const TANK_D = 12.0;
+
+      const WATER_W = TANK_W - 0.6;
+      const WATER_D = TANK_D - 0.6;
+
+      // Glass tank (more visible)
+      const boxGeo = new THREE.BoxGeometry(TANK_W, TANK_H, TANK_D);
+      const glassMatDef = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transmission: 0.92,
+        opacity: 0.32,              // ✅ stronger visibility
+        transparent: true,
+        roughness: 0.07,            // ✅ slightly rougher = clearer edges
+        metalness: 0.06,
+        thickness: 1.4,
+        clearcoat: 1,
+        clearcoatRoughness: 0.08,
+        ior: 1.45
+      });
+
+      glassMesh = new THREE.Mesh(boxGeo, glassMatDef);
+      glassMesh.position.y = -1.8;
+      glassMesh.castShadow = true;
+      tankGroup.add(glassMesh);
+
+      const edges = new THREE.EdgesGeometry(boxGeo);
+      glassEdges = new THREE.LineSegments(
+        edges,
+        new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.55, transparent: true }) // ✅ stronger outline
+      );
+      glassEdges.position.y = -1.8;
+      tankGroup.add(glassEdges);
+
+      // ✅ render order: water behind, ice above water, glass above all
+      glassMesh.renderOrder = 30;
+      glassEdges.renderOrder = 31;
+
+      // ✅ Save rim/top so ice never covers glass from top
+      State.tankTopY = glassMesh.position.y + (TANK_H / 2);
+
+      // Water (more visible)
+      const waterGeo = new THREE.BoxGeometry(WATER_W, 1, WATER_D);
+      waterGeo.translate(0, 0.5, 0);
+      const waterMat = new THREE.MeshPhysicalMaterial({
+        color: 0x1d9bf0,            // ✅ deeper blue for visibility
+        transmission: 0.78,
+        opacity: 0.95,
+        transparent: true,
+        roughness: 0.06,
+        metalness: 0.02,
+        thickness: 1.25,
+        ior: 1.333,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.14,
+        attenuationColor: new THREE.Color(0x0284c7), // ✅ stronger tint
+        attenuationDistance: 3.8,   // ✅ more color through depth
+        normalMap: waterNormal,
+        normalScale: new THREE.Vector2(0.65, 0.65),
+        emissive: new THREE.Color(0x0b4a6b),        // ✅ subtle glow so water is readable
+        emissiveIntensity: 0.08
+      });
+      waterMesh = new THREE.Mesh(waterGeo, waterMat);
+
+      // Water baseline
+      waterMesh.userData.baseY = glassMesh.position.y - (TANK_H / 2) + 0.15;
+      waterMesh.position.y = waterMesh.userData.baseY;
+
+      // ✅ slightly higher start water level
+      waterMesh.scale.y = State.waterScale;
+      State.waterScale = waterMesh.scale.y;
+      State.waterTarget = waterMesh.scale.y;
+
+      // ✅ Keep water visible
+      waterMesh.material.depthWrite = true;
+      waterMesh.renderOrder = 10;
+
+      tankGroup.add(waterMesh);
+
+      // ICE (top-freezing layer)
+      const iceGeo = new THREE.BoxGeometry(WATER_W, 1, WATER_D);
+      iceGeo.translate(0, 0.5, 0);
+
+      // ✅ Solid-looking white ice material
+      const iceMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.35,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.0,
+        map: iceCrackMap
+      });
+
+      iceMesh = new THREE.Mesh(iceGeo, iceMat);
+      iceMesh.visible = false;
+      iceMesh.castShadow = false;
+      iceMesh.renderOrder = 20;
+      tankGroup.add(iceMesh);
+
+      // Ice edges
+      const iceEdgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(WATER_W, 1, WATER_D));
+      iceEdgeGeo.translate(0, 0.5, 0);
+      iceEdges = new THREE.LineSegments(
+        iceEdgeGeo,
+        new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.0 })
+      );
+      iceEdges.visible = false;
+      iceEdges.renderOrder = 21;
+      tankGroup.add(iceEdges);
+
+      // Bubbles
+      const bubGeo = new THREE.SphereGeometry(0.11, 8, 8);
+      const bubMat = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.7, transparent: true });
+      for (let i = 0; i < 40; i++) {
+        const m = new THREE.Mesh(bubGeo, bubMat);
+        m.visible = false;
+        m.position.set((Math.random()-0.5)*(WATER_W-1.0), waterMesh.userData.baseY + Math.random()*0.2, (Math.random()-0.5)*(WATER_D-0.8));
+        tankGroup.add(m);
+        bubbles.push({ mesh: m, speed: 0.04 + Math.random()*0.07 });
+      }
+
+      // Steam sprites
+      for (let i = 0; i < 60; i++) {
+        const mat = new THREE.SpriteMaterial({
+          map: steamTex,
+          transparent: true,
+          opacity: 0.0,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        });
+        const s = new THREE.Sprite(mat);
+        s.visible = false;
+        s.scale.set(0.9, 0.9, 1);
+        scene.add(s);
+        steams.push({ mesh: s, life: Math.random(), drift: (Math.random()-0.5)*0.03 });
+      }
+    }
+
+    function buildSnow() {
+      const count = 2000;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      const vel = new Float32Array(count);
+      const sway = new Float32Array(count);
+
+      for (let i = 0; i < count; i++) {
+        const idx = i * 3;
+        pos[idx] = (Math.random() - 0.5) * 80;
+        pos[idx + 1] = Math.random() * 35 + 2;
+        pos[idx + 2] = (Math.random() - 0.5) * 80;
+        vel[i] = 0.35 + Math.random() * 0.9;
+        sway[i] = (Math.random() - 0.5) * 1.8;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.1,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false
+      });
+
+      snowPoints = new THREE.Points(geo, mat);
+      snowPoints.frustumCulled = false;
+      scene.add(snowPoints);
+
+      snowData = { count, pos, vel, sway };
+    }
+
+    // Slush
+    function buildSlush() {
+      const count = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      const vel = new Float32Array(count);
+
+      for (let i = 0; i < count; i++) {
+        const idx = i * 3;
+        pos[idx] = (Math.random() - 0.5) * 14.5;
+        pos[idx + 1] = -0.5;
+        pos[idx + 2] = (Math.random() - 0.5) * 7.5;
+        vel[i] = 0.25 + Math.random() * 0.6;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.07,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false
+      });
+
+      slushPoints = new THREE.Points(geo, mat);
+      slushPoints.frustumCulled = false;
+      slushPoints.visible = true;
+      tankGroup.add(slushPoints);
+
+      slushData = { count, pos, vel };
+    }
+
+    // --- INTERACTION & PHYSICS ---
+    function updatePhysics() {
+      const t = parseFloat(UI.slider.value);
+      State.temp = t;
+
+      const tForWater = t;
+
+      // ✅ IMPROVED Physics Logic
+      // Scale: 10.5 is the new neutral liquid height.
+      let expansion = 0;
+
+      if (tForWater >= 4) {
+        expansion = Math.pow((tForWater - 4), 1.2) * 0.005;
+      } else {
+        expansion = Math.pow((4 - tForWater), 1.5) * 0.02;
+      }
+
+      let baseScale = 10.5 + expansion;
+
+      const freezePush = (t <= 0) ? (Math.min(1.0, Math.abs(t) * 0.2) * 0.8) : 0;
+
+      State.waterTarget = Math.min(14.5, baseScale + freezePush);
+
+      let volume = 1.0 + (expansion * 0.05) + (freezePush * 0.09);
+      let density = 1.0 / volume;
+
+      // Water tuning (more readable)
+      if (waterMesh && waterMesh.material) {
+        const cold = Math.max(0, Math.min(1, (4 - Math.max(-2, tForWater)) / 10));
+        const hot  = Math.max(0, Math.min(1, (t - 60) / 45));
+        waterMesh.material.attenuationDistance = 4.2 - hot * 1.4 + cold * 0.4; // ✅ stronger tint
+        waterMesh.material.roughness = 0.06 + hot * 0.10 + cold * 0.05;
+        waterMesh.material.opacity = 0.95 - hot * 0.10;
+        waterMesh.material.emissiveIntensity = 0.07 + hot * 0.05;              // ✅ extra visibility when hot
+      }
+
+      // ICE TARGET (freezes from top)
+      if (t <= 0) {
+        const waterH = Math.max(6.8, State.waterTarget);
+        const maxIce = Math.min(1.5, waterH / 8);
+
+        let thickness = Math.abs(t) * 0.15;
+        if (thickness > maxIce) thickness = maxIce;
+
+        State.iceTarget = thickness;
+
+        UI.labelIce.style.opacity = 1;
+        UI.stateBadge.innerText = "Freezing";
+        UI.stateBadge.style.color = "var(--accent-blue)";
+        UI.noteDisplay.innerText = "Phase Change: Volume increases significantly (~9%).";
+      } else {
+        State.iceTarget = 0;
+
+        if (t >= 100) {
+          UI.stateBadge.innerText = "Boiling";
+          UI.stateBadge.style.color = "var(--accent-red)";
+          UI.noteDisplay.innerText = "Liquid turning to Gas.";
+        } else if (t < 4) {
+          UI.stateBadge.innerText = "Anomalous";
+          UI.stateBadge.style.color = "var(--accent-purple)";
+          UI.noteDisplay.innerText = "Expanding while cooling! (4°C to 0°C)";
+        } else {
+          UI.stateBadge.innerText = "Liquid";
+          UI.stateBadge.style.color = "var(--accent-green)";
+          UI.noteDisplay.innerText = "Normal thermal expansion.";
+        }
+      }
+
+      UI.tempDisplay.innerText = t.toFixed(1) + "°C";
+      if (t <= 0) UI.tempDisplay.style.color = "var(--accent-blue)";
+      else if (t >= 80) UI.tempDisplay.style.color = "var(--accent-red)";
+      else UI.tempDisplay.style.color = "var(--accent-blue)";
+
+      UI.volDisplay.innerText = volume.toFixed(4);
+      UI.denDisplay.innerText = density.toFixed(4);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+
+      controls.update();
+
+      // Stars
+      if (stars && stars.visible) {
+        stars.material.opacity = 0.75 + Math.sin(now * 0.0012) * 0.12;
+        stars.rotation.y += 0.0003;
+      }
+
+      // Clouds drift
+      if (cloudsGroup && cloudsGroup.visible) {
+        cloudsGroup.children.forEach(c => {
+          c.position.x += c.userData.speed * dt;
+          if (c.position.x > 30) c.position.x = -30;
+        });
+      }
+
+      const wSmooth = 1 - Math.pow(0.0008, dt);
+      State.waterScale += (State.waterTarget - State.waterScale) * (0.10 + wSmooth * 0.25);
+      if (waterMesh) waterMesh.scale.y = State.waterScale;
+
+      const smooth = 1 - Math.pow(0.001, dt);
+      State.iceThick += (State.iceTarget - State.iceThick) * (0.12 + smooth * 0.25);
+
+      const baseY = waterMesh.userData.baseY;
+      const waterTop = baseY + waterMesh.scale.y;
+
+      if (State.iceThick > 0.01) {
+        const visScale = Math.max(0.02, State.iceThick);
+
+        iceMesh.visible = true;
+        iceEdges.visible = true;
+
+        iceMesh.scale.y = visScale;
+        iceEdges.scale.y = visScale;
+
+        const fade = Math.min(1, visScale / 0.18);
+        iceMesh.material.opacity = 0.92 + fade * 0.08;
+        iceEdges.material.opacity = 0.18 + fade * 0.55;
+
+        const rimTop = State.tankTopY ?? (glassMesh.position.y + 5.5);
+        const desiredY = waterTop + 0.05;
+        const margin = 0.12;
+        const clampedY = Math.min(desiredY, rimTop - visScale - margin);
+
+        iceMesh.position.y = clampedY;
+        iceEdges.position.y = clampedY;
+
+        UI.labelIce.style.opacity = 1;
+
+        if (slushPoints && slushData) {
+          const slushStrength = Math.max(0, Math.min(1, (0.35 - visScale) / 0.35));
+          slushPoints.material.opacity = 0.6 * slushStrength;
+
+          const a = slushPoints.geometry.attributes.position;
+          for (let i = 0; i < slushData.count; i++) {
+            const idx = i * 3;
+            slushData.pos[idx + 1] = (clampedY - 0.06) + Math.sin(now * 0.001 + i) * 0.03;
+            slushData.pos[idx] += Math.sin(now * 0.0012 + i) * 0.0008 * slushData.vel[i];
+            slushData.pos[idx + 2] += Math.cos(now * 0.0011 + i) * 0.0008 * slushData.vel[i];
+
+            if (slushData.pos[idx] > 7.5) slushData.pos[idx] = -7.5;
+            if (slushData.pos[idx] < -7.5) slushData.pos[idx] = 7.5;
+            if (slushData.pos[idx + 2] > 4.0) slushData.pos[idx + 2] = -4.0;
+            if (slushData.pos[idx + 2] < -4.0) slushData.pos[idx + 2] = 4.0;
+          }
+          a.needsUpdate = true;
+        }
+
+      } else {
+        if (iceMesh) iceMesh.visible = false;
+        if (iceEdges) iceEdges.visible = false;
+        if (iceMesh) iceMesh.material.opacity = 0.0;
+        UI.labelIce.style.opacity = 0;
+        if (slushPoints) slushPoints.material.opacity = 0.0;
+      }
+
+      // Label position
+      if (iceMesh && iceMesh.visible) {
+        const vec = new THREE.Vector3(0, iceMesh.position.y + iceMesh.scale.y + 0.25, 0);
+        vec.project(camera);
+        const x = (vec.x * .5 + .5) * window.innerWidth;
+        const y = (-(vec.y * .5) + .5) * window.innerHeight;
+        UI.labelIce.style.transform = `translate(${x}px, ${y}px)`;
+      }
+
+      // Water normal movement
+      if (waterMesh && waterMesh.material && waterMesh.material.normalMap) {
+        const speed = State.temp > 80 ? 0.12 : 0.05;
+        waterMesh.material.normalMap.offset.x = (waterMesh.material.normalMap.offset.x + dt * speed) % 1;
+        waterMesh.material.normalMap.offset.y = (waterMesh.material.normalMap.offset.y + dt * (speed * 0.7)) % 1;
+      }
+
+      // Bubbles
+      if (State.temp >= 98) {
+        const waterTop2 = baseY + waterMesh.scale.y;
+        bubbles.forEach(b => {
+          b.mesh.visible = true;
+          b.mesh.position.y += b.speed * (1 + Math.random() * 0.2);
+          b.mesh.position.x += Math.sin(now * 0.002 + b.speed) * 0.001;
+          if (b.mesh.position.y > waterTop2) {
+            b.mesh.position.set((Math.random()-0.5)*(waterMesh.geometry.parameters.width-1.0), baseY + 0.15, (Math.random()-0.5)*(waterMesh.geometry.parameters.depth-0.8));
+          }
+        });
+      } else {
+        bubbles.forEach(b => b.mesh.visible = false);
+      }
+
+      // Steam
+      if (State.temp >= 90) {
+        const waterTop3 = baseY + waterMesh.scale.y + 0.1;
+        steams.forEach(s => {
+          s.mesh.visible = true;
+          s.life += dt * (0.55 + Math.random() * 0.35);
+
+          if (s.life < 0.02) {
+            s.mesh.position.set((Math.random()-0.5)*(waterMesh.geometry.parameters.width-1.6), waterTop3, (Math.random()-0.5)*(waterMesh.geometry.parameters.depth-1.2));
+            const size = 0.7 + Math.random() * 1.2;
+            s.mesh.scale.set(size, size, 1);
+          }
+
+          s.mesh.position.y += dt * (0.9 + Math.random() * 0.4);
+          s.mesh.position.x += s.drift + Math.sin(now * 0.001 + s.life * 3) * 0.004;
+          s.mesh.position.z += Math.cos(now * 0.0012 + s.life * 2) * 0.003;
+
+          const fadeIn = Math.min(1, s.life * 3.0);
+          const fadeOut = Math.max(0, 1 - (s.life * 0.9));
+          s.mesh.material.opacity = 0.45 * fadeIn * fadeOut;
+
+          if (s.life > 1.2) s.life = 0;
+        });
+      } else {
+        steams.forEach(s => s.mesh.visible = false);
+      }
+
+      // Snowfall
+      if (snowPoints && snowData) {
+        const target = State.temp < 0 ? Math.min(1, Math.abs(State.temp) / 8) : 0;
+        snowPoints.material.opacity += (target * 0.85 - snowPoints.material.opacity) * 0.05;
+
+        if (snowPoints.material.opacity > 0.01) {
+          const a = snowPoints.geometry.attributes.position;
+          for (let i = 0; i < snowData.count; i++) {
+            const idx = i * 3;
+            snowData.pos[idx + 1] -= snowData.vel[i] * dt * (1.2 + target * 1.5);
+            snowData.pos[idx] += Math.sin(now * 0.001 + i) * 0.0015 * snowData.sway[i] * (0.3 + target);
+
+            if (snowData.pos[idx + 1] < -6.2) {
+              snowData.pos[idx + 1] = 35 + Math.random() * 15;
+              snowData.pos[idx] = (Math.random() - 0.5) * 80;
+              snowData.pos[idx + 2] = (Math.random() - 0.5) * 80;
+            }
+          }
+          a.needsUpdate = true;
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // --- THEME & UI ---
+    function switchMode(mode, btnEl) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      if (mode === 'simulation') {
+        UI.theoryView.classList.remove('active');
+        UI.simUI.style.display = 'block';
+        UI.sidebar.classList.add('collapsed');
+      } else {
+        UI.theoryView.classList.add('active');
+        UI.simUI.style.display = 'none';
+        UI.sidebar.classList.remove('collapsed');
+      }
+    }
+
+    function toggleTheme(silentInit = false) {
+      if (!silentInit) State.isLight = !State.isLight;
+
+      document.body.classList.toggle('light-mode', State.isLight);
+
+      UI.themeIcon.innerText = State.isLight ? "🌙" : "☀️";
+      UI.themeText.innerText = State.isLight ? "Switch to Dark" : "Switch to Light";
+
+      if (State.isLight) {
+        // ✅ Fix "too white" light mode: use softer sky + balanced exposure/lighting
+        scene.fog = new THREE.FogExp2(0xcfe8ff, 0.015);
+        lights.amb.intensity = 0.85;
+        lights.sun.intensity = 1.15;
+        lights.sun.color.setHex(0xffffff);
+        lights.glow.intensity = 0.10;
+        lights.glow.color.setHex(0x93c5fd);
+
+        renderer.toneMappingExposure = 0.95;
+
+        stars.visible = false;
+        cloudsGroup.visible = true;
+        if (sunDisc) sunDisc.visible = true;
+
+        floorPlane.material.roughness = 0.55;
+        floorGrid.material.opacity = 0.12;
+
+        if (glassMesh) {
+          glassMesh.material.color.setHex(0xa6cfff);
+          glassMesh.material.opacity = 0.38;     // ✅ still visible in light mode
+          glassMesh.material.roughness = 0.10;
+          glassMesh.material.transmission = 0.90;
+        }
+        if (glassEdges) {
+          glassEdges.material.opacity = 0.45;
+          glassEdges.material.color.setHex(0x334155);
+        }
+
+      } else {
+        scene.fog = new THREE.FogExp2(0x0b1226, 0.020);
+        lights.amb.intensity = 0.42;
+        lights.sun.intensity = 1.0;
+        lights.sun.color.setHex(0xdbeafe);
+        lights.glow.intensity = 1.05;
+        lights.glow.color.setHex(0x38bdf8);
+
+        renderer.toneMappingExposure = 1.05;
+
+        stars.visible = true;
+        cloudsGroup.visible = false;
+        if (sunDisc) sunDisc.visible = false;
+
+        floorPlane.material.roughness = 0.62;
+        floorGrid.material.opacity = 0.18;
+
+        if (glassMesh) {
+          glassMesh.material.color.setHex(0xffffff);
+          glassMesh.material.opacity = 0.32;     // ✅ make glass readable in dark too
+          glassMesh.material.roughness = 0.07;
+          glassMesh.material.transmission = 0.92;
+        }
+        if (glassEdges) {
+          glassEdges.material.opacity = 0.55;
+          glassEdges.material.color.setHex(0xffffff);
+        }
+      }
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    init();
+  </script>
+</body>
+</html>

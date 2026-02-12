@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printed vs Electronic Information</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Left Panel - Primary Buttons & Dropdowns */
+        .left-panel {
+            width: 25%;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-right: 1px solid #eaeaea;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .left-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.3rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .primary-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .primary-btn {
+            background-color: white;
+            border: none;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary-btn.printed {
+            background: linear-gradient(to right, #8b4513, #a0522d);
+        }
+
+        .primary-btn.electronic {
+            background: linear-gradient(to right, #2c3e50, #3498db);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .primary-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .primary-btn i {
+            font-size: 1.4rem;
+        }
+
+        /* Dropdown Styles */
+        .dropdown-container {
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            flex-shrink: 0;
+        }
+
+        .dropdown {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.5s ease, opacity 0.5s ease;
+        }
+
+        .dropdown.active {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        .dropdown-header {
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .dropdown-header i {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown.active .dropdown-header i {
+            transform: rotate(180deg);
+        }
+
+        .subtopic-list {
+            list-style: none;
+            padding: 8px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .subtopic-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .subtopic-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .subtopic-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .subtopic-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtopic-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 22px;
+        }
+
+        .subtopic-item.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #3498db;
+            font-weight: 600;
+        }
+
+        .subtopic-item i {
+            color: #7a8ca5;
+            width: 20px;
+        }
+
+        .subtopic-item.active i {
+            color: #3498db;
+        }
+
+        /* Middle Panel - Image */
+        .middle-panel {
+            width: 40%;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fcfcfc;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .image-container {
+            width: 100%;
+            height: 90%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f5ff;
+            color: #7a8ca5;
+        }
+
+        .image-placeholder i {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .image-placeholder p {
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        #infoImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        /* Right Panel - Description */
+        .right-panel {
+            width: 35%;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #eaeaea;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .right-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .description-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .description-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .description-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .description-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .description-content h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.5rem;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .category-tag.printed {
+            background-color: #f5e9dd;
+            color: #8b4513;
+        }
+
+        .category-tag.electronic {
+            background-color: #e3f2fd;
+            color: #2c3e50;
+        }
+
+        .description-content p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .description-content ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .description-content li {
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .highlight {
+            background-color: #e8f4fc;
+            padding: 12px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            border-top: 1px solid #3a506b;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        footer p {
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .left-panel {
+                width: 28%;
+            }
+
+            .middle-panel {
+                width: 36%;
+            }
+
+            .right-panel {
+                width: 36%;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .left-panel,
+            .middle-panel,
+            .right-panel {
+                width: 100%;
+                height: auto;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid #eaeaea;
+                max-height: none;
+                padding: 20px;
+            }
+
+            .right-panel {
+                border-left: none;
+                border-top: 1px solid #eaeaea;
+                max-height: none;
+                padding: 20px;
+            }
+
+            .image-container {
+                height: 300px;
+            }
+
+            .primary-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .primary-btn {
+                flex: 1;
+                min-width: 200px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            header {
+                padding: 10px 15px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            header p {
+                font-size: 0.9rem;
+            }
+
+            .image-container {
+                height: 200px;
+            }
+
+            .primary-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .primary-btn {
+                min-width: 100%;
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+
+            .left-panel,
+            .middle-panel,
+            .right-panel {
+                padding: 10px;
+            }
+
+            .left-panel h2,
+            .right-panel h2 {
+                font-size: 1.2rem;
+            }
+
+            .description-content {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .image-container {
+                height: 150px;
+            }
+
+            .primary-btn {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            .left-panel h2,
+            .right-panel h2 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Printed and Electronic Information</h1>
+            
+        </header>
+
+        <div class="dashboard">
+            <!-- Left Panel - Primary Buttons & Dropdowns -->
+            <div class="left-panel">
+                <h2>Select Information Type</h2>
+
+                <div class="primary-buttons">
+                    <button class="primary-btn printed active" id="printedBtn">
+                        <i class="fas fa-print"></i> Printed Information
+                    </button>
+                    <button class="primary-btn electronic" id="electronicBtn">
+                        <i class="fas fa-laptop"></i> Electronic Information
+                    </button>
+                </div>
+
+                <!-- Printed Information Dropdown -->
+                <div class="dropdown-container">
+                    <div class="dropdown active" id="printedDropdown">
+                        <div class="dropdown-header">
+                            <span>Printed Examples</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <ul class="subtopic-list">
+                            <li class="subtopic-item" data-category="printed" data-id="newspapers">
+                                <i class="fas fa-newspaper"></i> Newspapers
+                            </li>
+                            <li class="subtopic-item" data-category="printed" data-id="books">
+                                <i class="fas fa-book"></i> Books
+                            </li>
+                            <li class="subtopic-item" data-category="printed" data-id="posters">
+                                <i class="fas fa-image"></i> Posters
+                            </li>
+                            <li class="subtopic-item" data-category="printed" data-id="stamps">
+                                <i class="fas fa-stamp"></i> Stamps
+                            </li>
+                            <li class="subtopic-item" data-category="printed" data-id="press">
+                                <i class="fas fa-file-alt"></i> Press Statements
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Electronic Information Dropdown -->
+                <div class="dropdown-container">
+                    <div class="dropdown" id="electronicDropdown">
+                        <div class="dropdown-header">
+                            <span>Electronic Examples</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <ul class="subtopic-list">
+                            <li class="subtopic-item" data-category="electronic" data-id="radio">
+                                <i class="fas fa-broadcast-tower"></i> Radio
+                            </li>
+                            <li class="subtopic-item" data-category="electronic" data-id="television">
+                                <i class="fas fa-tv"></i> Television
+                            </li>
+                            <li class="subtopic-item" data-category="electronic" data-id="mobile">
+                                <i class="fas fa-mobile-alt"></i> Mobile Phones
+                            </li>
+                            <li class="subtopic-item" data-category="electronic" data-id="internet">
+                                <i class="fas fa-wifi"></i> Internet
+                            </li>
+                            <li class="subtopic-item" data-category="electronic" data-id="social">
+                                <i class="fas fa-share-alt"></i> Social Media
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Panel - Image -->
+            <div class="middle-panel">
+                <div class="image-container">
+                    <div class="image-placeholder">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Select a subtopic to view related image</p>
+                    </div>
+                    <img id="infoImage" src="" alt="Information Media">
+                </div>
+            </div>
+
+            <!-- Right Panel - Description -->
+            <div class="right-panel">
+                <h2>Description</h2>
+                <div class="description-content" id="descriptionContent">
+                    <!-- Initial content will be loaded by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
+
+    <script>
+        // Information data for each category and subtopic
+        const informationData = {
+            // Category General Descriptions
+            printed_general: {
+                category: "printed",
+                title: "Printed Information",
+                image: "",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Printed Information Overview</h3>
+                    <p>Printed information refers to any form of information that is physically printed on paper or other materials. This includes books, newspapers, magazines, posters, and more.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Tangible, portable, no power required, permanent preservation.</p>
+                    </div>
+                    
+                    <h4>Common Examples:</h4>
+                    <ul>
+                        <li>Newspapers and Magazines</li>
+                        <li>Books and Journals</li>
+                        <li>Posters and Flyers</li>
+                        <li>Stamps and Currency</li>
+                    </ul>
+                    
+                    <p><strong>Select a specific example from the left panel to learn more about it.</strong></p>`
+            },
+            electronic_general: {
+                category: "electronic",
+                title: "Electronic Information",
+                image: "",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Electronic Information Overview</h3>
+                    <p>Electronic information is any information that is stored, transmitted, or accessed via electronic devices and digital networks. This includes radio, television, internet, and mobile devices.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Digital format, requires power, often interactive, easily updated.</p>
+                    </div>
+                    
+                    <h4>Common Examples:</h4>
+                    <ul>
+                        <li>Radio and Television</li>
+                        <li>Internet and Websites</li>
+                        <li>Mobile Applications</li>
+                        <li>Social Media Platforms</li>
+                    </ul>
+                    
+                    <p><strong>Select a specific example from the left panel to learn more about it.</strong></p>`
+            },
+            
+            // Printed Information Examples
+            newspapers: {
+                category: "printed",
+                title: "Newspapers",
+                image: "images/newspapers.jpg",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Newspapers</h3>
+                    <p>Newspapers are printed publications containing news, articles, and advertisements, published daily or weekly.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Regular publication, news coverage, editorial content.</p>
+                    </div>
+                    
+                    <h4>Advantages:</h4>
+                    <ul>
+                        <li>No internet required</li>
+                        <li>Portable reading</li>
+                        <li>Tangible archive</li>
+                    </ul>`
+            },
+            books: {
+                category: "printed",
+                title: "Books",
+                image: "images/books.jpg",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Books</h3>
+                    <p>Books are printed collections of written or illustrated sheets bound together, preserving knowledge and literature.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Physical format, permanent preservation, no power needed.</p>
+                    </div>
+                    
+                    <h4>Types:</h4>
+                    <ul>
+                        <li>Fiction and literature</li>
+                        <li>Educational textbooks</li>
+                        <li>Reference books</li>
+                    </ul>`
+            },
+            posters: {
+                category: "printed",
+                title: "Posters",
+                image: "images/posters.jpg",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Posters</h3>
+                    <p>Posters are large printed sheets displayed on walls to convey information, advertise, or promote events.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Visual impact, large format, public display.</p>
+                    </div>
+                    
+                    <h4>Uses:</h4>
+                    <ul>
+                        <li>Event promotion</li>
+                        <li>Educational displays</li>
+                        <li>Advertising</li>
+                    </ul>`
+            },
+            stamps: {
+                category: "printed",
+                title: "Stamps",
+                image: "images/stamps.jpg",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Stamps</h3>
+                    <p>Postage stamps are small printed pieces issued by postal authorities for mail, featuring cultural designs.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Small format, symbolic designs, collectible.</p>
+                    </div>
+                    
+                    <h4>Features:</h4>
+                    <ul>
+                        <li>National symbols</li>
+                        <li>Historical events</li>
+                        <li>Cultural art</li>
+                    </ul>`
+            },
+            press: {
+                category: "printed",
+                title: "Press Statements",
+                image: "images/press.jpg",
+                description: `<span class="category-tag printed">Printed Information</span>
+                    <h3>Press Statements</h3>
+                    <p>Press statements are printed documents issued to announce newsworthy information to the media.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Official communication, structured format.</p>
+                    </div>
+                    
+                    <h4>Elements:</h4>
+                    <ul>
+                        <li>Headline</li>
+                        <li>Key information</li>
+                        <li>Contact details</li>
+                    </ul>`
+            },
+
+            // Electronic Information Examples
+            radio: {
+                category: "electronic",
+                title: "Radio",
+                image: "images/radio.jpg",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Radio</h3>
+                    <p>Radio uses radio waves to transmit sound information, providing news, music, and entertainment.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Audio medium, real-time broadcasting, wide coverage.</p>
+                    </div>
+                    
+                    <h4>Content Types:</h4>
+                    <ul>
+                        <li>News and current affairs</li>
+                        <li>Music and entertainment</li>
+                        <li>Educational programs</li>
+                    </ul>`
+            },
+            television: {
+                category: "electronic",
+                title: "Television",
+                image: "images/television.jpg",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Television</h3>
+                    <p>Television transmits moving images and sound, combining visual and auditory information for news and entertainment.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Audio-visual medium, live broadcasting, mass reach.</p>
+                    </div>
+                    
+                    <h4>Formats:</h4>
+                    <ul>
+                        <li>News broadcasts</li>
+                        <li>Educational programs</li>
+                        <li>Live events</li>
+                    </ul>`
+            },
+            mobile: {
+                category: "electronic",
+                title: "Mobile Phones",
+                image: "images/mobile.jpg",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Mobile Phones</h3>
+                    <p>Mobile phones enable voice communication, internet access, and multimedia functions for information access.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Portability, multifunctionality, constant connectivity.</p>
+                    </div>
+                    
+                    <h4>Capabilities:</h4>
+                    <ul>
+                        <li>Internet browsing</li>
+                        <li>News apps</li>
+                        <li>E-books</li>
+                    </ul>`
+            },
+            internet: {
+                category: "electronic",
+                title: "Internet",
+                image: "images/internet.jpg",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Internet</h3>
+                    <p>The Internet is a global network enabling information exchange through websites, email, and databases.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> Global connectivity, instant access, vast resources.</p>
+                    </div>
+                    
+                    <h4>Resources:</h4>
+                    <ul>
+                        <li>World Wide Web</li>
+                        <li>Email and messaging</li>
+                        <li>Online databases</li>
+                    </ul>`
+            },
+            social: {
+                category: "electronic",
+                title: "Social Media",
+                image: "images/social.jpg",
+                description: `<span class="category-tag electronic">Electronic Information</span>
+                    <h3>Social Media</h3>
+                    <p>Social media platforms enable users to create, share, and interact with content in virtual communities.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong> User-generated content, real-time interaction.</p>
+                    </div>
+                    
+                    <h4>Platforms:</h4>
+                    <ul>
+                        <li>Facebook</li>
+                        <li>Twitter/X</li>
+                        <li>Instagram</li>
+                    </ul>`
+            }
+        };
+
+        // Get DOM elements
+        const printedBtn = document.getElementById('printedBtn');
+        const electronicBtn = document.getElementById('electronicBtn');
+        const printedDropdown = document.getElementById('printedDropdown');
+        const electronicDropdown = document.getElementById('electronicDropdown');
+        const subtopicItems = document.querySelectorAll('.subtopic-item');
+        const infoImage = document.getElementById('infoImage');
+        const imagePlaceholder = document.querySelector('.image-placeholder');
+        const descriptionContent = document.getElementById('descriptionContent');
+
+        // Track current active category and subtopic
+        let currentCategory = 'printed';
+        let currentSubtopic = null; // Start with no subtopic selected
+
+        // Function to update content based on selected subtopic or category
+        function updateContent(contentId) {
+            const data = informationData[contentId];
+
+            // Update image only if we have an image (for subtopics)
+            if (data.image) {
+                infoImage.src = data.image;
+                infoImage.alt = data.title;
+                infoImage.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+            } else {
+                // For general category descriptions, show placeholder
+                infoImage.style.display = 'none';
+                imagePlaceholder.style.display = 'flex';
+                
+                // Update placeholder icon based on category
+                const placeholderIcon = imagePlaceholder.querySelector('i');
+                if (data.category === 'printed') {
+                    placeholderIcon.className = 'fas fa-print';
+                    placeholderIcon.style.color = '#8b4513';
+                } else {
+                    placeholderIcon.className = 'fas fa-laptop';
+                    placeholderIcon.style.color = '#2c3e50';
+                }
+            }
+
+            // Update description
+            descriptionContent.innerHTML = data.description;
+
+            // Update subtopic item states only if we're showing a subtopic
+            if (contentId !== 'printed_general' && contentId !== 'electronic_general') {
+                subtopicItems.forEach(item => {
+                    if (item.getAttribute('data-id') === contentId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                currentSubtopic = contentId;
+            } else {
+                // If showing general category, remove active state from all subtopics
+                subtopicItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                currentSubtopic = null;
+            }
+
+            // Update current category
+            currentCategory = data.category;
+
+            // Update primary button states
+            printedBtn.classList.remove('active');
+            electronicBtn.classList.remove('active');
+
+            if (currentCategory === 'printed') {
+                printedBtn.classList.add('active');
+            } else {
+                electronicBtn.classList.add('active');
+            }
+        }
+
+        // Function to show/hide dropdowns based on category
+        function showCategory(category) {
+            if (category === 'printed') {
+                printedDropdown.classList.add('active');
+                electronicDropdown.classList.remove('active');
+                updateContent('printed_general');
+            } else {
+                printedDropdown.classList.remove('active');
+                electronicDropdown.classList.add('active');
+                updateContent('electronic_general');
+            }
+
+            currentCategory = category;
+            currentSubtopic = null;
+        }
+
+        // Add event listeners to primary buttons
+        printedBtn.addEventListener('click', () => {
+            showCategory('printed');
+        });
+
+        electronicBtn.addEventListener('click', () => {
+            showCategory('electronic');
+        });
+
+        // Add event listeners to subtopic items
+        subtopicItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const subtopicId = item.getAttribute('data-id');
+                updateContent(subtopicId);
+            });
+        });
+
+        // Toggle dropdown on header click
+        document.querySelectorAll('.dropdown-header').forEach(header => {
+            header.addEventListener('click', function () {
+                const dropdown = this.parentElement;
+                dropdown.classList.toggle('active');
+            });
+        });
+
+        // Initialize with printed information general description
+        showCategory('printed');
+
+        // Simulate image loading
+        infoImage.onload = function () {
+            console.log('Image loaded successfully');
+        };
+
+        infoImage.onerror = function () {
+            console.log('Error loading image, showing placeholder');
+            infoImage.style.display = 'none';
+            imagePlaceholder.style.display = 'flex';
+        };
+    </script>
+</body>
+
+</html>

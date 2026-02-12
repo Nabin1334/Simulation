@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Sources Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        
+        .left-sidebar {
+            flex: 0 0 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .energy-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .energy-btn {
+            padding: 1.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .energy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .energy-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-section {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            min-width: 300px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        
+        .info-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: #fdbb2d;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .energy-image {
+            width: 100%;
+            border-radius: 10px;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-sidebar {
+                flex: 0 0 auto;
+                width: 100%;
+            }
+            
+            .energy-selector {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .energy-btn {
+                flex: 1;
+                min-width: 150px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-section {
+                flex-direction: column;
+            }
+            
+            .canvas-container, .info-panel {
+                min-width: 100%;
+            }
+            
+            .energy-btn {
+                padding: 1rem 0.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Energy Sources Visualization</h1>
+        <p class="subtitle">Explore different energy generation methods through interactive 3D models and detailed explanations</p>
+    </header>
+    
+    <div class="container">
+        <div class="left-sidebar">
+            <div class="energy-selector">
+                <button class="energy-btn active" data-energy="solar">Solar Energy</button>
+                <button class="energy-btn" data-energy="wind">Wind Energy</button>
+                <button class="energy-btn" data-energy="hydro">Hydroelectric</button>
+                <button class="energy-btn" data-energy="fossil">Fossil Fuels</button>
+                <button class="energy-btn" data-energy="nuclear">Nuclear Power</button>
+            </div>
+            
+            <!-- Optional: Add some info or controls in the left sidebar -->
+           
+        </div>
+        
+        <div class="visualization-section">
+            <div class="canvas-container">
+                <!-- Three.js canvas will be inserted here -->
+            </div>
+            
+            <div class="info-panel">
+                <h2 id="energy-title">Solar Energy</h2>
+                <img id="energy-image" class="energy-image" src="https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Solar Energy">
+                <div id="energy-description">
+                    <p>Solar energy is harnessed from the sun's radiation using photovoltaic cells or solar thermal systems. It's a renewable, clean energy source that produces no greenhouse gas emissions during operation.</p>
+                    
+                    <h3>How It Works</h3>
+                    <p>Photovoltaic cells convert sunlight directly into electricity through the photovoltaic effect. When sunlight hits the semiconductor material in the cells, it knocks electrons loose, allowing them to flow freely and generate an electric current.</p>
+                    
+                    <h3>Advantages</h3>
+                    <p>Solar energy is abundant, renewable, and produces no air pollution or greenhouse gases. Solar panels have no moving parts and require minimal maintenance once installed.</p>
+                    
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value">1.73×10⁵</div>
+                            <div class="stat-label">TW Solar Energy Reaching Earth</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">20-25%</div>
+                            <div class="stat-label">Typical Efficiency</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">3-8 years</div>
+                            <div class="stat-label">Energy Payback Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Energy Sources Visualization | Created with Three.js</p>
+    </footer>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for camera manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="index.js"></script>
+   
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computers vs Human Beings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f9fc;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Header */
+        .main-header {
+            background: linear-gradient(135deg, #1a237e, #3949ab);
+            color: white;
+            padding: 18px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-header h1 {
+            font-size: 2.1rem;
+            margin-bottom: 6px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .main-header .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            line-height: 1.4;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 110px);
+            padding: 15px;
+            gap: 15px;
+        }
+
+        /* Left Panel - Buttons */
+        .left-panel {
+            flex: 0 0 280px;
+            background: linear-gradient(135deg, #1a237e, #5c6bc0);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .left-panel h2 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .topic-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .topic-buttons::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .topic-buttons::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .topic-buttons::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .topic-btn {
+            padding: 16px 15px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .topic-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .topic-btn.active {
+            background-color: rgba(66, 165, 245, 0.9);
+            border-left: 4px solid #ff9800;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ff9800;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .btn-text {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        /* Middle Panel - Image */
+        .middle-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .image-container {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-height: 0;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .info-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.5s ease;
+        }
+
+        .info-image:hover {
+            transform: scale(1.03);
+        }
+
+        .image-caption {
+            text-align: center;
+            color: #5c6bc0;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #ff9800;
+        }
+
+        /* Right Panel - Description */
+        .right-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .description-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #42a5f5;
+            flex-shrink: 0;
+        }
+
+        .header-icon {
+            font-size: 1.8rem;
+            margin-right: 12px;
+            color: #42a5f5;
+        }
+
+        .description-header h2 {
+            color: #1a237e;
+            font-size: 1.6rem;
+            flex: 1;
+        }
+
+        .description-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            line-height: 1.5;
+        }
+
+        .description-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .description-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .description-content::-webkit-scrollbar-thumb {
+            background: #42a5f5;
+            border-radius: 3px;
+        }
+
+        .description-content p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-table th {
+            background-color: #5c6bc0;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .comparison-table tr:hover {
+            background-color: #e8f4fc;
+        }
+
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #42a5f5;
+            margin-bottom: 15px;
+        }
+
+        .highlight strong {
+            color: #1a237e;
+        }
+
+        .similarities {
+            background-color: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .differences {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container {
+                height: calc(100vh - 110px);
+            }
+            
+            .left-panel {
+                flex: 0 0 240px;
+            }
+            
+            .topic-btn {
+                padding: 14px 12px;
+                font-size: 0.95rem;
+            }
+            
+            .btn-icon {
+                width: 32px;
+                height: 32px;
+                margin-right: 12px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                height: calc(100vh - 105px);
+                padding: 12px;
+                gap: 12px;
+            }
+            
+            .left-panel {
+                flex: 0 0 auto;
+                max-height: 170px;
+                width: 100%;
+            }
+            
+            .topic-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 8px;
+            }
+            
+            .topic-btn {
+                flex: 1;
+                min-width: 160px;
+                max-width: 200px;
+                text-align: center;
+                flex-direction: column;
+                padding: 12px 10px;
+            }
+            
+            .btn-icon {
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            
+            .middle-panel {
+                flex: 1.2;
+                min-height: 250px;
+            }
+            
+            .right-panel {
+                flex: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 1.7rem;
+                padding: 0 15px;
+            }
+            
+            .main-header .subtitle {
+                font-size: 0.9rem;
+                padding: 0 15px;
+            }
+            
+            .topic-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .topic-btn {
+                min-width: 150px;
+                font-size: 0.9rem;
+                padding: 10px 8px;
+            }
+            
+            .btn-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+            
+            .description-header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-header {
+                padding: 15px 0;
+            }
+            
+            .main-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-header .subtitle {
+                font-size: 0.85rem;
+            }
+            
+            .main-container {
+                height: calc(100vh - 100px);
+            }
+            
+            .topic-btn {
+                min-width: 140px;
+                font-size: 0.85rem;
+            }
+            
+            .btn-text {
+                font-size: 0.85rem;
+            }
+            
+            .description-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .description-content p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .main-header {
+                padding: 15px 0;
+            }
+            
+            .main-header h1 {
+                font-size: 1.7rem;
+                margin-bottom: 5px;
+            }
+            
+            .main-container {
+                height: calc(100vh - 95px);
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .left-panel, .middle-panel, .right-panel {
+                padding: 15px;
+            }
+            
+            .topic-btn {
+                padding: 12px 10px;
+            }
+            
+            .description-content p {
+                margin-bottom: 10px;
+                font-size: 0.95rem;
+            }
+            
+            .highlight {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Header -->
+    <header class="main-header">
+        <h1>Computers vs Human Beings</h1>
+        <div class="subtitle">Exploring the Fundamental Similarities and Differences Between Artificial Intelligence and Human Intelligence</div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- Left Panel: Topic Buttons -->
+        <div class="left-panel">
+            <h2>Comparison Topics</h2>
+            <div class="topic-buttons">
+                <button class="topic-btn active" onclick="showTopic(0)">
+                    <div class="btn-icon">🤖</div>
+                    <div class="btn-text">Introduction & Overview</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(1)">
+                    <div class="btn-icon">⚡</div>
+                    <div class="btn-text">Processing Capabilities</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(2)">
+                    <div class="btn-icon">🧠</div>
+                    <div class="btn-text">Memory & Learning</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(3)">
+                    <div class="btn-icon">🔬</div>
+                    <div class="btn-text">Physical vs Biological</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(4)">
+                    <div class="btn-icon">💡</div>
+                    <div class="btn-text">Creativity & Emotion</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Middle Panel: Image Display -->
+        <div class="middle-panel">
+            <div class="image-container">
+                <img id="infoImage" class="info-image" src="" alt="Computers vs Humans">
+            </div>
+            <div id="imageCaption" class="image-caption">
+                Click on any topic to explore the comparison between computers and humans
+            </div>
+        </div>
+
+        <!-- Right Panel: Description -->
+        <div class="right-panel">
+            <div class="description-header">
+                <div class="header-icon">🔍</div>
+                <h2 id="topicTitle">Introduction & Overview</h2>
+            </div>
+            <div class="description-content" id="topicDescription">
+                <p>The comparison between computers and human beings is a fascinating exploration of artificial versus natural intelligence, hardware versus biology, and programmed versus learned behaviors.</p>
+                
+                <div class="highlight similarities">
+                    <p><strong>Key Similarities:</strong></p>
+                    <ul>
+                        <li>Both process information and perform complex calculations</li>
+                        <li>Both have memory storage and retrieval capabilities</li>
+                        <li>Both can learn and adapt to new information</li>
+                        <li>Both follow systematic procedures and logic</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight differences">
+                    <p><strong>Key Differences:</strong></p>
+                    <ul>
+                        <li>Computers are electronic; humans are biological</li>
+                        <li>Computers lack consciousness and emotions</li>
+                        <li>Humans possess creativity and intuition</li>
+                        <li>Computers have perfect memory recall</li>
+                    </ul>
+                </div>
+                
+                <p>This comparison helps us understand the unique strengths and limitations of both artificial and human intelligence, guiding the development of better technology while appreciating human capabilities.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Image data stored in JavaScript
+        const imageData = {
+            images: [
+                "1st.jpg",
+                "2nd.jpg",
+                "3rd.jpg",
+                "4th.jpg",
+                "5th.jpg"
+            ],
+            captions: [
+                "AI and Human Intelligence: A Comparative Overview",
+                "Processing Power: Computers vs Human Brain Capabilities",
+                "Memory Systems: Electronic Storage vs Biological Memory",
+                "Physical Architecture: Hardware vs Biological Systems",
+                "Creativity and Emotion: Where Humans Excel Beyond Computers"
+            ]
+        };
+
+        // Topic data with comprehensive comparison content
+        const topics = [
+            {
+                title: "Introduction & Overview",
+                description: `
+                    <p>The comparison between computers and human beings reveals fundamental differences in how artificial and natural systems process information, learn, and interact with the world.</p>
+                    
+                    <div class="highlight similarities">
+                        <p><strong>Core Similarities:</strong></p>
+                        <table class="comparison-table">
+                            <tr>
+                                <th>Feature</th>
+                                <th>Computers</th>
+                                <th>Humans</th>
+                            </tr>
+                            <tr>
+                                <td>Information Processing</td>
+                                <td>Process data through algorithms</td>
+                                <td>Process information through neural networks</td>
+                            </tr>
+                            <tr>
+                                <td>Learning Ability</td>
+                                <td>Machine learning algorithms</td>
+                                <td>Learning through experience</td>
+                            </tr>
+                            <tr>
+                                <td>Pattern Recognition</td>
+                                <td>Can identify patterns in data</td>
+                                <td>Natural pattern recognition abilities</td>
+                            </tr>
+                            <tr>
+                                <td>Decision Making</td>
+                                <td>Based on programmed logic</td>
+                                <td>Based on logic and intuition</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <p>Understanding these similarities and differences helps in developing better AI systems while appreciating unique human capabilities that machines cannot replicate.</p>
+                `
+            },
+            {
+                title: "Processing Capabilities",
+                description: `
+                    <p>Processing capabilities represent one of the most significant areas of comparison between computers and humans, with each having distinct advantages.</p>
+                    
+                    <div class="highlight differences">
+                        <p><strong>Computer Advantages:</strong></p>
+                        <ul>
+                            <li><strong>Speed:</strong> Process billions of operations per second</li>
+                            <li><strong>Precision:</strong> Perfect mathematical accuracy</li>
+                            <li><strong>Consistency:</strong> No fatigue or performance degradation</li>
+                            <li><strong>Parallel Processing:</strong> Handle multiple tasks simultaneously</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight similarities">
+                        <p><strong>Human Advantages:</strong></p>
+                        <ul>
+                            <li><strong>Context Understanding:</strong> Nuanced comprehension of situations</li>
+                            <li><strong>Error Tolerance:</strong> Can work with incomplete information</li>
+                            <li><strong>Adaptability:</strong> Quickly adjust to new situations</li>
+                            <li><strong>Energy Efficiency:</strong> Brain uses only 20 watts of power</li>
+                        </ul>
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Computers</th>
+                            <th>Humans</th>
+                        </tr>
+                        <tr>
+                            <td>Processing Speed</td>
+                            <td>Extremely fast (GHz range)</td>
+                            <td>Relatively slow (~120 bits/sec)</td>
+                        </tr>
+                        <tr>
+                            <td>Energy Usage</td>
+                            <td>High power consumption</td>
+                            <td>Very efficient (20W)</td>
+                        </tr>
+                        <tr>
+                            <td>Multitasking</td>
+                            <td>Excellent parallel processing</td>
+                            <td>Limited simultaneous tasks</td>
+                        </tr>
+                        <tr>
+                            <td>Error Handling</td>
+                            <td>Crash or produce errors</td>
+                            <td>Graceful degradation</td>
+                        </tr>
+                    </table>
+                `
+            },
+            {
+                title: "Memory & Learning",
+                description: `
+                    <p>Memory and learning mechanisms differ significantly between artificial systems and biological organisms.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Computer Memory Systems:</strong></p>
+                        <ul>
+                            <li><strong>RAM:</strong> Temporary working memory</li>
+                            <li><strong>Storage:</strong> Long-term data retention</li>
+                            <li><strong>Cache:</strong> Frequently accessed data</li>
+                            <li><strong>Perfect Recall:</strong> Exact data retrieval</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Human Memory Systems:</strong></p>
+                        <ul>
+                            <li><strong>Short-term:</strong> Limited capacity (7±2 items)</li>
+                            <li><strong>Long-term:</strong> Virtually unlimited capacity</li>
+                            <li><strong>Associative:</strong> Connects related information</li>
+                            <li><strong>Reconstructive:</strong> Memory changes over time</li>
+                        </ul>
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Learning Aspect</th>
+                            <th>Computers</th>
+                            <th>Humans</th>
+                        </tr>
+                        <tr>
+                            <td>Learning Method</td>
+                            <td>Algorithm training with data</td>
+                            <td>Experience, observation, instruction</td>
+                        </tr>
+                        <tr>
+                            <td>Transfer Learning</td>
+                            <td>Limited between domains</td>
+                            <td>Excellent across domains</td>
+                        </tr>
+                        <tr>
+                            <td>Learning Speed</td>
+                            <td>Fast with enough data</td>
+                            <td>Slower but more flexible</td>
+                        </tr>
+                        <tr>
+                            <td>Forgetting</td>
+                            <td>Only if programmed to</td>
+                            <td>Natural memory decay</td>
+                        </tr>
+                    </table>
+                    
+                    <p><strong>Key Insight:</strong> Computers excel at storing and retrieving precise data, while humans excel at contextual understanding and associative memory.</p>
+                `
+            },
+            {
+                title: "Physical vs Biological",
+                description: `
+                    <p>The fundamental architectural differences between electronic computers and biological humans create distinct capabilities and limitations.</p>
+                    
+                    <div class="highlight differences">
+                        <p><strong>Physical Architecture (Computers):</strong></p>
+                        <ul>
+                            <li><strong>Components:</strong> Processors, memory chips, circuits</li>
+                            <li><strong>Power Source:</strong> Electrical power grid/batteries</li>
+                            <li><strong>Cooling:</strong> Requires active cooling systems</li>
+                            <li><strong>Upgrades:</strong> Hardware can be replaced/upgraded</li>
+                            <li><strong>Lifespan:</strong> Limited by component degradation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight differences">
+                        <p><strong>Biological Architecture (Humans):</strong></p>
+                        <ul>
+                            <li><strong>Components:</strong> Neurons, synapses, organs</li>
+                            <li><strong>Power Source:</strong> Chemical energy from food</li>
+                            <li><strong>Cooling:</strong> Natural thermoregulation</li>
+                            <li><strong>Repair:</strong> Natural healing and regeneration</li>
+                            <li><strong>Lifespan:</strong> Natural aging process</li>
+                        </ul>
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Characteristic</th>
+                            <th>Computers</th>
+                            <th>Humans</th>
+                        </tr>
+                        <tr>
+                            <td>Construction</td>
+                            <td>Manufactured components</td>
+                            <td>Biological growth</td>
+                        </tr>
+                        <tr>
+                            <td>Maintenance</td>
+                            <td>Software updates, repairs</td>
+                            <td>Sleep, nutrition, exercise</td>
+                        </tr>
+                        <tr>
+                            <td>Failure Mode</td>
+                            <td>Sudden, complete failure</td>
+                            <td>Gradual degradation</td>
+                        </tr>
+                        <tr>
+                            <td>Environmental Adapt.</td>
+                            <td>Limited, needs controlled env.</td>
+                            <td>Highly adaptable to changes</td>
+                        </tr>
+                    </table>
+                `
+            },
+            {
+                title: "Creativity & Emotion",
+                description: `
+                    <p>Creativity and emotion represent areas where humans significantly outperform computers, highlighting fundamental differences in consciousness and experience.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Human Uniqueness:</strong></p>
+                        <ul>
+                            <li><strong>Creativity:</strong> Original thought, art, innovation</li>
+                            <li><strong>Emotions:</strong> Complex emotional experiences</li>
+                            <li><strong>Consciousness:</strong> Self-awareness, subjective experience</li>
+                            <li><strong>Intuition:</strong> Gut feelings and insights</li>
+                            <li><strong>Morality:</strong> Ethical reasoning and values</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Computer Limitations:</strong></p>
+                        <ul>
+                            <li><strong>Simulated Creativity:</strong> Pattern recombination only</li>
+                            <li><strong>No Emotions:</strong> Can simulate but not feel</li>
+                            <li><strong>No Consciousness:</strong> Lacks self-awareness</li>
+                            <li><strong>Rule-based Intuition:</strong> Statistical inference only</li>
+                            <li><strong>Programmed Ethics:</strong> Follows predefined rules</li>
+                        </ul>
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Computers</th>
+                            <th>Humans</th>
+                        </tr>
+                        <tr>
+                            <td>Art Creation</td>
+                            <td>Algorithmic generation</td>
+                            <td>Emotional expression</td>
+                        </tr>
+                        <tr>
+                            <td>Problem Solving</td>
+                            <td>Systematic, logical</td>
+                            <td>Intuitive, creative leaps</td>
+                        </tr>
+                        <tr>
+                            <td>Social Interaction</td>
+                            <td>Rule-based responses</td>
+                            <td>Empathic understanding</td>
+                        </tr>
+                        <tr>
+                            <td>Motivation</td>
+                            <td>Programmed objectives</td>
+                            <td>Emotional drives, values</td>
+                        </tr>
+                    </table>
+                    
+                    <p><strong>Future Outlook:</strong> While AI can simulate certain aspects of creativity and emotional responses, true consciousness, emotional experience, and original creativity remain uniquely human characteristics that current technology cannot replicate.</p>
+                `
+            }
+        ];
+
+        // Initialize with first topic
+        document.addEventListener('DOMContentLoaded', function() {
+            showTopic(0);
+            
+            // Preload all images
+            imageData.images.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        });
+
+        function showTopic(index) {
+            // Update active button
+            const buttons = document.querySelectorAll('.topic-btn');
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            // Update image
+            const imageElement = document.getElementById('infoImage');
+            const captionElement = document.getElementById('imageCaption');
+            
+            imageElement.src = imageData.images[index];
+            imageElement.alt = topics[index].title;
+            captionElement.textContent = imageData.captions[index];
+
+            // Update title and description
+            document.getElementById('topicTitle').textContent = topics[index].title;
+            document.getElementById('topicDescription').innerHTML = topics[index].description;
+            
+            // Scroll description to top
+            const descContent = document.getElementById('topicDescription');
+            descContent.scrollTop = 0;
+        }
+    </script>
+</body>
+</html>

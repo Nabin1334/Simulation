@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Desktop Simulation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a5b4fc;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Control Panel Styles */
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #4cc9f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .components-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .component-btn {
+            background: rgba(17, 24, 39, 0.8);
+            border: none;
+            border-radius: 10px;
+            padding: 18px 20px;
+            color: #e6e6e6;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+        }
+
+        .component-btn:hover {
+            background: rgba(37, 99, 235, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .component-btn.active {
+            background: rgba(37, 99, 235, 0.3);
+            border-left-color: #4cc9f0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .component-btn i {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .btn-cpu i {
+            color: #4cc9f0;
+        }
+
+        .btn-monitor i {
+            color: #f72585;
+        }
+
+        .btn-keyboard i {
+            color: #7209b7;
+        }
+
+        .btn-mouse i {
+            color: #3a86ff;
+        }
+
+        .btn-speakers i {
+            color: #ff9e00;
+        }
+
+        .power-status {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(17, 24, 39, 0.8);
+            border-radius: 10px;
+        }
+
+        .power-status h3 {
+            margin-bottom: 15px;
+            color: #a5b4fc;
+        }
+
+        .power-btn {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .power-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .power-btn.off {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        /* Visualization Area Styles */
+        .visualization {
+            flex: 2;
+            min-width: 500px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .visualization h2 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #4cc9f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desktop-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+
+        /* COMPONENT LAYOUT - REALISTIC DESIGN */
+
+        /* Monitor - Top Center - More Realistic */
+        .monitor {
+            position: absolute;
+            width: 420px;
+            height: 260px;
+            background: #0f172a;
+            border-radius: 12px;
+            border: 18px solid #1e293b;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.5s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .monitor-screen-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            color: #10b981;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .monitor-stand {
+            position: absolute;
+            width: 50px;
+            height: 25px;
+            background: #1e293b;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .monitor-base {
+            position: absolute;
+            width: 150px;
+            height: 12px;
+            background: #1e293b;
+            top: calc(100% + 25px);
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+        }
+
+        /* CPU - Moved more to the left */
+        .cpu {
+            position: absolute;
+            width: 140px;
+            height: 320px;
+            background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
+            border-radius: 10px;
+            top: 25%;
+            left: 5%;
+            z-index: 9;
+            transition: all 0.5s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid #3b82f6;
+            cursor: pointer;
+        }
+
+        .cpu-front {
+            position: absolute;
+            width: 90%;
+            height: 85%;
+            background: rgba(20, 20, 20, 0.9);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 6px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+        }
+
+        .cpu-power-light {
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+        }
+
+        .cpu-power-light.on {
+            background: #10b981;
+            box-shadow: 0 0 15px #10b981;
+        }
+
+        .cpu-vents {
+            width: 80%;
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .cpu-vent {
+            width: 100%;
+            height: 8px;
+            background: rgba(60, 60, 60, 0.8);
+            border-radius: 2px;
+        }
+
+        /* CPU Power Button - More Realistic */
+        .cpu-power-btn {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(to bottom, #555, #333);
+            border-radius: 50%;
+            border: 2px solid #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .cpu-power-btn:hover {
+            background: linear-gradient(to bottom, #666, #444);
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .cpu-power-btn:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        /* Speaker - Smaller with Volume Buttons INSIDE */
+        .speaker {
+            position: absolute;
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(to bottom, #1a1a1a, #0a0a0a);
+            border-radius: 8px;
+            top: 25%;
+            right: 10%;
+            z-index: 9;
+            transition: all 0.5s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .speaker-front {
+            width: 85%;
+            height: 90%;
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border-radius: 6px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 15px;
+        }
+
+        .speaker-grill {
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #3a3a3a, #2a2a2a, #3a3a3a);
+            border-radius: 2px;
+        }
+
+        /* Volume Buttons INSIDE Speaker */
+        .volume-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .volume-btn {
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(to bottom, #444, #333);
+            border-radius: 50%;
+            border: 1px solid #555;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-btn:hover {
+            background: linear-gradient(to bottom, #555, #444);
+            transform: scale(1.1);
+        }
+
+        .volume-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Keyboard - More Realistic */
+        .keyboard {
+            position: absolute;
+            width: 380px;
+            height: 140px;
+            background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+            border-radius: 10px;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            padding: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .keyboard-keys {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            grid-template-columns: repeat(15, 1fr);
+            gap: 3px;
+            padding: 5px;
+        }
+
+        .key {
+            background: linear-gradient(to bottom, #444, #333);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: #ddd;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: all 0.1s ease;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        .key:hover {
+            background: linear-gradient(to bottom, #555, #444);
+        }
+
+        .key.active {
+            background: linear-gradient(to bottom, #4cc9f0, #3b82f6) !important;
+            color: white;
+            transform: scale(0.95);
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+
+        .key.wide {
+            grid-column: span 2;
+        }
+
+        .key.space {
+            grid-column: span 6;
+        }
+
+        .key.enter {
+            grid-column: span 2;
+        }
+
+        .key.shift {
+            grid-column: span 2;
+        }
+
+        /* Mouse - Smaller with Red Blinking Light in Middle */
+        .mouse {
+            position: absolute;
+            width: 65px;
+            height: 110px;
+            background: linear-gradient(to bottom, #4b5563, #374151);
+            border-radius: 35px 35px 20px 20px;
+            bottom: 25%;
+            right: 12%;
+            z-index: 8;
+            transition: all 0.5s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .mouse-top {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(to bottom, #6b7280, #4b5563);
+            border-radius: 35px 35px 15px 15px;
+            top: 0;
+            left: 0;
+        }
+
+        .mouse-button {
+            position: absolute;
+            width: 70%;
+            height: 25%;
+            background: linear-gradient(to bottom, #9ca3af, #6b7280);
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 20px 20px 10px 10px;
+        }
+
+        .mouse-wheel {
+            position: absolute;
+            width: 35%;
+            height: 10px;
+            background: linear-gradient(to bottom, #d1d5db, #9ca3af);
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+
+        /* Red Blinking Light in Middle of Mouse */
+        .mouse-blinker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            animation: mouseBlink 1.5s infinite;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+            z-index: 2;
+        }
+
+        @keyframes mouseBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+            }
+
+            50% {
+                opacity: 0.3;
+                box-shadow: 0 0 4px rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        .mouse-blinker.active {
+            background: #3a86ff;
+            box-shadow: 0 0 10px #3a86ff;
+            animation: mouseBlinkActive 0.8s infinite;
+        }
+
+        @keyframes mouseBlinkActive {
+
+            0%,
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 10px #3a86ff;
+            }
+
+            50% {
+                opacity: 0.5;
+                box-shadow: 0 0 15px #3a86ff;
+            }
+        }
+
+        /* Labels for all components */
+        .component-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 25;
+            opacity: 1;
+            white-space: nowrap;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid #4cc9f0;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+        }
+
+        /* Updated Highlight Effects - Glow without changing position or size */
+        .highlight {
+            box-shadow:
+                0 0 25px 10px rgba(76, 201, 240, 0.5),
+                0 0 50px 20px rgba(76, 201, 240, 0.3) !important;
+            z-index: 20 !important;
+            transform: none !important;
+            /* No scale transform */
+        }
+
+        .glow-monitor {
+            box-shadow:
+                0 0 25px 10px rgba(247, 37, 133, 0.5),
+                0 0 50px 20px rgba(247, 37, 133, 0.3) !important;
+            z-index: 20 !important;
+        }
+
+        .glow-cpu {
+            box-shadow:
+                0 0 25px 10px rgba(76, 201, 240, 0.5),
+                0 0 50px 20px rgba(76, 201, 240, 0.3) !important;
+            z-index: 20 !important;
+        }
+
+        .glow-keyboard {
+            box-shadow:
+                0 0 25px 10px rgba(114, 9, 183, 0.5),
+                0 0 50px 20px rgba(114, 9, 183, 0.3) !important;
+            z-index: 20 !important;
+        }
+
+        .glow-mouse {
+            box-shadow:
+                0 0 25px 10px rgba(58, 134, 255, 0.5),
+                0 0 50px 20px rgba(58, 134, 255, 0.3) !important;
+            z-index: 20 !important;
+        }
+
+        .glow-speakers {
+            box-shadow:
+                0 0 25px 10px rgba(255, 158, 0, 0.5),
+                0 0 50px 20px rgba(255, 158, 0, 0.3) !important;
+            z-index: 20 !important;
+        }
+
+        /* Status Panel - Smaller and Moved */
+        .status-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #4cc9f0;
+            min-width: 120px;
+            z-index: 30;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            font-size: 0.75rem;
+        }
+
+        .status-item {
+            margin: 3px 0;
+            font-size: 0.7rem;
+            color: #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-value {
+            color: #4cc9f0;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* Component Function Indicators */
+        .component-indicator {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #10b981;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            z-index: 30;
+            border: 1px solid #10b981;
+        }
+
+        .component.highlight .component-indicator {
+            opacity: 1;
+        }
+
+        /* Desktop Simulation Styles */
+        .desktop-background {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .desktop-icon {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .desktop-icon img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+        }
+
+        .desktop-icon span {
+            font-size: 0.6rem;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            word-break: break-word;
+            line-height: 1.1;
+        }
+
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .start-button {
+            background: linear-gradient(to bottom, #4cc9f0, #3a86ff);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .taskbar-items {
+            display: flex;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .taskbar-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.6rem;
+            cursor: pointer;
+        }
+
+        .time-display {
+            margin-left: auto;
+            font-size: 0.6rem;
+            color: #a5b4fc;
+        }
+
+        /* Virtual Keyboard Styles */
+        .virtual-keyboard-container {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #0f172a, #1e293b);
+            z-index: 1001;
+            padding: 20px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+            border-top: 3px solid #7209b7;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .virtual-keyboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .virtual-keyboard-title {
+            font-size: 1.5rem;
+            color: #7209b7;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .close-virtual-keyboard {
+            background: rgba(114, 9, 183, 0.3);
+            border: none;
+            color: #a855f7;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .close-virtual-keyboard:hover {
+            background: rgba(114, 9, 183, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .virtual-keyboard-keys {
+            display: grid;
+            grid-template-rows: repeat(4, 60px);
+            grid-template-columns: repeat(15, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .virtual-key {
+            background: linear-gradient(to bottom, #4b5563, #374151);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s ease;
+            border: 1px solid #6b7280;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .virtual-key:hover {
+            background: linear-gradient(to bottom, #5b6573, #475161);
+        }
+
+        .virtual-key:active {
+            background: linear-gradient(to bottom, #7209b7, #5b0588);
+            transform: scale(0.95);
+        }
+
+        .virtual-key.wide {
+            grid-column: span 2;
+        }
+
+        .virtual-key.space {
+            grid-column: span 6;
+        }
+
+        .virtual-key.enter {
+            grid-column: span 2;
+        }
+
+        .virtual-key.shift {
+            grid-column: span 2;
+        }
+
+        .virtual-key.special {
+            background: linear-gradient(to bottom, #6b7280, #4b5563);
+        }
+
+        .virtual-key.special:hover {
+            background: linear-gradient(to bottom, #7b8280, #5b6563);
+        }
+
+        .typing-display {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 60px;
+            border: 1px solid #7209b7;
+            font-size: 1.2rem;
+            color: #a855f7;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2rem;
+            background: #a855f7;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .visualization,
+            .control-panel {
+                min-width: 100%;
+            }
+
+            .desktop-container {
+                min-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .desktop-container {
+                min-height: 450px;
+            }
+
+            .monitor {
+                width: 320px;
+                height: 200px;
+                top: 10%;
+            }
+
+            .cpu {
+                width: 120px;
+                height: 280px;
+                left: 3%;
+                top: 20%;
+            }
+
+            .speaker {
+                width: 100px;
+                height: 150px;
+                right: 8%;
+                top: 20%;
+            }
+
+            .keyboard {
+                width: 300px;
+                height: 120px;
+                bottom: 25%;
+            }
+
+            .key {
+                font-size: 0.5rem;
+            }
+
+            .mouse {
+                width: 60px;
+                height: 100px;
+                right: 10%;
+                bottom: 30%;
+            }
+
+            .status-panel {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-top: 20px;
+                width: 100%;
+            }
+
+            .virtual-keyboard-keys {
+                grid-template-rows: repeat(4, 50px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-desktop"></i> Computer Desktop Simulation</h1>
+
+        </header>
+
+        <div class="main-content">
+            <!-- Control Panel with Component Buttons -->
+            <div class="control-panel">
+                <h2><i class="fas fa-sliders-h"></i> Component Controls</h2>
+
+                <div class="components-list">
+                    <button class="component-btn btn-cpu active" data-component="cpu">
+                        <i class="fas fa-microchip"></i>
+                        <div>
+                            <div>Central Processing Unit (CPU)</div>
+                            <div class="component-desc">Click to highlight and power on</div>
+                        </div>
+                    </button>
+
+                    <button class="component-btn btn-monitor" data-component="monitor">
+                        <i class="fas fa-desktop"></i>
+                        <div>
+                            <div>Monitor</div>
+                            <div class="component-desc">Click to show desktop simulation</div>
+                        </div>
+                    </button>
+
+                    <button class="component-btn btn-keyboard" data-component="keyboard">
+                        <i class="fas fa-keyboard"></i>
+                        <div>
+                            <div>Keyboard</div>
+                            <div class="component-desc">Click to highlight input device</div>
+                        </div>
+                    </button>
+
+                    <button class="component-btn btn-mouse" data-component="mouse">
+                        <i class="fas fa-mouse"></i>
+                        <div>
+                            <div>Mouse</div>
+                            <div class="component-desc">Click to highlight pointing device</div>
+                        </div>
+                    </button>
+
+                    <button class="component-btn btn-speakers" data-component="speakers">
+                        <i class="fas fa-volume-up"></i>
+                        <div>
+                            <div>Speakers</div>
+                            <div class="component-desc">Click to highlight audio output</div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="power-status">
+                    <h3><i class="fas fa-power-off"></i> System Power Control</h3>
+                    <button class="power-btn" id="powerButton">
+                        <i class="fas fa-power-off"></i>
+                        <span>Plugged In</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="visualization">
+                <h2><i class="fas fa-eye"></i> Desktop Visualization</h2>
+
+                <div class="desktop-container" id="desktopContainer">
+                    <!-- Status Panel - Smaller -->
+                    <div class="status-panel" id="statusPanel">
+                        <div class="status-item">
+                            <span>Selected:</span><span class="status-value" id="selectedComponent">CPU</span>
+                        </div>
+                        <div class="status-item">
+                            <span>System:</span><span class="status-value" id="systemStatus">ON</span>
+                        </div>
+                        <div class="status-item">
+                            <span>CPU Power:</span><span class="status-value" id="cpuPowerStatus">OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Monitor - Top Center -->
+                    <div class="component monitor" id="monitorComponent">
+                        <div class="monitor-screen">
+                            <div class="monitor-screen-content" id="screenContent">
+                                <!-- Monitor content will be updated here -->
+                            </div>
+                        </div>
+                        <div class="monitor-stand"></div>
+                        <div class="monitor-base"></div>
+                        <div class="component-label">Monitor</div>
+                        <div class="component-indicator">Display Active</div>
+                    </div>
+
+                    <!-- CPU - Moved more to the left -->
+                    <div class="component cpu" id="cpuComponent">
+                        <div class="cpu-front">
+                            <div class="cpu-power-light" id="cpuPowerLight"></div>
+                            <div class="cpu-vents">
+                                <div class="cpu-vent"></div>
+                                <div class="cpu-vent"></div>
+                                <div class="cpu-vent"></div>
+                                <div class="cpu-vent"></div>
+                                <div class="cpu-vent"></div>
+                            </div>
+                            <div class="cpu-power-btn" id="cpuPowerBtn" title="Click to power on CPU">
+                                <i class="fas fa-power-off"></i>
+                            </div>
+                        </div>
+                        <div class="component-label">Central Processing Unit</div>
+                        <div class="component-indicator">Processing Data</div>
+                    </div>
+
+                    <!-- Speaker - Volume buttons INSIDE -->
+                    <div class="component speaker" id="speakerComponent">
+                        <div class="speaker-front">
+                            <div class="speaker-grill"></div>
+                            <div class="speaker-grill"></div>
+                            <div class="speaker-grill"></div>
+                            <div class="speaker-grill"></div>
+                            <div class="speaker-grill"></div>
+                            <div class="volume-controls">
+                                <div class="volume-btn" id="volumeUpBtn" title="Volume Up">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="volume-btn" id="volumeDownBtn" title="Volume Down">
+                                    <i class="fas fa-minus"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="component-label">Speaker</div>
+                        <div class="component-indicator">Audio Output</div>
+                    </div>
+
+                    <!-- Keyboard - More Realistic -->
+                    <div class="component keyboard" id="keyboardComponent">
+                        <div class="keyboard-keys" id="keyboardKeys">
+                            <!-- Keys will be generated by JavaScript -->
+                        </div>
+                        <div class="component-label">Keyboard</div>
+                        <div class="component-indicator">Input Device</div>
+                    </div>
+
+                    <!-- Mouse - Smaller with Red Blinking Light in Middle -->
+                    <div class="component mouse" id="mouseComponent">
+                        <div class="mouse-top">
+                            <div class="mouse-button"></div>
+                            <div class="mouse-wheel"></div>
+                        </div>
+                        <div class="mouse-blinker" id="mouseBlinker"></div>
+                        <div class="component-label">Mouse</div>
+                        <div class="component-indicator">Pointing Device</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Virtual Keyboard Popup -->
+    <div class="virtual-keyboard-container" id="virtualKeyboard">
+        <div class="virtual-keyboard-header">
+            <div class="virtual-keyboard-title">
+                <i class="fas fa-keyboard"></i>
+                Virtual Keyboard
+            </div>
+            <button class="close-virtual-keyboard" id="closeVirtualKeyboard">
+                Close Keyboard
+            </button>
+        </div>
+        <div class="typing-display" id="typingDisplay">
+            <span id="typedText"></span>
+            <span class="cursor"></span>
+        </div>
+        <div class="virtual-keyboard-keys" id="virtualKeyboardKeys">
+            <!-- Virtual keys will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get all component buttons
+            const componentButtons = document.querySelectorAll('.component-btn');
+            const powerButton = document.getElementById('powerButton');
+            const cpuPowerLight = document.getElementById('cpuPowerLight');
+            const cpuPowerBtn = document.getElementById('cpuPowerBtn');
+            const screenContent = document.getElementById('screenContent');
+            const keyboardKeys = document.getElementById('keyboardKeys');
+            const mouseBlinker = document.getElementById('mouseBlinker');
+            const volumeUpBtn = document.getElementById('volumeUpBtn');
+            const volumeDownBtn = document.getElementById('volumeDownBtn');
+
+            // Popup elements
+            const virtualKeyboard = document.getElementById('virtualKeyboard');
+            const closeVirtualKeyboard = document.getElementById('closeVirtualKeyboard');
+            const virtualKeyboardKeys = document.getElementById('virtualKeyboardKeys');
+            const typedText = document.getElementById('typedText');
+
+            // Status elements
+            const selectedComponentSpan = document.getElementById('selectedComponent');
+            const systemStatusSpan = document.getElementById('systemStatus');
+            const cpuPowerStatusSpan = document.getElementById('cpuPowerStatus');
+
+            const desktopComponents = {
+                'cpu': document.getElementById('cpuComponent'),
+                'monitor': document.getElementById('monitorComponent'),
+                'keyboard': document.getElementById('keyboardComponent'),
+                'mouse': document.getElementById('mouseComponent'),
+                'speakers': document.getElementById('speakerComponent')
+            };
+
+            // Track current active component and states
+            let activeComponent = 'cpu';
+            let isSystemOn = true;
+            let isCpuPowered = false;
+            let volumeLevel = 50; // Volume level from 0-100
+            let currentTypedText = '';
+            let isMonitorActive = false;
+            let isMonitorShowingDesktop = false;
+
+            // Initialize with CPU highlighted
+            highlightComponent('cpu');
+            updateStatusPanel('cpu');
+
+            // Create realistic keyboard keys
+            createKeyboardKeys();
+            createVirtualKeyboardKeys();
+
+            // Initialize mouse blinker
+            updateMouseBlinker();
+
+            // Add click event to each component button
+            componentButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const component = this.getAttribute('data-component');
+
+                    // Update active button
+                    componentButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Highlight the component in visualization
+                    highlightComponent(component);
+                    updateStatusPanel(component);
+
+                    // Store active component
+                    activeComponent = component;
+
+                    // IMPORTANT: Keep monitor screen visible if CPU is on
+                    if (isCpuPowered && component !== 'monitor') {
+                        // Don't hide the monitor when clicking other components
+                        // Just ensure monitor screen stays visible
+                        maintainMonitorDisplay();
+                    }
+                });
+            });
+
+            // Monitor click event - show desktop simulation
+            desktopComponents.monitor.addEventListener('click', function () {
+                if (!isSystemOn) {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                if (!isCpuPowered) {
+                    showNotification('CPU is powered off. Power on CPU first.', 'error');
+                    return;
+                }
+
+                // Highlight the monitor
+                highlightComponent('monitor');
+                updateStatusPanel('monitor');
+                activeComponent = 'monitor';
+
+                // Update control panel button
+                componentButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.btn-monitor').classList.add('active');
+
+                // Show desktop simulation
+                showDesktopSimulation();
+                isMonitorShowingDesktop = true;
+
+                showNotification('Desktop Simulation Activated', 'info');
+            });
+
+            // Keyboard click event - show virtual keyboard
+            desktopComponents.keyboard.addEventListener('click', function () {
+                if (!isSystemOn) {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                // Highlight the keyboard
+                highlightComponent('keyboard');
+                updateStatusPanel('keyboard');
+                activeComponent = 'keyboard';
+
+                // Update control panel button
+                componentButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.btn-keyboard').classList.add('active');
+
+                // Show the virtual keyboard
+                virtualKeyboard.style.display = 'block';
+
+                // Keep monitor screen visible
+                maintainMonitorDisplay();
+
+                showNotification('Virtual Keyboard Activated', 'info');
+            });
+
+            // Close virtual keyboard
+            closeVirtualKeyboard.addEventListener('click', function () {
+                virtualKeyboard.style.display = 'none';
+            });
+
+            // System Power button functionality
+            powerButton.addEventListener('click', function () {
+                isSystemOn = !isSystemOn;
+
+                if (isSystemOn) {
+                    this.classList.remove('off');
+                    this.innerHTML = '<i class="fas fa-power-off"></i><span>Plugged In</span>';
+                    systemStatusSpan.textContent = 'ON';
+                    systemStatusSpan.style.color = '#10b981';
+
+                    // Re-highlight the active component
+                    highlightComponent(activeComponent);
+
+                    // Show notification
+                    showNotification('System plugged in', 'success');
+                } else {
+                    this.classList.add('off');
+                    this.innerHTML = '<i class="fas fa-power-off"></i><span>Plugged Out</span>';
+                    systemStatusSpan.textContent = 'OFF';
+                    systemStatusSpan.style.color = '#ef4444';
+
+                    // Turn off CPU if system is unplugged
+                    isCpuPowered = false;
+                    cpuPowerLight.classList.remove('on');
+                    cpuPowerStatusSpan.textContent = 'OFF';
+                    cpuPowerStatusSpan.style.color = '#ef4444';
+
+                    // Clear monitor display when system is unplugged
+                    clearMonitorDisplay();
+
+                    // Reset monitor states
+                    isMonitorActive = false;
+                    isMonitorShowingDesktop = false;
+
+                    // Remove highlights from all components
+                    removeAllHighlights();
+
+                    // Close virtual keyboard
+                    virtualKeyboard.style.display = 'none';
+
+                    // Show notification
+                    showNotification('System unplugged', 'error');
+                }
+
+                // Update mouse blinker based on system state
+                updateMouseBlinker();
+            });
+
+            // CPU Power button functionality - NOW AUTOMATICALLY ACTIVATES MONITOR
+            cpuPowerBtn.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent triggering CPU component click
+
+                if (!isSystemOn) {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                isCpuPowered = !isCpuPowered;
+
+                if (isCpuPowered) {
+                    cpuPowerLight.classList.add('on');
+                    cpuPowerStatusSpan.textContent = 'ON';
+                    cpuPowerStatusSpan.style.color = '#10b981';
+
+                    // Automatically activate and highlight the monitor
+                    activateMonitorOnCpuPowerOn();
+
+                    // Show notification
+                    showNotification('CPU powered ON - Monitor activated', 'success');
+                } else {
+                    cpuPowerLight.classList.remove('on');
+                    cpuPowerStatusSpan.textContent = 'OFF';
+                    cpuPowerStatusSpan.style.color = '#ef4444';
+
+                    // Clear monitor display when CPU is turned off
+                    clearMonitorDisplay();
+
+                    // Reset monitor states
+                    isMonitorActive = false;
+                    isMonitorShowingDesktop = false;
+
+                    // Show notification
+                    showNotification('CPU powered OFF', 'error');
+                }
+
+                // Update mouse blinker
+                updateMouseBlinker();
+            });
+
+            // Function to automatically activate monitor when CPU is powered on
+            function activateMonitorOnCpuPowerOn() {
+                // Set monitor as active component
+                activeComponent = 'monitor';
+                isMonitorActive = true;
+
+                // Update control panel button
+                componentButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.btn-monitor').classList.add('active');
+
+                // Highlight the monitor
+                highlightComponent('monitor');
+                updateStatusPanel('monitor');
+
+                // Show monitor power on sequence
+                showMonitorPowerOn();
+            }
+
+            // Function to maintain monitor display when clicking other components
+            function maintainMonitorDisplay() {
+                if (isCpuPowered && isMonitorActive) {
+                    // Keep the monitor screen visible with current content
+                    const monitorScreen = document.querySelector('.monitor-screen');
+
+                    if (isMonitorShowingDesktop) {
+                        // If desktop was showing, keep it showing
+                        showDesktopSimulation();
+                    } else {
+                        // Otherwise show default screen
+                        showMonitorDefaultScreen();
+                    }
+
+                    // Ensure screen content is visible
+                    screenContent.style.opacity = '1';
+                }
+            }
+
+            // Volume Up button functionality
+            volumeUpBtn.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent triggering speaker click
+                if (!isSystemOn) {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                volumeLevel = Math.min(100, volumeLevel + 10);
+                showNotification(`Volume increased to ${volumeLevel}%`, 'info');
+                showVolumeVisualization();
+            });
+
+            // Volume Down button functionality
+            volumeDownBtn.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent triggering speaker click
+                if (!isSystemOn) {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                volumeLevel = Math.max(0, volumeLevel - 10);
+                showNotification(`Volume decreased to ${volumeLevel}%`, 'info');
+                showVolumeVisualization();
+            });
+
+            // Function to show volume visualization
+            function showVolumeVisualization() {
+                const speakerGrills = document.querySelectorAll('.speaker-grill');
+                speakerGrills.forEach((grill, index) => {
+                    // Make grills pulse based on volume level
+                    const intensity = volumeLevel / 100;
+                    grill.style.animation = `volumePulse ${0.5 + (1 - intensity)}s infinite`;
+
+                    // Change color based on volume
+                    if (volumeLevel > 70) {
+                        grill.style.background = 'linear-gradient(to right, #4a4a4a, #ff9e00, #4a4a4a)';
+                    } else if (volumeLevel > 30) {
+                        grill.style.background = 'linear-gradient(to right, #4a4a4a, #f59e0b, #4a4a4a)';
+                    } else {
+                        grill.style.background = 'linear-gradient(to right, #3a3a3a, #2a2a2a, #3a3a3a)';
+                    }
+                });
+
+                // Add CSS animation for volume pulse if not exists
+                if (!document.querySelector('#volumePulse')) {
+                    const style = document.createElement('style');
+                    style.id = 'volumePulse';
+                    style.textContent = `
+                        @keyframes volumePulse {
+                            0%, 100% { opacity: 1; }
+                            50% { opacity: ${0.3 + (volumeLevel / 200)}; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            // Function to update mouse blinker
+            function updateMouseBlinker() {
+                if (isSystemOn && isCpuPowered) {
+                    mouseBlinker.classList.add('active');
+                } else {
+                    mouseBlinker.classList.remove('active');
+                }
+            }
+
+            // Function to highlight a specific component with glow effect
+            function highlightComponent(component) {
+                if (!isSystemOn && component !== 'cpu') {
+                    showNotification('System is unplugged. Plug in system first.', 'error');
+                    return;
+                }
+
+                // Remove highlight from all components first
+                removeAllHighlights();
+
+                // Add specific glow class based on component
+                const componentElement = desktopComponents[component];
+                if (componentElement) {
+                    componentElement.classList.add(`glow-${component}`);
+
+                    // Show component specific effects
+                    if (component === 'speakers') {
+                        showAudioVisualization();
+                    } else if (component === 'cpu') {
+                        // Only show CPU activity if powered on
+                        if (isCpuPowered) {
+                            showCpuActivity();
+                        }
+                    } else if (component === 'monitor') {
+                        // Show monitor display based on CPU power status
+                        if (isCpuPowered) {
+                            if (isMonitorActive) {
+                                if (isMonitorShowingDesktop) {
+                                    showDesktopSimulation();
+                                } else {
+                                    showMonitorDefaultScreen();
+                                }
+                            } else {
+                                showMonitorDefaultScreen();
+                            }
+                        } else {
+                            showMonitorNoSignal();
+                        }
+                    } else if (component === 'keyboard') {
+                        showKeyboardEffect();
+                    } else if (component === 'mouse') {
+                        showMouseEffect();
+
+                        // Make mouse blinker more active
+                        mouseBlinker.style.animation = 'mouseBlinkActive 0.5s infinite';
+                    }
+                }
+            }
+
+            // Function to remove all highlights - MODIFIED to not clear monitor display
+            function removeAllHighlights() {
+                Object.keys(desktopComponents).forEach(key => {
+                    const component = desktopComponents[key];
+                    if (component && component.classList) {
+                        // Remove all glow classes but keep monitor screen visible
+                        component.classList.remove('glow-cpu', 'glow-monitor', 'glow-keyboard', 'glow-mouse', 'glow-speakers');
+                    }
+                });
+
+                // Reset mouse blinker animation
+                mouseBlinker.style.animation = '';
+                updateMouseBlinker();
+
+                // Clear any special effects EXCEPT monitor display
+                clearAudioVisualization();
+                clearCpuActivity();
+                // DO NOT clear monitor display here - monitor should stay visible
+                clearKeyboardEffect();
+                clearMouseEffect();
+            }
+
+            // Function to update status panel
+            function updateStatusPanel(component) {
+                selectedComponentSpan.textContent = component.toUpperCase();
+            }
+
+            // Function to create realistic keyboard keys
+            function createKeyboardKeys() {
+                const keyLayout = [
+                    ['Esc', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'PrtSc', 'ScrLk', 'Pause'],
+                    ['~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace wide'],
+                    ['Tab wide', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
+                    ['Caps shift', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'Enter enter'],
+                    ['Shift shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'Shift shift'],
+                    ['Ctrl', 'Win', 'Alt', 'Space space', 'Alt', 'Win', 'Menu', 'Ctrl']
+                ];
+
+                keyboardKeys.innerHTML = '';
+
+                keyLayout.forEach(row => {
+                    row.forEach(keyInfo => {
+                        const key = document.createElement('div');
+                        const keyParts = keyInfo.split(' ');
+                        const keyLabel = keyParts[0];
+                        const keyClass = keyParts[1] || '';
+
+                        key.className = `key ${keyClass}`;
+                        key.textContent = keyLabel;
+                        key.setAttribute('data-key', keyLabel);
+
+                        // Add click effect - highlight the key when clicked
+                        key.addEventListener('mousedown', function () {
+                            this.classList.add('active');
+                            this.style.transform = 'scale(0.95)';
+
+                            // Show key press notification
+                            if (keyLabel === 'Space') {
+                                showNotification(`Space bar pressed`, 'info');
+                            } else if (keyLabel === 'Enter') {
+                                showNotification(`Enter key pressed`, 'info');
+                            } else if (keyLabel === 'Esc') {
+                                showNotification(`Escape key pressed`, 'info');
+                            } else {
+                                showNotification(`Key pressed: ${keyLabel}`, 'info');
+                            }
+                        });
+
+                        key.addEventListener('mouseup', function () {
+                            setTimeout(() => {
+                                this.classList.remove('active');
+                            }, 200);
+                            this.style.transform = 'scale(1)';
+                        });
+
+                        key.addEventListener('mouseleave', function () {
+                            this.classList.remove('active');
+                            this.style.transform = 'scale(1)';
+                            this.style.background = 'linear-gradient(to bottom, #444, #333)';
+                        });
+
+                        keyboardKeys.appendChild(key);
+                    });
+                });
+            }
+
+            // Function to create virtual keyboard keys
+            function createVirtualKeyboardKeys() {
+                const keyLayout = [
+                    ['Esc', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'PrtSc', 'ScrLk', 'Pause'],
+                    ['~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace wide'],
+                    ['Tab wide', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
+                    ['Caps shift', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'Enter enter'],
+                    ['Shift shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'Shift shift'],
+                    ['Ctrl special', 'Win special', 'Alt special', 'Space space', 'Alt special', 'Win special', 'Menu special', 'Ctrl special']
+                ];
+
+                virtualKeyboardKeys.innerHTML = '';
+
+                keyLayout.forEach(row => {
+                    row.forEach(keyInfo => {
+                        const key = document.createElement('div');
+                        const keyParts = keyInfo.split(' ');
+                        const keyLabel = keyParts[0];
+                        const keyClass = keyParts[1] || '';
+
+                        key.className = `virtual-key ${keyClass}`;
+                        key.textContent = keyLabel;
+                        key.setAttribute('data-key', keyLabel);
+
+                        // Add click event for typing
+                        key.addEventListener('click', function () {
+                            if (keyLabel === 'Backspace') {
+                                currentTypedText = currentTypedText.slice(0, -1);
+                            } else if (keyLabel === 'Space') {
+                                currentTypedText += ' ';
+                            } else if (keyLabel === 'Enter') {
+                                currentTypedText += '\n';
+                            } else if (keyLabel === 'Tab') {
+                                currentTypedText += '\t';
+                            } else if (!keyLabel.includes('F') && !['Esc', 'PrtSc', 'ScrLk', 'Pause', 'Ctrl', 'Win', 'Alt', 'Menu', 'Shift', 'Caps'].includes(keyLabel)) {
+                                currentTypedText += keyLabel;
+                            }
+
+                            // Update the display
+                            typedText.textContent = currentTypedText;
+
+                            // Highlight the key briefly
+                            this.style.background = 'linear-gradient(to bottom, #7209b7, #5b0588)';
+                            setTimeout(() => {
+                                this.style.background = '';
+                            }, 100);
+                        });
+
+                        virtualKeyboardKeys.appendChild(key);
+                    });
+                });
+            }
+
+            // Function to show monitor power on message (when CPU is turned on)
+            function showMonitorPowerOn() {
+                const messages = [
+                    "SYSTEM INITIALIZING...",
+                    "CPU: ACTIVATED",
+                    "MEMORY: CHECKING...",
+                    "BOOTING DESKTOP SIMULATION...",
+                    "DESKTOP SIMULATION READY"
+                ];
+
+                screenContent.innerHTML = '';
+                screenContent.style.opacity = '1';
+                screenContent.style.color = '#10b981';
+
+                // Animate messages one by one
+                let messageIndex = 0;
+
+                function showNextMessage() {
+                    if (messageIndex < messages.length) {
+                        screenContent.innerHTML = messages[messageIndex];
+                        messageIndex++;
+                        setTimeout(showNextMessage, 800);
+                    } else {
+                        // After boot sequence, show desktop simulation
+                        setTimeout(() => {
+                            showDesktopSimulation();
+                            isMonitorShowingDesktop = true;
+                        }, 1000);
+                    }
+                }
+
+                showNextMessage();
+            }
+
+            // Function to show desktop simulation
+            function showDesktopSimulation() {
+                const monitorScreen = document.querySelector('.monitor-screen');
+                monitorScreen.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+
+                screenContent.innerHTML = `
+                    <div class="desktop-background">
+                        <!-- Desktop Icons -->
+                        <div class="desktop-icon" style="top: 15px; left: 15px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNGNjOWYwIi8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Computer">
+                            <span>Computer</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 15px; left: 85px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjZmY5ZTAwIi8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Documents">
+                            <span>Documents</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 90px; left: 15px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjZjcyNTg1Ii8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Music">
+                            <span>Music</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 90px; left: 85px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjM2E4NmZmIi8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Pictures">
+                            <span>Pictures</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 165px; left: 15px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNzIwOWI3Ii8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Settings">
+                            <span>Settings</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 165px; left: 85px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMTBiOTgxIi8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Browser">
+                            <span>Browser</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 15px; left: 155px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjZjcyNTg1Ii8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Games">
+                            <span>Games</span>
+                        </div>
+                        <div class="desktop-icon" style="top: 90px; left: 155px;">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjM2E4NmZmIi8+Cjwvc3ZnPg==" style="width: 32px; height: 32px;" alt="Files">
+                            <span>Files</span>
+                        </div>
+                        
+                        <!-- Taskbar -->
+                        <div class="taskbar">
+                            <button class="start-button">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZmZmZmZmIi8+Cjwvc3ZnPg==" style="width: 16px; height: 16px;" alt="Start">
+                                <span>Start</span>
+                            </button>
+                            <div class="taskbar-items">
+                                <div class="taskbar-item">Desktop Sim</div>
+                                <div class="taskbar-item">Components</div>
+                                <div class="taskbar-item">Browser</div>
+                            </div>
+                            <div class="time-display" id="timeDisplay">12:00 PM</div>
+                        </div>
+                    </div>
+                `;
+                screenContent.style.opacity = '1';
+
+                // Update time
+                updateTime();
+                setInterval(updateTime, 60000);
+            }
+
+            // Function to update time display
+            function updateTime() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours % 12 || 12;
+
+                const timeDisplay = document.getElementById('timeDisplay');
+                if (timeDisplay) {
+                    timeDisplay.textContent = `${displayHours}:${minutes} ${ampm}`;
+                }
+            }
+
+            // Function to show monitor default screen (when CPU is on but monitor not clicked for desktop)
+            function showMonitorDefaultScreen() {
+                const monitorScreen = document.querySelector('.monitor-screen');
+                monitorScreen.style.background = 'linear-gradient(135deg, #0a0a0a, #1a1a2e)';
+
+                screenContent.innerHTML = `
+                    <div style="font-size: 1.5rem; margin-bottom: 10px; color: #4cc9f0; text-align: center;">
+                        DESKTOP SIMULATION
+                    </div>
+                    <div style="font-size: 1rem; margin-bottom: 15px; color: #a5b4fc; text-align: center;">
+                        CPU: <span style="color: #10b981;">POWERED ON</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #94a3b8; text-align: left; padding: 0 20px;">
+                        <div>✓ CPU: <span style="color: #10b981;">ACTIVE</span></div>
+                        <div>✓ Monitor: <span style="color: #10b981;">READY</span></div>
+                        <div>✓ Keyboard: <span style="color: #10b981;">READY</span></div>
+                        <div>✓ Mouse: <span style="color: #10b981;">CONNECTED</span></div>
+                        <div>✓ Speaker: <span style="color: #10b981;">AUDIO READY</span></div>
+                    </div>
+                `;
+                screenContent.style.opacity = '1';
+            }
+
+            // Function to show no signal on monitor
+            function showMonitorNoSignal() {
+                const monitorScreen = document.querySelector('.monitor-screen');
+                monitorScreen.style.background = '#000';
+                screenContent.innerHTML = `
+                    <div style="color: #ef4444; font-size: 1.2rem; text-align: center; margin-top: 50px;">
+                        NO SIGNAL
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+                        CPU is powered off
+                    </div>
+                `;
+                screenContent.style.opacity = '1';
+            }
+
+            // Function to clear monitor display (only when CPU/system is off)
+            function clearMonitorDisplay() {
+                const monitorScreen = document.querySelector('.monitor-screen');
+                monitorScreen.style.background = '#000';
+                screenContent.innerHTML = '';
+                screenContent.style.opacity = '0';
+            }
+
+            // Function to show audio visualization for speakers
+            function showAudioVisualization() {
+                const speakerGrills = document.querySelectorAll('.speaker-grill');
+                speakerGrills.forEach(grill => {
+                    grill.style.animation = 'speakerPulse 0.8s infinite alternate';
+                });
+
+                // Add CSS animation for speaker pulse
+                if (!document.querySelector('#speakerPulse')) {
+                    const style = document.createElement('style');
+                    style.id = 'speakerPulse';
+                    style.textContent = `
+                        @keyframes speakerPulse {
+                            from { background: linear-gradient(to right, #3a3a3a, #2a2a2a, #3a3a3a); }
+                            to { background: linear-gradient(to right, #4a4a4a, #ff9e00, #4a4a4a); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            // Function to clear audio visualization
+            function clearAudioVisualization() {
+                const speakerGrills = document.querySelectorAll('.speaker-grill');
+                speakerGrills.forEach(grill => {
+                    grill.style.animation = 'none';
+                    grill.style.background = 'linear-gradient(to right, #3a3a3a, #2a2a2a, #3a3a3a)';
+                });
+            }
+
+            // Function to show CPU activity
+            function showCpuActivity() {
+                const cpuVents = document.querySelectorAll('.cpu-vent');
+                cpuVents.forEach((vent, index) => {
+                    setTimeout(() => {
+                        vent.style.background = 'rgba(76, 201, 240, 0.8)';
+                        setTimeout(() => {
+                            vent.style.background = 'rgba(60, 60, 60, 0.8)';
+                        }, 300);
+                    }, index * 200);
+                });
+            }
+
+            // Function to clear CPU activity
+            function clearCpuActivity() {
+                const cpuVents = document.querySelectorAll('.cpu-vent');
+                cpuVents.forEach(vent => {
+                    vent.style.background = 'rgba(60, 60, 60, 0.8)';
+                });
+            }
+
+            // Function to show keyboard effect
+            function showKeyboardEffect() {
+                const keys = document.querySelectorAll('.key');
+                keys.forEach((key, index) => {
+                    setTimeout(() => {
+                        key.style.background = 'linear-gradient(to bottom, #555, #444)';
+                        setTimeout(() => {
+                            key.style.background = 'linear-gradient(to bottom, #444, #333)';
+                        }, 100);
+                    }, index * 20);
+                });
+            }
+
+            // Function to clear keyboard effect
+            function clearKeyboardEffect() {
+                const keys = document.querySelectorAll('.key');
+                keys.forEach(key => {
+                    key.classList.remove('active');
+                    key.style.background = 'linear-gradient(to bottom, #444, #333)';
+                });
+            }
+
+            // Function to show mouse effect
+            function showMouseEffect() {
+                const mouseButton = document.querySelector('.mouse-button');
+                mouseButton.style.animation = 'mouseClick 1s infinite';
+
+                // Add CSS animation for mouse click
+                if (!document.querySelector('#mouseClick')) {
+                    const style = document.createElement('style');
+                    style.id = 'mouseClick';
+                    style.textContent = `
+                        @keyframes mouseClick {
+                            0%, 100% { background: linear-gradient(to bottom, #9ca3af, #6b7280); }
+                            50% { background: linear-gradient(to bottom, #d1d5db, #9ca3af); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            // Function to clear mouse effect
+            function clearMouseEffect() {
+                const mouseButton = document.querySelector('.mouse-button');
+                mouseButton.style.animation = 'none';
+                mouseButton.style.background = 'linear-gradient(to bottom, #9ca3af, #6b7280)';
+            }
+
+            // Function to show notification
+            function showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 25px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 600;
+                    z-index: 1000;
+                    opacity: 0;
+                    transform: translateX(100px);
+                    transition: all 0.3s ease;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                `;
+
+                document.body.appendChild(notification);
+
+                // Animate in
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateX(0)';
+                }, 10);
+
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            // Add click events to components in visualization
+            desktopComponents.cpu.addEventListener('click', () => selectComponent('cpu'));
+            desktopComponents.speakers.addEventListener('click', () => selectComponent('speakers'));
+            desktopComponents.mouse.addEventListener('click', () => selectComponent('mouse'));
+
+            function selectComponent(component) {
+                if (component === 'monitor' || component === 'keyboard') {
+                    // These have special handlers above
+                    return;
+                }
+
+                // Update button state
+                componentButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.btn-${component}`).classList.add('active');
+
+                // Highlight the component
+                highlightComponent(component);
+                updateStatusPanel(component);
+
+                // Store active component
+                activeComponent = component;
+
+                // Keep monitor screen visible if CPU is on
+                if (isCpuPowered) {
+                    maintainMonitorDisplay();
+                }
+            }
+
+            // Handle escape key to close virtual keyboard
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    virtualKeyboard.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

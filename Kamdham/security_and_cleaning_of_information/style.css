@@ -1,0 +1,1412 @@
+/* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 5px solid #f1c40f;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .learning-objectives {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 800px;
+        }
+
+        /* Problem Panel */
+        .problem-panel {
+            flex: 1;
+            min-width: 350px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-right: 3px solid #e0e0e0;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .problem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .problem-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .problem-item.active {
+            border-color: #e74c3c;
+            background: #ffeaea;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .problem-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .problem-icon.warning {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .problem-info {
+            flex: 1;
+        }
+
+        .problem-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .problem-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Simulation Area */
+        .simulation-area {
+            flex: 2;
+            min-width: 500px;
+            background: #ecf0f1;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #simulationCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .computer-setup {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            min-height: 500px;
+        }
+
+        .desk {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(to bottom, #8B4513, #A0522D);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid #5D4037;
+            overflow: hidden;
+            padding: 20px;
+            display: grid;
+            grid-template-areas: 
+                "monitor monitor monitor"
+                "cpu keyboard mouse";
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: 2fr 1fr;
+            gap: 15px;
+        }
+
+        /* Monitor Area */
+        .monitor-area {
+            grid-area: monitor;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .monitor {
+            width: 100%;
+            max-width: 400px;
+            z-index: 3;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 180px;
+            background: #1a1a2e;
+            border-radius: 10px 10px 0 0;
+            border: 12px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        .screen-message {
+            text-align: center;
+            padding: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .screen-message h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #5eead4;
+        }
+
+        .status-indicator {
+            margin-top: 10px;
+            padding: 5px 12px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .monitor-stand {
+            width: 50px;
+            height: 30px;
+            background: #444;
+            margin: 0 auto;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .monitor-base {
+            width: 80px;
+            height: 8px;
+            background: #555;
+            margin: 0 auto;
+            border-radius: 3px;
+        }
+
+        /* CPU Area */
+        .cpu-area {
+            grid-area: cpu;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cpu-real {
+            width: 120px;
+            height: 220px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #1a252f;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            position: relative;
+        }
+
+        .cpu-front {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .cpu-vent {
+            width: 100%;
+            height: 45px;
+            background: #1a252f;
+            margin: 8px auto;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            padding: 6px;
+        }
+
+        .cpu-vent-slot {
+            background: #3498db;
+            border-radius: 1px;
+        }
+
+        .cpu-drive-bay {
+            width: 80%;
+            height: 20px;
+            background: #2c3e50;
+            margin: 6px auto;
+            border-radius: 3px;
+            border: 1px solid #4a6491;
+        }
+
+        .cpu-power {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        /* Keyboard Area - Centered */
+        .keyboard-area {
+            grid-area: keyboard;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .keyboard-real {
+            width: 100%;
+            max-width: 380px;
+            height: 140px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 12px 12px 6px 6px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            position: relative;
+            border: 3px solid #1a252f;
+            overflow: hidden;
+        }
+
+        .keyboard-real::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(135deg, #1a252f, #2c3e50);
+            border-radius: 10px 10px 0 0;
+            z-index: 1;
+        }
+
+        .keyboard-top {
+            flex: 1;
+            background: #111;
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px;
+            padding: 10px;
+            position: relative;
+            z-index: 2;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .key {
+            background: linear-gradient(145deg, #333, #222);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: #ecf0f1;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid #444;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .key::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            border-radius: 3px;
+            pointer-events: none;
+        }
+
+        .key:hover {
+            background: linear-gradient(145deg, #444, #333);
+            transform: translateY(-1px);
+        }
+
+        .key:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .key-space {
+            grid-column: span 7;
+            background: linear-gradient(145deg, #2c3e50, #1a252f);
+            border-radius: 6px;
+        }
+
+        .key-enter {
+            grid-column: span 3;
+            background: linear-gradient(145deg, #27ae60, #219653);
+            border-radius: 6px;
+        }
+
+        .key-backspace {
+            grid-column: span 3;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border-radius: 6px;
+        }
+
+        .key-tab {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #333, #222);
+        }
+
+        .key-caps {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #333, #222);
+        }
+
+        .key-shift {
+            grid-column: span 3;
+            background: linear-gradient(145deg, #333, #222);
+        }
+
+        .key-ctrl {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #333, #222);
+        }
+
+        .key-alt {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #333, #222);
+        }
+
+        .key-windows {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+        }
+
+        .key-fn {
+            grid-column: span 2;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            font-size: 0.5rem;
+        }
+
+        .key-function {
+            background: linear-gradient(145deg, #444, #333);
+            font-size: 0.45rem;
+        }
+
+        /* Special styling for letter keys */
+        .key[data-key*="Q"],
+        .key[data-key*="W"],
+        .key[data-key*="E"],
+        .key[data-key*="R"],
+        .key[data-key*="T"],
+        .key[data-key*="Y"],
+        .key[data-key*="U"],
+        .key[data-key*="I"],
+        .key[data-key*="O"],
+        .key[data-key*="P"],
+        .key[data-key*="A"],
+        .key[data-key*="S"],
+        .key[data-key*="D"],
+        .key[data-key*="F"],
+        .key[data-key*="G"],
+        .key[data-key*="H"],
+        .key[data-key*="J"],
+        .key[data-key*="K"],
+        .key[data-key*="L"],
+        .key[data-key*="Z"],
+        .key[data-key*="X"],
+        .key[data-key*="C"],
+        .key[data-key*="V"],
+        .key[data-key*="B"],
+        .key[data-key*="N"],
+        .key[data-key*="M"] {
+            background: linear-gradient(145deg, #2c3e50, #1a252f);
+        }
+
+        /* Mouse Area - Right Side */
+        .mouse-area {
+            grid-area: mouse;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mouse-real {
+            width: 70px;
+            height: 110px;
+            background: #2c3e50;
+            border-radius: 35px 35px 20px 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: perspective(400px) rotateX(10deg) rotateY(-5deg);
+            border: 2px solid #1a252f;
+        }
+
+        .mouse-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            border-radius: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mouse-wheel {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .mouse-button {
+            position: absolute;
+            width: 65%;
+            height: 30px;
+            background: linear-gradient(135deg, #1a252f, #2c3e50);
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
+        }
+
+        .mouse-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .mouse-left {
+            top: 15%;
+            left: 5px;
+        }
+
+        .mouse-right {
+            top: 15%;
+            right: 5px;
+        }
+
+        /* Animation Container */
+        .animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* Status Panel */
+        .status-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e0e0e0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Component Labels */
+        .component-label {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .cpu-label {
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .keyboard-label {
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .mouse-label {
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+
+        @keyframes shakeComponent {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0); }
+            25% { transform: translateX(-3px) translateY(-3px) rotate(-1deg); }
+            50% { transform: translateX(3px) translateY(3px) rotate(1deg); }
+            75% { transform: translateX(-2px) translateY(2px) rotate(-0.5deg); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes dustFall {
+            0% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 1; 
+            }
+            90% { 
+                opacity: 0.8; 
+            }
+            100% { 
+                transform: translateY(500px) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        @keyframes crumbFall {
+            0% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 1; 
+            }
+            90% { 
+                opacity: 0.8; 
+            }
+            100% { 
+                transform: translateY(500px) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        @keyframes virusFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg); 
+            }
+            25% { 
+                transform: translateY(-10px) rotate(90deg); 
+            }
+            50% { 
+                transform: translateY(0) rotate(180deg); 
+            }
+            75% { 
+                transform: translateY(10px) rotate(270deg); 
+            }
+        }
+
+        @keyframes keyPress {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        @keyframes pressEffect {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); }
+        }
+
+        @keyframes cableFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes heatGlow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 5px 15px rgba(231, 76, 60, 0.5); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { background: linear-gradient(135deg, #2c3e50, #34495e); }
+            50% { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        }
+
+        @keyframes virusAppear {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        /* Dust and crumb particles */
+        .dust-particle {
+            position: absolute;
+            background: rgba(189, 195, 199, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .crumb {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .virus-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Virus elements inside monitor */
+        .screen-virus {
+            position: absolute;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Enhanced Responsive Design */
+        /* For very large screens (above 1600px) */
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 1600px;
+            }
+            
+            .desk {
+                height: 550px;
+            }
+            
+            .monitor-screen {
+                height: 220px;
+            }
+            
+            .keyboard-real {
+                max-width: 420px;
+                height: 160px;
+            }
+            
+            .key {
+                font-size: 0.7rem;
+            }
+            
+            .cpu-real {
+                width: 140px;
+                height: 250px;
+            }
+            
+            .mouse-real {
+                width: 80px;
+                height: 125px;
+            }
+        }
+
+        /* For screens between 1400px and 1600px */
+        @media (max-width: 1600px) and (min-width: 1400px) {
+            .desk {
+                height: 520px;
+            }
+            
+            .monitor-screen {
+                height: 200px;
+            }
+            
+            .keyboard-real {
+                max-width: 400px;
+                height: 150px;
+            }
+            
+            .key {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* For screens between 1200px and 1400px */
+        @media (max-width: 1400px) {
+            .container {
+                margin: 10px;
+                max-width: calc(100% - 20px);
+            }
+            
+            .content {
+                flex-direction: column;
+            }
+            
+            .problem-panel, .simulation-area {
+                min-width: 100%;
+                max-height: none;
+            }
+            
+            .problem-panel {
+                border-right: none;
+                border-bottom: 3px solid #e0e0e0;
+            }
+        }
+
+        /* For screens between 1024px and 1200px */
+        @media (max-width: 1200px) and (min-width: 768px) {
+            .desk {
+                height: 480px;
+                grid-template-areas: 
+                    "monitor monitor"
+                    "cpu keyboard"
+                    "cpu mouse";
+                grid-template-columns: 1fr 2fr;
+                grid-template-rows: 2fr 1fr 1fr;
+                gap: 15px;
+            }
+            
+            .cpu-real {
+                width: 120px;
+                height: 200px;
+            }
+            
+            .keyboard-real {
+                max-width: 350px;
+                height: 130px;
+            }
+            
+            .key {
+                font-size: 0.55rem;
+            }
+            
+            .mouse-real {
+                width: 70px;
+                height: 100px;
+            }
+            
+            .monitor-screen {
+                height: 180px;
+            }
+        }
+
+        /* For tablets (768px to 1024px) */
+        @media (max-width: 1024px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .learning-objectives {
+                font-size: 1rem;
+            }
+            
+            .desk {
+                height: 450px;
+                padding: 15px;
+                grid-template-areas: 
+                    "monitor"
+                    "cpu"
+                    "keyboard"
+                    "mouse";
+                grid-template-columns: 1fr;
+                grid-template-rows: 2fr 1fr 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .monitor {
+                max-width: 350px;
+            }
+            
+            .monitor-screen {
+                height: 170px;
+            }
+            
+            .cpu-real {
+                width: 110px;
+                height: 180px;
+            }
+            
+            .keyboard-real {
+                max-width: 320px;
+                height: 120px;
+            }
+            
+            .key {
+                font-size: 0.5rem;
+            }
+            
+            .mouse-real {
+                width: 65px;
+                height: 95px;
+            }
+            
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* For mobile phones (up to 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .learning-objectives {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+            
+            .content {
+                min-height: auto;
+            }
+            
+            .problem-panel, .simulation-area {
+                padding: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .problem-item {
+                padding: 15px;
+            }
+            
+            .problem-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+            
+            .problem-title {
+                font-size: 1rem;
+            }
+            
+            .problem-desc {
+                font-size: 0.85rem;
+            }
+            
+            .desk {
+                height: 400px;
+                padding: 10px;
+                gap: 8px;
+            }
+            
+            .monitor {
+                max-width: 300px;
+            }
+            
+            .monitor-screen {
+                height: 150px;
+                border-width: 8px;
+            }
+            
+            .screen-message h3 {
+                font-size: 1.1rem;
+            }
+            
+            .screen-message p {
+                font-size: 0.9rem;
+            }
+            
+            .cpu-real {
+                width: 100px;
+                height: 160px;
+            }
+            
+            .cpu-vent {
+                height: 35px;
+            }
+            
+            .keyboard-real {
+                max-width: 280px;
+                height: 110px;
+            }
+            
+            .keyboard-top {
+                padding: 8px;
+                gap: 1px;
+            }
+            
+            .key {
+                font-size: 0.45rem;
+            }
+            
+            .mouse-real {
+                width: 60px;
+                height: 85px;
+            }
+            
+            .status-panel {
+                padding: 12px;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .status-value {
+                font-size: 1.3rem;
+            }
+            
+            .status-label {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* For small phones (480px to 768px) */
+        @media (max-width: 640px) {
+            .desk {
+                height: 380px;
+            }
+            
+            .monitor {
+                max-width: 280px;
+            }
+            
+            .monitor-screen {
+                height: 140px;
+            }
+            
+            .keyboard-real {
+                max-width: 260px;
+                height: 100px;
+            }
+            
+            .key {
+                font-size: 0.4rem;
+            }
+            
+            .cpu-real {
+                width: 90px;
+                height: 150px;
+            }
+            
+            .mouse-real {
+                width: 55px;
+                height: 80px;
+            }
+        }
+
+        /* For very small phones (up to 480px) */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .desk {
+                height: 350px;
+            }
+            
+            .monitor {
+                max-width: 260px;
+            }
+            
+            .monitor-screen {
+                height: 130px;
+            }
+            
+            .screen-message {
+                padding: 10px;
+            }
+            
+            .screen-message h3 {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .screen-message p {
+                font-size: 0.8rem;
+                margin-bottom: 3px;
+            }
+            
+            .cpu-real {
+                width: 85px;
+                height: 140px;
+                padding: 8px;
+            }
+            
+            .keyboard-real {
+                max-width: 240px;
+                height: 90px;
+                padding: 10px;
+            }
+            
+            .keyboard-top {
+                grid-template-columns: repeat(15, 1fr);
+                grid-template-rows: repeat(5, 1fr);
+                padding: 6px;
+                gap: 0.5px;
+            }
+            
+            .key {
+                font-size: 0.35rem;
+            }
+            
+            .mouse-real {
+                width: 50px;
+                height: 75px;
+            }
+            
+            .component-label {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+            
+            .problem-list {
+                gap: 10px;
+            }
+            
+            .problem-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .problem-info {
+                width: 100%;
+            }
+            
+            .problem-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* For extra small phones (up to 360px) */
+        @media (max-width: 360px) {
+            .desk {
+                height: 320px;
+            }
+            
+            .monitor {
+                max-width: 220px;
+            }
+            
+            .monitor-screen {
+                height: 110px;
+            }
+            
+            .keyboard-real {
+                max-width: 200px;
+                height: 80px;
+                padding: 8px;
+            }
+            
+            .keyboard-top {
+                padding: 4px;
+                gap: 0.3px;
+            }
+            
+            .key {
+                font-size: 0.3rem;
+            }
+            
+            .cpu-real {
+                width: 75px;
+                height: 120px;
+            }
+            
+            .mouse-real {
+                width: 45px;
+                height: 65px;
+            }
+        }
+
+        /* For landscape orientation on mobile */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                margin: 5px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .content {
+                flex-direction: row;
+                min-height: 500px;
+            }
+            
+            .problem-panel {
+                max-height: 500px;
+                overflow-y: auto;
+                border-right: 3px solid #e0e0e0;
+                border-bottom: none;
+            }
+            
+            .simulation-area {
+                max-height: 500px;
+            }
+            
+            .desk {
+                height: 300px;
+                grid-template-areas: 
+                    "monitor monitor monitor"
+                    "cpu keyboard mouse";
+                grid-template-columns: 1fr 2fr 1fr;
+                grid-template-rows: 2fr 1fr;
+            }
+            
+            .monitor-screen {
+                height: 140px;
+            }
+            
+            .keyboard-real {
+                height: 100px;
+            }
+            
+            .key {
+                font-size: 0.4rem;
+            }
+        }
+
+        /* For very short landscape mode */
+        @media (max-height: 450px) and (orientation: landscape) {
+            .desk {
+                height: 250px;
+            }
+            
+            .monitor-screen {
+                height: 100px;
+            }
+            
+            .keyboard-real {
+                height: 80px;
+            }
+            
+            .key {
+                font-size: 0.35rem;
+            }
+            
+            .cpu-real {
+                height: 120px;
+            }
+        }
+
+        /* Prevent text zoom on mobile devices */
+        @media (max-width: 768px) {
+            html {
+                -webkit-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .problem-item, 
+            .key,
+            .cpu-power,
+            .mouse-button {
+                min-height: 44px; /* Minimum touch target size */
+            }
+            
+            .key {
+                min-height: 24px;
+            }
+            
+            .problem-item:active {
+                transform: scale(0.98);
+                transition: transform 0.1s;
+            }
+            
+            .problem-item:hover {
+                transform: none; /* Remove hover effects on touch devices */
+            }
+            
+            .key:hover {
+                transform: none; /* Remove hover effects on touch devices */
+            }
+        }
+
+        /* High resolution displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            
+            .key {
+                border-width: 0.5px;
+            }
+        }
+
+        /* For reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            .problem-item,
+            .key,
+            .mouse-button,
+            .cpu-power {
+                transition: none;
+            }
+            
+            .problem-item.active {
+                animation: none;
+            }
+            
+            .crumb,
+            .dust-particle,
+            .screen-virus {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }

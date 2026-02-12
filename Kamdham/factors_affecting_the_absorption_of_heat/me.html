@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Absorption Simulation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-blur: blur(20px);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .simulation-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .simulation-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .simulation-header p {
+            font-size: 1rem;
+            opacity: 0.85;
+        }
+
+        .main-content {
+            height: calc(100vh - 100px);
+        }
+
+        .controls-panel,
+        .animation-panel,
+        .description-panel {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .animation-panel {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .animation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(to bottom, rgba(135, 206, 235, 0.3), rgba(176, 226, 255, 0.2), rgba(248, 249, 250, 0.1));
+            border-radius: 10px;
+        }
+
+        .animation-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .description-content-container {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .description-content {
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            color: #fff;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            font-weight: 600;
+            border-radius: 10px;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover,
+        .btn-primary-custom.active {
+            background: rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .btn-factor {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            color: #fff;
+            margin-bottom: 10px;
+            text-align: left;
+            padding: 10px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-factor:hover,
+        .btn-factor.active {
+            background: rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .factor-icon {
+            margin-right: 12px;
+            font-size: 1.3rem;
+            width: 25px;
+            text-align: center;
+        }
+
+        .description-title {
+            color: #fff;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .example-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .example-title {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .example-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .example-text {
+            font-size: 0.95rem;
+            color: #ddd;
+        }
+
+        /* Animation Elements (kept similar, with minor adjustments for alignment) */
+        .sun {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffdd00, #ff6600);
+            box-shadow: 0 0 40px #ff9900;
+            animation: pulse 4s infinite alternate;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.05);
+            }
+        }
+
+        .ice-cube {
+            position: absolute;
+            background: linear-gradient(135deg, #87CEEB, #B0E2FF);
+            border: 2px solid #63B8FF;
+            border-radius: 5px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            z-index: 30;
+        }
+
+        .bucket {
+            position: absolute;
+            border: 4px solid #8B4513;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            background: rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+        }
+
+        .bucket-handle {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            border: 4px solid #8B4513;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+        }
+
+        .bucket-water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #1E90FF, #87CEEB);
+            transition: height 0.5s;
+            z-index: 21;
+        }
+
+        .object {
+            position: absolute;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 30;
+        }
+
+        .thermometer {
+            position: absolute;
+            width: 20px;
+            height: 120px;
+            background: #ddd;
+            border-radius: 10px;
+            border: 2px solid #999;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            z-index: 40;
+        }
+
+        .thermometer-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, #00ff00, #ff0000);
+            border-radius: 8px;
+            transition: height 0.5s;
+        }
+
+        .temp-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            z-index: 100;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .time-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            z-index: 100;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .environment {
+            position: absolute;
+            border: 2px dashed;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 5;
+        }
+
+        .heat-indicator {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            animation: heatPulse 2s infinite;
+            z-index: 15;
+        }
+
+        @keyframes heatPulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .melt-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #87CEEB, #1E90FF);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 35;
+        }
+
+        .spoon {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .spoon-bowl {
+            width: 40px;
+            height: 20px;
+            background: #C0C0C0;
+            border-radius: 50% 50% 0 0;
+            margin-bottom: -5px;
+            z-index: 32;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .spoon-handle {
+            width: 6px;
+            height: 60px;
+            background: #C0C0C0;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .wood-spoon .spoon-bowl,
+        .wood-spoon .spoon-handle {
+            background: #8B4513;
+        }
+
+        /* Labels for animation elements */
+        .animation-label {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 45;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Custom scrollbar for description */
+        .description-content-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .description-content-container::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        .description-content-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .description-content-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Enhanced control panel */
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 992px) {
+            .simulation-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .btn-factor,
+            .btn-primary-custom {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .animation-container {
+                background: linear-gradient(to bottom, rgba(135, 206, 235, 0.3), rgba(176, 226, 255, 0.2), rgba(248, 249, 250, 0.1));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="simulation-header">
+            <h1><i class="fas fa-fire-alt"></i> Heat Absorption Simulation</h1>
+            <p>Explore how different factors affect how materials absorb heat</p>
+        </div>
+
+        <div class="row main-content g-3">
+            <!-- Left Panel: Controls -->
+            <div class="col-lg-3 col-md-4">
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <div class="control-group-title"><i class="fas fa-info-circle"></i> Simulation Overview</div>
+                        <button class="btn btn-primary-custom w-100 active" id="btn-heat-absorption">
+                            <i class="fas fa-thermometer-half factor-icon"></i> Heat Absorption
+                        </button>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-group-title"><i class="fas fa-sliders-h"></i> Adjustment Factors</div>
+                        <button class="btn btn-factor w-100" id="btn-solar-intensity">
+                            <span class="factor-icon"><i class="fas fa-sun"></i></span> Solar Intensity
+                        </button>
+                        <button class="btn btn-factor w-100" id="btn-surface-area">
+                            <span class="factor-icon"><i class="fas fa-expand-alt"></i></span> Surface Area
+                        </button>
+                        <button class="btn btn-factor w-100" id="btn-material-color">
+                            <span class="factor-icon"><i class="fas fa-palette"></i></span> Material Color
+                        </button>
+                        <button class="btn btn-factor w-100" id="btn-environmental-temp">
+                            <span class="factor-icon"><i class="fas fa-temperature-high"></i></span> Environmental
+                            Temperature
+                        </button>
+                        <button class="btn btn-factor w-100" id="btn-exposure-time">
+                            <span class="factor-icon"><i class="fas fa-clock"></i></span> Exposure Time
+                        </button>
+                        <button class="btn btn-factor w-100" id="btn-material-properties">
+                            <span class="factor-icon"><i class="fas fa-atom"></i></span> Material Properties
+                        </button>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-group-title"><i class="fas fa-cogs"></i> Simulation Controls</div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" id="btn-reset">
+                                <i class="fas fa-redo"></i> Reset Simulation
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-pause">
+                                <i class="fas fa-pause"></i> Pause/Resume
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Panel: Animation Display -->
+            <div class="col-lg-6 col-md-8">
+                <div class="animation-panel">
+                    <div class="animation-container">
+                        <div class="animation-area" id="animation-area">
+                            <!-- Animation will be rendered here -->
+                            <div class="temp-display" id="temp-display">Temperature: 20°C</div>
+                            <div class="time-display" id="time-display">Time: 0s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Description -->
+            <div class="col-lg-3 col-md-12 h-100">
+                <div class="description-panel h-100">
+                    <h3 class="description-title" id="description-title">Heat Absorption</h3>
+                    <div class="description-content-container">
+                        <div class="description-content" id="description-content">
+                            <p>Heat absorption is the process by which materials take in thermal energy from their
+                                surroundings. When solar radiation reaches a material like ice, several factors
+                                determine how efficiently that energy is absorbed and converted to heat.</p>
+
+                            <div class="example-box">
+                                <div class="example-title"><i class="fas fa-lightbulb"></i> How it works:</div>
+                                <div class="example-text">Objects absorb heat differently based on their properties and
+                                    environmental conditions. In this simulation, you can explore six key factors that
+                                    affect heat absorption.</div>
+                            </div>
+
+                            <h5>Key Principles:</h5>
+                            <ul>
+                                <li>Dark surfaces absorb more radiation than light surfaces</li>
+                                <li>Larger surface areas capture more incoming radiation</li>
+                                <li>Direct, intense sunlight delivers more energy</li>
+                                <li>Warmer environments accelerate heat transfer</li>
+                                <li>Longer exposure means more energy absorption</li>
+                                <li>Different materials have different thermal properties</li>
+                            </ul>
+
+                            <div class="example-box">
+                                <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                                <div class="example-text" id="current-simulation">Showing basic heat absorption with ice
+                                    melting in sunlight. Select different factors to see how they affect the process.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM Elements
+        const animationArea = document.getElementById('animation-area');
+        const descriptionTitle = document.getElementById('description-title');
+        const descriptionContent = document.getElementById('description-content');
+        const tempDisplay = document.getElementById('temp-display');
+        const timeDisplay = document.getElementById('time-display');
+        const currentSimulationText = document.getElementById('current-simulation');
+
+        // Button elements
+        const btnHeatAbsorption = document.getElementById('btn-heat-absorption');
+        const btnSolarIntensity = document.getElementById('btn-solar-intensity');
+        const btnSurfaceArea = document.getElementById('btn-surface-area');
+        const btnMaterialColor = document.getElementById('btn-material-color');
+        const btnEnvironmentalTemp = document.getElementById('btn-environmental-temp');
+        const btnExposureTime = document.getElementById('btn-exposure-time');
+        const btnMaterialProperties = document.getElementById('btn-material-properties');
+        const btnReset = document.getElementById('btn-reset');
+        const btnPause = document.getElementById('btn-pause');
+
+        // Animation state
+        let currentAnimation = null;
+        let animationInterval = null;
+        let isPaused = false;
+        let animationTime = 0;
+
+        // Initialize with heat absorption description
+        function init() {
+            setActiveButton(btnHeatAbsorption);
+            showDescription('heat-absorption');
+            createHeatAbsorptionAnimation();
+
+            // Set up event listeners for control buttons
+            btnReset.addEventListener('click', resetAnimation);
+            btnPause.addEventListener('click', togglePause);
+        }
+
+        // Set active button styling
+        function setActiveButton(activeButton) {
+            // Remove active class from all buttons
+            const allButtons = [
+                btnHeatAbsorption,
+                btnSolarIntensity,
+                btnSurfaceArea,
+                btnMaterialColor,
+                btnEnvironmentalTemp,
+                btnExposureTime,
+                btnMaterialProperties
+            ];
+
+            allButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to clicked button
+            activeButton.classList.add('active');
+        }
+
+        // Show description for selected factor
+        function showDescription(factor) {
+            const descriptions = {
+                'heat-absorption': {
+                    title: 'Heat Absorption',
+                    content: `<p>Heat absorption is the process by which materials take in thermal energy from their surroundings. When solar radiation reaches a material like ice, several factors determine how efficiently that energy is absorbed and converted to heat.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-lightbulb"></i> How it works:</div>
+                        <div class="example-text">Objects absorb heat differently based on their properties and environmental conditions. In this simulation, you can explore six key factors that affect heat absorption.</div>
+                    </div>
+                    
+                    <h5>Key Principles:</h5>
+                    <ul>
+                        <li>Dark surfaces absorb more radiation than light surfaces</li>
+                        <li>Larger surface areas capture more incoming radiation</li>
+                        <li>Direct, intense sunlight delivers more energy</li>
+                        <li>Warmer environments accelerate heat transfer</li>
+                        <li>Longer exposure means more energy absorption</li>
+                        <li>Different materials have different thermal properties</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Showing basic heat absorption with ice melting in sunlight. The sun provides thermal energy that causes the ice to melt into water.</div>
+                    </div>`
+                },
+                'solar-intensity': {
+                    title: 'Solar Intensity',
+                    content: `<p><strong>Higher intensity sunlight delivers more energy per unit area</strong>, increasing the rate of heat absorption.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-sun"></i> Example:</div>
+                        <div class="example-text">Ice melts faster in strong sunlight than in weak sunlight.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>Intense sunlight has more energy per unit area</li>
+                        <li>This leads to faster temperature increase</li>
+                        <li>Materials absorb heat more quickly under strong sunlight</li>
+                        <li>This is why shade feels cooler than direct sunlight</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Comparing ice melting under weak vs. strong sunlight. Notice how the ice under the strong sun melts much faster.</div>
+                    </div>`
+                },
+                'surface-area': {
+                    title: 'Surface Area',
+                    content: `<p><strong>Larger surface areas expose more material to radiation</strong>, allowing for greater total energy absorption.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-expand-alt"></i> Example:</div>
+                        <div class="example-text">Crushed ice melts faster than a big ice cube.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>More surface area = more exposure to heat</li>
+                        <li>This is why powdered substances react faster</li>
+                        <li>Surface area affects how quickly substances change state</li>
+                        <li>It's a key factor in heat transfer calculations</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Comparing a single ice cube vs. crushed ice. The crushed ice has more surface area exposed to sunlight, causing it to melt faster.</div>
+                    </div>`
+                },
+                'material-color': {
+                    title: 'Material Color',
+                    content: `<p><strong>Darker colors absorb more radiant energy while lighter colors reflect more</strong>, affecting heat absorption.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-palette"></i> Example:</div>
+                        <div class="example-text">A black object gets hotter in the sun than a white object.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>Black absorbs up to 95% of sunlight</li>
+                        <li>White reflects up to 80% of sunlight</li>
+                        <li>This is why light-colored clothes are cooler in summer</li>
+                        <li>Color choice affects energy efficiency in buildings</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Comparing heat absorption of black vs. white objects. The black object absorbs more sunlight and heats up faster.</div>
+                    </div>`
+                },
+                'environmental-temp': {
+                    title: 'Environmental Temperature',
+                    content: `<p><strong>Warmer surroundings transfer heat to the material through conduction and convection</strong>, accelerating melting.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-temperature-high"></i> Example:</div>
+                        <div class="example-text">Ice melts faster in a warm room than in a cold room.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>Heat flows from warmer to cooler areas</li>
+                        <li>Warmer surroundings provide more thermal energy</li>
+                        <li>This affects phase changes like melting</li>
+                        <li>Environmental temperature impacts all heat transfer processes</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Comparing ice melting in cold (10°C) vs. warm (25°C) environments. The ice in the warm environment melts faster due to additional heat from the surroundings.</div>
+                    </div>`
+                },
+                'exposure-time': {
+                    title: 'Exposure Time',
+                    content: `<p><strong>Longer exposure to heat sources allows more energy to be absorbed</strong>, increasing temperature over time.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-clock"></i> Example:</div>
+                        <div class="example-text">Water kept in the sun for a long time becomes hotter.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>Heat absorption increases with time</li>
+                        <li>There's a maximum temperature an object can reach</li>
+                        <li>Exposure time affects the rate of temperature change</li>
+                        <li>This is why timing matters in cooking and heating processes</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Showing how water temperature increases over time when exposed to sunlight. The longer the exposure, the higher the temperature.</div>
+                    </div>`
+                },
+                'material-properties': {
+                    title: 'Material Properties',
+                    content: `<p><strong>Different materials have varying specific heat capacities and thermal conductivities</strong> that affect how they absorb and transfer heat.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-atom"></i> Example:</div>
+                        <div class="example-text">A metal spoon gets hot faster than a wooden spoon.</div>
+                    </div>
+                    
+                    <h5>Key Points:</h5>
+                    <ul>
+                        <li>Metals conduct heat better than wood or plastic</li>
+                        <li>Water has high specific heat capacity</li>
+                        <li>Material properties determine practical applications</li>
+                        <li>This is why different materials feel different to the touch</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-flask"></i> Current Simulation:</div>
+                        <div class="example-text">Comparing heat absorption of metal vs. wooden spoons. The metal spoon conducts heat better and heats up faster.</div>
+                    </div>`
+                }
+            };
+
+            descriptionTitle.textContent = descriptions[factor].title;
+            descriptionContent.innerHTML = descriptions[factor].content;
+        }
+
+        // Clear any existing animation
+        function clearAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+
+            // Clear animation area
+            animationArea.innerHTML = '<div class="temp-display" id="temp-display">Temperature: 20°C</div><div class="time-display" id="time-display">Time: 0s</div>';
+            tempDisplay.textContent = 'Temperature: 20°C';
+            tempDisplay.style.display = 'block';
+            timeDisplay.textContent = 'Time: 0s';
+            animationTime = 0;
+            isPaused = false;
+            btnPause.innerHTML = '<i class="fas fa-pause"></i> Pause/Resume';
+        }
+
+        // Reset animation
+        function resetAnimation() {
+            if (currentAnimation) {
+                currentAnimation();
+            }
+        }
+
+        // Toggle pause/resume
+        function togglePause() {
+            isPaused = !isPaused;
+            btnPause.innerHTML = isPaused ?
+                '<i class="fas fa-play"></i> Pause/Resume' :
+                '<i class="fas fa-pause"></i> Pause/Resume';
+        }
+
+        // Create melt particles
+        function createMeltParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'melt-particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+
+            // Random size
+            const size = 4 + Math.random() * 8;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+
+            // Random velocity
+            const vx = (Math.random() - 0.5) * 4;
+            const vy = Math.random() * 3 + 1;
+
+            // Animate particle
+            let opacity = 1;
+            let posY = y;
+            let posX = x;
+
+            const animateParticle = () => {
+                opacity -= 0.02;
+                posY += vy;
+                posX += vx;
+
+                particle.style.opacity = opacity;
+                particle.style.top = posY + 'px';
+                particle.style.left = posX + 'px';
+
+                if (opacity <= 0) {
+                    particle.remove();
+                    return;
+                }
+
+                requestAnimationFrame(animateParticle);
+            };
+
+            animationArea.appendChild(particle);
+            requestAnimationFrame(animateParticle);
+        }
+
+        // Create label for animation elements
+        function createLabel(text, x, y, width = 'auto') {
+            const label = document.createElement('div');
+            label.className = 'animation-label';
+            label.textContent = text;
+            label.style.left = x;
+            label.style.top = y;
+            if (width !== 'auto') {
+                label.style.width = width;
+            }
+            label.style.transform = 'translateX(-50%)'; // Center horizontally
+            return label;
+        }
+
+        // Create heat absorption animation
+        function createHeatAbsorptionAnimation() {
+            clearAnimation();
+            currentAnimation = createHeatAbsorptionAnimation;
+
+            // Calculate positions based on container size
+            const containerWidth = animationArea.offsetWidth;
+            const containerHeight = animationArea.offsetHeight;
+
+            // Create sun (positioned at top center)
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.style.width = '80px';
+            sun.style.height = '80px';
+            sun.style.top = '40px';
+            sun.style.left = 'calc(50% - 40px)';
+
+            // Create bucket (positioned below sun)
+            const bucket = document.createElement('div');
+            bucket.className = 'bucket';
+            bucket.id = 'bucket';
+            bucket.style.width = '120px';
+            bucket.style.height = '150px';
+            bucket.style.top = 'calc(50% - 50px)';
+            bucket.style.left = 'calc(50% - 60px)';
+
+            // Add bucket handle
+            const handle = document.createElement('div');
+            handle.className = 'bucket-handle';
+            bucket.appendChild(handle);
+
+            // Create water in bucket
+            const bucketWater = document.createElement('div');
+            bucketWater.className = 'bucket-water';
+            bucketWater.id = 'bucket-water';
+            bucketWater.style.height = '0px';
+            bucket.appendChild(bucketWater);
+
+            // Create ice cube inside bucket
+            const iceCube = document.createElement('div');
+            iceCube.className = 'ice-cube';
+            iceCube.id = 'ice-cube';
+            iceCube.style.width = '80px';
+            iceCube.style.height = '80px';
+            iceCube.style.top = '35px';
+            iceCube.style.left = '20px';
+            bucket.appendChild(iceCube);
+
+            // Add elements
+            animationArea.appendChild(sun);
+            animationArea.appendChild(bucket);
+
+            // Add labels with centered alignment
+            animationArea.appendChild(createLabel('Sun', '50%', '125px', '60px'));
+            animationArea.appendChild(createLabel('Ice in Bucket', '50%', 'calc(50% + 90px)', '120px'));
+
+            // Animation variables
+            let iceHeight = 80;
+            let waterHeight = 0;
+            let temp = 20;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.05;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Melt ice slowly
+                if (iceHeight > 10) {
+                    iceHeight -= 0.2;
+                    iceCube.style.height = iceHeight + 'px';
+                    iceCube.style.top = (35 + (80 - iceHeight) * 0.3) + 'px'; // Adjust position as ice melts
+
+                    // Increase water in bucket
+                    waterHeight += 0.4;
+                    bucketWater.style.height = Math.min(waterHeight, 140) + 'px';
+
+                    // Create occasional melt particles
+                    if (Math.random() > 0.8) {
+                        const bucketRect = bucket.getBoundingClientRect();
+                        const containerRect = animationArea.getBoundingClientRect();
+
+                        const x = bucketRect.left + Math.random() * 80 - containerRect.left + 20;
+                        const y = bucketRect.top + 140 - waterHeight - containerRect.top;
+
+                        createMeltParticle(x, y);
+                    }
+
+                    // Update temperature
+                    temp += 0.02;
+                } else {
+                    // Ice is mostly melted
+                    iceCube.style.display = 'none';
+
+                    // Water continues to rise a bit more
+                    if (waterHeight < 140) {
+                        waterHeight += 0.2;
+                        bucketWater.style.height = waterHeight + 'px';
+                    } else {
+                        // Reset animation
+                        iceHeight = 80;
+                        waterHeight = 0;
+                        temp = 20;
+                        animationTime = 0;
+                        iceCube.style.display = 'block';
+                        iceCube.style.top = '35px';
+                    }
+                }
+
+                tempDisplay.textContent = `Temperature: ${temp.toFixed(1)}°C`;
+            }, 50);
+        }
+
+        // Create solar intensity animation
+        function createSolarIntensityAnimation() {
+            clearAnimation();
+            currentAnimation = createSolarIntensityAnimation;
+
+            // Create weak sun
+            const weakSun = document.createElement('div');
+            weakSun.className = 'sun';
+            weakSun.style.width = '60px';
+            weakSun.style.height = '60px';
+            weakSun.style.top = '60px';
+            weakSun.style.left = 'calc(25% - 30px)';
+            weakSun.style.background = 'radial-gradient(circle, #ffdd00, #ffaa00)';
+            weakSun.style.boxShadow = '0 0 30px #ffaa00';
+
+            // Create strong sun
+            const strongSun = document.createElement('div');
+            strongSun.className = 'sun';
+            strongSun.style.width = '100px';
+            strongSun.style.height = '100px';
+            strongSun.style.top = '40px';
+            strongSun.style.left = 'calc(75% - 50px)';
+            strongSun.style.background = 'radial-gradient(circle, #ffdd00, #ff3300)';
+            strongSun.style.boxShadow = '0 0 60px #ff3300';
+
+            // Create bucket for weak sun
+            const bucket1 = document.createElement('div');
+            bucket1.className = 'bucket';
+            bucket1.id = 'bucket-weak';
+            bucket1.style.width = '100px';
+            bucket1.style.height = '120px';
+            bucket1.style.top = 'calc(50% - 40px)';
+            bucket1.style.left = 'calc(25% - 50px)';
+
+            const handle1 = document.createElement('div');
+            handle1.className = 'bucket-handle';
+            bucket1.appendChild(handle1);
+
+            const water1 = document.createElement('div');
+            water1.className = 'bucket-water';
+            water1.id = 'water-weak';
+            water1.style.height = '0px';
+            bucket1.appendChild(water1);
+
+            const ice1 = document.createElement('div');
+            ice1.className = 'ice-cube';
+            ice1.id = 'ice-weak';
+            ice1.style.width = '60px';
+            ice1.style.height = '60px';
+            ice1.style.top = '30px';
+            ice1.style.left = '20px';
+            bucket1.appendChild(ice1);
+
+            // Create bucket for strong sun
+            const bucket2 = document.createElement('div');
+            bucket2.className = 'bucket';
+            bucket2.id = 'bucket-strong';
+            bucket2.style.width = '100px';
+            bucket2.style.height = '120px';
+            bucket2.style.top = 'calc(50% - 40px)';
+            bucket2.style.left = 'calc(75% - 50px)';
+
+            const handle2 = document.createElement('div');
+            handle2.className = 'bucket-handle';
+            bucket2.appendChild(handle2);
+
+            const water2 = document.createElement('div');
+            water2.className = 'bucket-water';
+            water2.id = 'water-strong';
+            water2.style.height = '0px';
+            bucket2.appendChild(water2);
+
+            const ice2 = document.createElement('div');
+            ice2.className = 'ice-cube';
+            ice2.id = 'ice-strong';
+            ice2.style.width = '60px';
+            ice2.style.height = '60px';
+            ice2.style.top = '30px';
+            ice2.style.left = '20px';
+            bucket2.appendChild(ice2);
+
+            // Add elements
+            animationArea.appendChild(weakSun);
+            animationArea.appendChild(strongSun);
+            animationArea.appendChild(bucket1);
+            animationArea.appendChild(bucket2);
+
+            // Add labels with centered alignment
+            animationArea.appendChild(createLabel('Weak Sunlight', '25%', '170px', '100px'));
+            animationArea.appendChild(createLabel('Strong Sunlight', '75%', '170px', '100px'));
+
+            // Animation variables
+            let iceHeight1 = 60, iceHeight2 = 60;
+            let waterHeight1 = 0, waterHeight2 = 0;
+            let temp = 20;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.05;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Ice under weak sun melts slowly
+                if (iceHeight1 > 10) {
+                    iceHeight1 -= 0.1;
+                    ice1.style.height = iceHeight1 + 'px';
+                    ice1.style.top = (30 + (60 - iceHeight1) * 0.3) + 'px';
+
+                    waterHeight1 += 0.2;
+                    water1.style.height = Math.min(waterHeight1, 110) + 'px';
+                } else {
+                    ice1.style.display = 'none';
+                }
+
+                // Ice under strong sun melts quickly
+                if (iceHeight2 > 10) {
+                    iceHeight2 -= 0.4;
+                    ice2.style.height = iceHeight2 + 'px';
+                    ice2.style.top = (30 + (60 - iceHeight2) * 0.3) + 'px';
+
+                    waterHeight2 += 0.8;
+                    water2.style.height = Math.min(waterHeight2, 110) + 'px';
+
+                    // Create more melt particles for strong sun
+                    if (Math.random() > 0.7) {
+                        const bucketRect = bucket2.getBoundingClientRect();
+                        const containerRect = animationArea.getBoundingClientRect();
+
+                        const x = bucketRect.left + Math.random() * 60 - containerRect.left + 20;
+                        const y = bucketRect.top + 110 - waterHeight2 - containerRect.top;
+
+                        createMeltParticle(x, y);
+                    }
+                } else {
+                    ice2.style.display = 'none';
+                }
+
+                // Reset animation
+                if (waterHeight2 >= 110) {
+                    iceHeight1 = 60;
+                    iceHeight2 = 60;
+                    waterHeight1 = 0;
+                    waterHeight2 = 0;
+                    animationTime = 0;
+                    ice1.style.display = 'block';
+                    ice2.style.display = 'block';
+                    ice1.style.top = '30px';
+                    ice2.style.top = '30px';
+                }
+
+                // Update temperature
+                temp += 0.03;
+                tempDisplay.textContent = `Temperature: ${temp.toFixed(1)}°C`;
+            }, 50);
+        }
+
+        // Create surface area animation
+        function createSurfaceAreaAnimation() {
+            clearAnimation();
+            currentAnimation = createSurfaceAreaAnimation;
+
+            // Create sun
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.style.width = '80px';
+            sun.style.height = '80px';
+            sun.style.top = '50px';
+            sun.style.left = 'calc(50% - 40px)';
+
+            // Create bucket for big ice cube
+            const bucket1 = document.createElement('div');
+            bucket1.className = 'bucket';
+            bucket1.id = 'bucket-big';
+            bucket1.style.width = '100px';
+            bucket1.style.height = '120px';
+            bucket1.style.top = 'calc(50% - 40px)';
+            bucket1.style.left = 'calc(25% - 50px)';
+
+            const handle1 = document.createElement('div');
+            handle1.className = 'bucket-handle';
+            bucket1.appendChild(handle1);
+
+            const water1 = document.createElement('div');
+            water1.className = 'bucket-water';
+            water1.id = 'water-big';
+            water1.style.height = '0px';
+            bucket1.appendChild(water1);
+
+            const bigIce = document.createElement('div');
+            bigIce.className = 'ice-cube';
+            bigIce.id = 'big-ice';
+            bigIce.style.width = '70px';
+            bigIce.style.height = '70px';
+            bigIce.style.top = '25px';
+            bigIce.style.left = '15px';
+            bucket1.appendChild(bigIce);
+
+            // Create bucket for crushed ice
+            const bucket2 = document.createElement('div');
+            bucket2.className = 'bucket';
+            bucket2.id = 'bucket-crushed';
+            bucket2.style.width = '100px';
+            bucket2.style.height = '120px';
+            bucket2.style.top = 'calc(50% - 40px)';
+            bucket2.style.left = 'calc(75% - 50px)';
+
+            const handle2 = document.createElement('div');
+            handle2.className = 'bucket-handle';
+            bucket2.appendChild(handle2);
+
+            const water2 = document.createElement('div');
+            water2.className = 'bucket-water';
+            water2.id = 'water-crushed';
+            water2.style.height = '0px';
+            bucket2.appendChild(water2);
+
+            // Create crushed ice (multiple small cubes)
+            const crushedIceContainer = document.createElement('div');
+            crushedIceContainer.id = 'crushed-ice';
+            crushedIceContainer.style.position = 'absolute';
+            crushedIceContainer.style.width = '80px';
+            crushedIceContainer.style.height = '70px';
+            crushedIceContainer.style.top = '25px';
+            crushedIceContainer.style.left = '10px';
+            bucket2.appendChild(crushedIceContainer);
+
+            // Create multiple small ice cubes
+            for (let i = 0; i < 12; i++) {
+                const smallIce = document.createElement('div');
+                smallIce.className = 'ice-cube';
+                smallIce.style.width = '15px';
+                smallIce.style.height = '15px';
+                smallIce.style.position = 'absolute';
+                smallIce.style.top = Math.random() * 55 + 'px';
+                smallIce.style.left = Math.random() * 65 + 'px';
+                crushedIceContainer.appendChild(smallIce);
+            }
+
+            // Add elements
+            animationArea.appendChild(sun);
+            animationArea.appendChild(bucket1);
+            animationArea.appendChild(bucket2);
+
+            // Add labels with centered alignment
+            animationArea.appendChild(createLabel('Single Ice Cube', '25%', 'calc(50% + 70px)', '110px'));
+            animationArea.appendChild(createLabel('Crushed Ice', '75%', 'calc(50% + 70px)', '90px'));
+
+            // Animation variables
+            let bigIceHeight = 70;
+            let crushedIceOpacity = 1;
+            let waterHeight1 = 0, waterHeight2 = 0;
+            let temp = 20;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.05;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Big ice cube melts slowly
+                if (bigIceHeight > 10) {
+                    bigIceHeight -= 0.1;
+                    bigIce.style.height = bigIceHeight + 'px';
+                    bigIce.style.top = (25 + (70 - bigIceHeight) * 0.3) + 'px';
+
+                    waterHeight1 += 0.2;
+                    water1.style.height = Math.min(waterHeight1, 110) + 'px';
+                } else {
+                    bigIce.style.display = 'none';
+                }
+
+                // Crushed ice melts quickly
+                if (crushedIceOpacity > 0.1) {
+                    crushedIceOpacity -= 0.008;
+                    crushedIceContainer.style.opacity = crushedIceOpacity;
+
+                    waterHeight2 += 0.6;
+                    water2.style.height = Math.min(waterHeight2, 110) + 'px';
+
+                    // Create melt particles
+                    if (Math.random() > 0.6) {
+                        const bucketRect = bucket2.getBoundingClientRect();
+                        const areaRect = animationArea.getBoundingClientRect();
+
+                        const x = bucketRect.left + Math.random() * 80 - areaRect.left + 10;
+                        const y = bucketRect.top + 110 - waterHeight2 - areaRect.top;
+
+                        createMeltParticle(x, y);
+                    }
+                }
+
+                // Reset animation
+                if (waterHeight2 >= 110) {
+                    bigIceHeight = 70;
+                    crushedIceOpacity = 1;
+                    waterHeight1 = 0;
+                    waterHeight2 = 0;
+                    animationTime = 0;
+                    crushedIceContainer.style.opacity = 1;
+                    bigIce.style.display = 'block';
+                    bigIce.style.top = '25px';
+
+                    // Reset crushed ice positions
+                    crushedIceContainer.querySelectorAll('.ice-cube').forEach(ice => {
+                        ice.style.top = Math.random() * 55 + 'px';
+                        ice.style.left = Math.random() * 65 + 'px';
+                    });
+                }
+
+                // Update temperature
+                temp += 0.03;
+                tempDisplay.textContent = `Temperature: ${temp.toFixed(1)}°C`;
+            }, 50);
+        }
+
+        // Create material color animation
+        function createMaterialColorAnimation() {
+            clearAnimation();
+            currentAnimation = createMaterialColorAnimation;
+
+            // Create sun
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.style.width = '80px';
+            sun.style.height = '80px';
+            sun.style.top = '60px';
+            sun.style.left = 'calc(50% - 40px)';
+
+            // Create white object
+            const whiteObject = document.createElement('div');
+            whiteObject.className = 'object';
+            whiteObject.id = 'white-object';
+            whiteObject.style.width = '80px';
+            whiteObject.style.height = '80px';
+            whiteObject.style.top = 'calc(50% - 60px)';
+            whiteObject.style.left = 'calc(25% - 40px)';
+            whiteObject.style.background = 'linear-gradient(135deg, #ffffff, #f0f0f0)';
+            whiteObject.style.color = '#333';
+            whiteObject.textContent = 'WHITE';
+
+            // Create black object
+            const blackObject = document.createElement('div');
+            blackObject.className = 'object';
+            blackObject.id = 'black-object';
+            blackObject.style.width = '80px';
+            blackObject.style.height = '80px';
+            blackObject.style.top = 'calc(50% - 60px)';
+            blackObject.style.left = 'calc(75% - 40px)';
+            blackObject.style.background = 'linear-gradient(135deg, #333333, #000000)';
+            blackObject.textContent = 'BLACK';
+
+            // Create thermometers
+            const thermo1 = document.createElement('div');
+            thermo1.className = 'thermometer';
+            thermo1.style.top = 'calc(50% + 40px)';
+            thermo1.style.left = 'calc(25% - 10px)';
+
+            const thermoFill1 = document.createElement('div');
+            thermoFill1.className = 'thermometer-fill';
+            thermoFill1.id = 'thermo-fill-1';
+            thermoFill1.style.height = '20%';
+            thermo1.appendChild(thermoFill1);
+
+            const thermo2 = document.createElement('div');
+            thermo2.className = 'thermometer';
+            thermo2.style.top = 'calc(50% + 40px)';
+            thermo2.style.left = 'calc(75% - 10px)';
+
+            const thermoFill2 = document.createElement('div');
+            thermoFill2.className = 'thermometer-fill';
+            thermoFill2.id = 'thermo-fill-2';
+            thermoFill2.style.height = '20%';
+            thermo2.appendChild(thermoFill2);
+
+            // Add heat indicators
+            const heat1 = document.createElement('div');
+            heat1.className = 'heat-indicator';
+            heat1.id = 'heat-1';
+            heat1.style.width = '0px';
+            heat1.style.height = '0px';
+            heat1.style.top = 'calc(50% - 60px)';
+            heat1.style.left = 'calc(25% - 0px)';
+
+            const heat2 = document.createElement('div');
+            heat2.className = 'heat-indicator';
+            heat2.id = 'heat-2';
+            heat2.style.width = '0px';
+            heat2.style.height = '0px';
+            heat2.style.top = 'calc(50% - 60px)';
+            heat2.style.left = 'calc(75% - 0px)';
+
+            // Add elements
+            animationArea.appendChild(sun);
+            animationArea.appendChild(whiteObject);
+            animationArea.appendChild(blackObject);
+            animationArea.appendChild(thermo1);
+            animationArea.appendChild(thermo2);
+            animationArea.appendChild(heat1);
+            animationArea.appendChild(heat2);
+
+            // Add labels with centered alignment below thermometers
+            animationArea.appendChild(createLabel('White Object', '25%', 'calc(50% + 170px)', '100px'));
+            animationArea.appendChild(createLabel('Black Object', '75%', 'calc(50% + 170px)', '100px'));
+
+            // Animation variables
+            let whiteTemp = 20, blackTemp = 20;
+            let whiteHeat = 0, blackHeat = 0;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.1;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // White object heats slowly
+                whiteTemp += 0.1;
+                whiteHeat += 0.002;
+
+                // Black object heats quickly
+                blackTemp += 0.4;
+                blackHeat += 0.01;
+
+                // Update thermometer fills
+                const maxTemp = 80;
+                document.getElementById('thermo-fill-1').style.height = Math.min((whiteTemp / maxTemp) * 100, 100) + '%';
+                document.getElementById('thermo-fill-2').style.height = Math.min((blackTemp / maxTemp) * 100, 100) + '%';
+
+                // Update heat indicators
+                heat1.style.width = (whiteHeat * 40) + 'px';
+                heat1.style.height = (whiteHeat * 40) + 'px';
+                heat1.style.left = 'calc(25% - ' + (whiteHeat * 20) + 'px)';
+                heat1.style.top = 'calc(50% - 60px)';
+
+                heat2.style.width = (blackHeat * 60) + 'px';
+                heat2.style.height = (blackHeat * 60) + 'px';
+                heat2.style.left = 'calc(75% - ' + (blackHeat * 30) + 'px)';
+                heat2.style.top = 'calc(50% - 60px)';
+
+                // Reset animation
+                if (blackTemp > maxTemp) {
+                    whiteTemp = 20;
+                    blackTemp = 20;
+                    whiteHeat = 0;
+                    blackHeat = 0;
+                    animationTime = 0;
+                }
+
+                // Update temperature display
+                tempDisplay.textContent = `White: ${whiteTemp.toFixed(1)}°C | Black: ${blackTemp.toFixed(1)}°C`;
+            }, 100);
+        }
+
+        // Create environmental temperature animation
+        function createEnvironmentalTempAnimation() {
+            clearAnimation();
+            currentAnimation = createEnvironmentalTempAnimation;
+
+            // Create sun
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.style.width = '80px';
+            sun.style.height = '80px';
+            sun.style.top = '50px';
+            sun.style.left = 'calc(50% - 40px)';
+
+            // Create cold environment
+            const coldEnv = document.createElement('div');
+            coldEnv.className = 'environment';
+            coldEnv.style.width = '40%';
+            coldEnv.style.height = '45%';
+            coldEnv.style.top = 'calc(30% - 10px)';
+            coldEnv.style.left = '5%';
+            coldEnv.style.borderColor = '#4682B4';
+            coldEnv.style.background = 'rgba(70, 130, 180, 0.2)';
+            coldEnv.textContent = '10°C';
+            coldEnv.style.fontSize = '1.2rem';
+
+            // Create warm environment
+            const warmEnv = document.createElement('div');
+            warmEnv.className = 'environment';
+            warmEnv.style.width = '40%';
+            warmEnv.style.height = '45%';
+            warmEnv.style.top = 'calc(30% - 10px)';
+            warmEnv.style.left = '55%';
+            warmEnv.style.borderColor = '#FF8C00';
+            warmEnv.style.background = 'rgba(255, 140, 0, 0.2)';
+            warmEnv.textContent = '25°C';
+            warmEnv.style.fontSize = '1.2rem';
+
+            // Create bucket in cold environment
+            const bucketCold = document.createElement('div');
+            bucketCold.className = 'bucket';
+            bucketCold.id = 'bucket-cold';
+            bucketCold.style.width = '80px';
+            bucketCold.style.height = '100px';
+            bucketCold.style.top = 'calc(45% - 20px)';
+            bucketCold.style.left = 'calc(25% - 40px)';
+
+            const handleCold = document.createElement('div');
+            handleCold.className = 'bucket-handle';
+            bucketCold.appendChild(handleCold);
+
+            const waterCold = document.createElement('div');
+            waterCold.className = 'bucket-water';
+            waterCold.id = 'water-cold';
+            waterCold.style.height = '0px';
+            bucketCold.appendChild(waterCold);
+
+            const iceCold = document.createElement('div');
+            iceCold.className = 'ice-cube';
+            iceCold.id = 'ice-cold';
+            iceCold.style.width = '50px';
+            iceCold.style.height = '50px';
+            iceCold.style.top = '25px';
+            iceCold.style.left = '15px';
+            bucketCold.appendChild(iceCold);
+
+            // Create bucket in warm environment
+            const bucketWarm = document.createElement('div');
+            bucketWarm.className = 'bucket';
+            bucketWarm.id = 'bucket-warm';
+            bucketWarm.style.width = '80px';
+            bucketWarm.style.height = '100px';
+            bucketWarm.style.top = 'calc(45% - 20px)';
+            bucketWarm.style.left = 'calc(75% - 40px)';
+
+            const handleWarm = document.createElement('div');
+            handleWarm.className = 'bucket-handle';
+            bucketWarm.appendChild(handleWarm);
+
+            const waterWarm = document.createElement('div');
+            waterWarm.className = 'bucket-water';
+            waterWarm.id = 'water-warm';
+            waterWarm.style.height = '0px';
+            bucketWarm.appendChild(waterWarm);
+
+            const iceWarm = document.createElement('div');
+            iceWarm.className = 'ice-cube';
+            iceWarm.id = 'ice-warm';
+            iceWarm.style.width = '50px';
+            iceWarm.style.height = '50px';
+            iceWarm.style.top = '25px';
+            iceWarm.style.left = '15px';
+            bucketWarm.appendChild(iceWarm);
+
+            // Add elements
+            animationArea.appendChild(sun);
+            animationArea.appendChild(coldEnv);
+            animationArea.appendChild(warmEnv);
+            animationArea.appendChild(bucketCold);
+            animationArea.appendChild(bucketWarm);
+
+            // Add labels with centered alignment
+            animationArea.appendChild(createLabel('Cold Environment', '25%', 'calc(75% - 10px)', '130px'));
+            animationArea.appendChild(createLabel('Warm Environment', '75%', 'calc(75% - 10px)', '130px'));
+
+            // Animation variables
+            let iceHeightCold = 50, iceHeightWarm = 50;
+            let waterHeightCold = 0, waterHeightWarm = 0;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.05;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Ice in cold environment melts very slowly
+                if (iceHeightCold > 10) {
+                    iceHeightCold -= 0.05;
+                    iceCold.style.height = iceHeightCold + 'px';
+                    iceCold.style.top = (25 + (50 - iceHeightCold) * 0.3) + 'px';
+
+                    waterHeightCold += 0.1;
+                    waterCold.style.height = Math.min(waterHeightCold, 90) + 'px';
+                } else {
+                    iceCold.style.display = 'none';
+                }
+
+                // Ice in warm environment melts quickly
+                if (iceHeightWarm > 10) {
+                    iceHeightWarm -= 0.3;
+                    iceWarm.style.height = iceHeightWarm + 'px';
+                    iceWarm.style.top = (25 + (50 - iceHeightWarm) * 0.3) + 'px';
+
+                    waterHeightWarm += 0.6;
+                    waterWarm.style.height = Math.min(waterHeightWarm, 90) + 'px';
+
+                    // Create melt particles for warm environment
+                    if (Math.random() > 0.8) {
+                        const bucketRect = bucketWarm.getBoundingClientRect();
+                        const containerRect = animationArea.getBoundingClientRect();
+
+                        const x = bucketRect.left + Math.random() * 50 - containerRect.left + 15;
+                        const y = bucketRect.top + 90 - waterHeightWarm - containerRect.top;
+
+                        createMeltParticle(x, y);
+                    }
+                } else {
+                    iceWarm.style.display = 'none';
+                }
+
+                // Reset animation
+                if (waterHeightWarm >= 90) {
+                    iceHeightCold = 50;
+                    iceHeightWarm = 50;
+                    waterHeightCold = 0;
+                    waterHeightWarm = 0;
+                    animationTime = 0;
+                    iceCold.style.display = 'block';
+                    iceWarm.style.display = 'block';
+                    iceCold.style.top = '25px';
+                    iceWarm.style.top = '25px';
+                }
+
+                // Update temperature display
+                tempDisplay.textContent = `Cold: 10°C | Warm: 25°C`;
+            }, 50);
+        }
+
+        // Create exposure time animation
+        function createExposureTimeAnimation() {
+            clearAnimation();
+            currentAnimation = createExposureTimeAnimation;
+
+            // Create sun
+            const sun = document.createElement('div');
+            sun.className = 'sun';
+            sun.id = 'exposure-sun';
+            sun.style.width = '80px';
+            sun.style.height = '80px';
+            sun.style.top = '60px';
+            sun.style.left = 'calc(50% - 40px)';
+
+            // Create water container
+            const waterContainer = document.createElement('div');
+            waterContainer.className = 'object';
+            waterContainer.id = 'water-container';
+            waterContainer.style.width = '100px';
+            waterContainer.style.height = '80px';
+            waterContainer.style.top = 'calc(50% - 60px)';
+            waterContainer.style.left = 'calc(50% - 50px)';
+            waterContainer.style.background = 'linear-gradient(135deg, #1E90FF, #87CEEB)';
+            waterContainer.textContent = 'WATER';
+
+            // Create thermometer
+            const thermometer = document.createElement('div');
+            thermometer.className = 'thermometer';
+            thermometer.style.top = 'calc(50% + 40px)';
+            thermometer.style.left = 'calc(50% - 10px)';
+
+            const thermoFill = document.createElement('div');
+            thermoFill.className = 'thermometer-fill';
+            thermoFill.id = 'exposure-thermo';
+            thermoFill.style.height = '20%';
+            thermometer.appendChild(thermoFill);
+
+            // Add elements
+            animationArea.appendChild(sun);
+            animationArea.appendChild(waterContainer);
+            animationArea.appendChild(thermometer);
+
+            // Add label with centered alignment below thermometer
+            animationArea.appendChild(createLabel('Water in Sunlight', '50%', 'calc(50% + 170px)', '130px'));
+
+            // Animation variables
+            let waterTemp = 20;
+            let sunIntensity = 0.5;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.1;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Water temperature increases with time
+                waterTemp += 0.1;
+
+                // Sun gets more intense over time
+                sunIntensity = 0.5 + animationTime * 0.01;
+                sun.style.transform = `scale(${1 + sunIntensity * 0.2})`;
+
+                // Update thermometer
+                const maxTemp = 80;
+                document.getElementById('exposure-thermo').style.height = Math.min((waterTemp / maxTemp) * 100, 100) + '%';
+
+                // Change water color based on temperature
+                if (waterTemp > 40) {
+                    const heatLevel = (waterTemp - 40) / 40;
+                    const red = Math.min(255, 30 + heatLevel * 200);
+                    const blue = Math.max(0, 144 - heatLevel * 100);
+                    waterContainer.style.background = `linear-gradient(135deg, rgb(${red}, 30, ${blue}), rgb(${red}, 206, ${blue}))`;
+                }
+
+                // Reset animation
+                if (waterTemp > maxTemp) {
+                    waterTemp = 20;
+                    animationTime = 0;
+                    sunIntensity = 0.5;
+                    waterContainer.style.background = 'linear-gradient(135deg, #1E90FF, #87CEEB)';
+                    sun.style.transform = 'scale(1)';
+                }
+
+                // Update displays
+                tempDisplay.textContent = `Temperature: ${waterTemp.toFixed(1)}°C`;
+            }, 100);
+        }
+
+        // Create material properties animation
+        function createMaterialPropertiesAnimation() {
+            clearAnimation();
+            currentAnimation = createMaterialPropertiesAnimation;
+
+            // Create heat source
+            const heatSource = document.createElement('div');
+            heatSource.className = 'sun';
+            heatSource.style.width = '60px';
+            heatSource.style.height = '60px';
+            heatSource.style.top = '60px';
+            heatSource.style.left = 'calc(50% - 30px)';
+            heatSource.style.background = 'radial-gradient(circle, #ff3300, #ff0000)';
+            heatSource.style.boxShadow = '0 0 40px #ff0000';
+
+            // Create metal spoon
+            const metalSpoon = document.createElement('div');
+            metalSpoon.className = 'spoon';
+            metalSpoon.id = 'metal-spoon';
+            metalSpoon.style.top = 'calc(50% - 60px)';
+            metalSpoon.style.left = 'calc(25% - 20px)';
+
+            const metalBowl = document.createElement('div');
+            metalBowl.className = 'spoon-bowl';
+            metalSpoon.appendChild(metalBowl);
+
+            const metalHandle = document.createElement('div');
+            metalHandle.className = 'spoon-handle';
+            metalSpoon.appendChild(metalHandle);
+
+            // Create wooden spoon
+            const woodSpoon = document.createElement('div');
+            woodSpoon.className = 'spoon wood-spoon';
+            woodSpoon.id = 'wood-spoon';
+            woodSpoon.style.top = 'calc(50% - 60px)';
+            woodSpoon.style.left = 'calc(75% - 20px)';
+
+            const woodBowl = document.createElement('div');
+            woodBowl.className = 'spoon-bowl';
+            woodSpoon.appendChild(woodBowl);
+
+            const woodHandle = document.createElement('div');
+            woodHandle.className = 'spoon-handle';
+            woodSpoon.appendChild(woodHandle);
+
+            // Create thermometers
+            const thermoMetal = document.createElement('div');
+            thermoMetal.className = 'thermometer';
+            thermoMetal.style.top = 'calc(50% + 40px)';
+            thermoMetal.style.left = 'calc(25% - 10px)';
+
+            const thermoFillMetal = document.createElement('div');
+            thermoFillMetal.className = 'thermometer-fill';
+            thermoFillMetal.id = 'thermo-metal';
+            thermoFillMetal.style.height = '20%';
+            thermoMetal.appendChild(thermoFillMetal);
+
+            const thermoWood = document.createElement('div');
+            thermoWood.className = 'thermometer';
+            thermoWood.style.top = 'calc(50% + 40px)';
+            thermoWood.style.left = 'calc(75% - 10px)';
+
+            const thermoFillWood = document.createElement('div');
+            thermoFillWood.className = 'thermometer-fill';
+            thermoFillWood.id = 'thermo-wood';
+            thermoFillWood.style.height = '20%';
+            thermoWood.appendChild(thermoFillWood);
+
+            // Add heat indicators
+            const heatMetal = document.createElement('div');
+            heatMetal.className = 'heat-indicator';
+            heatMetal.id = 'heat-metal';
+            heatMetal.style.width = '0px';
+            heatMetal.style.height = '0px';
+            heatMetal.style.top = 'calc(50% - 60px)';
+            heatMetal.style.left = 'calc(25% - 0px)';
+
+            const heatWood = document.createElement('div');
+            heatWood.className = 'heat-indicator';
+            heatWood.id = 'heat-wood';
+            heatWood.style.width = '0px';
+            heatWood.style.height = '0px';
+            heatWood.style.top = 'calc(50% - 60px)';
+            heatWood.style.left = 'calc(75% - 0px)';
+
+            // Add elements
+            animationArea.appendChild(heatSource);
+            animationArea.appendChild(metalSpoon);
+            animationArea.appendChild(woodSpoon);
+            animationArea.appendChild(thermoMetal);
+            animationArea.appendChild(thermoWood);
+            animationArea.appendChild(heatMetal);
+            animationArea.appendChild(heatWood);
+
+            // Add labels with centered alignment below thermometers
+            animationArea.appendChild(createLabel('Metal Spoon', '25%', 'calc(50% + 170px)', '100px'));
+            animationArea.appendChild(createLabel('Wooden Spoon', '75%', 'calc(50% + 170px)', '110px'));
+
+            // Animation variables
+            let metalTemp = 20, woodTemp = 20;
+            let metalHeat = 0, woodHeat = 0;
+
+            animationInterval = setInterval(() => {
+                if (isPaused) return;
+
+                // Update time
+                animationTime += 0.1;
+                timeDisplay.textContent = `Time: ${animationTime.toFixed(1)}s`;
+
+                // Metal heats up quickly
+                metalTemp += 0.5;
+                metalHeat += 0.015;
+
+                // Wood heats up slowly
+                woodTemp += 0.1;
+                woodHeat += 0.003;
+
+                // Update thermometer fills
+                const maxTemp = 80;
+                document.getElementById('thermo-metal').style.height = Math.min((metalTemp / maxTemp) * 100, 100) + '%';
+                document.getElementById('thermo-wood').style.height = Math.min((woodTemp / maxTemp) * 100, 100) + '%';
+
+                // Update heat indicators
+                heatMetal.style.width = (metalHeat * 50) + 'px';
+                heatMetal.style.height = (metalHeat * 50) + 'px';
+                heatMetal.style.left = 'calc(25% - ' + (metalHeat * 25) + 'px)';
+                heatMetal.style.top = 'calc(50% - 60px)';
+
+                heatWood.style.width = (woodHeat * 30) + 'px';
+                heatWood.style.height = (woodHeat * 30) + 'px';
+                heatWood.style.left = 'calc(75% - ' + (woodHeat * 15) + 'px)';
+                heatWood.style.top = 'calc(50% - 60px)';
+
+                // Change metal color based on temperature
+                if (metalTemp > 40) {
+                    const heatLevel = (metalTemp - 40) / 40;
+                    const red = Math.min(255, 192 + heatLevel * 63);
+                    const green = Math.max(0, 192 - heatLevel * 100);
+                    const blue = Math.max(0, 192 - heatLevel * 150);
+                    metalBowl.style.background = `rgb(${red}, ${green}, ${blue})`;
+                    metalHandle.style.background = `rgb(${red}, ${green}, ${blue})`;
+                }
+
+                // Change wood color based on temperature
+                if (woodTemp > 40) {
+                    const heatLevel = (woodTemp - 40) / 40;
+                    const red = Math.min(255, 139 + heatLevel * 50);
+                    const green = Math.max(0, 69 - heatLevel * 20);
+                    const blue = Math.max(0, 19 - heatLevel * 10);
+                    woodBowl.style.background = `rgb(${red}, ${green}, ${blue})`;
+                    woodHandle.style.background = `rgb(${red}, ${green}, ${blue})`;
+                }
+
+                // Reset animation
+                if (metalTemp > maxTemp) {
+                    metalTemp = 20;
+                    woodTemp = 20;
+                    metalHeat = 0;
+                    woodHeat = 0;
+                    animationTime = 0;
+                    metalBowl.style.background = '#C0C0C0';
+                    metalHandle.style.background = '#C0C0C0';
+                    woodBowl.style.background = '#8B4513';
+                    woodHandle.style.background = '#8B4513';
+                }
+
+                // Update temperature display
+                tempDisplay.textContent = `Metal: ${metalTemp.toFixed(1)}°C | Wood: ${woodTemp.toFixed(1)}°C`;
+            }, 100);
+        }
+
+        // Event listeners for buttons
+        btnHeatAbsorption.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('heat-absorption');
+            createHeatAbsorptionAnimation();
+        });
+
+        btnSolarIntensity.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('solar-intensity');
+            createSolarIntensityAnimation();
+        });
+
+        btnSurfaceArea.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('surface-area');
+            createSurfaceAreaAnimation();
+        });
+
+        btnMaterialColor.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('material-color');
+            createMaterialColorAnimation();
+        });
+
+        btnEnvironmentalTemp.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('environmental-temp');
+            createEnvironmentalTempAnimation();
+        });
+
+        btnExposureTime.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('exposure-time');
+            createExposureTimeAnimation();
+        });
+
+        btnMaterialProperties.addEventListener('click', function () {
+            setActiveButton(this);
+            showDescription('material-properties');
+            createMaterialPropertiesAnimation();
+        });
+
+        // Initialize the simulation
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

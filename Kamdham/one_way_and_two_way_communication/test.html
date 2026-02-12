@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Watching Television in 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background-color: #111;
+        }
+        
+        #scene-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        #title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 2;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        #title h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        #title p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 5px;
+            z-index: 2;
+            font-size: 14px;
+            max-width: 300px;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            z-index: 100;
+            text-align: center;
+        }
+        
+        .tv-glow {
+            animation: tv-glow 3s infinite alternate;
+        }
+        
+        @keyframes tv-glow {
+            0% { box-shadow: 0 0 5px rgba(100, 150, 255, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(100, 150, 255, 0.8), 0 0 30px rgba(100, 150, 255, 0.4); }
+        }
+        
+        .highlight {
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="scene-container"></div>
+    
+    <div id="title">
+        <h1>Child Watching Television in 3D</h1>
+        <p>A fully visible child character watching animated TV content</p>
+    </div>
+    
+    <div id="instructions">
+        <p><span class="highlight">Scene Elements:</span></p>
+        <p>• Fully visible child character</p>
+        <p>• Animated television screen</p>
+        <p>• Living room environment</p>
+        <p>• Rotating camera view</p>
+    </div>
+    
+    <div id="loading">Loading 3D scene...</div>
+
+    <script>
+        // Main variables
+        let scene, camera, renderer;
+        let child, television, room;
+        let tvScreenMaterial;
+        let clock = new THREE.Clock();
+        
+        // Initialize the scene
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x222222);
+            
+            // Create camera - positioned to clearly see the child
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(3, 2, 5); // Better angle to see the child
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            const container = document.getElementById('scene-container');
+            container.appendChild(renderer.domElement);
+            
+            // Add lighting
+            setupLighting();
+            
+            // Create the scene objects
+            createRoom();
+            createTelevision();
+            createChild();
+            createFurniture();
+            
+            // Hide loading text
+            document.getElementById('loading').style.display = 'none';
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // Set up lighting for the scene
+        function setupLighting() {
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            // Main directional light (like sunlight through a window)
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 50;
+            directionalLight.shadow.camera.left = -10;
+            directionalLight.shadow.camera.right = 10;
+            directionalLight.shadow.camera.top = 10;
+            directionalLight.shadow.camera.bottom = -10;
+            scene.add(directionalLight);
+            
+            // TV screen light (emissive light from the TV)
+            const tvLight = new THREE.PointLight(0x88aaff, 0.7, 10);
+            tvLight.position.set(0, 1.2, -2);
+            scene.add(tvLight);
+            
+            // Additional light to illuminate the child
+            const childLight = new THREE.PointLight(0xffffcc, 0.4, 8);
+            childLight.position.set(1, 1.5, -1);
+            scene.add(childLight);
+        }
+        
+        // Create the room (walls, floor, ceiling)
+        function createRoom() {
+            room = new THREE.Group();
+            
+            // Floor with a grid pattern for better depth perception
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x3a3a3a, 
+                roughness: 0.8,
+                side: THREE.DoubleSide
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = Math.PI / 2;
+            floor.receiveShadow = true;
+            room.add(floor);
+            
+            // Add a grid helper to the floor for better spatial understanding
+            const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            gridHelper.position.y = 0.01;
+            room.add(gridHelper);
+            
+            // Back wall
+            const backWallGeometry = new THREE.PlaneGeometry(20, 10);
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x4a4a5a,
+                roughness: 0.7
+            });
+            const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+            backWall.position.z = -10;
+            backWall.position.y = 5;
+            backWall.receiveShadow = true;
+            room.add(backWall);
+            
+            // Left wall
+            const leftWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+            leftWall.rotation.y = Math.PI / 2;
+            leftWall.position.x = -10;
+            leftWall.position.y = 5;
+            leftWall.receiveShadow = true;
+            room.add(leftWall);
+            
+            // Right wall
+            const rightWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+            rightWall.rotation.y = Math.PI / 2;
+            rightWall.position.x = 10;
+            rightWall.position.y = 5;
+            rightWall.receiveShadow = true;
+            room.add(rightWall);
+            
+            // Ceiling
+            const ceiling = new THREE.Mesh(backWallGeometry, new THREE.MeshStandardMaterial({ 
+                color: 0x3a3a4a,
+                roughness: 0.9
+            }));
+            ceiling.rotation.x = Math.PI;
+            ceiling.position.y = 10;
+            ceiling.receiveShadow = true;
+            room.add(ceiling);
+            
+            scene.add(room);
+        }
+        
+        // Create the television
+        function createTelevision() {
+            television = new THREE.Group();
+            
+            // TV body (main frame)
+            const tvBodyGeometry = new THREE.BoxGeometry(5, 3, 0.3);
+            const tvBodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x222222,
+                roughness: 0.3,
+                metalness: 0.7
+            });
+            const tvBody = new THREE.Mesh(tvBodyGeometry, tvBodyMaterial);
+            tvBody.castShadow = true;
+            tvBody.receiveShadow = true;
+            television.add(tvBody);
+            
+            // TV screen
+            const tvScreenGeometry = new THREE.PlaneGeometry(4.5, 2.5);
+            // Create animated TV screen material
+            tvScreenMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x000000,
+                emissive: 0x223344,
+                emissiveIntensity: 0.8
+            });
+            const tvScreen = new THREE.Mesh(tvScreenGeometry, tvScreenMaterial);
+            tvScreen.position.z = 0.16; // Slightly in front of the TV body
+            television.add(tvScreen);
+            
+            // TV stand
+            const tvStandGeometry = new THREE.BoxGeometry(1.5, 0.5, 1);
+            const tvStandMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x333333,
+                roughness: 0.5,
+                metalness: 0.5
+            });
+            const tvStand = new THREE.Mesh(tvStandGeometry, tvStandMaterial);
+            tvStand.position.y = -1.75;
+            tvStand.castShadow = true;
+            tvStand.receiveShadow = true;
+            television.add(tvStand);
+            
+            // TV base
+            const tvBaseGeometry = new THREE.BoxGeometry(2, 0.1, 1.5);
+            const tvBase = new THREE.Mesh(tvBaseGeometry, tvStandMaterial);
+            tvBase.position.y = -2;
+            tvBase.castShadow = true;
+            tvBase.receiveShadow = true;
+            television.add(tvBase);
+            
+            // Position the TV in the room
+            television.position.set(0, 1.5, -8);
+            
+            scene.add(television);
+        }
+        
+        // Create the child character - fully visible and clear
+        function createChild() {
+            child = new THREE.Group();
+            
+            // Child's body colors
+            const skinColor = 0xf0c8a0;
+            const shirtColor = 0x4287f5;
+            const pantsColor = 0x2a5caa;
+            const hairColor = 0x8B4513;
+            const shoeColor = 0x222222;
+            
+            // Head (sphere)
+            const headGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const headMaterial = new THREE.MeshStandardMaterial({ 
+                color: skinColor,
+                roughness: 0.8
+            });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.y = 0.9;
+            head.castShadow = true;
+            child.add(head);
+            
+            // Hair (slightly larger sphere on top of head)
+            const hairGeometry = new THREE.SphereGeometry(0.32, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const hairMaterial = new THREE.MeshStandardMaterial({ 
+                color: hairColor,
+                roughness: 0.9
+            });
+            const hair = new THREE.Mesh(hairGeometry, hairMaterial);
+            hair.position.y = 1.02;
+            hair.castShadow = true;
+            child.add(hair);
+            
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye.position.set(-0.1, 0.95, 0.28);
+            child.add(leftEye);
+            
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye.position.set(0.1, 0.95, 0.28);
+            child.add(rightEye);
+            
+            // Body (torso - cube for simpler shape)
+            const bodyGeometry = new THREE.BoxGeometry(0.6, 0.7, 0.4);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: shirtColor,
+                roughness: 0.8
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.y = 0.35;
+            body.castShadow = true;
+            child.add(body);
+            
+            // Arms (cylinders)
+            const armGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.6, 8);
+            const armMaterial = new THREE.MeshStandardMaterial({ 
+                color: skinColor,
+                roughness: 0.8
+            });
+            
+            // Left arm
+            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+            leftArm.position.set(-0.35, 0.4, 0);
+            leftArm.rotation.z = 0.3;
+            leftArm.castShadow = true;
+            child.add(leftArm);
+            
+            // Right arm
+            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+            rightArm.position.set(0.35, 0.4, 0);
+            rightArm.rotation.z = -0.3;
+            rightArm.castShadow = true;
+            child.add(rightArm);
+            
+            // Legs (pants - two separate cylinders for clearer shape)
+            const legGeometry = new THREE.CylinderGeometry(0.1, 0.08, 0.6, 8);
+            const legMaterial = new THREE.MeshStandardMaterial({ 
+                color: pantsColor,
+                roughness: 0.8
+            });
+            
+            // Left leg
+            const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+            leftLeg.position.set(-0.15, -0.3, 0);
+            leftLeg.castShadow = true;
+            child.add(leftLeg);
+            
+            // Right leg
+            const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+            rightLeg.position.set(0.15, -0.3, 0);
+            rightLeg.castShadow = true;
+            child.add(rightLeg);
+            
+            // Shoes (small boxes at the bottom of legs)
+            const shoeGeometry = new THREE.BoxGeometry(0.15, 0.1, 0.25);
+            const shoeMaterial = new THREE.MeshStandardMaterial({ 
+                color: shoeColor,
+                roughness: 0.5
+            });
+            
+            const leftShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+            leftShoe.position.set(-0.15, -0.65, 0.05);
+            leftShoe.castShadow = true;
+            child.add(leftShoe);
+            
+            const rightShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+            rightShoe.position.set(0.15, -0.65, 0.05);
+            rightShoe.castShadow = true;
+            child.add(rightShoe);
+            
+            // Position the child in the room - fully visible
+            child.position.set(0, 0, -3);
+            child.rotation.y = Math.PI; // Face the TV
+            
+            // Add a subtle highlight to make the child stand out
+            const childHighlight = new THREE.PointLight(0xffffff, 0.3, 3);
+            childHighlight.position.set(0, 1, 0);
+            child.add(childHighlight);
+            
+            scene.add(child);
+        }
+        
+        // Create additional furniture
+        function createFurniture() {
+            // Small rug in front of the TV
+            const rugGeometry = new THREE.CylinderGeometry(2, 2, 0.05, 32);
+            const rugMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x654321,
+                roughness: 0.9
+            });
+            const rug = new THREE.Mesh(rugGeometry, rugMaterial);
+            rug.position.set(0, 0.025, -5);
+            rug.receiveShadow = true;
+            scene.add(rug);
+            
+            // Small table next to the child
+            const tableGeometry = new THREE.CylinderGeometry(0.5, 0.6, 0.5, 8);
+            const tableMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8B4513,
+                roughness: 0.8
+            });
+            const table = new THREE.Mesh(tableGeometry, tableMaterial);
+            table.position.set(2, 0.25, -3);
+            table.castShadow = true;
+            table.receiveShadow = true;
+            scene.add(table);
+            
+            // Table top
+            const tableTopGeometry = new THREE.CylinderGeometry(0.7, 0.7, 0.1, 8);
+            const tableTop = new THREE.Mesh(tableTopGeometry, tableMaterial);
+            tableTop.position.y = 0.3;
+            tableTop.castShadow = true;
+            tableTop.receiveShadow = true;
+            table.add(tableTop);
+            
+            // Toy car on the table
+            const toyCarGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.15);
+            const toyCarMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xff3333,
+                roughness: 0.3,
+                metalness: 0.7
+            });
+            const toyCar = new THREE.Mesh(toyCarGeometry, toyCarMaterial);
+            toyCar.position.set(0, 0.4, 0);
+            toyCar.castShadow = true;
+            table.add(toyCar);
+            
+            // Window on the wall with a simple frame
+            const windowFrameGeometry = new THREE.BoxGeometry(3.2, 2.2, 0.2);
+            const windowFrameMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8B4513,
+                roughness: 0.7
+            });
+            const windowFrame = new THREE.Mesh(windowFrameGeometry, windowFrameMaterial);
+            windowFrame.position.set(-8, 5, -9.9);
+            windowFrame.castShadow = true;
+            scene.add(windowFrame);
+            
+            const windowGeometry = new THREE.PlaneGeometry(3, 2);
+            const windowMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x87CEEB,
+                emissive: 0x87CEEB,
+                emissiveIntensity: 0.3,
+                transparent: true,
+                opacity: 0.7
+            });
+            const window = new THREE.Mesh(windowGeometry, windowMaterial);
+            window.position.set(-8, 5, -9.8);
+            window.receiveShadow = true;
+            scene.add(window);
+            
+            // Add a simple sofa for context
+            const sofaBaseGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+            const sofaBaseMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x6d4c41,
+                roughness: 0.8
+            });
+            const sofaBase = new THREE.Mesh(sofaBaseGeometry, sofaBaseMaterial);
+            sofaBase.position.set(-3, 0.25, -4);
+            sofaBase.castShadow = true;
+            sofaBase.receiveShadow = true;
+            scene.add(sofaBase);
+            
+            const sofaBackGeometry = new THREE.BoxGeometry(2, 1, 0.2);
+            const sofaBack = new THREE.Mesh(sofaBackGeometry, sofaBaseMaterial);
+            sofaBack.position.set(-3, 0.75, -4.5);
+            sofaBack.castShadow = true;
+            scene.add(sofaBack);
+        }
+        
+        // Animate the scene
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsedTime = clock.getElapsedTime();
+            
+            // Animate the TV screen with colorful patterns
+            if (tvScreenMaterial) {
+                // Create a pulsing effect for the TV screen
+                const pulseIntensity = 0.7 + 0.3 * Math.sin(elapsedTime * 2);
+                tvScreenMaterial.emissiveIntensity = pulseIntensity;
+                
+                // Change TV screen color over time to simulate changing content
+                const hue = (elapsedTime * 0.2) % 1;
+                const color = new THREE.Color().setHSL(hue, 0.8, 0.6);
+                tvScreenMaterial.emissive = color;
+            }
+            
+            // Gentle bobbing motion for the child (like breathing)
+            if (child) {
+                // Subtle up and down movement
+                child.position.y = 0.01 * Math.sin(elapsedTime * 2);
+                
+                // Slight head movement (looking at TV)
+                const head = child.children[0];
+                if (head) {
+                    // Very subtle head movement to show the child is engaged
+                    head.rotation.y = 0.02 * Math.sin(elapsedTime * 0.8);
+                }
+                
+                // Gentle arm movement as if slightly fidgeting
+                const leftArm = child.children[4]; // Left arm
+                const rightArm = child.children[5]; // Right arm
+                if (leftArm && rightArm) {
+                    leftArm.rotation.z = 0.3 + 0.03 * Math.sin(elapsedTime * 1.2);
+                    rightArm.rotation.z = -0.3 + 0.03 * Math.sin(elapsedTime * 1.2 + 1);
+                }
+            }
+            
+            // Slowly rotate the camera around the scene for a better view
+            // but keep the child clearly visible at all times
+            const cameraRadius = 6;
+            const cameraHeight = 2.5;
+            const cameraAngle = elapsedTime * 0.15;
+            
+            camera.position.x = Math.sin(cameraAngle) * cameraRadius;
+            camera.position.z = Math.cos(cameraAngle) * cameraRadius - 3;
+            camera.position.y = cameraHeight + 0.5 * Math.sin(cameraAngle * 0.5);
+            
+            // Make the camera look at a point between the child and TV
+            camera.lookAt(0, 1, -5);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Start everything
+        init();
+        animate();
+    </script>
+</body>
+</html>

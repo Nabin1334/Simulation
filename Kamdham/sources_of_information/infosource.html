@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sources of Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #0f0f1e;
+            color: #fff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+            width: 100vw;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+            border-right: 2px solid #6366f1;
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+        }
+
+        .primary-button.active {
+            background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+        }
+
+        .sub-button {
+            background: rgba(99, 102, 241, 0.1);
+            margin-bottom: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            border-left: 4px solid transparent;
+        }
+
+        .sub-button:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateX(8px);
+            border-left-color: #6366f1;
+        }
+
+        .sub-button.active {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.2) 100%);
+            border: 2px solid #6366f1;
+            border-left: 4px solid #a855f7;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .sub-button-title {
+            font-weight: bold;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .sub-button-subtitle {
+            font-size: 13px;
+            color: #a0a0c0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .center-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            padding: 40px;
+        }
+
+        .content-box {
+            width: 90%;
+            max-width: 700px;
+            height: 80%;
+            background: rgba(99, 102, 241, 0.05);
+            border: 3px solid #6366f1;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+            overflow-y: auto;
+        }
+
+        .content-box.text-content {
+            flex-direction: column;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .content-box.text-content h2 {
+            color: #a855f7;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .content-box.text-content p {
+            color: #d0d0e0;
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .content-box.image-content {
+            padding: 0;
+        }
+
+        .content-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .placeholder-text {
+            color: #6366f1;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .description-section {
+            width: 320px;
+            padding: 30px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+            border-left: 2px solid #6366f1;
+            overflow-y: auto;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .description-section h2 {
+            color: #a855f7;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 0 2px 10px rgba(168, 85, 247, 0.3);
+        }
+
+        .description-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .description-section li {
+            color: #d0d0e0;
+            line-height: 1.7;
+            font-size: 15px;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .description-section li:before {
+            content: "▹";
+            color: #6366f1;
+            font-size: 20px;
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 30vh;
+                border-right: none;
+                border-bottom: 2px solid #6366f1;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .description-section {
+                width: 100%;
+                max-height: 30vh;
+                border-left: none;
+                border-top: 2px solid #6366f1;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #a855f7 0%, #ec4899 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sources of Information</h1>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="primary-button active" id="primaryBtn">Sources of Information</div>
+            <div id="buttons-container"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="center-section">
+                <div class="content-box text-content" id="contentBox">
+                    <h2>Sources of Information</h2>
+                    <p>Sources of information are various channels and mediums through which knowledge, data, and messages are transmitted and received. They play a crucial role in human communication, education, and decision-making processes. From traditional written letters to modern digital devices, these sources have evolved significantly over time, each serving unique purposes in storing, sharing, and accessing information. Understanding different sources helps us navigate the vast landscape of available knowledge and choose the most appropriate medium for our specific needs.</p>
+                </div>
+            </div>
+
+            <div class="description-section" id="descriptionSection">
+                <h2>Key Points</h2>
+                <ul>
+                    <li>Essential tools for communication and knowledge transfer</li>
+                    <li>Enable information sharing across distances and time</li>
+                    <li>Range from traditional to modern technological mediums</li>
+                    <li>Support personal, professional, and educational needs</li>
+                    <li>Help organize and manage daily activities</li>
+                    <li>Facilitate global connectivity and accessibility</li>
+                    <li>Preserve knowledge for future generations</li>
+                    <li>Enable real-time and asynchronous communication</li>
+                    <li>Adapt to changing societal and technological needs</li>
+                    <li>Form the foundation of modern information society</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sourcesData = [
+            {
+                id: 1,
+                name: 'Letter',
+                subtitle: 'Written communication',
+                points: [
+                    'One of the oldest forms of written communication',
+                    'Allows detailed message exchange across distances',
+                    'Used for personal and business correspondence',
+                    'Provides permanent record of communication',
+                    'Enables thoughtful and composed messages',
+                    'Can be formal or informal in nature',
+                    'Historically important for long-distance contact',
+                    'Maintains personal touch in communication',
+                    'Tangible and can be preserved as keepsakes',
+                    'Traditional yet still relevant today'
+                ],
+                image: 'letter.jpg'
+            },
+            {
+                id: 2,
+                name: 'Watch',
+                subtitle: 'Timekeeping device',
+                points: [
+                    'Portable device for tracking time',
+                    'Worn on wrist or carried in pocket',
+                    'Helps organize daily schedules efficiently',
+                    'Essential tool for time management',
+                    'Available in analog and digital formats',
+                    'Modern versions include smart features',
+                    'Reliable source of current time information',
+                    'Enables punctuality and planning',
+                    'Combines functionality with fashion',
+                    'Critical for coordinating activities'
+                ],
+                image: 'watch.jpg'
+            },
+            {
+                id: 3,
+                name: 'Magnetic Needle',
+                subtitle: 'Navigation tool',
+                points: [
+                    'Core component of compasses',
+                    'Aligns with Earth\'s magnetic field',
+                    'Indicates cardinal directions accurately',
+                    'Essential for navigation and exploration',
+                    'Used in maritime and land travel',
+                    'Functions without external power source',
+                    'Reliable in various environmental conditions',
+                    'Historical importance in global exploration',
+                    'Simple yet effective technology',
+                    'Still relevant for outdoor activities'
+                ],
+                image: 'mneedle.jpg'
+            },
+            {
+                id: 4,
+                name: 'Calendar',
+                subtitle: 'Date organization',
+                points: [
+                    'System for organizing time periods',
+                    'Tracks days, weeks, months, and years',
+                    'Essential for planning and scheduling',
+                    'Helps remember important dates and events',
+                    'Available in physical and digital formats',
+                    'Supports personal and professional planning',
+                    'Cultural and religious significance',
+                    'Enables long-term goal setting',
+                    'Coordinates activities among groups',
+                    'Fundamental tool for time management'
+                ],
+                image: 'calender.jpg'
+            },
+            {
+                id: 5,
+                name: 'Phone Diary',
+                subtitle: 'Contact records',
+                points: [
+                    'Stores contact information systematically',
+                    'Records phone numbers and addresses',
+                    'Maintains personal and professional contacts',
+                    'Quick reference for communication',
+                    'Preserves important connection details',
+                    'Organizes relationships effectively',
+                    'Can include notes and reminders',
+                    'Digital versions offer search capabilities',
+                    'Backup for memory and organization',
+                    'Essential for networking and relationships'
+                ],
+                image: 'diary.jpg'
+            },
+            {
+                id: 6,
+                name: 'Book',
+                subtitle: 'Knowledge collection',
+                points: [
+                    'Collection of bound written pages',
+                    'Repository of knowledge and stories',
+                    'Fundamental source of learning',
+                    'Preserves information across generations',
+                    'Available in numerous subjects and genres',
+                    'Enables deep and focused reading',
+                    'Portable and accessible knowledge source',
+                    'Both educational and entertaining',
+                    'Physical and digital formats available',
+                    'Cultural and historical significance'
+                ],
+                image: 'book1.png'
+            },
+            {
+                id: 7,
+                name: 'Radio',
+                subtitle: 'Audio broadcasting',
+                points: [
+                    'Transmits audio via electromagnetic waves',
+                    'Provides news, music, and entertainment',
+                    'Reaches wide audiences simultaneously',
+                    'Functions without visual requirements',
+                    'Accessible during various activities',
+                    'Important for emergency communications',
+                    'Portable and battery-operated options',
+                    'Local and international broadcasting',
+                    'Intimate and personal medium',
+                    'Still widely used globally'
+                ],
+                image: 'radio.jpg'
+            },
+            {
+                id: 8,
+                name: 'Telephone',
+                subtitle: 'Voice communication',
+                points: [
+                    'Enables real-time voice conversations',
+                    'Connects people across distances instantly',
+                    'Revolutionized long-distance communication',
+                    'Essential for personal and business use',
+                    'Evolved from landlines to mobile devices',
+                    'Supports urgent and immediate contact',
+                    'More personal than written communication',
+                    'Clarifies tone and emotion effectively',
+                    'Facilitates quick decision-making',
+                    'Universal communication tool'
+                ],
+                image: 'tele.jpg'
+            },
+            {
+                id: 9,
+                name: 'Television',
+                subtitle: 'Visual broadcasting',
+                points: [
+                    'Combines audio and visual information',
+                    'Broadcasts to millions simultaneously',
+                    'Provides news, education, and entertainment',
+                    'Visual storytelling medium',
+                    'Influences public opinion and culture',
+                    'Real-time and recorded content',
+                    'Educational programming available',
+                    'Connects viewers to global events',
+                    'Evolved to include streaming services',
+                    'Powerful mass communication tool'
+                ],
+                image: 'tv.jpg'
+            },
+            {
+                id: 10,
+                name: 'Dictionary',
+                subtitle: 'Word reference',
+                points: [
+                    'Lists words alphabetically with definitions',
+                    'Provides pronunciation guidance',
+                    'Explains word usage and context',
+                    'Essential for language learning',
+                    'Includes etymology and history',
+                    'Available in various languages',
+                    'Physical and digital versions exist',
+                    'Standardizes language understanding',
+                    'Supports effective communication',
+                    'Valuable educational resource'
+                ],
+                image: 'dictonary.jpg'
+            }
+        ];
+
+        const buttonsContainer = document.getElementById('buttons-container');
+        const contentBox = document.getElementById('contentBox');
+        const descriptionSection = document.getElementById('descriptionSection');
+        const primaryBtn = document.getElementById('primaryBtn');
+
+        // Create buttons
+        sourcesData.forEach(source => {
+            const button = document.createElement('div');
+            button.className = 'sub-button';
+            button.innerHTML = `
+                <div class="sub-button-title">${source.name}</div>
+                <div class="sub-button-subtitle">${source.subtitle}</div>
+            `;
+            button.onclick = () => selectSource(source);
+            buttonsContainer.appendChild(button);
+        });
+
+        // Primary button click handler
+        primaryBtn.onclick = () => {
+            // Remove active from all buttons
+            primaryBtn.classList.add('active');
+            document.querySelectorAll('.sub-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show default content
+            contentBox.className = 'content-box text-content';
+            contentBox.innerHTML = `
+                <h2>Sources of Information</h2>
+                <p>Sources of information are various channels and mediums through which knowledge, data, and messages are transmitted and received. They play a crucial role in human communication, education, and decision-making processes. From traditional written letters to modern digital devices, these sources have evolved significantly over time, each serving unique purposes in storing, sharing, and accessing information. Understanding different sources helps us navigate the vast landscape of available knowledge and choose the most appropriate medium for our specific needs.</p>
+            `;
+
+            descriptionSection.innerHTML = `
+                <h2>Key Points</h2>
+                <ul>
+                    <li>Essential tools for communication and knowledge transfer</li>
+                    <li>Enable information sharing across distances and time</li>
+                    <li>Range from traditional to modern technological mediums</li>
+                    <li>Support personal, professional, and educational needs</li>
+                    <li>Help organize and manage daily activities</li>
+                    <li>Facilitate global connectivity and accessibility</li>
+                    <li>Preserve knowledge for future generations</li>
+                    <li>Enable real-time and asynchronous communication</li>
+                    <li>Adapt to changing societal and technological needs</li>
+                    <li>Form the foundation of modern information society</li>
+                </ul>
+            `;
+        };
+
+        function selectSource(source) {
+            // Remove active class from primary button
+            primaryBtn.classList.remove('active');
+            
+            // Remove active class from all sub buttons
+            document.querySelectorAll('.sub-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to clicked button
+            event.currentTarget.classList.add('active');
+
+            // Update center content
+            contentBox.className = 'content-box image-content';
+            contentBox.innerHTML = '';
+            if (source.image) {
+                const img = document.createElement('img');
+                img.src = source.image;
+                img.alt = source.name;
+                contentBox.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-text';
+                placeholder.textContent = `Image placeholder for ${source.name}`;
+                contentBox.appendChild(placeholder);
+            }
+
+            // Update description with points
+            const pointsList = source.points.map(point => `<li>${point}</li>`).join('');
+            descriptionSection.innerHTML = `
+                <h2>${source.name}</h2>
+                <ul>${pointsList}</ul>
+            `;
+        }
+    </script>
+</body>
+</html>

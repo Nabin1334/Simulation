@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Security & Cleaning Simulation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Computer Security & Cleaning</h1>
+           
+        </header>
+        
+        <div class="content">
+            <!-- Problem Panel -->
+            <div class="problem-panel">
+                <div class="section-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Computer Problems
+                </div>
+                
+                <div class="problem-list">
+                    <div class="problem-item" onclick="showAnimation('hitting')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-hand-rock"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Hitting Computer Parts</div>
+                            <div class="problem-desc">Physical damage from hitting or dropping components</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('eating')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Eating Near Computer</div>
+                            <div class="problem-desc">Food crumbs and spills damaging components</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('mouse')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-mouse"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Rough Mouse Usage</div>
+                            <div class="problem-desc">Clicking too hard or throwing the mouse</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('keyboard')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Rough Keyboard Usage</div>
+                            <div class="problem-desc">Pressing keys too hard or hitting keyboard</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('shutdown')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-power-off"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Improper Shutdown</div>
+                            <div class="problem-desc">Not shutting down properly or pulling power</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('dust')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Dust Accumulation</div>
+                            <div class="problem-desc">Dust buildup causing overheating and damage</div>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-item" onclick="showAnimation('malware')">
+                        <div class="problem-icon warning">
+                            <i class="fas fa-virus"></i>
+                        </div>
+                        <div class="problem-info">
+                            <div class="problem-title">Malware & Viruses</div>
+                            <div class="problem-desc">Downloaded from unsafe websites</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Simulation Area -->
+            <div class="simulation-area">
+                <div id="simulationCanvas"></div>
+                <div class="animation-container" id="animationContainer"></div>
+                
+                <div class="computer-setup">
+                    <div class="desk">
+                        <!-- Monitor Area -->
+                        <div class="monitor-area">
+                            <div class="monitor" id="monitor">
+                                <div class="monitor-screen" id="monitorScreen">
+                                    <div class="screen-content">
+                                        <div class="screen-message">
+                                            <h3>Computer System</h3>
+                                            <p>Status: <span id="systemStatus">Normal</span></p>
+                                            <p id="screenMessage">All systems operational</p>
+                                            <div class="status-indicator" id="statusIndicator">✓ Protected</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="monitor-stand"></div>
+                                <div class="monitor-base"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- CPU Area -->
+                        <div class="cpu-area">
+                            <div class="cpu-real" id="cpuReal">
+                                <div class="component-label cpu-label">CPU Tower</div>
+                                <div class="cpu-front">
+                                    <div class="cpu-vent">
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div><div class="cpu-vent-slot"></div>
+                                        <div class="cpu-vent-slot"></div>
+                                    </div>
+                                    <div class="cpu-drive-bay"></div>
+                                    <div class="cpu-drive-bay"></div>
+                                    <div class="cpu-power" id="cpuPower" onclick="simulatePowerButton()">
+                                        <i class="fas fa-power-off"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Keyboard Area - Center -->
+                        <div class="keyboard-area">
+                            <div class="keyboard-real" id="keyboardReal">
+                                <div class="component-label keyboard-label">Keyboard</div>
+                                <div class="keyboard-top" id="keyboardTop">
+                                    <!-- Keys will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mouse Area - Right Side -->
+                        <div class="mouse-area">
+                            <div class="mouse-real" id="mouseReal">
+                                <div class="component-label mouse-label">Mouse</div>
+                                <div class="mouse-body">
+                                    <div class="mouse-wheel"></div>
+                                    <div class="mouse-button mouse-left" onclick="simulateMouseClick('left')"></div>
+                                    <div class="mouse-button mouse-right" onclick="simulateMouseClick('right')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Panel -->
+                <div class="status-panel">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-value" id="cpuTemp">40°C</div>
+                            <div class="status-label">CPU Temperature</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="securityStatus">Protected</div>
+                            <div class="status-label">Security Status</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="systemLoad">10%</div>
+                            <div class="status-label">System Load</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="maintenanceStatus">Good</div>
+                            <div class="status-label">Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.7/two.min.js"></script>
+    <script src="script.js">
+      
+    </script>
+</body>
+</html>

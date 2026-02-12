@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Magnet Simulation</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-color: #4ecdc4;
+            --secondary-color: #667eea;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --sidebar-width: 280px;
+            --description-width: 320px;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: white;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+            padding: 10px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Main Layout Grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr var(--description-width);
+            grid-template-rows: auto 1fr;
+            gap: 10px;
+            height: 100%;
+            max-height: 100vh;
+        }
+
+        /* Header spans all columns */
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .magnet-icon {
+            font-size: 2em;
+            animation: magnetFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes magnetFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            50% { transform: translateY(-5px) rotate(5deg) scale(1.05); }
+        }
+
+        h1 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .subtitle {
+            color: #e0e7ff;
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: calc(100vh - 100px);
+        }
+
+        .sidebar h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.6);
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 1;
+        }
+
+        .use-button {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1em;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            min-height: 60px;
+        }
+
+        .use-button:hover {
+            background: rgba(78, 205, 196, 0.15);
+            transform: translateX(5px);
+            border-color: rgba(78, 205, 196, 0.4);
+        }
+
+        .use-button.active {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.9), rgba(43, 108, 176, 0.9));
+            border-color: var(--primary-color);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3); }
+            50% { box-shadow: 0 6px 25px rgba(78, 205, 196, 0.5); }
+        }
+
+        .button-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: #0f2027;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        .use-button.active .button-number {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* Main Content Area */
+        .main-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: calc(100vh - 100px);
+        }
+
+        .animation-title {
+            color: white;
+            text-align: center;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .animation-container {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            min-height: 0;
+        }
+
+        .animation-panel {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .animation-panel.active {
+            display: block;
+        }
+
+        /* Right Sidebar */
+        .description-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 100px);
+        }
+
+        .description-area h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.6);
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 1;
+        }
+
+        .description-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .description-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .description-content li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .description-content li:hover {
+            transform: translateX(5px);
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        /* ANIMATION 1: FINDING TINY OBJECTS - FIXED */
+        .tiny-objects-scene {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent);
+            overflow: hidden;
+        }
+
+        .magnet-container-1 {
+            position: absolute;
+            width: 80px;
+            height: 24px;
+            cursor: move;
+            user-select: none;
+            z-index: 100;
+            left: 30px;
+            top: 30px;
+        }
+
+        .magnet-svg-1 {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .particles-area-1 {
+            position: absolute;
+            width: calc(100% - 120px);
+            height: calc(100% - 120px);
+            top: 60px;
+            left: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            overflow: hidden;
+        }
+
+        .metal-particles-1 {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            pointer-events: none;
+        }
+
+        .metal-particle-1 {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(192, 192, 192, 0.6), 0 0 2px rgba(255, 255, 255, 0.8);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .metal-particle-1.attached {
+            animation: particleAttach 0.3s ease-out;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 1), 0 0 4px rgba(255, 255, 255, 1);
+        }
+
+        @keyframes particleAttach {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.6); }
+            100% { transform: scale(1); }
+        }
+
+        .collected-metal-1 {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+        }
+
+        .collected-label-1 {
+            font-size: 0.8em;
+            color: white;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .collected-particles-1 {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 80px;
+        }
+
+        .collected-piece-1 {
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(192, 192, 192, 0.8);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease-out;
+        }
+
+        .collected-piece-1.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ANIMATION 2: PICKING SMALL OBJECTS - FIXED */
+        .picking-scene-2 {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent);
+            overflow: hidden;
+        }
+
+        .magnet-container-2 {
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            cursor: move;
+            user-select: none;
+            z-index: 100;
+            left: 30px;
+            top: 30px;
+        }
+
+        .magnet-svg-2 {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .objects-area-2 {
+            position: absolute;
+            width: calc(100% - 120px);
+            height: calc(100% - 120px);
+            top: 60px;
+            left: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            overflow: hidden;
+        }
+
+        .small-objects-container-2 {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            pointer-events: none;
+        }
+
+        .small-object-2 {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            z-index: 1;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .small-object-2.pin {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+        }
+
+        .small-object-2.clip {
+            background: linear-gradient(135deg, #2ed573, #1dd1a1);
+        }
+
+        .small-object-2.nail {
+            background: linear-gradient(135deg, #3742fa, #5352ed);
+        }
+
+        .small-object-2.screw {
+            background: linear-gradient(135deg, #ffa502, #ff7f50);
+        }
+
+        .small-object-2.attached {
+            z-index: 99;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+            animation: objectAttach 0.3s ease-out;
+            transform: scale(1.1);
+        }
+
+        @keyframes objectAttach {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1.1); }
+        }
+
+        .collected-objects-2 {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+        }
+
+        .collected-label-2 {
+            font-size: 0.8em;
+            color: white;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .collected-objects-display-2 {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 120px;
+        }
+
+        .collected-object-piece-2 {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .collected-object-piece-2.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ANIMATION 3: ELECTRONIC DEVICES - Compact Layout */
+        .electronics-scene {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .electronic-device {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+            height: 100%;
+            min-height: 120px;
+        }
+
+        .device-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+        }
+
+        .device-name {
+            font-size: 1em;
+            color: #4ecdc4;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* ANIMATION 4: DATA STORAGE - Compact Layout */
+        .storage-scene {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .storage-device {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+            height: 100%;
+            min-height: 120px;
+        }
+
+        .storage-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+        }
+
+        .storage-name {
+            font-size: 1em;
+            color: #4ecdc4;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .data-flow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .data-bit {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(78, 205, 196, 0.8);
+            animation: dataFlow 2s linear infinite;
+        }
+
+        @keyframes dataFlow {
+            0% {
+                transform: translateY(-100%) translateX(var(--start-x));
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100%) translateX(var(--end-x));
+                opacity: 0;
+            }
+        }
+
+        /* ANIMATION 5: FOOD PURIFICATION - FIXED */
+        .food-scene-5 {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent);
+            overflow: hidden;
+        }
+
+        .magnet-container-5 {
+            position: absolute;
+            width: 80px;
+            height: 24px;
+            cursor: move;
+            user-select: none;
+            z-index: 100;
+            left: 30px;
+            top: 30px;
+        }
+
+        .magnet-svg-5 {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .food-bucket-5 {
+            position: absolute;
+            width: calc(100% - 120px);
+            height: calc(100% - 120px);
+            top: 60px;
+            left: 60px;
+            background: linear-gradient(to bottom, rgba(240, 240, 240, 0.9), rgba(220, 220, 220, 0.9));
+            border: 3px solid rgba(200, 200, 200, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .food-label-5 {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(120, 120, 120, 0.9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1em;
+            z-index: 15;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .food-content-5 {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: rgba(250, 250, 250, 0.3);
+        }
+
+        .rice-grain-5 {
+            position: absolute;
+            background: linear-gradient(135deg, #ffffff, #f5f5f5, #f0f0f0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border-radius: 15% 35% 15% 35%;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .rice-particle-5 {
+            position: absolute;
+            background: linear-gradient(135deg, #000000, #333333);
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .iron-particle-5 {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(192, 192, 192, 0.6);
+            transition: box-shadow 0.3s ease;
+            z-index: 3;
+        }
+
+        .iron-particle-5.attached {
+            animation: particleAttach 0.3s ease-out;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 1);
+        }
+
+        .collected-iron-5 {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+        }
+
+        .collected-label-5 {
+            font-size: 0.8em;
+            color: white;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .collected-particles-5 {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 80px;
+        }
+
+        .collected-piece-5 {
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(192, 192, 192, 0.8);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease-out;
+        }
+
+        .collected-piece-5.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Reset Button - Positioned at bottom center of each animation */
+        .reset-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .reset-button:hover {
+            background: linear-gradient(135deg, #44a08d, #4ecdc4);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        /* Instructions */
+        .instructions {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            max-width: 90%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1200px) {
+            :root {
+                --sidebar-width: 240px;
+                --description-width: 280px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .subtitle {
+                font-size: 0.9em;
+            }
+            
+            .use-button {
+                padding: 12px;
+                font-size: 0.9em;
+                min-height: 50px;
+            }
+            
+            .button-number {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9em;
+            }
+            
+            .particles-area-1,
+            .objects-area-2,
+            .food-bucket-5 {
+                width: calc(100% - 80px);
+                height: calc(100% - 80px);
+                top: 40px;
+                left: 40px;
+            }
+            
+            .collected-metal-1,
+            .collected-objects-2,
+            .collected-iron-5 {
+                top: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 200px 1fr 200px;
+                gap: 8px;
+            }
+            
+            header {
+                grid-column: 1;
+                grid-row: 1;
+                padding: 10px;
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+            
+            .magnet-icon {
+                font-size: 1.8em;
+            }
+            
+            h1 {
+                font-size: 1.4em;
+                white-space: normal;
+                line-height: 1.2;
+            }
+            
+            .sidebar {
+                grid-column: 1;
+                grid-row: 2;
+                max-height: 200px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                overflow-x: auto;
+                padding: 15px;
+            }
+            
+            .sidebar h2 {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            
+            .use-button {
+                flex: 1;
+                min-width: calc(50% - 10px);
+                max-width: calc(50% - 10px);
+                min-height: 45px;
+                font-size: 0.85em;
+            }
+            
+            .main-container {
+                grid-column: 1;
+                grid-row: 3;
+                max-height: none;
+            }
+            
+            .description-area {
+                grid-column: 1;
+                grid-row: 4;
+                max-height: 200px;
+            }
+            
+            .description-content ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .description-content li {
+                flex: 1;
+                min-width: calc(50% - 10px);
+                margin-bottom: 0;
+                font-size: 0.85em;
+                padding: 10px;
+            }
+            
+            .particles-area-1,
+            .objects-area-2,
+            .food-bucket-5 {
+                width: calc(100% - 40px);
+                height: calc(100% - 40px);
+                top: 20px;
+                left: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .app-container {
+                gap: 5px;
+            }
+            
+            .use-button {
+                min-width: 100%;
+                max-width: 100%;
+                font-size: 0.8em;
+            }
+            
+            .description-content li {
+                min-width: 100%;
+                font-size: 0.8em;
+            }
+            
+            .animation-title {
+                font-size: 1.2em;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .magnet-container-1,
+            .magnet-container-2,
+            .magnet-container-5 {
+                width: 60px;
+                height: 18px;
+                left: 15px;
+                top: 15px;
+            }
+            
+            .reset-button {
+                padding: 8px 20px;
+                font-size: 0.8em;
+                bottom: 15px;
+            }
+            
+            .instructions {
+                font-size: 0.7em;
+                bottom: 50px;
+                padding: 6px 12px;
+            }
+            
+            .electronics-scene,
+            .storage-scene {
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .device-icon,
+            .storage-icon {
+                font-size: 2em;
+                margin-bottom: 8px;
+            }
+            
+            .device-name,
+            .storage-name {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                grid-template-rows: auto 180px 1fr 180px;
+            }
+            
+            h1 {
+                font-size: 1.2em;
+            }
+            
+            .subtitle {
+                font-size: 0.8em;
+            }
+            
+            .sidebar {
+                padding: 10px;
+            }
+            
+            .sidebar h2 {
+                font-size: 1.1em;
+                padding: 8px;
+            }
+            
+            .use-button {
+                min-height: 40px;
+                padding: 8px;
+                font-size: 0.75em;
+            }
+            
+            .button-number {
+                width: 24px;
+                height: 24px;
+                font-size: 0.8em;
+            }
+            
+            .description-area {
+                padding: 10px;
+            }
+            
+            .description-area h2 {
+                font-size: 1.1em;
+                padding: 8px;
+            }
+            
+            .description-content li {
+                font-size: 0.75em;
+                padding: 8px;
+            }
+            
+            .particles-area-1,
+            .objects-area-2,
+            .food-bucket-5 {
+                width: calc(100% - 20px);
+                height: calc(100% - 20px);
+                top: 10px;
+                left: 10px;
+            }
+            
+            .collected-metal-1,
+            .collected-objects-2,
+            .collected-iron-5 {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .collected-label-1,
+            .collected-label-2,
+            .collected-label-5 {
+                font-size: 0.7em;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .app-container {
+                grid-template-rows: auto 150px 1fr 150px;
+            }
+            
+            .sidebar,
+            .description-area {
+                max-height: 150px;
+            }
+            
+            .use-button {
+                min-height: 35px;
+                padding: 6px 8px;
+                font-size: 0.75em;
+            }
+            
+            .description-content li {
+                font-size: 0.75em;
+                padding: 8px;
+                margin-bottom: 5px;
+            }
+            
+            .reset-button {
+                bottom: 10px;
+                padding: 6px 15px;
+                font-size: 0.8em;
+            }
+            
+            .instructions {
+                bottom: 40px;
+                font-size: 0.7em;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="magnet-icon">🧲</div>
+            <h1>Use of magnet in daily life</h1>
+            
+        </header>
+
+        <div class="sidebar">
+            <h2>Select a Use</h2>
+            <button class="use-button active" onclick="showContent(0)">
+                <span class="button-number">1</span>
+                Finding Tiny Objects
+            </button>
+            <button class="use-button" onclick="showContent(1)">
+                <span class="button-number">2</span>
+                Picking Small Objects
+            </button>
+            <button class="use-button" onclick="showContent(2)">
+                <span class="button-number">3</span>
+                Electronic Devices
+            </button>
+            <button class="use-button" onclick="showContent(3)">
+                <span class="button-number">4</span>
+                Data Storage
+            </button>
+            <button class="use-button" onclick="showContent(4)">
+                <span class="button-number">5</span>
+                Food Purification
+            </button>
+        </div>
+
+        <div class="main-container">
+            <h2 class="animation-title" id="animationTitle">Finding Tiny Objects</h2>
+            <div class="animation-container">
+                
+                <!-- Animation 1: Finding Tiny Objects -->
+                <div class="animation-panel active" id="panel1">
+                    <div class="tiny-objects-scene">
+                        <div class="magnet-container-1" id="magnetContainer1">
+                            <svg class="magnet-svg-1" viewBox="0 0 140 40"></svg>
+                        </div>
+                        
+                        <div class="collected-metal-1">
+                            <div class="collected-label-1">ATTACHED: <span id="collectedCount">0</span></div>
+                            <div class="collected-particles-1" id="collectedParticles1"></div>
+                        </div>
+                        
+                        <div class="particles-area-1">
+                            <div class="metal-particles-1" id="particlesContainer1"></div>
+                        </div>
+                        
+                        <button class="reset-button" onclick="resetAnimation1()">
+                            RESET SIMULATION
+                        </button>
+                        
+                        <div class="instructions">🧲 <strong>Drag the magnet</strong> - particles stick and stay attached! Click RESET to start over</div>
+                    </div>
+                </div>
+
+                <!-- Animation 2: Picking Small Objects -->
+                <div class="animation-panel" id="panel2">
+                    <div class="picking-scene-2">
+                        <div class="magnet-container-2" id="magnetContainer2">
+                            <svg class="magnet-svg-2" viewBox="0 0 140 40"></svg>
+                        </div>
+                        
+                        <div class="collected-objects-2">
+                            <div class="collected-label-2">COLLECTED: <span id="collectedObjectsCount">0</span></div>
+                            <div class="collected-objects-display-2" id="collectedObjectsDisplay2"></div>
+                        </div>
+                        
+                        <div class="objects-area-2">
+                            <div class="small-objects-container-2" id="smallObjectsContainer2"></div>
+                        </div>
+                        
+                        <button class="reset-button" onclick="resetAnimation2()">
+                            RESET SIMULATION
+                        </button>
+                        
+                        <div class="instructions">🧲 <strong>Drag the magnet</strong> - small objects stick and stay attached! Click RESET to start over</div>
+                    </div>
+                </div>
+
+                <!-- Animation 3: Electronic Devices -->
+                <div class="animation-panel" id="panel3">
+                    <div class="electronics-scene">
+                        <div class="electronic-device">
+                            <div class="device-icon">🔊</div>
+                            <div class="device-name">Speakers</div>
+                        </div>
+                        <div class="electronic-device">
+                            <div class="device-icon">💻</div>
+                            <div class="device-name">Hard Drive</div>
+                        </div>
+                        <div class="electronic-device">
+                            <div class="device-icon">🎤</div>
+                            <div class="device-name">Microphone</div>
+                        </div>
+                        <div class="electronic-device">
+                            <div class="device-icon">📺</div>
+                            <div class="device-name">TV</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation 4: Data Storage -->
+                <div class="animation-panel" id="panel4">
+                    <div class="storage-scene">
+                        <div class="storage-device">
+                            <div class="storage-icon">💾</div>
+                            <div class="storage-name">Hard Disk</div>
+                            <div class="data-flow" id="hardDiskData"></div>
+                        </div>
+                        <div class="storage-device">
+                            <div class="storage-icon">💳</div>
+                            <div class="storage-name">ATM Card</div>
+                            <div class="data-flow" id="cardData"></div>
+                        </div>
+                        <div class="storage-device">
+                            <div class="storage-icon">📼</div>
+                            <div class="storage-name">Cassette Tape</div>
+                            <div class="data-flow" id="tapeData"></div>
+                        </div>
+                        <div class="storage-device">
+                            <div class="storage-icon">📀</div>
+                            <div class="storage-name">CD/DVD</div>
+                            <div class="data-flow" id="discData"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation 5: Food Purification -->
+                <div class="animation-panel" id="panel5">
+                    <div class="food-scene-5">
+                        <div class="magnet-container-5" id="magnetContainer5">
+                            <svg class="magnet-svg-5" viewBox="0 0 140 40"></svg>
+                        </div>
+                        
+                        <div class="collected-iron-5">
+                            <div class="collected-label-5">REMOVED: <span id="removedCount5">0</span></div>
+                            <div class="collected-particles-5" id="collectedParticles5"></div>
+                        </div>
+                        
+                        <div class="food-bucket-5">
+                            <div class="food-label-5">RICE PURIFICATION</div>
+                            <div class="food-content-5" id="foodContent5"></div>
+                        </div>
+                        
+                        <button class="reset-button" onclick="resetAnimation5()">
+                            RESET SIMULATION
+                        </button>
+                        
+                        <div class="instructions">🧲 <strong>Drag the magnet</strong> - iron particles stick and stay attached! Click RESET to start over</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description-area">
+            <h2>Description</h2>
+            <div class="description-content" id="descriptionContent">
+                <ul>
+                    <li>Drag magnet to find tiny metal objects</li>
+                    <li>Metal particles get attracted and stick to magnet</li>
+                    <li>Useful in workshops and factories</li>
+                    <li>Prevents injuries from hidden metal pieces</li>
+                    <li>Industrial magnets collect metal fragments</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Content Data
+        const contentData = [
+            {
+                title: "Finding Tiny Objects",
+                description: [
+                    "Drag magnet to find tiny metal objects",
+                    "Metal particles get attracted and stick to magnet",
+                    "Useful in workshops and factories",
+                    "Prevents injuries from hidden metal pieces",
+                    "Industrial magnets collect metal fragments"
+                ]
+            },
+            {
+                title: "Picking Small Objects",
+                description: [
+                    "Magnet picks up small metal objects safely",
+                    "Used in manufacturing assembly lines",
+                    "Prevents hand injuries from sharp objects",
+                    "Magnetic tools for precision work",
+                    "Industrial magnetic pickers for heavy objects"
+                ]
+            },
+            {
+                title: "Electronic Devices",
+                description: [
+                    "Speakers use electromagnets to produce sound",
+                    "Hard drives store data using magnetic fields",
+                    "Microphones convert sound to electrical signals",
+                    "Electric motors rely on magnetic principles",
+                    "Transformers use electromagnetic induction"
+                ]
+            },
+            {
+                title: "Data Storage",
+                description: [
+                    "Hard disks store binary data magnetically",
+                    "Magnetic tapes used for data backup",
+                    "Credit cards have magnetic stripes",
+                    "Cassette tapes store audio magnetically",
+                    "Modern SSDs also use magnetic storage"
+                ]
+            },
+            {
+                title: "Food Purification",
+                description: [
+                    "Magnets remove iron particles from food",
+                    "Ensures food safety standards",
+                    "Used in grain processing plants",
+                    "Prevents machinery damage",
+                    "Maintains food quality and purity"
+                ]
+            }
+        ];
+
+        let currentContent = 0;
+        
+        // Animation 1 Variables
+        let magnetData1 = { x: 100, y: 100 };
+        let metalParticles1 = [];
+        let animationFrameId1 = null;
+        
+        // Animation 2 Variables
+        let magnetData2 = { x: 100, y: 100 };
+        let smallObjects2 = [];
+        let animationFrameId2 = null;
+        
+        // Animation 5 Variables
+        let magnetData5 = { x: 100, y: 100 };
+        let riceGrains5 = [];
+        let ironParticles5 = [];
+        let animationFrameId5 = null;
+
+        // Function to create SVG magnet
+        function createSvgMagnet(svgElement) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            svgElement.innerHTML = '';
+            
+            const magnetGroup = document.createElementNS(svgNS, "g");
+            
+            const shadow = document.createElementNS(svgNS, "rect");
+            shadow.setAttribute("x", 4);
+            shadow.setAttribute("y", 4);
+            shadow.setAttribute("width", 132);
+            shadow.setAttribute("height", 32);
+            shadow.setAttribute("rx", 8);
+            shadow.setAttribute("fill", "rgba(0, 0, 0, 0.3)");
+            shadow.setAttribute("filter", "blur(3px)");
+            magnetGroup.appendChild(shadow);
+            
+            const magnetBody = document.createElementNS(svgNS, "rect");
+            magnetBody.setAttribute("x", 0);
+            magnetBody.setAttribute("y", 0);
+            magnetBody.setAttribute("width", 140);
+            magnetBody.setAttribute("height", 40);
+            magnetBody.setAttribute("rx", 10);
+            magnetBody.setAttribute("fill", "#D3D3D3");
+            magnetBody.setAttribute("stroke", "#808080");
+            magnetBody.setAttribute("stroke-width", "2");
+            magnetGroup.appendChild(magnetBody);
+            
+            const northPole = document.createElementNS(svgNS, "rect");
+            northPole.setAttribute("x", 0);
+            northPole.setAttribute("y", 0);
+            northPole.setAttribute("width", 70);
+            northPole.setAttribute("height", 40);
+            northPole.setAttribute("rx", 10);
+            northPole.setAttribute("fill", "#E63946");
+            northPole.setAttribute("opacity", "0.85");
+            magnetGroup.appendChild(northPole);
+            
+            const southPole = document.createElementNS(svgNS, "rect");
+            southPole.setAttribute("x", 70);
+            southPole.setAttribute("y", 0);
+            southPole.setAttribute("width", 70);
+            southPole.setAttribute("height", 40);
+            southPole.setAttribute("rx", 10);
+            southPole.setAttribute("fill", "#457B9D");
+            southPole.setAttribute("opacity", "0.85");
+            magnetGroup.appendChild(southPole);
+            
+            const highlight = document.createElementNS(svgNS, "rect");
+            highlight.setAttribute("x", 20);
+            highlight.setAttribute("y", 5);
+            highlight.setAttribute("width", 100);
+            highlight.setAttribute("height", 8);
+            highlight.setAttribute("rx", 4);
+            highlight.setAttribute("fill", "rgba(255, 255, 255, 0.3)");
+            magnetGroup.appendChild(highlight);
+            
+            const northLabel = document.createElementNS(svgNS, "text");
+            northLabel.setAttribute("x", 35);
+            northLabel.setAttribute("y", 25);
+            northLabel.setAttribute("text-anchor", "middle");
+            northLabel.setAttribute("fill", "white");
+            northLabel.setAttribute("font-weight", "bold");
+            northLabel.setAttribute("font-size", "16");
+            northLabel.textContent = "N";
+            magnetGroup.appendChild(northLabel);
+            
+            const southLabel = document.createElementNS(svgNS, "text");
+            southLabel.setAttribute("x", 105);
+            southLabel.setAttribute("y", 25);
+            southLabel.setAttribute("text-anchor", "middle");
+            southLabel.setAttribute("fill", "white");
+            southLabel.setAttribute("font-weight", "bold");
+            southLabel.setAttribute("font-size", "16");
+            southLabel.textContent = "S";
+            magnetGroup.appendChild(southLabel);
+            
+            svgElement.appendChild(magnetGroup);
+        }
+
+        // Initialize all animations
+        function initAllAnimations() {
+            initAnimation1();
+            initAnimation2();
+            createDataStorageAnimations();
+            initAnimation5();
+        }
+
+        // ANIMATION 1: Finding Tiny Objects - UPDATED ATTACHMENT BEHAVIOR
+        function initAnimation1() {
+            if (animationFrameId1) {
+                cancelAnimationFrame(animationFrameId1);
+            }
+            
+            const svgElement = document.querySelector('#panel1 .magnet-svg-1');
+            createSvgMagnet(svgElement);
+            
+            magnetData1 = { x: 100, y: 100 };
+            const magnetContainer = document.getElementById('magnetContainer1');
+            magnetContainer.style.left = magnetData1.x + 'px';
+            magnetContainer.style.top = magnetData1.y + 'px';
+            
+            const container = document.getElementById('particlesContainer1');
+            const collectedContainer = document.getElementById('collectedParticles1');
+            const collectedCountElement = document.getElementById('collectedCount');
+            
+            if (container && collectedContainer && collectedCountElement) {
+                container.innerHTML = '';
+                collectedContainer.innerHTML = '';
+                metalParticles1 = [];
+                collectedCountElement.textContent = '0';
+                
+                for (let i = 0; i < 15; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'collected-piece-1';
+                    piece.style.animationDelay = `${i * 0.1}s`;
+                    collectedContainer.appendChild(piece);
+                }
+                
+                for (let i = 0; i < 30; i++) {
+                    createMetalParticle1();
+                }
+            }
+            
+            setupMagnetDragging('magnetContainer1', magnetData1);
+            animateParticles1();
+        }
+
+        function createMetalParticle1() {
+            const container = document.getElementById('particlesContainer1');
+            const particlesArea = document.querySelector('.particles-area-1');
+            
+            if (!container || !particlesArea) return;
+            
+            const particle = document.createElement('div');
+            particle.className = 'metal-particle-1';
+            
+            const areaRect = particlesArea.getBoundingClientRect();
+            
+            particle.style.left = Math.random() * (areaRect.width - 20) + 'px';
+            particle.style.top = Math.random() * (areaRect.height - 20) + 'px';
+            
+            container.appendChild(particle);
+            
+            const particleData = {
+                element: particle,
+                x: parseFloat(particle.style.left),
+                y: parseFloat(particle.style.top),
+                attached: false,
+                offsetX: 0,
+                offsetY: 0
+            };
+            
+            metalParticles1.push(particleData);
+        }
+
+        function updateParticles1() {
+            const magnetContainer = document.getElementById('magnetContainer1');
+            const magnetRect = magnetContainer.getBoundingClientRect();
+            const particlesArea = document.querySelector('.particles-area-1');
+            const areaRect = particlesArea.getBoundingClientRect();
+            
+            const magnetLeft = magnetRect.left - areaRect.left;
+            const magnetTop = magnetRect.top - areaRect.top;
+            const magnetRight = magnetLeft + magnetRect.width;
+            const magnetBottom = magnetTop + magnetRect.height;
+            
+            let attachedCount = 0;
+            
+            metalParticles1.forEach((particle) => {
+                if (particle.attached) {
+                    // Attached particles move EXACTLY with the magnet with their stored offset
+                    particle.x = magnetLeft + particle.offsetX;
+                    particle.y = magnetTop + particle.offsetY;
+                    
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    attachedCount++;
+                    return;
+                }
+                
+                const dx = (magnetLeft + magnetRect.width/2) - (particle.x + 2.5);
+                const dy = (magnetTop + magnetRect.height/2) - (particle.y + 2.5);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Strong magnetic attraction
+                if (distance < 150) {
+                    // Much stronger force - makes particles snap to magnet
+                    const force = Math.min(30, 50000 / (distance * distance + 1));
+                    
+                    particle.x += (dx / distance) * force;
+                    particle.y += (dy / distance) * force;
+                    
+                    particle.x = Math.max(0, Math.min(particle.x, areaRect.width - 6));
+                    particle.y = Math.max(0, Math.min(particle.y, areaRect.height - 6));
+                    
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    
+                    // Strong visual effect
+                    const glow = Math.max(0, 1 - distance / 150);
+                    particle.element.style.boxShadow = `0 0 ${8 + glow * 20}px rgba(192, 192, 192, ${0.8 + glow * 0.2})`;
+                    
+                    // Strong attachment when very close
+                    if (distance < 30) {
+                        particle.attached = true;
+                        particle.element.classList.add('attached');
+                        
+                        // Calculate random offset relative to magnet's position
+                        // Particles stick to the side they approach from
+                        let offsetX, offsetY;
+                        
+                        // Determine which side of the magnet the particle is approaching from
+                        const angle = Math.atan2(dy, dx);
+                        const magnetWidth = magnetRect.width;
+                        const magnetHeight = magnetRect.height;
+                        
+                        // Convert angle to a point on magnet perimeter
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            // Approach from left or right
+                            if (dx > 0) {
+                                // Approach from left
+                                offsetX = 0;
+                                offsetY = Math.random() * magnetHeight;
+                            } else {
+                                // Approach from right
+                                offsetX = magnetWidth;
+                                offsetY = Math.random() * magnetHeight;
+                            }
+                        } else {
+                            // Approach from top or bottom
+                            if (dy > 0) {
+                                // Approach from top
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = 0;
+                            } else {
+                                // Approach from bottom
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = magnetHeight;
+                            }
+                        }
+                        
+                        // Add some randomness to the attachment point
+                        offsetX += (Math.random() - 0.5) * 10;
+                        offsetY += (Math.random() - 0.5) * 10;
+                        
+                        // Store the offset relative to magnet's position
+                        particle.offsetX = offsetX;
+                        particle.offsetY = offsetY;
+                        
+                        // Immediate repositioning to magnet surface
+                        particle.x = magnetLeft + offsetX;
+                        particle.y = magnetTop + offsetY;
+                        particle.element.style.left = particle.x + 'px';
+                        particle.element.style.top = particle.y + 'px';
+                    }
+                }
+            });
+            
+            document.getElementById('collectedCount').textContent = attachedCount;
+            
+            const collectedPieces = document.querySelectorAll('#collectedParticles1 .collected-piece-1');
+            collectedPieces.forEach((piece, index) => {
+                if (index < attachedCount) {
+                    piece.classList.add('show');
+                } else {
+                    piece.classList.remove('show');
+                }
+            });
+        }
+
+        function animateParticles1() {
+            updateParticles1();
+            animationFrameId1 = requestAnimationFrame(animateParticles1);
+        }
+
+        // ANIMATION 2: Picking Small Objects - UPDATED ATTACHMENT BEHAVIOR
+        function initAnimation2() {
+            if (animationFrameId2) {
+                cancelAnimationFrame(animationFrameId2);
+            }
+            
+            const svgElement = document.querySelector('#panel2 .magnet-svg-2');
+            createSvgMagnet(svgElement);
+            
+            magnetData2 = { x: 100, y: 100 };
+            const magnetContainer = document.getElementById('magnetContainer2');
+            magnetContainer.style.left = magnetData2.x + 'px';
+            magnetContainer.style.top = magnetData2.y + 'px';
+            
+            const container = document.getElementById('smallObjectsContainer2');
+            const collectedContainer = document.getElementById('collectedObjectsDisplay2');
+            const collectedCountElement = document.getElementById('collectedObjectsCount');
+            
+            if (container && collectedContainer && collectedCountElement) {
+                container.innerHTML = '';
+                collectedContainer.innerHTML = '';
+                smallObjects2 = [];
+                collectedCountElement.textContent = '0';
+                
+                const objectTypes = ['pin', 'clip', 'nail', 'screw'];
+                for (let i = 0; i < 12; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'collected-object-piece-2';
+                    const type = objectTypes[i % 4];
+                    piece.classList.add(type);
+                    
+                    switch(type) {
+                        case 'pin': piece.innerHTML = '📌'; break;
+                        case 'clip': piece.innerHTML = '📎'; break;
+                        case 'nail': piece.innerHTML = '🔩'; break;
+                        case 'screw': piece.innerHTML = '🔧'; break;
+                    }
+                    
+                    piece.style.animationDelay = `${i * 0.1}s`;
+                    collectedContainer.appendChild(piece);
+                }
+                
+                for (let i = 0; i < 8; i++) {
+                    createSmallObject2(i);
+                }
+            }
+            
+            setupMagnetDragging('magnetContainer2', magnetData2);
+            animateSmallObjects2();
+        }
+
+        function createSmallObject2(index) {
+            const container = document.getElementById('smallObjectsContainer2');
+            const objectsArea = document.querySelector('.objects-area-2');
+            
+            if (!container || !objectsArea) return;
+            
+            const objectTypes = ['pin', 'clip', 'nail', 'screw'];
+            const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+            
+            const object = document.createElement('div');
+            object.className = `small-object-2 ${type}`;
+            
+            switch(type) {
+                case 'pin': object.innerHTML = '📌'; break;
+                case 'clip': object.innerHTML = '📎'; break;
+                case 'nail': object.innerHTML = '🔩'; break;
+                case 'screw': object.innerHTML = '🔧'; break;
+            }
+            
+            const areaRect = objectsArea.getBoundingClientRect();
+            
+            object.style.left = Math.random() * (areaRect.width - 50) + 'px';
+            object.style.top = Math.random() * (areaRect.height - 50) + 'px';
+            
+            container.appendChild(object);
+            
+            const objectData = {
+                element: object,
+                type: type,
+                x: parseFloat(object.style.left),
+                y: parseFloat(object.style.top),
+                attached: false,
+                offsetX: 0,
+                offsetY: 0,
+                width: 40,
+                height: 40
+            };
+            
+            smallObjects2.push(objectData);
+        }
+
+        function updateSmallObjects2() {
+            const magnetContainer = document.getElementById('magnetContainer2');
+            const magnetRect = magnetContainer.getBoundingClientRect();
+            const objectsArea = document.querySelector('.objects-area-2');
+            const areaRect = objectsArea.getBoundingClientRect();
+            
+            const magnetLeft = magnetRect.left - areaRect.left;
+            const magnetTop = magnetRect.top - areaRect.top;
+            const magnetRight = magnetLeft + magnetRect.width;
+            const magnetBottom = magnetTop + magnetRect.height;
+            
+            let attachedCount = 0;
+            
+            smallObjects2.forEach((obj) => {
+                if (obj.attached) {
+                    // Object is attached to magnet - follow magnet's movement EXACTLY
+                    obj.x = magnetLeft + obj.offsetX - obj.width/2;
+                    obj.y = magnetTop + obj.offsetY - obj.height/2;
+                    
+                    obj.element.style.left = obj.x + 'px';
+                    obj.element.style.top = obj.y + 'px';
+                    
+                    attachedCount++;
+                    return;
+                }
+                
+                const objCenterX = obj.x + obj.width / 2;
+                const objCenterY = obj.y + obj.height / 2;
+                const dx = (magnetLeft + magnetRect.width/2) - objCenterX;
+                const dy = (magnetTop + magnetRect.height/2) - objCenterY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Very strong magnetic attraction
+                if (distance < 200) {
+                    // Much stronger force - makes objects snap to magnet
+                    const force = Math.min(40, 100000 / (distance * distance + 1));
+                    
+                    obj.x += (dx / distance) * force;
+                    obj.y += (dy / distance) * force;
+                    
+                    obj.x = Math.max(0, Math.min(obj.x, areaRect.width - obj.width));
+                    obj.y = Math.max(0, Math.min(obj.y, areaRect.height - obj.height));
+                    
+                    obj.element.style.left = obj.x + 'px';
+                    obj.element.style.top = obj.y + 'px';
+                    
+                    // Strong visual effect
+                    const glow = Math.max(0, 1 - distance / 200);
+                    obj.element.style.boxShadow = `0 0 ${15 + glow * 25}px rgba(255, 255, 255, ${0.9 + glow * 0.1})`;
+                    obj.element.style.transform = `scale(${1 + glow * 0.2})`;
+                    
+                    // Strong attachment when very close
+                    if (distance < 50) {
+                        obj.attached = true;
+                        obj.element.classList.add('attached');
+                        
+                        // Calculate random attachment point on magnet based on approach direction
+                        let offsetX, offsetY;
+                        const magnetWidth = magnetRect.width;
+                        const magnetHeight = magnetRect.height;
+                        
+                        // Determine which side the object is approaching from
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            // Approach from left or right
+                            if (dx > 0) {
+                                // Approach from left
+                                offsetX = 0;
+                                offsetY = Math.random() * magnetHeight;
+                            } else {
+                                // Approach from right
+                                offsetX = magnetWidth;
+                                offsetY = Math.random() * magnetHeight;
+                            }
+                        } else {
+                            // Approach from top or bottom
+                            if (dy > 0) {
+                                // Approach from top
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = 0;
+                            } else {
+                                // Approach from bottom
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = magnetHeight;
+                            }
+                        }
+                        
+                        // Add some randomness
+                        offsetX += (Math.random() - 0.5) * 15;
+                        offsetY += (Math.random() - 0.5) * 15;
+                        
+                        // Store offset relative to magnet position
+                        obj.offsetX = offsetX;
+                        obj.offsetY = offsetY;
+                        
+                        // Immediate repositioning to magnet surface
+                        obj.x = magnetLeft + offsetX - obj.width/2;
+                        obj.y = magnetTop + offsetY - obj.height/2;
+                        obj.element.style.left = obj.x + 'px';
+                        obj.element.style.top = obj.y + 'px';
+                        obj.element.style.transform = 'scale(1.1)';
+                    }
+                }
+            });
+            
+            document.getElementById('collectedObjectsCount').textContent = attachedCount;
+            
+            const collectedPieces = document.querySelectorAll('#collectedObjectsDisplay2 .collected-object-piece-2');
+            collectedPieces.forEach((piece, index) => {
+                if (index < attachedCount) {
+                    piece.classList.add('show');
+                } else {
+                    piece.classList.remove('show');
+                }
+            });
+        }
+
+        function animateSmallObjects2() {
+            updateSmallObjects2();
+            animationFrameId2 = requestAnimationFrame(animateSmallObjects2);
+        }
+
+        // ANIMATION 4: Data Storage
+        function createDataStorageAnimations() {
+            const containers = ['hardDiskData', 'cardData', 'tapeData', 'discData'];
+            
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                for (let i = 0; i < 12; i++) {
+                    const bit = document.createElement('div');
+                    bit.className = 'data-bit';
+                    
+                    const startX = Math.random() * 100;
+                    const endX = startX + (Math.random() * 30 - 15);
+                    
+                    bit.style.setProperty('--start-x', `${startX}%`);
+                    bit.style.setProperty('--end-x', `${endX}%`);
+                    bit.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    container.appendChild(bit);
+                }
+            });
+        }
+
+        // ANIMATION 5: Food Purification - UPDATED ATTACHMENT BEHAVIOR
+        function initAnimation5() {
+            if (animationFrameId5) {
+                cancelAnimationFrame(animationFrameId5);
+            }
+            
+            const svgElement = document.querySelector('#panel5 .magnet-svg-5');
+            createSvgMagnet(svgElement);
+            
+            magnetData5 = { x: 100, y: 100 };
+            const magnetContainer = document.getElementById('magnetContainer5');
+            magnetContainer.style.left = magnetData5.x + 'px';
+            magnetContainer.style.top = magnetData5.y + 'px';
+            
+            const content = document.getElementById('foodContent5');
+            const collectedContainer = document.getElementById('collectedParticles5');
+            const removedCountElement = document.getElementById('removedCount5');
+            
+            if (content && collectedContainer && removedCountElement) {
+                content.innerHTML = '';
+                collectedContainer.innerHTML = '';
+                riceGrains5 = [];
+                ironParticles5 = [];
+                removedCountElement.textContent = '0';
+                
+                for (let i = 0; i < 12; i++) {
+                    const piece = document.createElement('div');
+                    piece.className = 'collected-piece-5';
+                    piece.style.animationDelay = `${i * 0.1}s`;
+                    collectedContainer.appendChild(piece);
+                }
+                
+                const foodBucket = document.querySelector('.food-bucket-5');
+                const containerRect = foodBucket.getBoundingClientRect();
+                
+                for (let i = 0; i < 80; i++) {
+                    createRiceGrain5(i, containerRect);
+                }
+                
+                for (let i = 0; i < 20; i++) {
+                    createIronParticle5(i, containerRect);
+                }
+            }
+            
+            setupMagnetDragging('magnetContainer5', magnetData5);
+            animateRicePurification5();
+        }
+
+        function createRiceGrain5(index, containerRect) {
+            const content = document.getElementById('foodContent5');
+            if (!content) return;
+            
+            const rice = document.createElement('div');
+            rice.className = 'rice-grain-5';
+            
+            const width = 12 + Math.random() * 6;
+            const height = 4 + Math.random() * 3;
+            const x = Math.random() * (containerRect.width - width);
+            const y = Math.random() * (containerRect.height - height);
+            const rotation = Math.random() * 360;
+            
+            rice.style.width = `${width}px`;
+            rice.style.height = `${height}px`;
+            rice.style.left = `${x}px`;
+            rice.style.top = `${y}px`;
+            rice.style.transform = `rotate(${rotation}deg)`;
+            rice.style.opacity = 0.8 + Math.random() * 0.2;
+            
+            const numBlackParticles = 1 + Math.floor(Math.random() * 2);
+            
+            for (let i = 0; i < numBlackParticles; i++) {
+                const blackParticle = document.createElement('div');
+                blackParticle.className = 'rice-particle-5';
+                
+                const particleX = Math.random() * (width - 2) + 1;
+                const particleY = Math.random() * (height - 2) + 1;
+                const particleSize = 1 + Math.random() * 1;
+                
+                blackParticle.style.width = `${particleSize}px`;
+                blackParticle.style.height = `${particleSize}px`;
+                blackParticle.style.left = `${particleX}px`;
+                blackParticle.style.top = `${particleY}px`;
+                
+                rice.appendChild(blackParticle);
+            }
+            
+            content.appendChild(rice);
+            
+            riceGrains5.push({
+                element: rice,
+                x: x,
+                y: y,
+                width: width,
+                height: height,
+                rotation: rotation
+            });
+        }
+
+        function createIronParticle5(index, containerRect) {
+            const content = document.getElementById('foodContent5');
+            if (!content) return;
+            
+            const iron = document.createElement('div');
+            iron.className = 'iron-particle-5';
+            
+            const x = Math.random() * (containerRect.width - 6);
+            const y = Math.random() * (containerRect.height - 6);
+            
+            iron.style.left = x + 'px';
+            iron.style.top = y + 'px';
+            
+            content.appendChild(iron);
+            
+            ironParticles5.push({
+                element: iron,
+                x: x,
+                y: y,
+                attached: false,
+                offsetX: 0,
+                offsetY: 0
+            });
+        }
+
+        function updateRicePurification5() {
+            const magnetContainer = document.getElementById('magnetContainer5');
+            const magnetRect = magnetContainer.getBoundingClientRect();
+            const foodBucket = document.querySelector('.food-bucket-5');
+            const containerRect = foodBucket.getBoundingClientRect();
+            
+            const magnetLeft = magnetRect.left - containerRect.left;
+            const magnetTop = magnetRect.top - containerRect.top;
+            
+            let attachedCount = 0;
+            
+            ironParticles5.forEach((particle) => {
+                if (particle.attached) {
+                    // Attached particles move EXACTLY with the magnet
+                    particle.x = magnetLeft + particle.offsetX;
+                    particle.y = magnetTop + particle.offsetY;
+                    
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    attachedCount++;
+                    return;
+                }
+                
+                const dx = (magnetLeft + magnetRect.width/2) - (particle.x + 2.5);
+                const dy = (magnetTop + magnetRect.height/2) - (particle.y + 2.5);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Very strong magnetic attraction
+                if (distance < 150) {
+                    const force = Math.min(30, 50000 / (distance * distance + 1));
+                    
+                    particle.x += (dx / distance) * force;
+                    particle.y += (dy / distance) * force;
+                    
+                    particle.x = Math.max(0, Math.min(particle.x, containerRect.width - 6));
+                    particle.y = Math.max(0, Math.min(particle.y, containerRect.height - 6));
+                    
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    
+                    const glow = Math.max(0, 1 - distance / 150);
+                    particle.element.style.boxShadow = `0 0 ${8 + glow * 20}px rgba(192, 192, 192, ${0.8 + glow * 0.2})`;
+                    
+                    // Strong attachment when very close
+                    if (distance < 30) {
+                        particle.attached = true;
+                        particle.element.classList.add('attached');
+                        
+                        // Calculate random attachment point on magnet
+                        let offsetX, offsetY;
+                        const magnetWidth = magnetRect.width;
+                        const magnetHeight = magnetRect.height;
+                        
+                        // Determine approach direction
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            // Approach from left or right
+                            if (dx > 0) {
+                                // Approach from left
+                                offsetX = 0;
+                                offsetY = Math.random() * magnetHeight;
+                            } else {
+                                // Approach from right
+                                offsetX = magnetWidth;
+                                offsetY = Math.random() * magnetHeight;
+                            }
+                        } else {
+                            // Approach from top or bottom
+                            if (dy > 0) {
+                                // Approach from top
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = 0;
+                            } else {
+                                // Approach from bottom
+                                offsetX = Math.random() * magnetWidth;
+                                offsetY = magnetHeight;
+                            }
+                        }
+                        
+                        // Add some randomness
+                        offsetX += (Math.random() - 0.5) * 10;
+                        offsetY += (Math.random() - 0.5) * 10;
+                        
+                        // Store offset
+                        particle.offsetX = offsetX;
+                        particle.offsetY = offsetY;
+                        
+                        // Immediate repositioning to magnet surface
+                        particle.x = magnetLeft + offsetX;
+                        particle.y = magnetTop + offsetY;
+                        particle.element.style.left = particle.x + 'px';
+                        particle.element.style.top = particle.y + 'px';
+                    }
+                }
+            });
+            
+            document.getElementById('removedCount5').textContent = attachedCount;
+            
+            const collectedPieces = document.querySelectorAll('#collectedParticles5 .collected-piece-5');
+            collectedPieces.forEach((piece, index) => {
+                if (index < attachedCount) {
+                    piece.classList.add('show');
+                } else {
+                    piece.classList.remove('show');
+                }
+            });
+        }
+
+        function animateRicePurification5() {
+            updateRicePurification5();
+            animationFrameId5 = requestAnimationFrame(animateRicePurification5);
+        }
+
+        // Universal magnet dragging function
+        function setupMagnetDragging(containerId, magnetData) {
+            const container = document.getElementById(containerId);
+            let isDragging = false;
+            let dragOffsetX = 0, dragOffsetY = 0;
+            
+            container.addEventListener('mousedown', function (e) {
+                isDragging = true;
+                container.style.cursor = 'grabbing';
+                
+                const rect = container.getBoundingClientRect();
+                dragOffsetX = e.clientX - rect.left;
+                dragOffsetY = e.clientY - rect.top;
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function (e) {
+                if (!isDragging) return;
+                
+                const scene = container.closest('.animation-panel');
+                const sceneRect = scene.getBoundingClientRect();
+                
+                let newX = e.clientX - sceneRect.left - dragOffsetX;
+                let newY = e.clientY - sceneRect.top - dragOffsetY;
+                
+                newX = Math.max(10, Math.min(newX, sceneRect.width - 100));
+                newY = Math.max(10, Math.min(newY, sceneRect.height - 50));
+                
+                magnetData.x = newX;
+                magnetData.y = newY;
+                
+                container.style.left = magnetData.x + 'px';
+                container.style.top = magnetData.y + 'px';
+            });
+            
+            document.addEventListener('mouseup', function () {
+                if (isDragging) {
+                    isDragging = false;
+                    container.style.cursor = 'move';
+                }
+            });
+            
+            container.addEventListener('touchstart', function (e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                isDragging = true;
+                
+                const rect = container.getBoundingClientRect();
+                dragOffsetX = touch.clientX - rect.left;
+                dragOffsetY = touch.clientY - rect.top;
+            });
+            
+            document.addEventListener('touchmove', function (e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                
+                const scene = container.closest('.animation-panel');
+                const sceneRect = scene.getBoundingClientRect();
+                
+                let newX = touch.clientX - sceneRect.left - dragOffsetX;
+                let newY = touch.clientY - sceneRect.top - dragOffsetY;
+                
+                newX = Math.max(10, Math.min(newX, sceneRect.width - 100));
+                newY = Math.max(10, Math.min(newY, sceneRect.height - 50));
+                
+                magnetData.x = newX;
+                magnetData.y = newY;
+                
+                container.style.left = magnetData.x + 'px';
+                container.style.top = magnetData.y + 'px';
+            });
+            
+            document.addEventListener('touchend', function () {
+                if (isDragging) {
+                    isDragging = false;
+                    container.style.cursor = 'move';
+                }
+            });
+        }
+
+        function resetAnimation1() {
+            initAnimation1();
+            
+            const resetBtn = document.querySelector('#panel1 .reset-button');
+            resetBtn.style.transform = 'translateX(-50%) scale(1.1)';
+            setTimeout(() => {
+                resetBtn.style.transform = 'translateX(-50%)';
+            }, 300);
+        }
+
+        function resetAnimation2() {
+            initAnimation2();
+            
+            const resetBtn = document.querySelector('#panel2 .reset-button');
+            resetBtn.style.transform = 'translateX(-50%) scale(1.1)';
+            setTimeout(() => {
+                resetBtn.style.transform = 'translateX(-50%)';
+            }, 300);
+        }
+
+        function resetAnimation5() {
+            initAnimation5();
+            
+            const resetBtn = document.querySelector('#panel5 .reset-button');
+            resetBtn.style.transform = 'translateX(-50%) scale(1.1)';
+            setTimeout(() => {
+                resetBtn.style.transform = 'translateX(-50%)';
+            }, 300);
+        }
+
+        // Show content function
+        function showContent(index) {
+            currentContent = index;
+            
+            document.getElementById('animationTitle').textContent = contentData[index].title;
+            
+            document.querySelectorAll('.use-button').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.querySelectorAll('.animation-panel').forEach((panel, i) => {
+                panel.classList.toggle('active', i === index);
+            });
+            
+            const descBox = document.getElementById('descriptionContent');
+            descBox.innerHTML = `
+                <ul>
+                    ${contentData[index].description.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+            
+            switch(index) {
+                case 0:
+                    initAnimation1();
+                    break;
+                case 1:
+                    initAnimation2();
+                    break;
+                case 3:
+                    createDataStorageAnimations();
+                    break;
+                case 4:
+                    initAnimation5();
+                    break;
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initAllAnimations();
+            
+            document.querySelectorAll('.use-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            switch(currentContent) {
+                case 0:
+                    initAnimation1();
+                    break;
+                case 1:
+                    initAnimation2();
+                    break;
+                case 4:
+                    initAnimation5();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Magnetic Field & Poles Simulation</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #2979ff;
+            --accent-color: #ff5252;
+            --field-color: #7c4dff;
+            --north-color: #ff5252;
+            --south-color: #2979ff;
+            --bg-gradient: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glow-color: rgba(41, 121, 255, 0.6);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(26, 35, 126, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--north-color), var(--south-color));
+        }
+        
+        .header h1 {
+            font-weight: 800;
+            font-size: 2.8rem;
+            background: linear-gradient(to right, #fff, #bbdefb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            gap: 25px;
+            min-height: 0;
+        }
+        
+        /* Left Panel - Buttons */
+        .button-panel {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .mode-btn {
+            padding: 25px 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            background: rgba(30, 30, 46, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+        }
+        
+        .mode-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            z-index: 1;
+        }
+        
+        .mode-btn i {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            z-index: 2;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn span {
+            display: block;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .btn-field {
+            color: #bbdefb;
+            border-color: rgba(41, 121, 255, 0.3);
+        }
+        
+        .btn-field.active {
+            background: linear-gradient(135deg, rgba(41, 121, 255, 0.2), rgba(41, 121, 255, 0.8));
+            color: white;
+            border-color: var(--secondary-color);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(41, 121, 255, 0.4);
+        }
+        
+        .btn-field.active i {
+            filter: drop-shadow(0 0 10px rgba(41, 121, 255, 0.8));
+        }
+        
+        .btn-poles {
+            color: #ffcdd2;
+            border-color: rgba(255, 82, 82, 0.3);
+        }
+        
+        .btn-poles.active {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.2), rgba(255, 82, 82, 0.8));
+            color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 82, 82, 0.4);
+        }
+        
+        .btn-poles.active i {
+            filter: drop-shadow(0 0 10px rgba(255, 82, 82, 0.8));
+        }
+        
+        .btn-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+        
+        .btn-field.active .btn-indicator {
+            background: var(--secondary-color);
+            box-shadow: 0 0 15px rgba(41, 121, 255, 0.8);
+        }
+        
+        .btn-poles.active .btn-indicator {
+            background: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255, 82, 82, 0.8);
+        }
+        
+        /* Center Panel - Animation */
+        .animation-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            min-height: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .animation-header {
+            padding: 20px 30px;
+            background: rgba(26, 35, 126, 0.9);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animation-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .animation-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: rgba(10, 15, 35, 0.9);
+            overflow: hidden;
+        }
+        
+        #magneticCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .animation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(10, 15, 35, 0.95);
+            z-index: 10;
+            transition: opacity 0.5s;
+        }
+        
+        .overlay-content {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(26, 35, 126, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+        
+        .overlay-content i {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            color: var(--secondary-color);
+        }
+        
+        .overlay-content h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .overlay-content p {
+            color: #bbdefb;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Right Panel - Description */
+        .description-panel {
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 46, 0.9);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .description-header {
+            padding: 20px 30px;
+            background: rgba(26, 35, 126, 0.9);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .description-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .description-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .description-section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: rgba(40, 40, 60, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .description-section h4 {
+            color: #bbdefb;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(41, 121, 255, 0.5);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .description-section h4 i {
+            margin-right: 12px;
+        }
+        
+        .description-section p {
+            color: #e8eaf6;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .key-point {
+            background: rgba(41, 121, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .key-point h5 {
+            color: #bbdefb;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .features-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .features-list li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+            color: #e8eaf6;
+            font-size: 1.1rem;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbdefb;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .button-panel {
+                width: 220px;
+            }
+            
+            .description-panel {
+                width: 350px;
+            }
+            
+            .mode-btn {
+                height: 160px;
+                padding: 20px 15px;
+            }
+            
+            .mode-btn i {
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .button-panel {
+                width: 100%;
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .mode-btn {
+                width: 300px;
+                height: 140px;
+            }
+            
+            .animation-panel {
+                height: 600px;
+            }
+            
+            .description-panel {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .button-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .animation-title, .description-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Animation for field lines */
+        @keyframes fieldFlow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 20; }
+        }
+        
+        .field-line {
+            stroke-dasharray: 10;
+            animation: fieldFlow 2s linear infinite;
+        }
+        
+        /* Animation for poles */
+        @keyframes polePulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .pole-pulse {
+            animation: polePulse 2s infinite;
+        }
+        
+        /* Glow effect */
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 5px rgba(41, 121, 255, 0.7)); }
+            50% { filter: drop-shadow(0 0 20px rgba(41, 121, 255, 0.9)); }
+            100% { filter: drop-shadow(0 0 5px rgba(41, 121, 255, 0.7)); }
+        }
+        
+        .glow-effect {
+            animation: glow 3s infinite;
+        }
+        
+        /* Particle animation */
+        @keyframes particleFloat {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+            100% { transform: translateY(0px) rotate(360deg); }
+        }
+        
+        .particle-float {
+            animation: particleFloat 4s infinite ease-in-out;
+        }
+        
+        /* Background particles */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <div id="particles-js"></div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-magnet me-3"></i> Enhanced Magnetic Field & Poles Simulation</h1>
+            
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel - Buttons -->
+            <div class="button-panel">
+                <button id="fieldBtn" class="mode-btn btn-field active">
+                    <div class="btn-indicator">1</div>
+                    <i class="fas fa-wave-square"></i>
+                    Magnetic Field
+                    <span>Vivid field lines & patterns</span>
+                </button>
+                
+                <button id="polesBtn" class="mode-btn btn-poles">
+                    <div class="btn-indicator">2</div>
+                    <i class="fas fa-compass"></i>
+                    Magnetic Poles
+                    <span>Interactive poles & forces</span>
+                </button>
+            </div>
+            
+            <!-- Center Panel - Animation -->
+            <div class="animation-panel">
+                <div class="animation-header">
+                    <div>
+                        <div class="animation-title" id="animationTitle">Magnetic Field Visualization</div>
+                        <div class="animation-subtitle" id="animationSubtitle">Dynamic field lines with glowing effects and particle flow</div>
+                    </div>
+                    <div id="activeIndicator" class="badge bg-primary fs-5 p-3" style="background: linear-gradient(135deg, var(--secondary-color), #1a237e) !important;">Field View Active</div>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="magneticCanvas"></canvas>
+                    
+                    <!-- Overlay when nothing is selected (should not appear with our logic) -->
+                    <div id="noSelectionOverlay" class="animation-overlay hidden">
+                        <div class="overlay-content">
+                            <i class="fas fa-hand-pointer"></i>
+                            <h3>Select a Mode to Begin</h3>
+                            <p>Click on either "Magnetic Field" or "Magnetic Poles" button to start the simulation and visualization.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Description -->
+            <div class="description-panel">
+                <div class="description-header">
+                    <div class="description-title" id="descriptionTitle">Magnetic Field</div>
+                </div>
+                
+                <div class="description-content">
+                    <!-- Field Description (default) -->
+                    <div id="fieldDescription">
+                        <div class="description-section">
+                            <h4><i class="fas fa-wave-square me-2"></i>Magnetic Field Visualization</h4>
+                            <p>This enhanced visualization shows magnetic field lines as glowing, animated paths that illustrate the direction and strength of the magnetic force around a magnet.</p>
+                            
+                            <div class="key-point">
+                                <h5>Enhanced Visual Effects:</h5>
+                                <p>The field lines now feature glowing trails, particle flows, and dynamic animations that make the magnetic field visualization more intuitive and engaging.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="description-section">
+                            <h4><i class="fas fa-stream me-2"></i>Field Characteristics</h4>
+                            <p>In this visualization, you can observe:</p>
+                            <ul class="features-list">
+                                <li><strong>Glowing Field Lines:</strong> Bright, animated lines showing magnetic direction</li>
+                                <li><strong>Particle Flow:</strong> Tiny particles flowing along field lines</li>
+                                <li><strong>Strength Visualization:</strong> Line density and brightness indicate field strength</li>
+                                <li><strong>Dynamic Animation:</strong> Continuous flow from North to South pole</li>
+                                <li><strong>Interactive Elements:</strong> Hover effects and dynamic responses</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="description-section">
+                            <h4><i class="fas fa-eye me-2"></i>What You're Seeing</h4>
+                            <p>The animation displays a powerful bar magnet with vivid, flowing field lines. The enhanced effects include:</p>
+                            <p>1. <strong>Glow Effects:</strong> Field lines emit light for better visibility</p>
+                            <p>2. <strong>Particle Systems:</strong> Animated particles follow field lines</p>
+                            <p>3. <strong>Dynamic Curves:</strong> Realistic curvature of magnetic fields</p>
+                            <p>4. <strong>Interactive Response:</strong> Visual feedback based on magnet position</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Poles Description (hidden by default) -->
+                    <div id="polesDescription" class="hidden">
+                        <div class="description-section">
+                            <h4><i class="fas fa-compass me-2"></i>Magnetic Poles Experience</h4>
+                            <p>This enhanced visualization shows magnetic poles with vivid colors, pulsing animations, and interactive force fields that demonstrate attraction and repulsion.</p>
+                            
+                            <div class="key-point">
+                                <h5>Pole Interaction Principles:</h5>
+                                <p>Unlike poles attract each other with visible force lines, while like poles repel with animated push effects. The strength of attraction/repulsion is visualized through glow intensity.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="description-section">
+                            <h4><i class="fas fa-arrows-alt-h me-2"></i>Enhanced Pole Effects</h4>
+                            <p>This visualization includes advanced effects:</p>
+                            <ul class="features-list">
+                                <li><strong>Pulsing Poles:</strong> North and South poles pulse with energy</li>
+                                <li><strong>Force Fields:</strong> Visible energy fields around each pole</li>
+                                <li><strong>Attraction Lines:</strong> Glowing lines connecting opposite poles</li>
+                                <li><strong>Particle Systems:</strong> Animated particles showing field direction</li>
+                                <li><strong>Interactive Elements:</strong> Dynamic response to pole interactions</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="description-section">
+                            <h4><i class="fas fa-magnet me-2"></i>Visualized Pole Properties</h4>
+                            <p>1. <strong>North Pole (Red Glow):</strong> Emits field lines, appears as a pulsing red energy source</p>
+                            <p>2. <strong>South Pole (Blue Glow):</strong> Receives field lines, appears as a pulsing blue energy source</p>
+                            <p>3. <strong>Force Visualization:</strong> Attractive forces shown as connecting beams of light</p>
+                            <p>4. <strong>Energy Fields:</strong> Glowing auras around poles indicate magnetic strength</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+       
+    </div>
+
+    <!-- Particles.js library for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Get the canvas and context
+        const canvas = document.getElementById('magneticCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas to full container size
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // Initial resize
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Current active mode
+        let activeMode = 'field'; // 'field' or 'poles'
+        
+        // Animation state
+        const animationState = {
+            fieldLines: [],
+            poles: [],
+            particles: [],
+            fieldParticles: [],
+            forceFields: [],
+            fieldAnimationPhase: 0,
+            poleAnimationPhase: 0,
+            fieldStrength: 0.8,
+            time: 0
+        };
+        
+        // Initialize the animation
+        function initializeAnimation() {
+            // Clear previous state
+            animationState.fieldLines = [];
+            animationState.poles = [];
+            animationState.particles = [];
+            animationState.fieldParticles = [];
+            animationState.forceFields = [];
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const magnetWidth = Math.min(canvas.width * 0.4, 300);
+            const magnetHeight = 80;
+            
+            // Create poles for the magnet with enhanced properties
+            animationState.poles = [
+                {
+                    x: centerX - magnetWidth/2,
+                    y: centerY,
+                    type: 'north',
+                    radius: 40,
+                    color: '#ff5252',
+                    glowColor: 'rgba(255, 82, 82, 0.7)',
+                    pulsePhase: 0
+                },
+                {
+                    x: centerX + magnetWidth/2,
+                    y: centerY,
+                    type: 'south',
+                    radius: 40,
+                    color: '#2979ff',
+                    glowColor: 'rgba(41, 121, 255, 0.7)',
+                    pulsePhase: Math.PI
+                }
+            ];
+            
+            // Create force fields around poles
+            animationState.forceFields = animationState.poles.map(pole => ({
+                x: pole.x,
+                y: pole.y,
+                radius: pole.radius * 3,
+                color: pole.type === 'north' ? 'rgba(255, 82, 82, 0.15)' : 'rgba(41, 121, 255, 0.15)',
+                pulse: 0
+            }));
+            
+            // Create field lines for field mode
+            if (activeMode === 'field') {
+                createEnhancedFieldLines();
+                createFieldParticles();
+            }
+            
+            // Create particles for poles mode
+            if (activeMode === 'poles') {
+                createEnhancedPoleParticles();
+            }
+        }
+        
+        // Create enhanced magnetic field lines
+        function createEnhancedFieldLines() {
+            const linesCount = 32;
+            const poleNorth = animationState.poles[0];
+            const poleSouth = animationState.poles[1];
+            
+            for (let i = 0; i < linesCount; i++) {
+                // Calculate starting points around the north pole
+                const angle = (i / linesCount) * Math.PI * 2;
+                const startX = poleNorth.x + Math.cos(angle) * poleNorth.radius;
+                const startY = poleNorth.y + Math.sin(angle) * poleNorth.radius;
+                
+                // Create a field line with enhanced properties
+                animationState.fieldLines.push({
+                    points: [{x: startX, y: startY}],
+                    currentPoint: 0,
+                    color: i % 2 === 0 ? '#7c4dff' : '#b388ff',
+                    glowColor: i % 2 === 0 ? 'rgba(124, 77, 255, 0.8)' : 'rgba(179, 136, 255, 0.8)',
+                    width: 3 + Math.random() * 3,
+                    speed: 0.8 + Math.random() * 1.5,
+                    length: 150 + Math.random() * 200,
+                    targetX: poleSouth.x,
+                    targetY: poleSouth.y,
+                    pulsePhase: Math.random() * Math.PI * 2,
+                    trailParticles: []
+                });
+            }
+        }
+        
+        // Create particles that flow along field lines
+        function createFieldParticles() {
+            const particleCount = 200;
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Create particles that will follow field lines
+                animationState.fieldParticles.push({
+                    lineIndex: Math.floor(Math.random() * animationState.fieldLines.length),
+                    position: Math.random(),
+                    speed: 0.005 + Math.random() * 0.01,
+                    size: 2 + Math.random() * 4,
+                    color: Math.random() > 0.5 ? '#7c4dff' : '#b388ff',
+                    glow: 0.5 + Math.random() * 0.5,
+                    angle: 0
+                });
+            }
+        }
+        
+        // Create enhanced particles for pole visualization
+        function createEnhancedPoleParticles() {
+            const particleCount = 150;
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Random position in the canvas
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                
+                // Determine which pole this particle is attracted to
+                const poleNorth = animationState.poles[0];
+                const poleSouth = animationState.poles[1];
+                
+                const dxToNorth = x - poleNorth.x;
+                const dyToNorth = y - poleNorth.y;
+                const distToNorth = Math.sqrt(dxToNorth*dxToNorth + dyToNorth*dyToNorth);
+                
+                const dxToSouth = x - poleSouth.x;
+                const dyToSouth = y - poleSouth.y;
+                const distToSouth = Math.sqrt(dxToSouth*dxToSouth + dyToSouth*dyToSouth);
+                
+                // Particles closer to north pole are repelled, closer to south are attracted
+                const targetPole = distToNorth < distToSouth ? poleSouth : poleNorth;
+                const isNorthParticle = distToNorth < distToSouth;
+                
+                animationState.particles.push({
+                    x: x,
+                    y: y,
+                    radius: 4 + Math.random() * 6,
+                    color: isNorthParticle ? '#ff5252' : '#2979ff',
+                    glowColor: isNorthParticle ? 'rgba(255, 82, 82, 0.8)' : 'rgba(41, 121, 255, 0.8)',
+                    opacity: 0.8 + Math.random() * 0.2,
+                    speed: 0.8 + Math.random() * 2,
+                    angle: Math.atan2(targetPole.y - y, targetPole.x - x),
+                    rotation: 0,
+                    rotationSpeed: (Math.random() - 0.5) * 0.15,
+                    pulse: Math.random() * Math.PI * 2,
+                    trail: []
+                });
+            }
+        }
+        
+        // Update field animation
+        function updateFieldAnimation() {
+            animationState.fieldAnimationPhase += 0.03;
+            animationState.time += 0.02;
+            
+            // Update field lines
+            for (let i = 0; i < animationState.fieldLines.length; i++) {
+                const line = animationState.fieldLines[i];
+                line.pulsePhase += 0.05;
+                
+                // Add new points to the line
+                if (line.points.length < line.length) {
+                    const lastPoint = line.points[line.points.length - 1];
+                    
+                    // Calculate direction toward south pole with enhanced curvature
+                    const dx = line.targetX - lastPoint.x;
+                    const dy = line.targetY - lastPoint.y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    
+                    // Normalize direction
+                    const dirX = dx / distance;
+                    const dirY = dy / distance;
+                    
+                    // Add enhanced curvature to the field lines
+                    const curveFactor = Math.sin(animationState.fieldAnimationPhase + line.currentPoint * 0.08 + i * 0.5) * 0.5;
+                    const perpX = -dirY;
+                    const perpY = dirX;
+                    
+                    // New point
+                    const newX = lastPoint.x + dirX * line.speed + perpX * curveFactor;
+                    const newY = lastPoint.y + dirY * line.speed + perpY * curveFactor;
+                    
+                    line.points.push({x: newX, y: newY});
+                    line.currentPoint++;
+                    
+                    // Add trail particles occasionally
+                    if (Math.random() < 0.1 && line.points.length > 10) {
+                        line.trailParticles.push({
+                            x: newX,
+                            y: newY,
+                            life: 1,
+                            size: 2 + Math.random() * 3,
+                            color: line.color
+                        });
+                    }
+                }
+                
+                // Update trail particles
+                for (let j = line.trailParticles.length - 1; j >= 0; j--) {
+                    const particle = line.trailParticles[j];
+                    particle.life -= 0.02;
+                    if (particle.life <= 0) {
+                        line.trailParticles.splice(j, 1);
+                    }
+                }
+            }
+            
+            // Update field particles
+            for (const particle of animationState.fieldParticles) {
+                particle.position += particle.speed;
+                if (particle.position > 1) particle.position = 0;
+                
+                particle.angle += 0.05;
+            }
+        }
+        
+        // Update poles animation
+        function updatePolesAnimation() {
+            animationState.poleAnimationPhase += 0.04;
+            animationState.time += 0.02;
+            
+            // Update force fields
+            for (const field of animationState.forceFields) {
+                field.pulse += 0.03;
+            }
+            
+            // Update poles pulse
+            for (const pole of animationState.poles) {
+                pole.pulsePhase += 0.05;
+            }
+            
+            // Update particles
+            for (const particle of animationState.particles) {
+                // Update rotation and pulse
+                particle.rotation += particle.rotationSpeed;
+                particle.pulse += 0.06;
+                
+                // Calculate attraction/repulsion forces with enhanced effects
+                const poleNorth = animationState.poles[0];
+                const poleSouth = animationState.poles[1];
+                
+                // Distance to poles
+                const dxToNorth = particle.x - poleNorth.x;
+                const dyToNorth = particle.y - poleNorth.y;
+                const distToNorth = Math.sqrt(dxToNorth*dxToNorth + dyToNorth*dyToNorth);
+                
+                const dxToSouth = particle.x - poleSouth.x;
+                const dyToSouth = particle.y - poleSouth.y;
+                const distToSouth = Math.sqrt(dxToSouth*dxToSouth + dyToSouth*dyToSouth);
+                
+                // Determine which pole this particle is related to
+                const isNorthParticle = particle.color === '#ff5252';
+                const targetPole = isNorthParticle ? poleSouth : poleNorth;
+                const samePole = isNorthParticle ? poleNorth : poleSouth;
+                
+                // Enhanced attraction to opposite pole
+                const attDx = targetPole.x - particle.x;
+                const attDy = targetPole.y - particle.y;
+                const attDist = Math.sqrt(attDx*attDx + attDy*attDy);
+                
+                // Enhanced repulsion from same pole
+                const repDx = particle.x - samePole.x;
+                const repDy = particle.y - samePole.y;
+                const repDist = Math.sqrt(repDx*repDx + repDy*repDy);
+                
+                // Combined force with enhanced effects
+                const forceX = (attDx / (attDist * 0.08)) - (repDx / (repDist * 0.15));
+                const forceY = (attDy / (attDist * 0.08)) - (repDy / (repDist * 0.15));
+                
+                const forceMag = Math.sqrt(forceX*forceX + forceY*forceY);
+                const normalizedForceX = forceX / forceMag;
+                const normalizedForceY = forceY / forceMag;
+                
+                // Update position with enhanced movement
+                particle.x += normalizedForceX * particle.speed * 0.6;
+                particle.y += normalizedForceY * particle.speed * 0.6;
+                
+                // Add some randomness to movement
+                particle.x += (Math.random() - 0.5) * 0.5;
+                particle.y += (Math.random() - 0.5) * 0.5;
+                
+                // Keep particles within bounds
+                particle.x = Math.max(particle.radius, Math.min(canvas.width - particle.radius, particle.x));
+                particle.y = Math.max(particle.radius, Math.min(canvas.height - particle.radius, particle.y));
+                
+                // Update opacity based on pulse
+                particle.opacity = 0.7 + 0.3 * Math.sin(particle.pulse);
+                
+                // Add to trail
+                particle.trail.push({x: particle.x, y: particle.y});
+                if (particle.trail.length > 10) {
+                    particle.trail.shift();
+                }
+            }
+        }
+        
+        // Draw enhanced magnet
+        function drawEnhancedMagnet() {
+            const poleNorth = animationState.poles[0];
+            const poleSouth = animationState.poles[1];
+            
+            // Draw magnet body with gradient
+            const magnetWidth = poleSouth.x - poleNorth.x;
+            const magnetHeight = 100;
+            const gradient = ctx.createLinearGradient(
+                poleNorth.x - 20, poleNorth.y - magnetHeight/2,
+                poleSouth.x + 20, poleSouth.y + magnetHeight/2
+            );
+            
+            gradient.addColorStop(0, '#1a237e');
+            gradient.addColorStop(0.5, '#283593');
+            gradient.addColorStop(1, '#1a237e');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(poleNorth.x - 15, poleNorth.y - magnetHeight/2, magnetWidth + 30, magnetHeight);
+            
+            // Add metallic shine
+            const shineGradient = ctx.createLinearGradient(
+                poleNorth.x - 15, poleNorth.y - magnetHeight/2,
+                poleNorth.x - 15, poleNorth.y + magnetHeight/2
+            );
+            
+            shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            shineGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+            shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+            
+            ctx.fillStyle = shineGradient;
+            ctx.fillRect(poleNorth.x - 15, poleNorth.y - magnetHeight/2, 10, magnetHeight);
+            
+            // Add magnet texture
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const yPos = poleNorth.y - magnetHeight/2 + 15 + i * 15;
+                ctx.beginPath();
+                ctx.moveTo(poleNorth.x - 5, yPos);
+                ctx.lineTo(poleSouth.x + 5, yPos);
+                ctx.stroke();
+            }
+            
+            // Add magnet label
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('BAR MAGNET', (poleNorth.x + poleSouth.x) / 2, poleNorth.y);
+        }
+        
+        // Draw enhanced field visualization
+        function drawEnhancedFieldVisualization() {
+            // Draw force fields around poles
+            for (const field of animationState.forceFields) {
+                const pulseScale = 1 + 0.1 * Math.sin(field.pulse);
+                const radius = field.radius * pulseScale;
+                
+                // Create radial gradient for force field
+                const gradient = ctx.createRadialGradient(
+                    field.x, field.y, 0,
+                    field.x, field.y, radius
+                );
+                
+                gradient.addColorStop(0, field.color);
+                gradient.addColorStop(0.7, 'rgba(41, 121, 255, 0.05)');
+                gradient.addColorStop(1, 'rgba(41, 121, 255, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(field.x, field.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Draw field lines with glow effect
+            for (let i = 0; i < animationState.fieldLines.length; i++) {
+                const line = animationState.fieldLines[i];
+                if (line.points.length < 2) continue;
+                
+                // Draw line glow
+                ctx.beginPath();
+                ctx.moveTo(line.points[0].x, line.points[0].y);
+                
+                for (let j = 1; j < line.points.length; j++) {
+                    ctx.lineTo(line.points[j].x, line.points[j].y);
+                }
+                
+                // Outer glow
+                ctx.strokeStyle = line.glowColor;
+                ctx.lineWidth = line.width + 6;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                
+                // Inner line
+                ctx.beginPath();
+                ctx.moveTo(line.points[0].x, line.points[0].y);
+                
+                for (let j = 1; j < line.points.length; j++) {
+                    ctx.lineTo(line.points[j].x, line.points[j].y);
+                }
+                
+                ctx.strokeStyle = line.color;
+                ctx.lineWidth = line.width;
+                ctx.stroke();
+                
+                // Draw animated arrow at the end
+                if (line.points.length > 10) {
+                    const lastPoint = line.points[line.points.length - 1];
+                    const secondLastPoint = line.points[line.points.length - 2];
+                    
+                    const angle = Math.atan2(lastPoint.y - secondLastPoint.y, lastPoint.x - secondLastPoint.x);
+                    
+                    ctx.save();
+                    ctx.translate(lastPoint.x, lastPoint.y);
+                    ctx.rotate(angle);
+                    
+                    // Arrow glow
+                    ctx.fillStyle = line.glowColor;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-15, -8);
+                    ctx.lineTo(-15, 8);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Arrow
+                    ctx.fillStyle = line.color;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-12, -6);
+                    ctx.lineTo(-12, 6);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+                
+                // Draw trail particles
+                for (const particle of line.trailParticles) {
+                    ctx.fillStyle = particle.color;
+                    ctx.globalAlpha = particle.life;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+            
+            // Draw field particles
+            for (const particle of animationState.fieldParticles) {
+                const line = animationState.fieldLines[particle.lineIndex];
+                if (!line || line.points.length < 2) continue;
+                
+                // Calculate position along the line
+                const index = Math.floor(particle.position * (line.points.length - 1));
+                const nextIndex = Math.min(index + 1, line.points.length - 1);
+                const t = particle.position * (line.points.length - 1) - index;
+                
+                const pointA = line.points[index];
+                const pointB = line.points[nextIndex];
+                
+                const x = pointA.x + (pointB.x - pointA.x) * t;
+                const y = pointA.y + (pointB.y - pointA.y) * t;
+                
+                // Draw particle with glow
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(particle.angle);
+                
+                // Glow
+                ctx.fillStyle = `rgba(124, 77, 255, ${particle.glow})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, particle.size + 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Particle
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        // Draw enhanced poles visualization
+        function drawEnhancedPolesVisualization() {
+            // Draw attraction force line between poles
+            const poleNorth = animationState.poles[0];
+            const poleSouth = animationState.poles[1];
+            
+            // Draw pulsing force line
+            const pulseIntensity = 0.5 + 0.5 * Math.sin(animationState.poleAnimationPhase * 2);
+            
+            // Force line glow
+            const gradient = ctx.createLinearGradient(poleNorth.x, poleNorth.y, poleSouth.x, poleSouth.y);
+            gradient.addColorStop(0, 'rgba(255, 82, 82, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(179, 136, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(41, 121, 255, 0.8)');
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 4 + pulseIntensity * 4;
+            ctx.setLineDash([10, 5]);
+            ctx.lineDashOffset = -animationState.time * 20;
+            
+            ctx.beginPath();
+            ctx.moveTo(poleNorth.x, poleNorth.y);
+            ctx.lineTo(poleSouth.x, poleSouth.y);
+            ctx.stroke();
+            
+            ctx.setLineDash([]);
+            
+            // Draw particles with trails
+            for (const particle of animationState.particles) {
+                // Draw trail
+                if (particle.trail.length > 1) {
+                    ctx.strokeStyle = particle.glowColor;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particle.trail[0].x, particle.trail[0].y);
+                    
+                    for (let i = 1; i < particle.trail.length; i++) {
+                        ctx.lineTo(particle.trail[i].x, particle.trail[i].y);
+                    }
+                    
+                    ctx.stroke();
+                }
+                
+                // Draw particle with glow
+                ctx.save();
+                ctx.translate(particle.x, particle.y);
+                ctx.rotate(particle.rotation);
+                
+                // Outer glow
+                ctx.fillStyle = particle.glowColor;
+                ctx.globalAlpha = particle.opacity;
+                ctx.beginPath();
+                ctx.arc(0, 0, particle.radius + 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner particle
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                
+                if (particle.color === '#ff5252') { // North particle
+                    // Arrow shape pointing away from north pole
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(particle.radius * 2.5, 0);
+                    ctx.lineTo(particle.radius * 1.8, -particle.radius * 1.2);
+                    ctx.lineTo(particle.radius * 1.8, particle.radius * 1.2);
+                    ctx.closePath();
+                } else { // South particle
+                    // Arrow shape pointing toward south pole
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-particle.radius * 2.5, 0);
+                    ctx.lineTo(-particle.radius * 1.8, -particle.radius * 1.2);
+                    ctx.lineTo(-particle.radius * 1.8, particle.radius * 1.2);
+                    ctx.closePath();
+                }
+                
+                ctx.fill();
+                
+                ctx.restore();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Draw attractive force text
+            ctx.fillStyle = '#bbdefb';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            const midX = (poleNorth.x + poleSouth.x) / 2;
+            const midY = (poleNorth.y + poleSouth.y) / 2;
+            ctx.fillText('ATTRACTIVE FORCE', midX, midY - 30);
+            
+            // Draw force direction arrows
+            const arrowCount = 5;
+            for (let i = 0; i < arrowCount; i++) {
+                const t = (i + 1) / (arrowCount + 1);
+                const arrowX = poleNorth.x + (poleSouth.x - poleNorth.x) * t;
+                const arrowY = poleNorth.y + (poleSouth.y - poleNorth.y) * t;
+                
+                ctx.save();
+                ctx.translate(arrowX, arrowY);
+                ctx.rotate(poleSouth.x > poleNorth.x ? 0 : Math.PI);
+                
+                // Arrow
+                ctx.fillStyle = '#bbdefb';
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(15, 0);
+                ctx.lineTo(10, -8);
+                ctx.lineTo(10, 8);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        // Draw enhanced poles with glow and pulse
+        function drawEnhancedPoles() {
+            for (const pole of animationState.poles) {
+                // Calculate pulse scale
+                const pulseScale = 1 + 0.15 * Math.sin(pole.pulsePhase);
+                
+                // Draw outer glow
+                const outerGlow = ctx.createRadialGradient(
+                    pole.x, pole.y, 0,
+                    pole.x, pole.y, pole.radius * 2.5
+                );
+                
+                outerGlow.addColorStop(0, pole.glowColor);
+                outerGlow.addColorStop(0.7, pole.type === 'north' ? 'rgba(255, 82, 82, 0.2)' : 'rgba(41, 121, 255, 0.2)');
+                outerGlow.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = outerGlow;
+                ctx.beginPath();
+                ctx.arc(pole.x, pole.y, pole.radius * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw pole with pulse
+                ctx.save();
+                ctx.translate(pole.x, pole.y);
+                ctx.scale(pulseScale, pulseScale);
+                ctx.translate(-pole.x, -pole.y);
+                
+                // Draw pole
+                ctx.fillStyle = pole.color;
+                ctx.beginPath();
+                ctx.arc(pole.x, pole.y, pole.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw pole border with glow
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // Draw N or S indicator
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 28px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pole.type === 'north' ? 'N' : 'S', pole.x, pole.y);
+                
+                ctx.restore();
+                
+                // Draw pole label
+                ctx.fillStyle = pole.color;
+                ctx.font = 'bold 22px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(pole.type.toUpperCase() + ' POLE', pole.x, pole.y - pole.radius - 30);
+            }
+        }
+        
+        // Main draw function
+        function draw() {
+            // Clear canvas with dark gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0d1b2a');
+            gradient.addColorStop(1, '#1b263b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw subtle grid
+            drawGrid();
+            
+            // Draw based on active mode
+            if (activeMode === 'field') {
+                drawEnhancedMagnet();
+                drawEnhancedFieldVisualization();
+                updateFieldAnimation();
+            } else {
+                drawEnhancedMagnet();
+                drawEnhancedPoles();
+                drawEnhancedPolesVisualization();
+                updatePolesAnimation();
+            }
+        }
+        
+        // Draw subtle grid in background
+        function drawGrid() {
+            const gridSize = 40;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+        
+        // Switch to field mode
+        function switchToFieldMode() {
+            activeMode = 'field';
+            
+            // Update UI
+            document.getElementById('fieldBtn').classList.add('active');
+            document.getElementById('polesBtn').classList.remove('active');
+            
+            document.getElementById('animationTitle').textContent = 'Magnetic Field Visualization';
+            document.getElementById('animationSubtitle').textContent = 'Glowing field lines with particle flow animation';
+            document.getElementById('activeIndicator').textContent = 'Field View Active';
+            document.getElementById('activeIndicator').style.background = 'linear-gradient(135deg, var(--secondary-color), #1a237e) !important';
+            
+            document.getElementById('descriptionTitle').textContent = 'Magnetic Field';
+            
+            // Show/hide descriptions
+            document.getElementById('fieldDescription').classList.remove('hidden');
+            document.getElementById('polesDescription').classList.add('hidden');
+            
+            // Reinitialize animation for field mode
+            initializeAnimation();
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Switch to poles mode
+        function switchToPolesMode() {
+            activeMode = 'poles';
+            
+            // Update UI
+            document.getElementById('polesBtn').classList.add('active');
+            document.getElementById('fieldBtn').classList.remove('active');
+            
+            document.getElementById('animationTitle').textContent = 'Magnetic Poles Visualization';
+            document.getElementById('animationSubtitle').textContent = 'Pulsing poles with force fields and attraction lines';
+            document.getElementById('activeIndicator').textContent = 'Poles View Active';
+            document.getElementById('activeIndicator').style.background = 'linear-gradient(135deg, var(--accent-color), #b71c1c) !important';
+            
+            document.getElementById('descriptionTitle').textContent = 'Magnetic Poles';
+            
+            // Show/hide descriptions
+            document.getElementById('polesDescription').classList.remove('hidden');
+            document.getElementById('fieldDescription').classList.add('hidden');
+            
+            // Reinitialize animation for poles mode
+            initializeAnimation();
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Animation loop
+        function animate() {
+            draw();
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize particles.js for background
+        function initParticles() {
+            particlesJS("particles-js", {
+                particles: {
+                    number: { value: 60, density: { enable: true, value_area: 800 } },
+                    color: { value: "#bbdefb" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.3, random: true },
+                    size: { value: 2, random: true },
+                    line_linked: { enable: false },
+                    move: {
+                        enable: true,
+                        speed: 0.5,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: { enable: false },
+                        onclick: { enable: false },
+                        resize: true
+                    }
+                }
+            });
+        }
+        
+        // Initialize and start the application
+        function init() {
+            // Set up button event listeners
+            document.getElementById('fieldBtn').addEventListener('click', switchToFieldMode);
+            document.getElementById('polesBtn').addEventListener('click', switchToPolesMode);
+            
+            // Initialize background particles
+            initParticles();
+            
+            // Start with field mode
+            switchToFieldMode();
+        }
+        
+        // Start the application when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

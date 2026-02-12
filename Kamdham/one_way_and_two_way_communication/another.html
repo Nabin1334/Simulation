@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modes of Communication</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .main-container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+        }
+
+        /* Left Sidebar - Buttons */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 20px;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .nav-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .main-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        .sub-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            margin-left: 15px;
+        }
+
+        .nav-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sub-btn.active {
+            border-color: #667eea;
+        }
+
+        /* Middle Section - Animation */
+        .animation-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .animation-container {
+            width: 100%;
+            max-width: 600px;
+            height: 500px;
+            position: relative;
+            display: none;
+        }
+
+        .animation-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Overview Animation */
+        .overview-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .comm-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .comm-waves {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .wave-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .wave-icon:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .wave-icon:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* One Way Communication - TV Scene (Side View) */
+        .tv-scene {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(to bottom, #87ceeb 0%, #e8dcc4 60%, #8b7355 100%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* Room Wall */
+        .room-wall {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to bottom, #f5e6d3 0%, #e8dcc4 100%);
+        }
+
+        /* Room Floor */
+        .room-floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to bottom, #8b7355 0%, #6d5c47 100%);
+            border-top: 4px solid #5a4a37;
+        }
+
+        /* Wall decoration - picture frame */
+        .wall-frame {
+            position: absolute;
+            top: 15%;
+            right: 12%;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(135deg, #87ceeb 30%, #4a90e2 100%);
+            border: 5px solid #654321;
+            border-radius: 3px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Television on Stand - Left Side */
+        .tv-setup {
+            position: absolute;
+            left: 12%;
+            bottom: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 3;
+        }
+
+        .television {
+            width: 200px;
+            height: 140px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: perspective(400px) rotateY(8deg);
+        }
+
+        .tv-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .tv-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            animation: tvFlicker 4s infinite;
+            gap: 8px;
+        }
+
+        .tv-content i {
+            font-size: 40px;
+        }
+
+        @keyframes tvFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.88; }
+        }
+
+        .tv-glare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .tv-stand {
+            width: 80px;
+            height: 6px;
+            background: #2c2c2c;
+            margin-top: 4px;
+            border-radius: 3px;
+        }
+
+        .tv-base {
+            width: 120px;
+            height: 25px;
+            background: linear-gradient(to bottom, #3a3a3a 0%, #2c2c2c 100%);
+            margin-top: 2px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Couch with Person - Right Side, facing TV (Side View) */
+        .couch-setup {
+            position: absolute;
+            right: 15%;
+            bottom: 22%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 4;
+        }
+
+        .couch {
+            width: 180px;
+            height: 120px;
+            position: relative;
+            transform: perspective(500px) rotateY(-15deg);
+        }
+
+        /* Couch back - left side */
+        .couch-back {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 35px;
+            height: 100px;
+            background: linear-gradient(to right, #8b4513 0%, #a0522d 100%);
+            border-radius: 12px 0 0 8px;
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Couch seat */
+        .couch-seat {
+            position: absolute;
+            left: 30px;
+            bottom: 0;
+            width: 150px;
+            height: 50px;
+            background: linear-gradient(to bottom, #a0522d 0%, #8b4513 100%);
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Couch arm - front right */
+        .couch-arm-right {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 35px;
+            height: 65px;
+            background: linear-gradient(to left, #8b4513 0%, #a0522d 100%);
+            border-radius: 0 12px 8px 0;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Person sitting on couch - side view facing left (TV) */
+        .person-watching {
+            position: absolute;
+            bottom: 50px;
+            left: 65px;
+            z-index: 5;
+        }
+
+        .head {
+            width: 42px;
+            height: 48px;
+            background: #ffdbac;
+            border-radius: 45% 55% 48% 52%;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: -2px 3px 8px rgba(0, 0, 0, 0.2);
+            transform: rotate(-2deg);
+        }
+
+        .hair {
+            width: 48px;
+            height: 28px;
+            background: #3d2817;
+            border-radius: 50% 50% 0 0;
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .eye {
+            width: 7px;
+            height: 7px;
+            background: #2c1810;
+            border-radius: 50%;
+            position: absolute;
+            top: 18px;
+        }
+
+        .eye-left {
+            left: 8px;
+        }
+
+        .eye-right {
+            left: 20px;
+        }
+
+        .nose {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 8px solid #f0c89a;
+            position: absolute;
+            left: 15px;
+            top: 26px;
+        }
+
+        .body {
+            width: 50px;
+            height: 42px;
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+            border-radius: 8px;
+            position: relative;
+            margin: 2px auto 0;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .arm {
+            width: 16px;
+            height: 45px;
+            background: #4a90e2;
+            border-radius: 8px;
+            position: absolute;
+            top: 5px;
+        }
+
+        .arm-left {
+            left: -12px;
+            transform: rotate(15deg);
+        }
+
+        .arm-right {
+            right: -12px;
+            transform: rotate(-25deg);
+        }
+
+        .legs {
+            display: flex;
+            gap: 6px;
+            margin-top: -2px;
+        }
+
+        .leg {
+            width: 20px;
+            height: 45px;
+            background: #2c5282;
+            border-radius: 4px 4px 8px 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Signal Arrows from TV to Person */
+        .signal-arrows {
+            position: absolute;
+            left: 30%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 25px;
+            z-index: 2;
+        }
+
+        .arrow-wave {
+            font-size: 30px;
+            color: rgba(102, 126, 234, 0.7);
+            animation: flowRight 2s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .arrow-wave:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .arrow-wave:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes flowRight {
+            0%, 100% { 
+                opacity: 0.2;
+                transform: translateX(-10px) scale(0.8);
+            }
+            50% { 
+                opacity: 1;
+                transform: translateX(5px) scale(1);
+            }
+        }
+
+        /* Two Way Communication - Smartphone Long Distance Call */
+        .phone-scene {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0;
+            position: relative;
+            background: linear-gradient(to right, #1e3a5f 0%, #87ceeb 30%, #87ceeb 70%, #8b5a8e 100%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* Left side - City background */
+        .location-left {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 38%;
+            height: 100%;
+            background: linear-gradient(to bottom, #1e3a5f 0%, #2c5282 60%, #3a6ea5 100%);
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
+        }
+
+        .city-buildings-left {
+            position: absolute;
+            bottom: 18%;
+            left: 8%;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .building {
+            background: linear-gradient(to bottom, #0d1117 0%, #1a252f 100%);
+            border-radius: 3px 3px 0 0;
+            position: relative;
+        }
+
+        .building-1 { width: 28px; height: 75px; }
+        .building-2 { width: 32px; height: 95px; }
+        .building-3 { width: 24px; height: 60px; }
+        .building-4 { width: 28px; height: 85px; }
+
+        .building-window {
+            width: 4px;
+            height: 4px;
+            background: #ffd700;
+            position: absolute;
+            border-radius: 1px;
+        }
+
+        /* Right side - Different city background */
+        .location-right {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 38%;
+            height: 100%;
+            background: linear-gradient(to bottom, #4a1e3a 0%, #6b2d52 60%, #8b3a6e 100%);
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .city-buildings-right {
+            position: absolute;
+            bottom: 18%;
+            right: 8%;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        /* Ground for both sides */
+        .ground-left {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 38%;
+            height: 18%;
+            background: linear-gradient(to bottom, #2d5016 0%, #1a2f0a 100%);
+        }
+
+        .ground-right {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 38%;
+            height: 18%;
+            background: linear-gradient(to bottom, #5c2e1f 0%, #3d1f14 100%);
+        }
+
+        /* Caller and Receiver */
+        .caller {
+            position: absolute;
+            left: 14%;
+            bottom: 18%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 5;
+            animation: slideInLeft 1s ease;
+        }
+
+        .receiver {
+            position: absolute;
+            right: 14%;
+            bottom: 18%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 5;
+            animation: slideInRight 1s ease;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Realistic Person Design */
+        .person-phone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .person-head {
+            width: 50px;
+            height: 55px;
+            background: #ffdbac;
+            border-radius: 50% 50% 48% 48%;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+        }
+
+        .person-hair {
+            width: 52px;
+            height: 28px;
+            background: #2c1810;
+            border-radius: 50% 50% 0 0;
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .caller .person-hair {
+            background: #3d2817;
+        }
+
+        .receiver .person-hair {
+            background: #1a0f08;
+        }
+
+        .person-eye {
+            width: 5px;
+            height: 5px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            position: absolute;
+            top: 22px;
+        }
+
+        .person-eye-left { left: 14px; }
+        .person-eye-right { right: 14px; }
+
+        .person-mouth {
+            width: 15px;
+            height: 8px;
+            border: 2px solid #d4a574;
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .person-body {
+            width: 60px;
+            height: 55px;
+            background: linear-gradient(to bottom, #e74c3c 0%, #c0392b 100%);
+            border-radius: 10px 10px 5px 5px;
+            margin-top: 3px;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .receiver .person-body {
+            background: linear-gradient(to bottom, #3498db 0%, #2980b9 100%);
+        }
+
+        .person-arm {
+            width: 16px;
+            height: 45px;
+            background: #e74c3c;
+            border-radius: 8px;
+            position: absolute;
+            top: 5px;
+        }
+
+        .receiver .person-arm {
+            background: #3498db;
+        }
+
+        .person-arm-left {
+            left: -12px;
+            transform: rotate(20deg);
+        }
+
+        .person-arm-right {
+            right: -12px;
+            transform: rotate(-20deg);
+        }
+
+        .person-legs {
+            display: flex;
+            gap: 8px;
+            margin-top: -3px;
+        }
+
+        .person-leg {
+            width: 24px;
+            height: 40px;
+            background: #34495e;
+            border-radius: 5px 5px 10px 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modern Smartphone Design */
+        .smartphone {
+            width: 55px;
+            height: 100px;
+            background: linear-gradient(to bottom, #2c3e50 0%, #1a252f 100%);
+            border-radius: 14px;
+            position: absolute;
+            top: -30px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border: 2px solid #34495e;
+        }
+
+        .caller .smartphone {
+            right: -40px;
+            transform: rotate(-20deg);
+        }
+
+        .receiver .smartphone {
+            left: -40px;
+            transform: rotate(20deg);
+        }
+
+        .phone-screen {
+            width: 48px;
+            height: 88px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            margin: 4px auto;
+            position: relative;
+            animation: phoneGlow 2s infinite;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .call-icon {
+            color: white;
+            font-size: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .call-timer {
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .phone-notch {
+            width: 30px;
+            height: 5px;
+            background: #1a252f;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @keyframes phoneGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(102, 126, 234, 1);
+            }
+        }
+
+        /* Signal Waves Between People */
+        .signal-waves {
+            position: absolute;
+            top: 32%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .wave-line {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .wave {
+            width: 25px;
+            height: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: waveExpand 2s infinite;
+        }
+
+        .wave:nth-child(2) { animation-delay: 0.3s; }
+        .wave:nth-child(3) { animation-delay: 0.6s; }
+        .wave:nth-child(4) { animation-delay: 0.9s; }
+        .wave:nth-child(5) { animation-delay: 1.2s; }
+
+        @keyframes waveExpand {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Connection Line */
+        .connection-line {
+            position: absolute;
+            top: 32%;
+            left: 32%;
+            width: 36%;
+            height: 3px;
+            background: linear-gradient(to right, 
+                rgba(255, 255, 255, 0.3) 0%, 
+                rgba(255, 255, 255, 0.7) 50%, 
+                rgba(255, 255, 255, 0.3) 100%);
+            z-index: 1;
+        }
+
+        .signal-dot {
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            animation: signalMove 3s infinite ease-in-out;
+        }
+
+        @keyframes signalMove {
+            0%, 100% { left: 0; }
+            50% { left: calc(100% - 12px); }
+        }
+
+        /* Distance indicator */
+        .distance-label {
+            position: absolute;
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .distance-label i {
+            margin-right: 8px;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Right Section - Description */
+        .description-section {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .description-content {
+            display: none;
+        }
+
+        .description-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .description-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .description-content p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .description-content ul {
+            margin-left: 20px;
+            color: #555;
+            line-height: 2;
+        }
+
+        .description-content li {
+            margin-bottom: 10px;
+        }
+
+        .badge-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 220px;
+                padding: 20px 15px;
+            }
+
+            .description-section {
+                width: 280px;
+                padding: 30px 20px;
+            }
+
+            .animation-container {
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 15px;
+            }
+
+            .sidebar h3 {
+                display: none;
+            }
+
+            .nav-btn {
+                white-space: nowrap;
+                font-size: 14px;
+            }
+
+            .animation-section {
+                padding: 20px;
+            }
+
+            .description-section {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+
+            .phone-scene {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <h3>Navigation</h3>
+            <button class="nav-btn main-btn active" onclick="showContent('overview')">
+                <i class="fas fa-broadcast-tower"></i> Modes of Communication
+            </button>
+            <button class="nav-btn sub-btn" onclick="showContent('oneway')">
+                <i class="fas fa-arrow-right"></i> One-Way Communication
+            </button>
+            <button class="nav-btn sub-btn" onclick="showContent('twoway')">
+                <i class="fas fa-exchange-alt"></i> Two-Way Communication
+            </button>
+        </div>
+
+        <!-- Middle Animation Section -->
+        <div class="animation-section">
+            <!-- Overview Animation -->
+            <div class="animation-container active" id="overview-animation">
+                <div class="overview-animation">
+                    <div class="comm-circle">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="comm-waves">
+                        <div class="wave-icon">
+                            <i class="fas fa-tv"></i>
+                        </div>
+                        <div class="wave-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="wave-icon">
+                            <i class="fas fa-satellite-dish"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- One-Way Communication Animation -->
+            <div class="animation-container" id="oneway-animation">
+                <div class="tv-scene">
+                    <div class="room-wall"></div>
+                    <div class="room-floor"></div>
+                    <div class="wall-frame"></div>
+                    
+                    <div class="tv-setup">
+                        <div class="television">
+                            <div class="tv-screen">
+                                <div class="tv-content">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                    <span>LIVE NEWS</span>
+                                </div>
+                                <div class="tv-glare"></div>
+                            </div>
+                        </div>
+                        <div class="tv-stand"></div>
+                        <div class="tv-base"></div>
+                    </div>
+
+                    <div class="signal-arrows">
+                        <div class="arrow-wave">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="arrow-wave">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="arrow-wave">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="couch-setup">
+                        <div class="couch">
+                            <div class="couch-back"></div>
+                            <div class="couch-seat"></div>
+                            <div class="couch-arm-right"></div>
+                        </div>
+                        <div class="person-watching">
+                            <div class="head">
+                                <div class="hair"></div>
+                                <div class="eye eye-left"></div>
+                                <div class="eye eye-right"></div>
+                                <div class="nose"></div>
+                            </div>
+                            <div class="body">
+                                <div class="arm arm-left"></div>
+                                <div class="arm arm-right"></div>
+                            </div>
+                            <div class="legs">
+                                <div class="leg"></div>
+                                <div class="leg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Way Communication Animation -->
+            <div class="animation-container" id="twoway-animation">
+                <div class="phone-scene">
+                    <!-- Left location background -->
+                    <div class="location-left"></div>
+                    <div class="ground-left"></div>
+                    <div class="city-buildings-left">
+                        <div class="building building-1"></div>
+                        <div class="building building-2"></div>
+                        <div class="building building-3"></div>
+                        <div class="building building-4"></div>
+                    </div>
+
+                    <!-- Right location background -->
+                    <div class="location-right"></div>
+                    <div class="ground-right"></div>
+                    <div class="city-buildings-right">
+                        <div class="building building-1"></div>
+                        <div class="building building-2"></div>
+                        <div class="building building-3"></div>
+                        <div class="building building-4"></div>
+                    </div>
+
+                    <!-- Distance label -->
+                    <div class="distance-label">
+                        <i class="fas fa-globe-americas"></i>
+                        Long Distance Call
+                    </div>
+
+                    <!-- Connection elements -->
+                    <div class="connection-line">
+                        <div class="signal-dot"></div>
+                    </div>
+
+                    <div class="signal-waves">
+                        <div class="wave-line">
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Caller (Left Person) -->
+                    <div class="caller">
+                        <div class="person-phone">
+                            <div class="person-head">
+                                <div class="person-hair"></div>
+                                <div class="person-eye person-eye-left"></div>
+                                <div class="person-eye person-eye-right"></div>
+                                <div class="person-mouth"></div>
+                            </div>
+                            <div class="smartphone">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <i class="fas fa-phone-alt call-icon"></i>
+                                    <div class="call-timer">05:32</div>
+                                </div>
+                            </div>
+                            <div class="person-body">
+                                <div class="person-arm person-arm-left"></div>
+                                <div class="person-arm person-arm-right"></div>
+                            </div>
+                            <div class="person-legs">
+                                <div class="person-leg"></div>
+                                <div class="person-leg"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Receiver (Right Person) -->
+                    <div class="receiver">
+                        <div class="person-phone">
+                            <div class="person-head">
+                                <div class="person-hair"></div>
+                                <div class="person-eye person-eye-left"></div>
+                                <div class="person-eye person-eye-right"></div>
+                                <div class="person-mouth"></div>
+                            </div>
+                            <div class="smartphone">
+                                <div class="phone-notch"></div>
+                                <div class="phone-screen">
+                                    <i class="fas fa-phone-alt call-icon"></i>
+                                    <div class="call-timer">05:32</div>
+                                </div>
+                            </div>
+                            <div class="person-body">
+                                <div class="person-arm person-arm-left"></div>
+                                <div class="person-arm person-arm-right"></div>
+                            </div>
+                            <div class="person-legs">
+                                <div class="person-leg"></div>
+                                <div class="person-leg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Description Section -->
+        <div class="description-section">
+            <!-- Overview Description -->
+            <div class="description-content active" id="overview-desc">
+                <span class="badge-custom">Overview</span>
+                <h2>Modes of Communication</h2>
+                <p>Communication is the process of exchanging information, ideas, and messages between individuals or groups. Understanding different modes helps us choose the most effective method for our needs.</p>
+                
+                <p><strong>Key Types:</strong></p>
+                <ul>
+                    <li><strong>One-Way Communication:</strong> Information flows in a single direction from sender to receiver</li>
+                    <li><strong>Two-Way Communication:</strong> Interactive exchange where both parties send and receive messages</li>
+                </ul>
+                
+                <p>Each mode has specific applications and advantages depending on the context, audience, and communication goals.</p>
+            </div>
+
+            <!-- One-Way Description -->
+            <div class="description-content" id="oneway-desc">
+                <span class="badge-custom">One-Way</span>
+                <h2>One-Way Communication</h2>
+                <p>One-way communication is a linear process where information flows from a sender to a receiver without immediate feedback or response.</p>
+                
+                <p><strong>Characteristics:</strong></p>
+                <ul>
+                    <li>No immediate interaction</li>
+                    <li>Single direction flow</li>
+                    <li>Receiver cannot respond directly</li>
+                    <li>Efficient for mass distribution</li>
+                </ul>
+                
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>Television broadcasts</li>
+                    <li>Radio programs</li>
+                    <li>Newspapers and magazines</li>
+                    <li>Announcements and notices</li>
+                    <li>Email newsletters</li>
+                </ul>
+                
+                <p><strong>Advantages:</strong> Quick dissemination, cost-effective for large audiences, consistent messaging.</p>
+            </div>
+
+            <!-- Two-Way Description -->
+            <div class="description-content" id="twoway-desc">
+                <span class="badge-custom">Two-Way</span>
+                <h2>Two-Way Communication</h2>
+                <p>Two-way communication is an interactive process where both parties actively participate in sending and receiving messages, creating a dialogue.</p>
+                
+                <p><strong>Characteristics:</strong></p>
+                <ul>
+                    <li>Interactive exchange</li>
+                    <li>Immediate feedback possible</li>
+                    <li>Both parties are senders and receivers</li>
+                    <li>Dynamic and responsive</li>
+                </ul>
+                
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>Phone conversations</li>
+                    <li>Video calls and meetings</li>
+                    <li>Text messaging and chat</li>
+                    <li>Face-to-face discussions</li>
+                    <li>Social media interactions</li>
+                </ul>
+                
+                <p><strong>Advantages:</strong> Better understanding, immediate clarification, relationship building, collaborative problem-solving.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showContent(section) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Hide all animations
+            document.querySelectorAll('.animation-container').forEach(anim => {
+                anim.classList.remove('active');
+            });
+
+            // Hide all descriptions
+            document.querySelectorAll('.description-content').forEach(desc => {
+                desc.classList.remove('active');
+            });
+
+            // Show selected content
+            if (section === 'overview') {
+                document.querySelector('.main-btn').classList.add('active');
+                document.getElementById('overview-animation').classList.add('active');
+                document.getElementById('overview-desc').classList.add('active');
+            } else if (section === 'oneway') {
+                document.querySelectorAll('.sub-btn')[0].classList.add('active');
+                document.getElementById('oneway-animation').classList.add('active');
+                document.getElementById('oneway-desc').classList.add('active');
+            } else if (section === 'twoway') {
+                document.querySelectorAll('.sub-btn')[1].classList.add('active');
+                document.getElementById('twoway-animation').classList.add('active');
+                document.getElementById('twoway-desc').classList.add('active');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            showContent('overview');
+        });
+    </script>
+</body>
+</html>

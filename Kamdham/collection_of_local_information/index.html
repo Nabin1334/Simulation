@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collection of Local Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f9fc;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Header */
+        .main-header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-header .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+            padding: 15px;
+            gap: 15px;
+        }
+
+        /* Left Panel - Buttons */
+        .left-panel {
+            flex: 0 0 280px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .left-panel h2 {
+            color: white;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.5rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .topic-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .topic-buttons::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .topic-buttons::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .topic-buttons::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .topic-btn {
+            padding: 16px 15px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .topic-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .topic-btn.active {
+            background-color: rgba(52, 152, 219, 0.8);
+            border-left: 4px solid #e74c3c;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e74c3c;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .btn-text {
+            flex: 1;
+        }
+
+        /* Middle Panel - Image */
+        .middle-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* For proper image scaling */
+        }
+
+        .image-container {
+            flex: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            min-height: 0; /* Allows image container to shrink */
+        }
+
+        .info-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .info-image:hover {
+            transform: scale(1.03);
+        }
+
+        .image-caption {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            font-size: 0.9rem;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* Right Panel - Description */
+        .right-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* For proper text scaling */
+        }
+
+        .description-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            flex-shrink: 0;
+        }
+
+        .header-icon {
+            font-size: 1.8rem;
+            margin-right: 12px;
+            color: #3498db;
+        }
+
+        .description-header h2 {
+            color: #2c3e50;
+            font-size: 1.6rem;
+        }
+
+        .description-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+            line-height: 1.5;
+        }
+
+        .description-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .description-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .description-content::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 3px;
+        }
+
+        .description-content p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .description-content ul, .description-content ol {
+            margin-left: 18px;
+            margin-bottom: 15px;
+        }
+
+        .description-content li {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        .highlight strong {
+            color: #2c3e50;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container {
+                height: calc(100vh - 130px);
+            }
+            
+            .left-panel {
+                flex: 0 0 240px;
+            }
+            
+            .topic-btn {
+                padding: 14px 12px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                height: calc(100vh - 120px);
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .left-panel {
+                flex: 0 0 auto;
+                max-height: 180px;
+                width: 100%;
+            }
+            
+            .topic-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 8px;
+            }
+            
+            .topic-btn {
+                flex: 1;
+                min-width: 150px;
+                max-width: 200px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 12px 10px;
+            }
+            
+            .btn-number {
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            
+            .middle-panel {
+                flex: 1.5;
+                min-height: 300px;
+            }
+            
+            .right-panel {
+                flex: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 1.8rem;
+                padding: 0 15px;
+            }
+            
+            .main-header .subtitle {
+                font-size: 0.9rem;
+                padding: 0 15px;
+            }
+            
+            .topic-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .topic-btn {
+                min-width: 140px;
+                font-size: 0.9rem;
+                padding: 10px 8px;
+            }
+            
+            .btn-number {
+                width: 24px;
+                height: 24px;
+                font-size: 0.8rem;
+            }
+            
+            .description-header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .description-content p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-header {
+                padding: 15px 0;
+            }
+            
+            .main-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-header .subtitle {
+                font-size: 0.85rem;
+            }
+            
+            .main-container {
+                height: calc(100vh - 110px);
+            }
+            
+            .topic-btn {
+                min-width: 130px;
+                font-size: 0.85rem;
+            }
+            
+            .btn-text {
+                font-size: 0.85rem;
+            }
+            
+            .description-header {
+                margin-bottom: 15px;
+            }
+            
+            .description-header h2 {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .main-header {
+                padding: 15px 0;
+            }
+            
+            .main-header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 5px;
+            }
+            
+            .main-container {
+                height: calc(100vh - 100px);
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .left-panel, .middle-panel, .right-panel {
+                padding: 15px;
+            }
+            
+            .topic-btn {
+                padding: 12px 10px;
+            }
+            
+            .description-content p {
+                margin-bottom: 10px;
+                font-size: 0.95rem;
+            }
+            
+            .highlight {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Header -->
+    <header class="main-header">
+        <h1>Collection of Local Information</h1>
+        
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- Left Panel: Topic Buttons -->
+        <div class="left-panel">
+            <h2>Research Topics</h2>
+            <div class="topic-buttons">
+                <button class="topic-btn active" onclick="showTopic(0)">
+                    <div class="btn-number">1</div>
+                    <div class="btn-text">Local Information</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(1)">
+                    <div class="btn-number">2</div>
+                    <div class="btn-text">Sources of Information</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(2)">
+                    <div class="btn-number">3</div>
+                    <div class="btn-text">Collection Methods</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(3)">
+                    <div class="btn-number">4</div>
+                    <div class="btn-text">Key Considerations</div>
+                </button>
+                <button class="topic-btn" onclick="showTopic(4)">
+                    <div class="btn-number">5</div>
+                    <div class="btn-text">Materials Needed</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Middle Panel: Image Display -->
+        <div class="middle-panel">
+            <div class="image-container">
+                <img id="infoImage" class="info-image" src="" alt="Local Information Illustration">
+            </div>
+            <div id="imageCaption" class="image-caption">
+                Click on any topic to view detailed information and related images
+            </div>
+        </div>
+
+        <!-- Right Panel: Description -->
+        <div class="right-panel">
+            <div class="description-header">
+                <div class="header-icon">📊</div>
+                <h2 id="topicTitle">Local Information</h2>
+            </div>
+            <div class="description-content" id="topicDescription">
+                <p><strong>Local information</strong> refers to specific knowledge, data, and insights about a particular geographical area, community, or locality. It encompasses details that are relevant to a specific place and its residents.</p>
+                
+                <div class="highlight">
+                    <p><strong>Key Characteristics:</strong></p>
+                    <ul>
+                        <li><strong>Geographically specific:</strong> Tied to a particular location or community</li>
+                        <li><strong>Contextual:</strong> Meaningful within the local environment and culture</li>
+                        <li><strong>Comprehensive:</strong> Includes demographic, social, economic, and environmental data</li>
+                        <li><strong>Dynamic:</strong> Changes over time as communities evolve</li>
+                        <li><strong>Accessible:</strong> Often available through local institutions and community members</li>
+                    </ul>
+                </div>
+                
+                <p>Local information serves as the foundation for community development, policy-making, resource allocation, and understanding local needs. It helps in identifying problems, planning solutions, and evaluating outcomes at the community level.</p>
+                
+                <p><strong>Examples include:</strong> population demographics, local history, community resources, economic activities, environmental conditions, cultural practices, and infrastructure details.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Image data stored in JavaScript
+        const imageData = {
+            images: [
+                "1st.jpg ",
+                "2nd.jpg",
+                "3rd.jpg",
+                "4th.jpg",
+                "5th.jpg"
+            ],
+            captions: [
+                "Understanding Local Information - Community knowledge sharing",
+                "Sources of Local Information - Libraries, community centers, and government offices",
+                "Methods for Collecting Local Information - Surveys, interviews, and observations",
+                "Key Considerations - Ethics, accuracy, and community engagement",
+                "Materials Needed - Recording devices, notebooks, and technological tools"
+            ]
+        };
+
+        // Topic data with concise content for better fit
+        const topics = [
+            {
+                title: "Local Information",
+                description: `
+                    <p><strong>Local information</strong> refers to specific knowledge, data, and insights about a particular geographical area, community, or locality.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Key Characteristics:</strong></p>
+                        <ul>
+                            <li><strong>Geographically specific</strong> to a particular location</li>
+                            <li><strong>Contextual</strong> within local environment and culture</li>
+                            <li><strong>Comprehensive</strong> covering multiple data types</li>
+                            <li><strong>Dynamic</strong> and changes over time</li>
+                            <li><strong>Accessible</strong> through local institutions</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Local information is foundational for community development, policy-making, resource allocation, and understanding local needs.</p>
+                    
+                    <p><strong>Examples:</strong> Population demographics, local history, community resources, economic activities, environmental conditions, cultural practices.</p>
+                `
+            },
+            {
+                title: "Sources of Information",
+                description: `
+                    <p>Local information can be obtained from various sources providing different types of valuable data.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Primary Sources:</strong></p>
+                        <ol>
+                            <li><strong>Local Government Offices:</strong> Municipal records, census data</li>
+                            <li><strong>Community Centers:</strong> Neighborhood associations</li>
+                            <li><strong>Libraries & Archives:</strong> Historical records, maps</li>
+                            <li><strong>Educational Institutions:</strong> Schools, research centers</li>
+                            <li><strong>Healthcare Facilities:</strong> Health statistics</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Community-Based Sources:</strong></p>
+                        <ul>
+                            <li><strong>Community Leaders:</strong> Elders, local officials</li>
+                            <li><strong>Local Businesses:</strong> Market information</li>
+                            <li><strong>Residents:</strong> Personal experiences</li>
+                            <li><strong>Community Organizations:</strong> NGOs, civic groups</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Digital Sources:</strong> Local websites, social media groups, municipal portals, online databases.</p>
+                `
+            },
+            {
+                title: "Collection Methods",
+                description: `
+                    <p>Various methods can be employed to collect local information based on data type and resources.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Primary Data Collection:</strong></p>
+                        <ol>
+                            <li><strong>Surveys & Questionnaires:</strong> Structured questions</li>
+                            <li><strong>Interviews:</strong> One-on-one conversations</li>
+                            <li><strong>Focus Group Discussions:</strong> Group perspectives</li>
+                            <li><strong>Observation:</strong> Direct observation</li>
+                            <li><strong>Participatory Methods:</strong> Community mapping</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Secondary Data Collection:</strong></p>
+                        <ul>
+                            <li><strong>Document Review:</strong> Existing records</li>
+                            <li><strong>Archival Research:</strong> Historical documents</li>
+                            <li><strong>Internet Research:</strong> Online sources</li>
+                            <li><strong>Database Analysis:</strong> Existing data sets</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Mixed Methods Approach</strong> combining multiple methods provides comprehensive understanding.</p>
+                `
+            },
+            {
+                title: "Key Considerations",
+                description: `
+                    <p>Important factors to ensure accuracy, ethics, and effectiveness in information collection.</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Ethical Considerations:</strong></p>
+                        <ul>
+                            <li><strong>Informed Consent:</strong> Participants understand and agree</li>
+                            <li><strong>Confidentiality:</strong> Protect sensitive information</li>
+                            <li><strong>Cultural Sensitivity:</strong> Respect local customs</li>
+                            <li><strong>Beneficence:</strong> Benefit the community</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Practical Considerations:</strong></p>
+                        <ol>
+                            <li><strong>Sample Representation:</strong> Diverse community representation</li>
+                            <li><strong>Data Quality:</strong> Verify accuracy</li>
+                            <li><strong>Timing:</strong> Seasonal variations</li>
+                            <li><strong>Accessibility:</strong> Accessible to all</li>
+                            <li><strong>Resource Availability:</strong> Time, budget, personnel</li>
+                        </ol>
+                    </div>
+                    
+                    <p><strong>Community Engagement:</strong> Involve community members to build trust and ensure relevance.</p>
+                    <p><strong>Data Validation:</strong> Cross-check information from multiple sources.</p>
+                `
+            },
+            {
+                title: "Materials Needed",
+                description: `
+                    <p>Materials required for collecting local information vary by method but typically include:</p>
+                    
+                    <div class="highlight">
+                        <p><strong>Documentation Materials:</strong></p>
+                        <ul>
+                            <li><strong>Recording Devices:</strong> Audio recorders, smartphones</li>
+                            <li><strong>Writing Materials:</strong> Notebooks, pens</li>
+                            <li><strong>Survey Tools:</strong> Questionnaires, consent forms</li>
+                            <li><strong>Mapping Materials:</strong> Maps, chart paper</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Technological Tools:</strong></p>
+                        <ol>
+                            <li><strong>Data Collection Apps:</strong> Mobile applications</li>
+                            <li><strong>GPS Devices:</strong> Location mapping</li>
+                            <li><strong>Tablets/Laptops:</strong> Real-time data entry</li>
+                            <li><strong>Data Storage:</strong> External drives, cloud</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="highlight">
+                        <p><strong>Field Equipment:</strong></p>
+                        <ul>
+                            <li><strong>Identification:</strong> ID cards, letters</li>
+                            <li><strong>Communication:</strong> Mobile phones</li>
+                            <li><strong>Transportation:</strong> Appropriate transport</li>
+                            <li><strong>Safety Gear:</strong> First aid kits</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Budget Items:</strong> Transportation, participant compensation, materials, contingency.</p>
+                `
+            }
+        ];
+
+        // Initialize with first topic
+        document.addEventListener('DOMContentLoaded', function() {
+            showTopic(0);
+            
+            // Preload all images
+            imageData.images.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        });
+
+        function showTopic(index) {
+            // Update active button
+            const buttons = document.querySelectorAll('.topic-btn');
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            // Update image
+            const imageElement = document.getElementById('infoImage');
+            const captionElement = document.getElementById('imageCaption');
+            
+            imageElement.src = imageData.images[index];
+            imageElement.alt = topics[index].title;
+            captionElement.textContent = imageData.captions[index];
+
+            // Update title and description
+            document.getElementById('topicTitle').textContent = topics[index].title;
+            document.getElementById('topicDescription').innerHTML = topics[index].description;
+            
+            // Scroll description to top
+            document.getElementById('topicDescription').scrollTop = 0;
+        }
+    </script>
+</body>
+</html>

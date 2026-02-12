@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Machines Interactive Learning</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 100vh;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .content-area {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            height: calc(100vh - 150px);
+        }
+
+        .control-panel {
+            width: 25%;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-right: 1px solid #eaeaea;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .visual-area {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e1e9f0 100%);
+        }
+
+        .info-panel {
+            width: 30%;
+            padding: 12px;
+            background-color: #fff;
+            overflow-y: auto;
+            border-left: 1px solid #eaeaea;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #2980b9, #1c5a7d);
+        }
+
+        .btn i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-example {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .btn-example:hover {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+        }
+
+        .btn-application {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .btn-application:hover {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+        }
+
+        .dropdown {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            margin-bottom: 8px;
+        }
+
+        .dropdown.active {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+
+        .dropdown-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            margin-bottom: 6px;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+
+        .visual-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #ffffff, #f0f4f8);
+            border-radius: 8px;
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .machine-visual {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .machine-visual.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-content {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .info-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.3rem;
+        }
+
+        h3 {
+            color: #3498db;
+            margin: 12px 0 6px 0;
+            font-size: 1.1rem;
+        }
+
+        h4 {
+            color: #2c3e50;
+            margin: 10px 0 5px 0;
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 16px;
+            margin-bottom: 12px;
+        }
+
+        li {
+            margin-bottom: 5px;
+            padding-left: 5px;
+            font-size: 0.9rem;
+        }
+
+        .application-points li {
+            background-color: #f8f9fa;
+            padding: 6px 8px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            border-left: 3px solid #9b59b6;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .application-points li:hover {
+            transform: translateX(5px);
+            background-color: #f0e6f5;
+        }
+
+        .definition-points li {
+            background-color: #f0f7ff;
+            padding: 6px 8px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            border-left: 3px solid #3498db;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .definition-points li:hover {
+            transform: translateX(5px);
+            background-color: #e1f0ff;
+        }
+
+        .example-points li {
+            background-color: #f0f9f0;
+            padding: 6px 8px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            border-left: 3px solid #2ecc71;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .example-points li:hover {
+            transform: translateX(5px);
+            background-color: #e1f7e1;
+        }
+
+        .machine-title {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+            padding: 10px;
+            z-index: 10;
+            border-radius: 5px;
+            margin: 0 20px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* =========================================
+           ENHANCED ANIMATIONS - TWICE THE SIZE & MORE ATTRACTIVE
+           ========================================= */
+
+        /* Stage for all animations */
+        .stage {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            position: absolute;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+        /* Animation container for centering - NOW LARGER */
+        .animation-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 1. LEVER ANIMATION - ENHANCED & LARGER */
+        .lever-container {
+            position: relative;
+            width: 440px; /* Doubled from 220px */
+            height: 200px; /* Doubled from 100px */
+        }
+
+        .lever-fulcrum {
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 60px solid #2c3e50;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+        }
+
+        .lever-beam {
+            width: 440px;
+            height: 16px;
+            background: linear-gradient(to right, #2c3e50, #4a6491, #2c3e50);
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            margin-left: -220px;
+            border-radius: 8px;
+            animation: seesaw 3s infinite ease-in-out;
+            transform-origin: center 60px;
+            box-shadow: 
+                0 3px 5px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .lever-load {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            position: absolute;
+            bottom: 16px;
+            left: 30px;
+            border-radius: 8px;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.2),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: load-bounce 3s infinite ease-in-out;
+        }
+
+        .lever-effort {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 16px;
+            right: 30px;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.2),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: effort-bounce 3s infinite ease-in-out;
+        }
+
+        @keyframes seesaw {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-18deg); }
+            75% { transform: rotate(18deg); }
+        }
+
+        @keyframes load-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes effort-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* 2. WHEEL & AXLE ANIMATION - ENHANCED & LARGER */
+        .wheel-container {
+            position: relative;
+            width: 240px; /* Doubled from 120px */
+            height: 360px; /* Doubled from 180px */
+        }
+
+        .wheel-support {
+            width: 16px;
+            height: 240px;
+            background: linear-gradient(to bottom, #2c3e50, #4a6491);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .big-wheel {
+            width: 180px; /* Doubled from 90px */
+            height: 180px; /* Doubled from 90px */
+            border: 14px solid #95a5a6;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: 
+                radial-gradient(circle at center, #7f8c8d, #95a5a6),
+                linear-gradient(0deg, transparent 48%, #2c3e50 48%, #2c3e50 52%, transparent 52%);
+            animation: rotate-wheel 4s infinite linear;
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .axle-rope {
+            width: 5px;
+            background: linear-gradient(to bottom, #7f8c8d, #5d6d7e);
+            position: absolute;
+            top: 50%;
+            left: calc(50% + 90px);
+            height: 200px;
+            animation: rope-wind 4s infinite linear;
+            border-radius: 3px;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.2);
+        }
+
+        .bucket {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            position: absolute;
+            bottom: 0;
+            left: -27px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: bucket-swing 2s infinite ease-in-out;
+        }
+
+        @keyframes rotate-wheel {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes rope-wind {
+            0% { height: 200px; }
+            50% { height: 60px; }
+            100% { height: 200px; }
+        }
+
+        @keyframes bucket-swing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* 3. PULLEY ANIMATION - ENHANCED & LARGER */
+        .pulley-container {
+            position: relative;
+            width: 200px; /* Doubled from 100px */
+            height: 400px; /* Doubled from 200px */
+        }
+
+        .pulley-disc {
+            width: 120px; /* Doubled from 60px */
+            height: 120px; /* Doubled from 60px */
+            border: 10px solid #2c3e50;
+            border-radius: 50%;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: rotate-wheel 3s infinite linear;
+            background: radial-gradient(circle at center, #4a6491, #2c3e50);
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.3),
+                inset 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .pulley-rope-left {
+            width: 6px;
+            background: linear-gradient(to bottom, #7f8c8d, #5d6d7e);
+            position: absolute;
+            top: 50px;
+            left: calc(50% - 60px);
+            height: 400px;
+            animation: rope-shorten 3s infinite ease-in-out;
+            border-radius: 3px;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.2);
+        }
+
+        .pulley-rope-right {
+            width: 6px;
+            background: linear-gradient(to bottom, #7f8c8d, #5d6d7e);
+            position: absolute;
+            top: 50px;
+            left: calc(50% + 56px);
+            height: 400px;
+            animation: rope-lengthen 3s infinite ease-in-out;
+            border-radius: 3px;
+            box-shadow: -1px 0 3px rgba(0,0,0,0.2);
+        }
+
+        .pulley-load {
+            width: 70px;
+            height: 80px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            position: absolute;
+            bottom: 0;
+            left: -32px;
+            border-radius: 5px;
+            box-shadow: 
+                0 5px 10px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: load-vibrate 1.5s infinite ease-in-out;
+        }
+
+        @keyframes rope-shorten {
+            0%, 100% { height: 300px; }
+            50% { height: 100px; }
+        }
+
+        @keyframes rope-lengthen {
+            0%, 100% { height: 80px; }
+            50% { height: 280px; }
+        }
+
+        @keyframes load-vibrate {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+
+        /* 4. INCLINED PLANE ANIMATION - ENHANCED & LARGER */
+        .incline-container {
+            position: relative;
+            width: 500px; /* Doubled from 250px */
+            height: 300px; /* Doubled from 150px */
+            overflow: hidden;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #f0f4f8, #e1e9f0);
+            border-radius: 8px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .slope-surface {
+            width: 400px; /* Doubled from 200px */
+            height: 200px; /* Doubled from 100px */
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            clip-path: polygon(0% 100%, 100% 100%, 100% 0%);
+            border-top-right-radius: 6px;
+            box-shadow: 
+                0 3px 8px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .sliding-wedge {
+            position: absolute;
+            width: 80px; /* Doubled from 40px */
+            height: 80px; /* Doubled from 40px */
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            box-shadow: 
+                3px 3px 10px rgba(0, 0, 0, 0.4),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: wedge-slide 3s infinite ease-in-out;
+            z-index: 2;
+            bottom: 60px;
+            left: calc(50% - 200px);
+            transform: rotate(26.565deg) translateY(-40px);
+            transform-origin: center 120px;
+            border-radius: 3px;
+        }
+
+        @keyframes wedge-slide {
+            0% {
+                transform: translate(0, 0) rotate(26.565deg) translateY(-40px);
+            }
+            25% {
+                transform: translate(178px, -89px) rotate(26.565deg) translateY(-40px);
+            }
+            50% {
+                transform: translate(356px, -178px) rotate(26.565deg) translateY(-40px);
+            }
+            75% {
+                transform: translate(178px, -89px) rotate(26.565deg) translateY(-40px);
+            }
+            100% {
+                transform: translate(0, 0) rotate(26.565deg) translateY(-40px);
+            }
+        }
+
+        /* 5. WEDGE ANIMATION - ENHANCED & LARGER */
+        .wedge-container {
+            position: relative;
+            width: 300px; /* Doubled from 150px */
+            height: 300px; /* Doubled from 150px */
+        }
+
+        .wedge-log-left {
+            width: 100px; /* Doubled from 50px */
+            height: 160px; /* Doubled from 80px */
+            background: linear-gradient(to right, #d35400, #e67e22);
+            position: absolute;
+            bottom: 40px;
+            left: 80px;
+            animation: split-l 3s infinite ease-in-out;
+            border-radius: 5px;
+            box-shadow: 
+                0 3px 6px rgba(0,0,0,0.2),
+                inset -2px 0 0 rgba(0,0,0,0.1);
+        }
+
+        .wedge-log-right {
+            width: 100px; /* Doubled from 50px */
+            height: 160px; /* Doubled from 80px */
+            background: linear-gradient(to left, #d35400, #e67e22);
+            position: absolute;
+            bottom: 40px;
+            left: 180px;
+            animation: split-r 3s infinite ease-in-out;
+            border-radius: 5px;
+            box-shadow: 
+                0 3px 6px rgba(0,0,0,0.2),
+                inset 2px 0 0 rgba(0,0,0,0.1);
+        }
+
+        .wedge-shape {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent; /* Doubled from 20px */
+            border-right: 40px solid transparent; /* Doubled from 20px */
+            border-top: 120px solid #95a5a6; /* Doubled from 60px */
+            position: absolute;
+            top: 120px; /* Adjusted */
+            left: 60%;
+            transform: translateX(-50%);
+            animation: hammer 3s infinite ease-in-out;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+
+        @keyframes hammer {
+            0%, 100% {
+                top: 60px;
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                top: 140px;
+                transform: translateX(-50%) scale(1.05);
+            }
+        }
+
+        @keyframes split-l {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+            }
+            50% {
+                transform: translateX(-20px) rotate(-8deg);
+            }
+        }
+
+        @keyframes split-r {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+            }
+            50% {
+                transform: translateX(20px) rotate(8deg);
+            }
+        }
+
+        /* 6. SCREW ANIMATION - ENHANCED & LARGER */
+        .screw-container {
+            position: relative;
+            width: 120px; /* Doubled from 60px */
+            height: 360px; /* Doubled from 180px */
+        }
+
+        .screw-bolt {
+            width: 80px; /* Doubled from 40px */
+            height: 300px; /* Doubled from 150px */
+            background: repeating-linear-gradient(-45deg,
+                    #95a5a6,
+                    #95a5a6 12px, /* Doubled from 6px */
+                    #7f8c8d 12px, /* Doubled from 6px */
+                    #7f8c8d 24px); /* Doubled from 12px */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            box-shadow: 
+                0 5px 10px rgba(0,0,0,0.2),
+                inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .screw-nut {
+            width: 120px; /* Doubled from 60px */
+            height: 60px; /* Doubled from 30px */
+            background: linear-gradient(to bottom, #2c3e50, #4a6491);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px;
+            background-image: linear-gradient(to right, transparent 50%, rgba(255, 255, 255, 0.2) 50%);
+            background-size: 40px 100%; /* Doubled from 20px */
+            animation: thread-move 4s infinite linear;
+            box-shadow: 
+                0 5px 10px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+
+        @keyframes thread-move {
+            0% {
+                bottom: 60px;
+                background-position: 0 0;
+            }
+            50% {
+                bottom: 240px;
+                background-position: 120px 0; /* Adjusted */
+            }
+            100% {
+                bottom: 60px;
+                background-position: 0 0;
+            }
+        }
+
+        /* Image container for buttons 1 and 2 */
+        .image-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .definition-image,
+        .application-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .definition-image.active,
+        .application-image.active {
+            display: block;
+        }
+
+        /* Image placeholder styles for fallback */
+        .image-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e8f4fc, #d4e7f7);
+            color: #3498db;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+
+        .image-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 3px 5px rgba(52, 152, 219, 0.3));
+        }
+
+        .image-placeholder p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .image-instructions {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 8px;
+            color: #7f8c8d;
+            font-size: 0.75rem;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .content-area {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .control-panel,
+            .visual-area,
+            .info-panel {
+                width: 100%;
+                height: auto;
+                max-height: none;
+            }
+
+            .control-panel {
+                border-right: none;
+                border-bottom: 1px solid #eaeaea;
+                max-height: 180px;
+                overflow-y: auto;
+            }
+
+            .visual-area {
+                height: 350px;
+            }
+
+            .info-panel {
+                height: 300px;
+                border-left: none;
+                border-top: 1px solid #eaeaea;
+            }
+            
+            /* Scale down animations for mobile */
+            .lever-container {
+                width: 220px;
+                height: 100px;
+            }
+            
+            .lever-beam {
+                width: 220px;
+                margin-left: -110px;
+            }
+            
+            .wheel-container {
+                width: 120px;
+                height: 180px;
+            }
+            
+            .big-wheel {
+                width: 90px;
+                height: 90px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .subtitle {
+                font-size: 0.75rem;
+            }
+
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .visual-area {
+                height: 300px;
+            }
+
+            .info-panel {
+                height: 250px;
+            }
+            
+            .machine-title {
+                font-size: 1.2rem;
+                padding: 8px;
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Simple Machines Interactive Learning</h1>
+            <p class="subtitle">Explore the six classical simple machines with interactive animations</p>
+        </header>
+
+        <div class="content-area">
+            <div class="control-panel">
+                <button class="btn" id="definitionBtn">
+                    <i class="fas fa-question-circle"></i> What is a Simple Machine?
+                </button>
+
+                <button class="btn btn-application" id="applicationBtn">
+                    <i class="fas fa-tasks"></i> Application of Simple Machines
+                </button>
+
+                <button class="btn btn-example" id="exampleBtn">
+                    <i class="fas fa-cogs"></i> Examples of Simple Machines
+                </button>
+
+                <div class="dropdown" id="exampleDropdown">
+                    <button class="btn dropdown-btn example-option" data-machine="lever">
+                        <i class="fas fa-balance-scale"></i> Lever
+                    </button>
+                    <button class="btn dropdown-btn example-option" data-machine="wheel">
+                        <i class="fas fa-cog"></i> Wheel & Axle
+                    </button>
+                    <button class="btn dropdown-btn example-option" data-machine="pulley">
+                        <i class="fas fa-weight-hanging"></i> Pulley
+                    </button>
+                    <button class="btn dropdown-btn example-option" data-machine="incline">
+                        <i class="fas fa-chart-line"></i> Inclined Plane
+                    </button>
+                    <button class="btn dropdown-btn example-option" data-machine="wedge">
+                        <i class="fas fa-cut"></i> Wedge
+                    </button>
+                    <button class="btn dropdown-btn example-option" data-machine="screw">
+                        <i class="fas fa-bolt"></i> Screw
+                    </button>
+                </div>
+            </div>
+
+            <div class="visual-area">
+                <div class="visual-container">
+                    <!-- Button 1: What is a Simple Machine? (Image) -->
+                    <div class="machine-visual active" id="definitionVisual">
+                        <div class="stage">
+                            <div class="image-container">
+                                <img class="definition-image" id="definitionImg" alt="Simple Machines Definition">
+                                <div class="image-placeholder" id="definitionPlaceholder">
+                                    <i class="fas fa-cogs"></i>
+                                    <p>Simple Machines Definition</p>
+                                    <p class="image-instructions">Image loading or not available</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Simple Machines Definition</div>
+                    </div>
+
+                    <!-- Button 2: Application of Simple Machines (Image) -->
+                    <div class="machine-visual" id="applicationVisual">
+                        <div class="stage">
+                            <div class="image-container">
+                                <img class="application-image" id="applicationImg" alt="Applications of Simple Machines">
+                                <div class="image-placeholder" id="applicationPlaceholder">
+                                    <i class="fas fa-tools"></i>
+                                    <p>Applications of Simple Machines</p>
+                                    <p class="image-instructions">Image loading or not available</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Applications of Simple Machines</div>
+                    </div>
+
+                    <!-- Button 3: Example Visuals with Enhanced Animations -->
+                    <div class="machine-visual" id="leverVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="lever-container">
+                                    <div class="lever-fulcrum"></div>
+                                    <div class="lever-beam">
+                                        <div class="lever-load"></div>
+                                        <div class="lever-effort"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Lever - A rigid bar that pivots around a fulcrum</div>
+                    </div>
+
+                    <div class="machine-visual" id="wheelVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="wheel-container">
+                                    <div class="wheel-support"></div>
+                                    <div class="big-wheel"></div>
+                                    <div class="axle-rope">
+                                        <div class="bucket"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Wheel and Axle - Rotational force multiplier</div>
+                    </div>
+
+                    <div class="machine-visual" id="pulleyVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="pulley-container">
+                                    <div class="pulley-disc"></div>
+                                    <div class="pulley-rope-left">
+                                        <div class="pulley-load"></div>
+                                    </div>
+                                    <div class="pulley-rope-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Pulley - Changes direction of force</div>
+                    </div>
+
+                    <div class="machine-visual" id="inclineVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="incline-container">
+                                    <div class="slope-surface"></div>
+                                    <div class="sliding-wedge"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Inclined Plane - Reduces effort needed to lift</div>
+                    </div>
+
+                    <div class="machine-visual" id="wedgeVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="wedge-container">
+                                    <div class="wedge-log-left"></div>
+                                    <div class="wedge-log-right"></div>
+                                    <div class="wedge-shape"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Wedge - Converts force to splitting action</div>
+                    </div>
+
+                    <div class="machine-visual" id="screwVisual">
+                        <div class="stage">
+                            <div class="animation-container">
+                                <div class="screw-container">
+                                    <div class="screw-bolt"></div>
+                                    <div class="screw-nut"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="machine-title">Screw - Inclined plane wrapped around a cylinder</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <!-- Definition Content -->
+                <div class="info-content active" id="definitionInfo">
+                    <h2>What is a Simple Machine?</h2>
+                    <p>A simple machine is a mechanical device that changes the direction or magnitude of a force. In
+                        general, they are the simplest mechanisms that use mechanical advantage (also called leverage)
+                        to multiply force.</p>
+
+                    <h3>Key Characteristics:</h3>
+                    <ul class="definition-points">
+                        <li><strong>Minimal moving parts</strong> - Simple machines have few or no moving parts</li>
+                        <li><strong>Force multiplier</strong> - They make work easier by reducing the amount of force
+                            needed</li>
+                        <li><strong>Direction changer</strong> - They can change the direction of applied force</li>
+                        <li><strong>Energy conservation</strong> - They don't create energy but help transfer it more
+                            efficiently</li>
+                        <li><strong>Basic building blocks</strong> - Complex machines are combinations of simple
+                            machines</li>
+                    </ul>
+
+                    <h3>Six Classical Simple Machines:</h3>
+                    <ol>
+                        <li>Lever</li>
+                        <li>Wheel and axle</li>
+                        <li>Pulley</li>
+                        <li>Inclined plane</li>
+                        <li>Wedge</li>
+                        <li>Screw</li>
+                    </ol>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background-color: #f0f7ff; border-radius: 5px; border-left: 4px solid #3498db;">
+                        <p><strong>Fun Fact:</strong> The ancient Greek philosopher Archimedes famously said about the lever: "Give me a place to stand, and I shall move the Earth."</p>
+                    </div>
+                </div>
+
+                <!-- Application Content -->
+                <div class="info-content" id="applicationInfo">
+                    <h2>Applications of Simple Machines</h2>
+                    <p>Simple machines have countless applications in everyday life, industry, and technology. Here are
+                        their main applications:</p>
+
+                    <h3>Lever</h3>
+                    <ul class="application-points">
+                        <li><strong>Lifting heavy objects</strong> with less effort (crowbars, bottle openers)</li>
+                        <li><strong>Creating mechanical advantage</strong> in tools like pliers, scissors, and tweezers
+                        </li>
+                        <li><strong>Balance and measurement</strong> in devices like scales and seesaws</li>
+                    </ul>
+
+                    <h3>Wheel and Axle</h3>
+                    <ul class="application-points">
+                        <li><strong>Transportation</strong> - cars, bicycles, carts, and wheelchairs</li>
+                        <li><strong>Rotational force transmission</strong> - doorknobs, steering wheels, windmills</li>
+                        <li><strong>Mechanical systems</strong> - gears, pulleys, and rotating machinery</li>
+                    </ul>
+
+                    <h3>Pulley</h3>
+                    <ul class="application-points">
+                        <li><strong>Lifting heavy loads</strong> - construction cranes, elevators, flagpoles</li>
+                        <li><strong>Direction change of force</strong> - window blinds, clotheslines, sailboats</li>
+                        <li><strong>Compound systems</strong> - block and tackle systems for maximum mechanical
+                            advantage</li>
+                    </ul>
+
+                    <h3>Inclined Plane</h3>
+                    <ul class="application-points">
+                        <li><strong>Reducing effort to lift</strong> - ramps for wheelchairs, loading docks, staircases
+                        </li>
+                        <li><strong>Controlling motion</strong> - slides, escalators, conveyor belts</li>
+                        <li><strong>Access solutions</strong> - roads on hills, handicapped access ramps</li>
+                    </ul>
+
+                    <h3>Wedge</h3>
+                    <ul class="application-points">
+                        <li><strong>Splitting objects</strong> - axes, knives, chisels, plows</li>
+                        <li><strong>Holding objects in place</strong> - doorstops, shims, nails</li>
+                        <li><strong>Cutting and shaping</strong> - scissors, saw blades, needles</li>
+                    </ul>
+
+                    <h3>Screw</h3>
+                    <ul class="application-points">
+                        <li><strong>Fastening objects together</strong> - screws, bolts, jar lids</li>
+                        <li><strong>Lifting or pressing</strong> - car jacks, clamps, vises</li>
+                        <li><strong>Moving materials</strong> - Archimedes screw for moving water or grain</li>
+                    </ul>
+                </div>
+
+                <!-- Example Content -->
+                <div class="info-content" id="exampleInfo">
+                    <h2>Examples of Simple Machines</h2>
+                    <p>Select a simple machine from the dropdown to see an animation and learn about specific examples.
+                    </p>
+                    <div id="dynamicExampleContent">
+                        <!-- Content will be loaded here based on selection -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2023 Simple Machines Interactive Learning | Educational Tool</p>
+        </footer>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const definitionBtn = document.getElementById('definitionBtn');
+        const applicationBtn = document.getElementById('applicationBtn');
+        const exampleBtn = document.getElementById('exampleBtn');
+        const exampleDropdown = document.getElementById('exampleDropdown');
+        const exampleOptions = document.querySelectorAll('.example-option');
+
+        // Get image elements
+        const definitionImg = document.getElementById('definitionImg');
+        const applicationImg = document.getElementById('applicationImg');
+        const definitionPlaceholder = document.getElementById('definitionPlaceholder');
+        const applicationPlaceholder = document.getElementById('applicationPlaceholder');
+
+        // Get visual elements
+        const definitionVisual = document.getElementById('definitionVisual');
+        const applicationVisual = document.getElementById('applicationVisual');
+        const leverVisual = document.getElementById('leverVisual');
+        const wheelVisual = document.getElementById('wheelVisual');
+        const pulleyVisual = document.getElementById('pulleyVisual');
+        const inclineVisual = document.getElementById('inclineVisual');
+        const wedgeVisual = document.getElementById('wedgeVisual');
+        const screwVisual = document.getElementById('screwVisual');
+
+        // Get info content elements
+        const definitionInfo = document.getElementById('definitionInfo');
+        const applicationInfo = document.getElementById('applicationInfo');
+        const exampleInfo = document.getElementById('exampleInfo');
+        const dynamicExampleContent = document.getElementById('dynamicExampleContent');
+
+        // Set image sources
+        definitionImg.src = 'sim.png';
+        applicationImg.src = 'app.jpg';
+
+        // Handle image loading
+        definitionImg.onload = function() {
+            definitionImg.classList.add('active');
+            definitionPlaceholder.style.display = 'none';
+        };
+        
+        definitionImg.onerror = function() {
+            console.log('Definition image failed to load, showing placeholder');
+            definitionPlaceholder.style.display = 'flex';
+        };
+
+        applicationImg.onload = function() {
+            applicationImg.classList.add('active');
+            applicationPlaceholder.style.display = 'none';
+        };
+        
+        applicationImg.onerror = function() {
+            console.log('Application image failed to load, showing placeholder');
+            applicationPlaceholder.style.display = 'flex';
+        };
+
+        // Example data
+        const exampleData = {
+            lever: {
+                title: "Lever",
+                examples: [
+                    "Seesaw - A playground equipment that uses a lever to balance weight",
+                    "Crowbar - Used for prying objects apart with minimal force",
+                    "Bottle opener - Uses leverage to remove bottle caps easily",
+                    "Scissors - Two levers working together to cut materials"
+                ],
+                description: "A lever is a rigid bar that pivots around a fixed point called a fulcrum. It multiplies force, allowing heavy objects to be moved with less effort. There are three classes of levers based on the positions of the fulcrum, load, and effort."
+            },
+            wheel: {
+                title: "Wheel and Axle",
+                examples: [
+                    "Car steering wheel - A small force applied to the wheel turns the axle with greater force",
+                    "Doorknob - Rotating the knob turns the latch mechanism",
+                    "Ferris wheel - The wheel rotates around a central axle",
+                    "Windmill - Uses wheel and axle mechanism to convert wind energy"
+                ],
+                description: "The wheel and axle consists of a wheel attached to a smaller axle so that these two parts rotate together. Force is transferred from one to the other. The wheel provides mechanical advantage by allowing a smaller force to be applied over a longer distance."
+            },
+            pulley: {
+                title: "Pulley",
+                examples: [
+                    "Flagpole - Uses a pulley to raise and lower the flag with ease",
+                    "Window blinds - Pulleys control the raising and lowering of blinds",
+                    "Construction crane - Uses multiple pulleys to lift heavy materials",
+                    "Rock climbing equipment - Pulley systems for safety and efficiency"
+                ],
+                description: "A pulley is a wheel on an axle designed to support movement and change of direction of a taut cable or belt along its circumference. Pulleys can be fixed or movable, and multiple pulleys can be combined to create compound systems with greater mechanical advantage."
+            },
+            incline: {
+                title: "Inclined Plane",
+                examples: [
+                    "Ramp - Used for wheelchair access or loading goods into trucks",
+                    "Staircase - An inclined plane broken into smaller steps",
+                    "Slide - Children's playground equipment that uses gravity on an incline",
+                    "Mountain road - Winding roads reduce the steepness of ascents"
+                ],
+                description: "An inclined plane is a flat surface tilted at an angle, with one end higher than the other. It reduces the force needed to lift objects vertically by increasing the distance over which the force is applied. The steeper the incline, the more force required."
+            },
+            wedge: {
+                title: "Wedge",
+                examples: [
+                    "Knife - Uses a wedge shape to cut through materials",
+                    "Axe - Splits wood by concentrating force on a thin edge",
+                    "Doorstop - A wedge that prevents doors from closing",
+                    "Plow - Wedge-shaped tool for turning soil in farming"
+                ],
+                description: "A wedge is a triangular shaped tool used to split, lift, or tighten by being driven between two objects or parts of an object. It converts a force applied to its blunt end into forces perpendicular to its inclined surfaces. The thinner the wedge, the easier it penetrates materials."
+            },
+            screw: {
+                title: "Screw",
+                examples: [
+                    "Jar lid - The threads act as an inclined plane wrapped around a cylinder",
+                    "Car jack - Uses screw mechanism to lift heavy vehicles",
+                    "Light bulb - Screws into socket for secure connection",
+                    "Archimedes screw - Ancient device for lifting water"
+                ],
+                description: "A screw is essentially an inclined plane wrapped around a cylinder. It converts rotational motion to linear motion and provides mechanical advantage. The distance between threads (pitch) determines the mechanical advantage - smaller pitch provides greater force multiplication."
+            }
+        };
+
+        // Event Listeners
+        definitionBtn.addEventListener('click', () => {
+            // Show definition content
+            showInfoContent(definitionInfo);
+
+            // Show definition visual
+            showVisual(definitionVisual);
+
+            // Close example dropdown if open
+            exampleDropdown.classList.remove('active');
+        });
+
+        applicationBtn.addEventListener('click', () => {
+            // Show application content
+            showInfoContent(applicationInfo);
+
+            // Show application visual
+            showVisual(applicationVisual);
+
+            // Close example dropdown if open
+            exampleDropdown.classList.remove('active');
+        });
+
+        exampleBtn.addEventListener('click', () => {
+            // Show example content
+            showInfoContent(exampleInfo);
+
+            // Toggle example dropdown
+            exampleDropdown.classList.toggle('active');
+
+            // Show first example by default if no machine is selected
+            if (!document.querySelector('.machine-visual.active') || 
+                document.querySelector('.machine-visual.active').id === 'definitionVisual' || 
+                document.querySelector('.machine-visual.active').id === 'applicationVisual') {
+                showExample('lever');
+            }
+        });
+
+        // Add event listeners to example options
+        exampleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const machine = option.getAttribute('data-machine');
+                showExample(machine);
+
+                // Close dropdown on mobile
+                if (window.innerWidth < 1024) {
+                    exampleDropdown.classList.remove('active');
+                }
+            });
+        });
+
+        // Function to show specific info content
+        function showInfoContent(contentElement) {
+            // Hide all info content
+            document.querySelectorAll('.info-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show the selected info content
+            contentElement.classList.add('active');
+        }
+
+        // Function to show specific visual
+        function showVisual(visualElement) {
+            // Hide all visuals
+            document.querySelectorAll('.machine-visual').forEach(visual => {
+                visual.classList.remove('active');
+            });
+
+            // Show the selected visual
+            visualElement.classList.add('active');
+        }
+
+        // Function to show example
+        function showExample(machine) {
+            // Get data for the selected machine
+            const data = exampleData[machine];
+
+            // Update dynamic content
+            dynamicExampleContent.innerHTML = `
+                <h3>${data.title}</h3>
+                <p>${data.description}</p>
+                <h4>Examples :</h4>
+                <ul class="example-points">
+                    ${data.examples.map(example => `<li>${example}</li>`).join('')}
+                </ul>
+                <div style="margin-top: 15px; padding: 10px; background-color: #f0f9f0; border-radius: 5px; border-left: 4px solid #2ecc71;">
+                    <p><strong>Mechanical Advantage:</strong> ${getMechanicalAdvantageTip(machine)}</p>
+                </div>
+            `;
+
+            // Show the appropriate visual
+            let visualToShow;
+            switch (machine) {
+                case 'lever': visualToShow = leverVisual; break;
+                case 'wheel': visualToShow = wheelVisual; break;
+                case 'pulley': visualToShow = pulleyVisual; break;
+                case 'incline': visualToShow = inclineVisual; break;
+                case 'wedge': visualToShow = wedgeVisual; break;
+                case 'screw': visualToShow = screwVisual; break;
+            }
+
+            showVisual(visualToShow);
+
+            // Ensure example info is shown
+            showInfoContent(exampleInfo);
+        }
+
+        // Helper function for mechanical advantage tips
+        function getMechanicalAdvantageTip(machine) {
+            const tips = {
+                lever: "The mechanical advantage of a lever depends on the distance from the fulcrum to the effort compared to the distance from the fulcrum to the load.",
+                wheel: "The mechanical advantage equals the radius of the wheel divided by the radius of the axle.",
+                pulley: "A single fixed pulley has a mechanical advantage of 1, but movable pulleys and compound systems can provide much greater advantage.",
+                incline: "The mechanical advantage equals the length of the slope divided by the height of the incline.",
+                wedge: "The mechanical advantage equals the length of the wedge divided by its thickness at the widest point.",
+                screw: "The mechanical advantage equals the circumference of the screw divided by the pitch (distance between threads)."
+            };
+            return tips[machine] || "Simple machines provide mechanical advantage by trading force for distance.";
+        }
+
+        // Initialize with definition view
+        showInfoContent(definitionInfo);
+        showVisual(definitionVisual);
+
+        // Adjust layout on window resize
+        window.addEventListener('resize', function () {
+            // On mobile/tablet, close dropdown if open to save space
+            if (window.innerWidth < 1024 && exampleDropdown.classList.contains('active')) {
+                exampleDropdown.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>

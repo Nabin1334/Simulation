@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Wave: Source and Propagation</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            background: linear-gradient(135deg, #0c1a2d 0%, #1a3a5f 100%);
+            color: #e6f2ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-fluid {
+            height: 100vh;
+            padding: 15px;
+        }
+        
+        .row {
+            height: 100%;
+            margin: 0;
+        }
+        
+        /* Left Panel - Controls */
+        .controls-panel {
+            background: rgba(12, 36, 56, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .controls-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .control-title {
+            color: #4dabf7;
+            border-bottom: 2px solid #339af0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            background: rgba(12, 36, 56, 0.95);
+            z-index: 10;
+        }
+        
+        .btn-control {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: linear-gradient(to right, #1c7ed6, #339af0);
+            border: none;
+            color: white;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-control:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to right, #1971c2, #228be6);
+        }
+        
+        .btn-control:active {
+            transform: translateY(0);
+        }
+        
+        .btn-control.active {
+            background: linear-gradient(to right, #0c8599, #15aabf);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+            background: rgba(25, 55, 85, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .control-label {
+            color: #a5d8ff;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            background: #339af0;
+        }
+        
+        /* Middle Panel - Animation */
+        .animation-panel {
+            background: rgba(8, 20, 35, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+        }
+        
+        .animation-title {
+            color: #4dabf7;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .animation-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #0a1625;
+            min-height: 300px;
+        }
+        
+        #animationCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Right Panel - Description */
+        .description-panel {
+            background: rgba(12, 36, 56, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .description-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .description-title {
+            color: #4dabf7;
+            border-bottom: 2px solid #339af0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            background: rgba(12, 36, 56, 0.95);
+            z-index: 10;
+        }
+        
+        .wave-property {
+            background: rgba(25, 55, 85, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #339af0;
+        }
+        
+        .property-title {
+            color: #74c0fc;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .property-value {
+            color: #a5d8ff;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .wave-visual {
+            height: 60px;
+            width: 100%;
+            margin: 12px 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+            background: rgba(8, 20, 35, 0.7);
+        }
+        
+        /* Animation status indicator */
+        .animation-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(64, 156, 255, 0.2);
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background-color: #40c057;
+            box-shadow: 0 0 8px #40c057;
+        }
+        
+        .status-text {
+            color: #a5d8ff;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Animation info panel below animation */
+        .animation-info {
+            background: rgba(25, 55, 85, 0.7);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(64, 156, 255, 0.2);
+        }
+        
+        .info-title {
+            color: #74c0fc;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        /* Custom scrollbar */
+        .controls-content::-webkit-scrollbar,
+        .description-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .controls-content::-webkit-scrollbar-track,
+        .description-content::-webkit-scrollbar-track {
+            background: rgba(25, 55, 85, 0.3);
+            border-radius: 4px;
+        }
+        
+        .controls-content::-webkit-scrollbar-thumb,
+        .description-content::-webkit-scrollbar-thumb {
+            background: #339af0;
+            border-radius: 4px;
+        }
+        
+        .controls-content::-webkit-scrollbar-thumb:hover,
+        .description-content::-webkit-scrollbar-thumb:hover {
+            background: #1c7ed6;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .container-fluid {
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .row {
+                height: auto;
+            }
+            
+            .controls-panel, .description-panel {
+                height: 500px;
+                margin-bottom: 20px;
+            }
+            
+            .animation-panel {
+                height: 600px;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 10px;
+            }
+            
+            .controls-panel, .animation-panel, .description-panel {
+                height: 400px;
+            }
+            
+            .animation-container {
+                min-height: 300px;
+            }
+            
+            .wave-visual {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row g-4">
+            <!-- Left Panel - Controls -->
+            <div class="col-lg-3">
+                <div class="controls-panel">
+                    <h3 class="control-title">Wave Controls</h3>
+                    <div class="controls-content">
+                        <div class="d-grid gap-2">
+                            <button id="startBtn" class="btn-control active">▶ Start</button>
+                            <button id="pauseBtn" class="btn-control">⏸ Pause</button>
+                            <button id="resetBtn" class="btn-control">↺ Reset</button>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">Frequency</div>
+                            <input type="range" class="form-range" id="frequencySlider" min="1" max="10" step="0.5" value="3">
+                            <div class="d-flex justify-content-between">
+                                <small>Low</small>
+                                <small id="frequencyValue">3 Hz</small>
+                                <small>High</small>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">Amplitude</div>
+                            <input type="range" class="form-range" id="amplitudeSlider" min="10" max="50" step="5" value="30">
+                            <div class="d-flex justify-content-between">
+                                <small>Small</small>
+                                <small id="amplitudeValue">30</small>
+                                <small>Large</small>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">Speed</div>
+                            <input type="range" class="form-range" id="speedSlider" min="1" max="10" step="1" value="5">
+                            <div class="d-flex justify-content-between">
+                                <small>Slow</small>
+                                <small id="speedValue">5</small>
+                                <small>Fast</small>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">Wave Type</div>
+                            <div class="d-grid gap-2">
+                                <button id="longitudinalBtn" class="btn-control active">Longitudinal</button>
+                                <button id="transverseBtn" class="btn-control">Transverse</button>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">Particle Color Code</div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="color-dot me-2" style="width:12px; height:12px; background-color:#ff6b6b; border-radius:50%;"></div>
+                                <small>Source Particles</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="color-dot me-2" style="width:12px; height:12px; background-color:#4dabf7; border-radius:50%;"></div>
+                                <small>Near Field Particles</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="color-dot me-2" style="width:12px; height:12px; background-color:#51cf66; border-radius:50%;"></div>
+                                <small>Far Field Particles</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="animation-status">
+                        <div class="status-indicator pulse"></div>
+                        <div class="status-text" id="statusText">Animation Running</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Middle Panel - Animation -->
+            <div class="col-lg-6">
+                <div class="animation-panel">
+                    <h2 class="animation-title">Sound Wave: Source and Propagation</h2>
+                    <div class="animation-container">
+                        <canvas id="animationCanvas"></canvas>
+                    </div>
+                    
+                    <!-- Animation Info Panel -->
+                    <div class="animation-info">
+                        <div class="info-title">Current Wave Details:</div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="property-title">Type:</div>
+                                <div class="property-value" id="currentWaveType">Longitudinal</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="property-title">Particles:</div>
+                                <div class="property-value" id="particleCount">80</div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="property-title">Propagation Pattern:</div>
+                            <div class="property-value" id="propPattern">Compressions & Rarefactions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Description -->
+            <div class="col-lg-3">
+                <div class="description-panel">
+                    <h3 class="description-title">Wave Properties</h3>
+                    <div class="description-content">
+                        <p>Sound waves propagate through medium by vibrating particles. Watch how waves move from source to surroundings.</p>
+                        
+                        <div class="wave-property">
+                            <div class="property-title">Wave Source</div>
+                            <div class="property-value" id="sourceType">Vibrating Speaker</div>
+                            <p class="mt-1 mb-0" style="font-size: 0.85rem;">The origin point where vibrations begin and energy transfers to adjacent particles.</p>
+                        </div>
+                        
+                        <div class="wave-property">
+                            <div class="property-title">Propagation Type</div>
+                            <div class="property-value" id="propagationType">Longitudinal</div>
+                            <p class="mt-1 mb-0" style="font-size: 0.85rem;">Particles oscillate parallel to wave direction in compressions and rarefactions.</p>
+                        </div>
+                        
+                        <div class="wave-visual">
+                            <canvas id="waveCanvas"></canvas>
+                        </div>
+                        
+                        <div class="wave-property">
+                            <div class="property-title">Current Parameters</div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <div class="property-title">Frequency:</div>
+                                    <div class="property-value" id="currentFrequency">3 Hz</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="property-title">Amplitude:</div>
+                                    <div class="property-value" id="currentAmplitude">30</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <div class="property-title">Speed:</div>
+                                    <div class="property-value" id="currentSpeed">5</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="property-title">Waves Active:</div>
+                                    <div class="property-value" id="wavesActive">5</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wave-property mt-3">
+                            <div class="property-title">Wave Characteristics</div>
+                            <p class="mt-1 mb-0" style="font-size: 0.85rem;">
+                                <strong>Compression:</strong> Particles are close together<br>
+                                <strong>Rarefaction:</strong> Particles are spread apart<br>
+                                <strong>Wavelength:</strong> Distance between compressions<br>
+                                <strong>Frequency:</strong> Waves per second (Hz)
+                            </p>
+                        </div>
+                        
+                        <div class="wave-property mt-3">
+                            <div class="property-title">Sound Wave Facts</div>
+                            <p class="mt-1 mb-0" style="font-size: 0.85rem;">
+                                • Requires medium to propagate<br>
+                                • Speed in air: ~343 m/s<br>
+                                • Speed in water: ~1482 m/s<br>
+                                • Cannot travel in vacuum
+                            </p>
+                        </div>
+                        
+                        <div class="wave-property mt-3">
+                            <div class="property-title">Controls Guide</div>
+                            <p class="mt-1 mb-0" style="font-size: 0.85rem;">
+                                • Adjust sliders to change wave properties<br>
+                                • Switch between wave types<br>
+                                • Use Start/Pause/Reset for animation control
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Canvas elements
+        const mainCanvas = document.getElementById('animationCanvas');
+        const waveCanvas = document.getElementById('waveCanvas');
+        const mainCtx = mainCanvas.getContext('2d');
+        const waveCtx = waveCanvas.getContext('2d');
+        
+        // Control elements
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const frequencySlider = document.getElementById('frequencySlider');
+        const amplitudeSlider = document.getElementById('amplitudeSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const longitudinalBtn = document.getElementById('longitudinalBtn');
+        const transverseBtn = document.getElementById('transverseBtn');
+        const statusText = document.getElementById('statusText');
+        const statusIndicator = document.querySelector('.status-indicator');
+        
+        // Description elements
+        const sourceType = document.getElementById('sourceType');
+        const propagationType = document.getElementById('propagationType');
+        const currentFrequency = document.getElementById('currentFrequency');
+        const currentAmplitude = document.getElementById('currentAmplitude');
+        const currentSpeed = document.getElementById('currentSpeed');
+        const frequencyValue = document.getElementById('frequencyValue');
+        const amplitudeValue = document.getElementById('amplitudeValue');
+        const speedValue = document.getElementById('speedValue');
+        const currentWaveType = document.getElementById('currentWaveType');
+        const particleCount = document.getElementById('particleCount');
+        const propPattern = document.getElementById('propPattern');
+        const wavesActive = document.getElementById('wavesActive');
+        
+        // Animation variables
+        let animationId = null;
+        let isAnimating = true;
+        let isPaused = false;
+        let waveType = 'longitudinal'; // 'longitudinal' or 'transverse'
+        
+        // Wave parameters
+        let waveParams = {
+            frequency: parseFloat(frequencySlider.value),
+            amplitude: parseInt(amplitudeSlider.value),
+            speed: parseInt(speedSlider.value),
+            time: 0,
+            particles: [],
+            waves: []
+        };
+        
+        // Initialize canvas size
+        function resizeCanvas() {
+            mainCanvas.width = mainCanvas.parentElement.clientWidth;
+            mainCanvas.height = mainCanvas.parentElement.clientHeight;
+            
+            waveCanvas.width = waveCanvas.parentElement.clientWidth;
+            waveCanvas.height = waveCanvas.parentElement.clientHeight;
+            
+            initParticles();
+        }
+        
+        // Initialize particles for wave propagation visualization
+        function initParticles() {
+            waveParams.particles = [];
+            const particleCountValue = 80;
+            const canvasWidth = mainCanvas.width;
+            const canvasHeight = mainCanvas.height;
+            
+            for (let i = 0; i < particleCountValue; i++) {
+                waveParams.particles.push({
+                    x: (canvasWidth / particleCountValue) * i + 50,
+                    y: canvasHeight / 2,
+                    originalY: canvasHeight / 2,
+                    radius: 3 + Math.random() * 2,
+                    speed: 0.02 + Math.random() * 0.02,
+                    phase: Math.random() * Math.PI * 2,
+                    color: i < 5 ? '#ff6b6b' : (i < 15 ? '#4dabf7' : '#51cf66')
+                });
+            }
+            
+            // Update particle count display
+            particleCount.textContent = particleCountValue;
+        }
+        
+        // Initialize waves
+        function initWaves() {
+            waveParams.waves = [];
+            
+            // Create initial waves
+            for (let i = 0; i < 5; i++) {
+                waveParams.waves.push({
+                    x: 100,
+                    radius: 5,
+                    amplitude: waveParams.amplitude,
+                    life: 1.0,
+                    speed: 2 + waveParams.speed / 2
+                });
+            }
+        }
+        
+        // Draw the sound source (speaker)
+        function drawSource(ctx) {
+            const centerX = 100;
+            const centerY = mainCanvas.height / 2;
+            
+            // Speaker body
+            ctx.fillStyle = '#495057';
+            ctx.fillRect(centerX - 40, centerY - 60, 40, 120);
+            
+            // Speaker cone
+            ctx.fillStyle = '#868e96';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 40);
+            ctx.lineTo(centerX + 60, centerY - 20);
+            ctx.lineTo(centerX + 60, centerY + 20);
+            ctx.lineTo(centerX, centerY + 40);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Speaker details
+            ctx.fillStyle = '#343a40';
+            ctx.fillRect(centerX - 40, centerY - 60, 40, 20);
+            ctx.fillRect(centerX - 40, centerY - 20, 40, 40);
+            ctx.fillRect(centerX - 40, centerY + 40, 40, 20);
+            
+            // Vibration effect
+            if (isAnimating && !isPaused) {
+                const vibrationOffset = Math.sin(waveParams.time * 10) * 3;
+                ctx.fillStyle = 'rgba(255, 107, 107, 0.7)';
+                ctx.fillRect(centerX + 60, centerY - 20 + vibrationOffset, 5, 40);
+                
+                // Vibration waves
+                ctx.beginPath();
+                ctx.arc(centerX + 65, centerY + vibrationOffset, 8, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 107, 107, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            // Source label
+            ctx.fillStyle = '#a5d8ff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Sound Source', centerX, centerY - 80);
+        }
+        
+        // Draw longitudinal waves (compressions and rarefactions)
+        function drawLongitudinalWaves(ctx) {
+            const centerY = mainCanvas.height / 2;
+            
+            // Draw waves emanating from source
+            waveParams.waves.forEach((wave, index) => {
+                wave.x += wave.speed;
+                wave.radius += 0.5;
+                wave.life -= 0.005;
+                
+                // Draw compression
+                ctx.beginPath();
+                ctx.arc(wave.x, centerY, wave.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(77, 171, 247, ${wave.life})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw rarefaction
+                ctx.beginPath();
+                ctx.arc(wave.x + 30, centerY, wave.radius * 0.7, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(81, 207, 102, ${wave.life})`;
+                ctx.stroke();
+                
+                // Remove old waves
+                if (wave.life <= 0) {
+                    waveParams.waves.splice(index, 1);
+                }
+            });
+            
+            // Add new wave periodically
+            if (waveParams.time % (30 / waveParams.frequency) < 1) {
+                waveParams.waves.push({
+                    x: 100,
+                    radius: 5,
+                    amplitude: waveParams.amplitude,
+                    life: 1.0,
+                    speed: 2 + waveParams.speed / 2
+                });
+            }
+            
+            // Draw particles showing longitudinal motion
+            waveParams.particles.forEach((particle, index) => {
+                // Calculate displacement based on wave position
+                let displacement = 0;
+                waveParams.waves.forEach(wave => {
+                    const distance = Math.abs(particle.x - wave.x);
+                    if (distance < 100) {
+                        displacement += Math.sin(waveParams.time * waveParams.frequency + particle.phase) * 
+                                       wave.amplitude * (1 - distance / 100) * wave.life;
+                    }
+                });
+                
+                // Update particle position
+                particle.y = particle.originalY + displacement;
+                
+                // Draw particle
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.fillStyle = particle.color;
+                ctx.fill();
+                
+                // Draw connection lines between nearby particles
+                if (index < waveParams.particles.length - 1) {
+                    const nextParticle = waveParams.particles[index + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    ctx.lineTo(nextParticle.x, nextParticle.y);
+                    ctx.strokeStyle = `rgba(77, 171, 247, 0.3)`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            });
+            
+            // Update waves active count
+            wavesActive.textContent = waveParams.waves.length;
+        }
+        
+        // Draw transverse waves
+        function drawTransverseWaves(ctx) {
+            const centerY = mainCanvas.height / 2;
+            
+            // Draw the wave propagation direction line
+            ctx.beginPath();
+            ctx.moveTo(150, centerY);
+            ctx.lineTo(mainCanvas.width - 50, centerY);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Draw sine wave
+            ctx.beginPath();
+            ctx.moveTo(150, centerY);
+            
+            for (let x = 150; x < mainCanvas.width - 50; x += 2) {
+                const y = centerY + Math.sin((x - 150) * 0.05 + waveParams.time * waveParams.speed * 0.1) * waveParams.amplitude;
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.strokeStyle = '#4dabf7';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw particles on the wave
+            waveParams.particles.forEach((particle, index) => {
+                // Calculate displacement for transverse wave
+                const displacement = Math.sin(particle.x * 0.05 + waveParams.time * waveParams.speed * 0.1 + particle.phase) * waveParams.amplitude;
+                
+                // Update particle position
+                particle.y = particle.originalY + displacement;
+                
+                // Draw particle
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.fillStyle = particle.color;
+                ctx.fill();
+                
+                // Draw vertical lines showing displacement
+                ctx.beginPath();
+                ctx.moveTo(particle.x, particle.originalY);
+                ctx.lineTo(particle.x, particle.y);
+                ctx.strokeStyle = `rgba(255, 107, 107, 0.5)`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+            
+            // Update waves active count
+            wavesActive.textContent = 1;
+        }
+        
+        // Draw wave visualization in description panel
+        function drawWaveVisualization() {
+            const width = waveCanvas.width;
+            const height = waveCanvas.height;
+            const centerY = height / 2;
+            
+            // Clear canvas
+            waveCtx.clearRect(0, 0, width, height);
+            
+            // Draw background
+            waveCtx.fillStyle = 'rgba(8, 20, 35, 0.7)';
+            waveCtx.fillRect(0, 0, width, height);
+            
+            // Draw wave based on current type
+            waveCtx.beginPath();
+            
+            if (waveType === 'longitudinal') {
+                // Draw longitudinal wave representation
+                for (let x = 0; x < width; x += 5) {
+                    const compression = Math.sin(x * 0.1 + waveParams.time * 2) > 0.7;
+                    const y = compression ? centerY - 10 : centerY + 10;
+                    
+                    // Draw particle at this point
+                    waveCtx.beginPath();
+                    waveCtx.arc(x, y, 2, 0, Math.PI * 2);
+                    waveCtx.fillStyle = compression ? '#ff6b6b' : '#4dabf7';
+                    waveCtx.fill();
+                }
+            } else {
+                // Draw transverse wave representation
+                for (let x = 0; x < width; x += 2) {
+                    const y = centerY + Math.sin(x * 0.1 + waveParams.time * 2) * 15;
+                    if (x === 0) {
+                        waveCtx.moveTo(x, y);
+                    } else {
+                        waveCtx.lineTo(x, y);
+                    }
+                }
+                
+                waveCtx.strokeStyle = '#51cf66';
+                waveCtx.lineWidth = 2;
+                waveCtx.stroke();
+            }
+        }
+        
+        // Main animation function
+        function animate() {
+            // Clear main canvas
+            mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            
+            // Draw gradient background
+            const gradient = mainCtx.createLinearGradient(0, 0, mainCanvas.width, mainCanvas.height);
+            gradient.addColorStop(0, '#0a1625');
+            gradient.addColorStop(1, '#1a3a5f');
+            mainCtx.fillStyle = gradient;
+            mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+            
+            // Draw source
+            drawSource(mainCtx);
+            
+            // Draw waves based on type
+            if (waveType === 'longitudinal') {
+                drawLongitudinalWaves(mainCtx);
+            } else {
+                drawTransverseWaves(mainCtx);
+            }
+            
+            // Draw propagation direction label
+            mainCtx.fillStyle = '#a5d8ff';
+            mainCtx.font = '14px Arial';
+            mainCtx.textAlign = 'center';
+            mainCtx.fillText('Wave Propagation Direction →', mainCanvas.width / 2, mainCanvas.height - 20);
+            
+            // Draw wave visualization in description panel
+            drawWaveVisualization();
+            
+            // Update time for animation
+            if (!isPaused) {
+                waveParams.time += 0.05 * waveParams.speed;
+            }
+            
+            // Continue animation
+            if (isAnimating) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        // Event Listeners
+        startBtn.addEventListener('click', function() {
+            isPaused = false;
+            isAnimating = true;
+            statusText.textContent = 'Animation Running';
+            statusIndicator.style.backgroundColor = '#40c057';
+            statusIndicator.classList.add('pulse');
+            
+            startBtn.classList.add('active');
+            pauseBtn.classList.remove('active');
+            
+            if (!animationId) {
+                animate();
+            }
+        });
+        
+        pauseBtn.addEventListener('click', function() {
+            isPaused = !isPaused;
+            statusText.textContent = isPaused ? 'Animation Paused' : 'Animation Running';
+            statusIndicator.style.backgroundColor = isPaused ? '#ff922b' : '#40c057';
+            
+            if (isPaused) {
+                statusIndicator.classList.remove('pulse');
+                pauseBtn.classList.add('active');
+                startBtn.classList.remove('active');
+            } else {
+                statusIndicator.classList.add('pulse');
+                pauseBtn.classList.remove('active');
+                startBtn.classList.add('active');
+            }
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            waveParams.time = 0;
+            initWaves();
+            initParticles();
+            
+            if (!isAnimating) {
+                isAnimating = true;
+                animate();
+            }
+            
+            statusText.textContent = 'Animation Running';
+            statusIndicator.style.backgroundColor = '#40c057';
+            statusIndicator.classList.add('pulse');
+            
+            startBtn.classList.add('active');
+            pauseBtn.classList.remove('active');
+        });
+        
+        frequencySlider.addEventListener('input', function() {
+            waveParams.frequency = parseFloat(this.value);
+            currentFrequency.textContent = `${waveParams.frequency.toFixed(1)} Hz`;
+            frequencyValue.textContent = `${waveParams.frequency.toFixed(1)} Hz`;
+        });
+        
+        amplitudeSlider.addEventListener('input', function() {
+            waveParams.amplitude = parseInt(this.value);
+            currentAmplitude.textContent = `${waveParams.amplitude}`;
+            amplitudeValue.textContent = `${waveParams.amplitude}`;
+        });
+        
+        speedSlider.addEventListener('input', function() {
+            waveParams.speed = parseInt(this.value);
+            currentSpeed.textContent = `${waveParams.speed}`;
+            speedValue.textContent = `${waveParams.speed}`;
+        });
+        
+        longitudinalBtn.addEventListener('click', function() {
+            waveType = 'longitudinal';
+            propagationType.textContent = 'Longitudinal';
+            sourceType.textContent = 'Vibrating Speaker';
+            currentWaveType.textContent = 'Longitudinal';
+            propPattern.textContent = 'Compressions & Rarefactions';
+            
+            longitudinalBtn.classList.add('active');
+            transverseBtn.classList.remove('active');
+            
+            initParticles();
+            initWaves();
+        });
+        
+        transverseBtn.addEventListener('click', function() {
+            waveType = 'transverse';
+            propagationType.textContent = 'Transverse';
+            sourceType.textContent = 'Vibrating String';
+            currentWaveType.textContent = 'Transverse';
+            propPattern.textContent = 'Sine Wave Pattern';
+            
+            transverseBtn.classList.add('active');
+            longitudinalBtn.classList.remove('active');
+            
+            initParticles();
+            initWaves();
+        });
+        
+        // Initialize the application
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            initWaves();
+            initParticles();
+            animate();
+            
+            // Update display values
+            currentFrequency.textContent = `${waveParams.frequency.toFixed(1)} Hz`;
+            currentAmplitude.textContent = `${waveParams.amplitude}`;
+            currentSpeed.textContent = `${waveParams.speed}`;
+            frequencyValue.textContent = `${waveParams.frequency.toFixed(1)} Hz`;
+            amplitudeValue.textContent = `${waveParams.amplitude}`;
+            speedValue.textContent = `${waveParams.speed}`;
+        });
+        
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>

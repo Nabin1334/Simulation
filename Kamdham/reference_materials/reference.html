@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference Materials </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr 380px;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px 20px;
+            border-right: 2px solid #dee2e6;
+        }
+
+        .sidebar h2 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95em;
+            text-align: left;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .visual-section {
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8f9fa 100%);
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visual-section::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .visual-content {
+            text-align: center;
+            display: none;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .visual-content.active {
+            display: block;
+            animation: fadeInScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(-20deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        .scene-3d {
+            width: 350px;
+            height: 350px;
+            margin: 0 auto 20px;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        /* Simple Realistic Book */
+        .book-3d {
+            width: 180px;
+            height: 240px;
+            position: relative;
+            transform-style: preserve-3d;
+            margin: 0 auto;
+            transform: rotateY(-25deg) rotateX(5deg);
+            animation: bookHover 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .book-3d:hover {
+            transform: rotateY(-25deg) rotateX(5deg) translateY(-20px) scale(1.1);
+        }
+
+        @keyframes bookHover {
+            0%, 100% { transform: rotateY(-25deg) rotateX(5deg) translateY(0px); }
+            50% { transform: rotateY(-25deg) rotateX(5deg) translateY(-10px); }
+        }
+
+        /* Front Cover */
+        .book-cover {
+            position: absolute;
+            width: 180px;
+            height: 240px;
+            background: 
+                linear-gradient(to bottom right,
+                    #c41e3a 0%,
+                    #8b1a2e 50%,
+                    #c41e3a 100%
+                );
+            border-radius: 0 3px 3px 0;
+            transform: translateZ(15px);
+            box-shadow: 
+                2px 2px 20px rgba(0,0,0,0.4),
+                inset 1px 1px 0 rgba(255,255,255,0.2),
+                inset -1px -1px 0 rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border: 2px solid rgba(255,215,0,0.7);
+            border-radius: 2px;
+        }
+
+        .book-icon {
+            font-size: 60px;
+            margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.5));
+        }
+
+        .book-title {
+            color: #FFD700;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            font-family: Georgia, serif;
+            letter-spacing: 1px;
+            line-height: 1.3;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+
+        /* Back Cover */
+        .book-back {
+            position: absolute;
+            width: 180px;
+            height: 240px;
+            background: linear-gradient(to bottom, #8b1a2e, #6b1523);
+            border-radius: 3px 0 0 3px;
+            transform: translateZ(-15px);
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Spine */
+        .book-spine {
+            position: absolute;
+            width: 30px;
+            height: 240px;
+            background: linear-gradient(to right, #6b1523, #8b1a2e, #6b1523);
+            left: 0;
+            transform: rotateY(90deg) translateX(-15px) translateZ(165px);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spine-text {
+            color: #FFD700;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: Georgia, serif;
+            writing-mode: vertical-rl;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* Page Stack */
+        .book-pages {
+            position: absolute;
+            width: 175px;
+            height: 235px;
+            right: -2px;
+            top: 2.5px;
+            transform: translateZ(14.5px);
+            background: 
+                linear-gradient(to right,
+                    #f4f1e8 0%,
+                    #fff 3px,
+                    #f4f1e8 6px,
+                    #fff 9px,
+                    #f4f1e8 12px,
+                    #fff 15px
+                );
+            border-radius: 0 2px 2px 0;
+            box-shadow: 
+                2px 0 5px rgba(0,0,0,0.2),
+                inset -1px 0 1px rgba(0,0,0,0.1);
+        }
+
+        /* Page edges on spine side */
+        .book-pages-left {
+            position: absolute;
+            width: 30px;
+            height: 235px;
+            left: 0;
+            top: 2.5px;
+            background: 
+                linear-gradient(to bottom,
+                    #f4f1e8 0%,
+                    #fff 50%,
+                    #f4f1e8 100%
+                );
+            transform: rotateY(90deg) translateX(-15px) translateZ(15px);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Top pages edge */
+        .book-pages-top {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            top: 0;
+            left: 0;
+            background: linear-gradient(to bottom, #fff, #f4f1e8);
+            transform: rotateX(90deg) translateY(-15px) translateZ(225px);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Bottom pages edge */
+        .book-pages-bottom {
+            position: absolute;
+            width: 180px;
+            height: 30px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to top, #fff, #f4f1e8);
+            transform: rotateX(-90deg) translateY(15px) translateZ(15px);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Bookmark */
+        .book-bookmark {
+            position: absolute;
+            top: -5px;
+            right: 30px;
+            width: 18px;
+            height: 100px;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            transform: translateZ(15.5px);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 50% 100%, 0 90%);
+        }
+
+        /* Sources Scene - Multiple Devices */
+        .sources-scene {
+            width: 400px;
+            height: 380px;
+            position: relative;
+            transform-style: preserve-3d;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 180px);
+            grid-template-rows: repeat(2, 180px);
+            gap: 40px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .device {
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .device:hover {
+            transform: scale(1.15) translateZ(20px) !important;
+            z-index: 10;
+        }
+
+        .device:hover .device-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .device-label {
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        /* Tablet - Top Left */
+        .tablet {
+            animation: floatDevice1 4s ease-in-out infinite;
+        }
+
+        @keyframes floatDevice1 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tablet-body {
+            width: 130px;
+            height: 100px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 3px solid #333;
+            position: relative;
+        }
+
+        .tablet-body::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 3px;
+            background: #555;
+            border-radius: 2px;
+        }
+
+        .tablet-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Mobile Phone - Top Right */
+        .mobile {
+            animation: floatDevice2 3.5s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes floatDevice2 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .mobile-body {
+            width: 70px;
+            height: 130px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            border: 2px solid #333;
+            position: relative;
+        }
+
+        .mobile-body::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .mobile-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin-top: 8px;
+        }
+
+        /* Book - Bottom Left */
+        .sources-book {
+            animation: floatDevice3 4.5s ease-in-out infinite 1s;
+        }
+
+        @keyframes floatDevice3 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-11px); }
+        }
+
+        .small-book {
+            width: 95px;
+            height: 120px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 4px;
+            box-shadow: 
+                0 12px 25px rgba(0,0,0,0.4),
+                inset -3px 0 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .small-book::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(to right, rgba(0,0,0,0.3), transparent);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .small-book::after {
+            content: '';
+            position: absolute;
+            right: 2px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Newspaper - Bottom Right */
+        .newspaper {
+            animation: floatDevice4 3.8s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes floatDevice4 {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .newspaper-page {
+            width: 120px;
+            height: 95px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 3px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            padding: 10px;
+            position: relative;
+            border: 1px solid #ddd;
+        }
+
+        .newspaper-page::before {
+            content: 'NEWS';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            font-family: 'Times New Roman', serif;
+            border-bottom: 3px solid #333;
+            padding-bottom: 2px;
+        }
+
+        .newspaper-page::after {
+            content: '';
+            position: absolute;
+            top: 35px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: repeating-linear-gradient(
+                0deg,
+                #666 0px,
+                #666 1px,
+                transparent 1px,
+                transparent 7px
+            );
+            opacity: 0.4;
+        }
+
+        .newspaper-icon {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            font-size: 24px;
+        }
+
+        /* Target Scene with Interactive Rings */
+        .target-3d {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .target-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            border: 15px solid;
+            animation: pulseRing 2s ease-in-out infinite;
+            transition: all 0.3s;
+        }
+
+        .target-3d:hover .target-ring {
+            animation-play-state: paused;
+        }
+
+        .target-ring:nth-child(1) {
+            border-color: #667eea;
+            transform: translateZ(40px);
+        }
+
+        .target-ring:nth-child(2) {
+            border-color: #764ba2;
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            transform: translateZ(25px);
+            animation-delay: 0.3s;
+        }
+
+        .target-ring:nth-child(3) {
+            border-color: #f093fb;
+            width: 40%;
+            height: 40%;
+            top: 30%;
+            left: 30%;
+            transform: translateZ(10px);
+            animation-delay: 0.6s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+
+        @keyframes pulseRing {
+            0%, 100% { transform: scale(1) translateZ(var(--z, 0px)); opacity: 1; }
+            50% { transform: scale(1.08) translateZ(var(--z, 0px)); opacity: 0.8; }
+        }
+
+        /* Enhanced Lightbulb */
+        .bulb-3d {
+            width: 220px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        .bulb-3d:hover .bulb-glass {
+            box-shadow: 0 0 80px rgba(255, 215, 0, 1), inset 0 0 60px rgba(255, 255, 255, 0.9);
+        }
+
+        .bulb-glass {
+            width: 160px;
+            height: 200px;
+            background: radial-gradient(circle at 50% 30%, #fff 0%, #ffe57f 40%, #ffd700 100%);
+            border-radius: 80px 80px 60px 60px;
+            margin: 0 auto;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 40px rgba(255, 255, 255, 0.6);
+            animation: glow 2s ease-in-out infinite;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .bulb-glass::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), transparent);
+            border-radius: 50%;
+            top: 30px;
+            left: 30px;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 40px rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 0 100px rgba(255, 215, 0, 1), inset 0 0 60px rgba(255, 255, 255, 0.9); }
+        }
+
+        .bulb-base {
+            width: 90px;
+            height: 70px;
+            background: linear-gradient(to bottom, #aaa, #666);
+            margin: 0 auto;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .bulb-contact {
+            width: 40px;
+            height: 15px;
+            background: #444;
+            margin: 0 auto;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Enhanced Warning with Rotation */
+        .warning-3d {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateWarning 4s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes rotateWarning {
+            0%, 100% { transform: rotateZ(0deg) rotateY(0deg); }
+            25% { transform: rotateZ(-8deg) rotateY(10deg); }
+            75% { transform: rotateZ(8deg) rotateY(-10deg); }
+        }
+
+        .warning-3d:hover {
+            animation-play-state: paused;
+            transform: scale(1.15);
+        }
+
+        .warning-triangle {
+            width: 0;
+            height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-bottom: 250px solid #ff6b6b;
+            position: relative;
+            filter: drop-shadow(0 15px 40px rgba(255, 107, 107, 0.6));
+        }
+
+        .warning-triangle::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-bottom: 230px solid #ff8787;
+            left: -130px;
+            top: 10px;
+        }
+
+        .warning-triangle::after {
+            content: '⚠';
+            position: absolute;
+            font-size: 120px;
+            color: white;
+            left: -60px;
+            top: 60px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        /* Enhanced Question Mark */
+        .question-3d {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .question-circle {
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 180px;
+            color: white;
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.6);
+            animation: bounce 2s ease-in-out infinite;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .question-circle::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4), transparent);
+            border-radius: 50%;
+            top: 40px;
+            left: 60px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-25px) scale(1.05); }
+        }
+
+        .question-3d:hover .question-circle {
+            animation-play-state: paused;
+            transform: rotateY(180deg);
+        }
+
+        /* Enhanced Books Stack */
+        .books-stack {
+            width: 240px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .book-item {
+            width: 200px;
+            height: 70px;
+            position: absolute;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .book-item:hover {
+            transform: translateY(-20px) translateZ(30px) rotateZ(5deg) !important;
+            z-index: 10;
+        }
+
+        .book-item:nth-child(1) {
+            bottom: 0;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: bookFloat 3s ease-in-out infinite;
+        }
+
+        .book-item:nth-child(2) {
+            bottom: 80px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: bookFloat 3s ease-in-out infinite 0.4s;
+        }
+
+        .book-item:nth-child(3) {
+            bottom: 160px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            animation: bookFloat 3s ease-in-out infinite 0.8s;
+        }
+
+        @keyframes bookFloat {
+            0%, 100% { transform: translateY(0px) rotateZ(2deg); }
+            50% { transform: translateY(-15px) rotateZ(-2deg); }
+        }
+
+        /* Enhanced Checkmark */
+        .check-3d {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .check-circle {
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 180px;
+            color: white;
+            box-shadow: 0 25px 60px rgba(67, 233, 123, 0.6);
+            animation: checkPulse 2s ease-in-out infinite;
+            border: 8px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+        }
+
+        .check-circle::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4), transparent);
+            border-radius: 50%;
+            top: 30px;
+            left: 50px;
+        }
+
+        @keyframes checkPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.08) rotate(5deg); }
+        }
+
+        .check-3d:hover .check-circle {
+            animation-play-state: paused;
+            transform: rotateY(360deg);
+            transition: transform 0.8s;
+        }
+
+        .visual-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-top: 20px;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .description-section {
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px 30px;
+            border-left: 2px solid #dee2e6;
+            overflow-y: auto;
+        }
+
+        .description-content {
+            display: none;
+        }
+
+        .description-content.active {
+            display: block;
+            animation: slideIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .description-content h3 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .description-content h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .description-content p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .description-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .description-content li {
+            margin-bottom: 12px;
+            color: #555;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .description-content li::before {
+            content: '▸';
+            position: absolute;
+            left: -10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .description-section {
+                border-left: none;
+                border-top: 2px solid #dee2e6;
+            }
+
+            .nav-btn:hover {
+                transform: translateX(0) scale(1.02);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .scene-3d {
+                width: 280px;
+                height: 280px;
+            }
+
+            .visual-title {
+                font-size: 1.5em;
+            }
+
+            .sources-scene {
+                width: 300px;
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Reference Materials </h1>
+           
+        </div>
+
+        <div class="main-content">
+            <!-- Left Sidebar with Navigation Buttons -->
+            <div class="sidebar">
+                <h2>Topics</h2>
+                <button class="nav-btn active">What is Reference Material?</button>
+                <button class="nav-btn">Sources of Reference Materials</button>
+                <button class="nav-btn">Purposes & Uses</button>
+                <button class="nav-btn">Considerations While Using</button>
+                <button class="nav-btn">Precautions & Best Practices</button>
+                <button class="nav-btn">Why Are They Necessary?</button>
+                <button class="nav-btn">Types of Reference Materials</button>
+                <button class="nav-btn">Selecting Reference Materials</button>
+            </div>
+
+            <!-- Middle Section with Enhanced 3D Visual Representation -->
+            <div class="visual-section">
+                <!-- Book Scene -->
+                <div class="visual-content active" data-index="0">
+                    <div class="scene-3d">
+                        <div class="book-3d">
+                            <div class="book-cover">
+                                <div class="book-title-frame">
+                                    <div class="book-icon">📖</div>
+                                    <div class="book-title">Reference<br>Material</div>
+                                </div>
+                            </div>
+                            <div class="book-pages"></div>
+                            <div class="book-pages-left"></div>
+                            <div class="book-spine">
+                                <div class="spine-text">REFERENCE MATERIAL</div>
+                            </div>
+                            <div class="book-back"></div>
+                            <div class="book-bookmark"></div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Reference Material</h2>
+                </div>
+
+                <!-- Sources Scene - Multiple Devices -->
+                <div class="visual-content" data-index="1">
+                    <div class="scene-3d">
+                        <div class="sources-scene">
+                            <!-- Tablet - Top Left -->
+                            <div class="device tablet">
+                                <div class="tablet-body">
+                                    <div class="tablet-screen">📱</div>
+                                </div>
+                                <div class="device-label">Tablet</div>
+                            </div>
+                            
+                            <!-- Mobile Phone - Top Right -->
+                            <div class="device mobile">
+                                <div class="mobile-body">
+                                    <div class="mobile-screen">📱</div>
+                                </div>
+                                <div class="device-label">Mobile</div>
+                            </div>
+                            
+                            <!-- Book - Bottom Left -->
+                            <div class="device sources-book">
+                                <div class="small-book">📚</div>
+                                <div class="device-label">Books</div>
+                            </div>
+                            
+                            <!-- Newspaper - Bottom Right -->
+                            <div class="device newspaper">
+                                <div class="newspaper-page">
+                                    <span class="newspaper-icon">📰</span>
+                                </div>
+                                <div class="device-label">Newspaper</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Sources</h2>
+                </div>
+
+                <!-- Target Scene -->
+                <div class="visual-content" data-index="2">
+                    <div class="scene-3d">
+                        <div class="target-3d">
+                            <div class="target-ring" style="--z: 40px;"></div>
+                            <div class="target-ring" style="--z: 25px;"></div>
+                            <div class="target-ring" style="--z: 10px;">🎯</div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Purposes</h2>
+                </div>
+
+                <!-- Lightbulb Scene -->
+                <div class="visual-content" data-index="3">
+                    <div class="scene-3d">
+                        <div class="bulb-3d">
+                            <div class="bulb-glass"></div>
+                            <div class="bulb-base"></div>
+                            <div class="bulb-contact"></div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Considerations</h2>
+                </div>
+
+                <!-- Warning Sign Scene -->
+                <div class="visual-content" data-index="4">
+                    <div class="scene-3d">
+                        <div class="warning-3d">
+                            <div class="warning-triangle"></div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Precautions</h2>
+                </div>
+
+                <!-- Question Mark Scene -->
+                <div class="visual-content" data-index="5">
+                    <div class="scene-3d">
+                        <div class="question-3d">
+                            <div class="question-circle">❓</div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Necessity</h2>
+                </div>
+
+                <!-- Stack of Books Scene -->
+                <div class="visual-content" data-index="6">
+                    <div class="scene-3d">
+                        <div class="books-stack">
+                            <div class="book-item"></div>
+                            <div class="book-item"></div>
+                            <div class="book-item"></div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Types</h2>
+                </div>
+
+                <!-- Checkmark Scene -->
+                <div class="visual-content" data-index="7">
+                    <div class="scene-3d">
+                        <div class="check-3d">
+                            <div class="check-circle">✓</div>
+                        </div>
+                    </div>
+                    <h2 class="visual-title">Selection</h2>
+                </div>
+            </div>
+
+            <!-- Right Section with Descriptions -->
+            <div class="description-section">
+                <div class="description-content active" data-index="0">
+                    <h3>What is Reference Material?</h3>
+                    <p>Reference materials are authoritative sources of information designed to provide quick, reliable answers to specific questions. They are not meant to be read cover-to-cover but consulted for particular facts or guidance.</p>
+                    <p>These materials serve as reliable foundations for research, learning, and decision-making across various fields of study and professional practice.</p>
+                </div>
+
+                <div class="description-content" data-index="1">
+                    <h3>Sources of Reference Materials</h3>
+                    <p>Reference materials can be obtained from various sources:</p>
+                    <ul>
+                        <li><strong>Libraries:</strong> Public, academic, and specialized libraries</li>
+                        <li><strong>Digital Databases:</strong> Online encyclopedias, journals, and repositories</li>
+                        <li><strong>Educational Institutions:</strong> Schools, colleges, and universities</li>
+                        <li><strong>Professional Organizations:</strong> Industry-specific resources</li>
+                        <li><strong>Government Publications:</strong> Official statistics and reports</li>
+                        <li><strong>Online Platforms:</strong> Credible websites and digital archives</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="2">
+                    <h3>Purposes & Uses</h3>
+                    <p>Reference materials serve multiple important purposes:</p>
+                    <ul>
+                        <li><strong>Research:</strong> Supporting academic and professional investigations</li>
+                        <li><strong>Fact-Checking:</strong> Verifying information and claims</li>
+                        <li><strong>Learning:</strong> Acquiring new knowledge and understanding</li>
+                        <li><strong>Problem-Solving:</strong> Finding solutions to specific challenges</li>
+                        <li><strong>Citation:</strong> Providing credible sources for work</li>
+                        <li><strong>Decision-Making:</strong> Informing important choices</li>
+                        <li><strong>Standardization:</strong> Following established guidelines and protocols</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="3">
+                    <h3>Considerations While Using</h3>
+                    <p>When using reference materials, consider the following:</p>
+                    <ul>
+                        <li><strong>Credibility:</strong> Assess the authority and reputation of the source</li>
+                        <li><strong>Currency:</strong> Check publication date and relevance to current context</li>
+                        <li><strong>Accuracy:</strong> Verify information against multiple sources</li>
+                        <li><strong>Relevance:</strong> Ensure the material matches your specific needs</li>
+                        <li><strong>Scope:</strong> Understand the depth and breadth of coverage</li>
+                        <li><strong>Bias:</strong> Recognize potential perspectives or limitations</li>
+                        <li><strong>Purpose:</strong> Match the material to your intended use</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="4">
+                    <h3>Precautions & Best Practices</h3>
+                    <p>Take these precautions when using reference materials:</p>
+                    <ul>
+                        <li><strong>Cross-Reference:</strong> Verify information across multiple sources</li>
+                        <li><strong>Cite Properly:</strong> Give appropriate credit to avoid plagiarism</li>
+                        <li><strong>Check Updates:</strong> Look for the most recent editions or versions</li>
+                        <li><strong>Understand Context:</strong> Consider the historical and cultural background</li>
+                        <li><strong>Evaluate Critically:</strong> Don't accept information at face value</li>
+                        <li><strong>Use Appropriate Tools:</strong> Select materials suitable for your level</li>
+                        <li><strong>Respect Copyright:</strong> Follow legal guidelines for usage</li>
+                        <li><strong>Keep Records:</strong> Document your sources for future reference</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="5">
+                    <h3>Why Are Reference Materials Necessary?</h3>
+                    <p>Reference materials are essential for several critical reasons:</p>
+                    <ul>
+                        <li><strong>Reliability:</strong> Provide vetted, trustworthy information</li>
+                        <li><strong>Efficiency:</strong> Save time by offering organized, accessible knowledge</li>
+                        <li><strong>Standardization:</strong> Establish common understanding and terminology</li>
+                        <li><strong>Academic Integrity:</strong> Support proper research and citation practices</li>
+                        <li><strong>Professional Development:</strong> Enable continuous learning and skill enhancement</li>
+                        <li><strong>Quality Assurance:</strong> Help maintain standards in work and research</li>
+                        <li><strong>Foundation Building:</strong> Create solid bases for further exploration</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="6">
+                    <h3>Types of Reference Materials</h3>
+                    <p>Common types of reference materials include:</p>
+                    <ul>
+                        <li><strong>Dictionaries:</strong> Word definitions and usage</li>
+                        <li><strong>Encyclopedias:</strong> Comprehensive topic overviews</li>
+                        <li><strong>Atlases:</strong> Maps and geographical information</li>
+                        <li><strong>Almanacs:</strong> Annual facts and statistics</li>
+                        <li><strong>Bibliographies:</strong> Lists of works on specific subjects</li>
+                        <li><strong>Directories:</strong> Contact and organizational information</li>
+                        <li><strong>Handbooks:</strong> Practical guidelines and procedures</li>
+                        <li><strong>Indexes:</strong> Systematic listings of contents</li>
+                        <li><strong>Thesauri:</strong> Synonyms and related words</li>
+                    </ul>
+                </div>
+
+                <div class="description-content" data-index="7">
+                    <h3>Selecting Reference Materials</h3>
+                    <p>When selecting reference materials, consider these key factors:</p>
+                    <ul>
+                        <li><strong>Authority:</strong> Choose materials from reputable publishers and experts</li>
+                        <li><strong>Scope & Coverage:</strong> Ensure the material covers your topic adequately</li>
+                        <li><strong>Currency:</strong> Prefer recent publications for time-sensitive topics</li>
+                        <li><strong>Accessibility:</strong> Consider format, language, and ease of use</li>
+                        <li><strong>Credibility:</strong> Look for peer-reviewed or well-established sources</li>
+                        <li><strong>Purpose Alignment:</strong> Match the material to your specific goals</li>
+                        <li><strong>Level Appropriateness:</strong> Select materials suited to your knowledge level</li>
+                        <li><strong>Cost-Effectiveness:</strong> Balance quality with budget constraints</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach((btn, index) => {
+                btn.addEventListener('click', () => showContent(index));
+            });
+        });
+
+        function showContent(index) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            const visualContents = document.querySelectorAll('.visual-content');
+            const descriptionContents = document.querySelectorAll('.description-content');
+
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            visualContents.forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+
+            descriptionContents.forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+    </script>
+</body>
+</html>
