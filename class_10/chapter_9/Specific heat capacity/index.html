@@ -1,443 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Photorealistic Thermodynamics Lab</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Lab Monitor UI */
-        #monitor {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 300px;
-            background: rgba(10, 15, 20, 0.85);
-            border: 1px solid #334455;
-            border-radius: 8px;
-            padding: 15px;
-            color: #b0c0d0;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-        .val { color: #00ffff; font-family: monospace; font-weight: bold; }
-        .hot { color: #ff4444; text-shadow: 0 0 5px #ff0000; }
-        .status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-top: 5px;}
-        
-        /* Graph Canvas */
-        #graphCanvas {
-            width: 100%;
-            height: 100px;
-            background: #050a10;
-            border: 1px solid #223344;
-            margin-top: 10px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Specific Heat CAPACITY</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    background: #1c1e22;
+    font-family: 'Outfit', sans-serif;
+    color: #e8eaf0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 10px;
+    gap: 12px;
+  }
+  .header { text-align:center; width:100%; }
+  .header h1 {
+    font-size: clamp(16px, 4vw, 22px);
+    font-weight:700;
+    color:#f0f2f5;
+    margin-bottom:3px;
+  }
+  .header p { font-size: clamp(11px, 2.5vw, 13px); color:#7a8090; }
 
-        /* Loading */
-        #loading {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 1.2rem;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
-    </style>
+  .main-panel {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    max-width: 1400px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .controls-col {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lab-wrap {
+    background:#1a1d22;
+    border:1px solid #2d3138;
+    border-radius:14px;
+    overflow:hidden;
+    flex: 1 1 500px;
+    min-width: 300px;
+    position:relative;
+  }
+  #labCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 960 / 520;
+  }
+
+  .bottom-row {
+    display:flex;
+    gap:12px;
+    width:100%;
+    max-width:1400px;
+    align-items:flex-start;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .graph-card {
+    background:#22252b;
+    border:1px solid #33373f;
+    border-radius:12px;
+    padding:12px 14px;
+    flex: 1 1 600px;
+    min-width: 280px;
+  }
+  .graph-card h3 {
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:#666;
+    text-transform:uppercase;
+    margin-bottom:8px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .legend {
+    display:flex;
+    gap:12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    color:#aaa;
+  }
+  .leg-line { width:18px; height:2.5px; border-radius:2px; }
+  #graphCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 820 / 155;
+    border-radius:6px;
+    background: #14171d;
+  }
+
+  .card {
+    background:#22252b;
+    border:1px solid #33373f;
+    border-radius:12px;
+    padding:13px 15px;
+    width: 100%;
+  }
+  .card-title {
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    color:#555;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .timer-big {
+    font-family:'JetBrains Mono',monospace;
+    font-size: clamp(24px, 6vw, 32px);
+    font-weight:700;
+    text-align:center;
+    color:#f0f2f5;
+    letter-spacing:3px;
+  }
+  .timer-sub { font-size:10px; color:#555; text-align:center; margin-top:3px; }
+  .reading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:5px 0;
+    border-bottom:1px solid #2a2d33;
+    gap: 8px;
+  }
+  .reading:last-child { border:none; }
+  .r-label {
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:13px;
+    font-weight:500;
+  }
+  .r-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .r-val {
+    font-family:'JetBrains Mono',monospace;
+    font-size:17px;
+    font-weight:700;
+    white-space: nowrap;
+  }
+  .dbar { margin-top:10px; }
+  .dbar-row { margin-bottom:8px; }
+  .dbar-labels {
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:#666;
+    margin-bottom:3px;
+  }
+  .dbar-track {
+    background:#1a1d22;
+    border-radius:3px;
+    height:6px;
+    overflow:hidden;
+  }
+  .dbar-fill {
+    height:100%;
+    border-radius:3px;
+    transition:width .12s linear;
+  }
+  .button-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1 1 auto;
+    padding: 10px 5px;
+    border:none;
+    border-radius:8px;
+    font-family:'Outfit',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.1s;
+    text-align: center;
+    min-width: 100px;
+  }
+  .btn:active { transform:scale(0.96); }
+  .btn-fireon { background:#3fb950; color:black; }
+  .btn-fireoff { background:#b33e3e; color:white; border:1px solid #a33; }
+  .btn-reset { background:#2a2d33; color:#bbb; border:1px solid #3a3e47; width:100%; }
+  .speed-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:#666;
+    margin-top:8px;
+    flex-wrap: wrap;
+  }
+  .speed-row select {
+    background:#1a1d22;
+    border:1px solid #3a3e47;
+    color:#ccc;
+    padding:3px 7px;
+    border-radius:6px;
+    font-size:12px;
+    flex:1;
+    min-width: 80px;
+  }
+  .info-cards {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:10px;
+    width:100%;
+    max-width:1400px;
+  }
+  .info-card {
+    background:#22252b;
+    border:1px solid #33373f;
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .info-card h4 {
+    font-size:11px;
+    color:#666;
+    margin-bottom:6px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .info-card p { font-size:12px; color:#888; line-height:1.6; }
+  .info-card .hl { color:#ddd; }
+  .q-calc {
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    line-height:2;
+  }
+  .q-calc .qrow {
+    display:flex;
+    justify-content:space-between;
+    padding:1px 0;
+    border-bottom:1px solid #2a2d33;
+    gap: 10px;
+  }
+  .q-calc .qrow:last-child { border:none; color:#fff; font-weight:700; }
+  .q-calc .qw { color:#58a6ff; }
+  .q-calc .qo { color:#f0b429; }
+  .heat-indicator {
+    background:#1e1f24;
+    border-radius:6px;
+    padding:8px 10px;
+    margin-top:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+  }
+  .heat-row {
+    display:flex;
+    justify-content:space-between;
+    margin:3px 0;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .heat-value { color:#ffaa66; }
+
+  .therm-bars-container {
+    display:flex;
+    gap:10px;
+    margin: 10px 0 8px;
+  }
+  .therm-bar-wrapper {
+    flex:1;
+    text-align:center;
+    font-size:9px;
+  }
+  .therm-bar-bg {
+    background:#1a1d22;
+    height:16px;
+    border-radius:8px;
+    overflow:hidden;
+    margin-top: 2px;
+  }
+  .therm-bar-fill {
+    height:100%;
+    width:0%;
+    border-radius:8px;
+    transition: width 0.1s;
+  }
+</style>
 </head>
 <body>
 
-    <div id="loading">Initializing Laboratory Environment...</div>
+<div class="header">
+  <h1>🔬 SPECIFIC HEAT CAPACITY</h1>
+ 
+</div>
 
-    <div id="monitor">
-        <h3 style="margin: 0 0 10px 0; color: white; border-bottom: 1px solid #445;">THERMAL SENSOR</h3>
-        <div class="row"><span>Target:</span> <span id="matName" class="val">Water</span></div>
-        <div class="row"><span>Temperature:</span> <span id="tempVal" class="val">20.0 °C</span></div>
-        <div class="row"><span>State:</span> <span id="stateVal" class="val">LIQUID</span></div>
-        <div class="row"><span>Input Power:</span> <span id="powerVal" class="val">0 W</span></div>
-        <canvas id="graphCanvas" width="300" height="100"></canvas>
-        <div class="status" id="simStatus">Standby</div>
+<div class="main-panel">
+  <!-- LEFT CONTROLS -->
+  <div class="controls-col">
+    <div class="card">
+      <div class="timer-big" id="timerEl">0:00</div>
+      <div class="timer-sub">elapsed time (minutes)</div>
     </div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+    <div class="card">
+      <div class="card-title">🌡️ THERMOMETER (0–100°C)</div>
+      <div class="reading">
+        <div class="r-label"><div class="r-dot" style="background:#58a6ff"></div>Water</div>
+        <div class="r-val" style="color:#58a6ff" id="wTempEl">20.0°C</div>
+      </div>
+      <div class="reading">
+        <div class="r-label"><div class="r-dot" style="background:#f0b429"></div>Oil</div>
+        <div class="r-val" style="color:#f0b429" id="oTempEl">20.0°C</div>
+      </div>
+      
+      <!-- Visual thermometer bars (0-100°C) -->
+      <div class="therm-bars-container">
+        <div class="therm-bar-wrapper">
+          <span style="color:#58a6ff;">Water °C</span>
+          <div class="therm-bar-bg">
+            <div id="wThermFill" class="therm-bar-fill" style="background:#58a6ff;"></div>
+          </div>
+        </div>
+        <div class="therm-bar-wrapper">
+          <span style="color:#f0b429;">Oil °C</span>
+          <div class="therm-bar-bg">
+            <div id="oThermFill" class="therm-bar-fill" style="background:#f0b429;"></div>
+          </div>
+        </div>
+      </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-        import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+      <!-- Heating/cooling predictions -->
+      <div class="heat-indicator">
+        <div class="heat-row"><span>⏳ to boil water (100°C)</span> <span class="heat-value" id="timeToBoilWater">—</span></div>
+        <div class="heat-row"><span>⏳ to boil oil (100°C)</span> <span class="heat-value" id="timeToBoilOil">—</span></div>
+        <div class="heat-row"><span>❄️ water cool to 30°C</span> <span class="heat-value" id="timeCoolWater">—</span></div>
+        <div class="heat-row"><span>❄️ oil cool to 30°C</span> <span class="heat-value" id="timeCoolOil">—</span></div>
+      </div>
 
-        // --- PHYSICS CONFIGURATION ---
-        const CONFIG = {
-            power: 0,           // Watts
-            mass: 200,          // grams
-            startTemp: 20,      // Celsius
-            ambientTemp: 20,    // Room temp
-            speed: 1.0          // Time multiplier
-        };
+      <div class="dbar">
+        <div class="dbar-row">
+          <div class="dbar-labels"><span>ΔT water</span><span id="wDeltaEl">+0.0°C</span></div>
+          <div class="dbar-track"><div class="dbar-fill" id="wBar" style="background:#58a6ff;width:0%"></div></div>
+        </div>
+        <div class="dbar-row">
+          <div class="dbar-labels"><span>ΔT oil</span><span id="oDeltaEl">+0.0°C</span></div>
+          <div class="dbar-track"><div class="dbar-fill" id="oBar" style="background:#f0b429;width:0%"></div></div>
+        </div>
+      </div>
+    </div>
 
-        // Material Database with Phase Change Properties
-        const MATERIALS = {
-            'Water': { 
-                c: 4.18,        // Specific Heat
-                boilPt: 100,    // Boiling Point
-                latentV: 2260,  // Heat of Vaporization (J/g)
-                color: 0xaaddff,
-                type: 'liquid',
-                density: 1.0
-            },
-            'Iron': { 
-                c: 0.45, 
-                boilPt: 2862, 
-                latentV: 6000,
-                color: 0x444444, 
-                type: 'solid',
-                density: 7.8
-            },
-            'Gold': { 
-                c: 0.13, 
-                boilPt: 2800, 
-                latentV: 1600,
-                color: 0xffd700, 
-                type: 'solid',
-                density: 19.3
-            }
-        };
+    <!-- Flame control -->
+    <div class="card">
+      <div class="card-title">🔥 FLAME CONTROL</div>
+      <div class="button-row">
+        <button class="btn btn-fireon" id="fireOnBtn">🔥 Fire On</button>
+        <button class="btn btn-fireoff" id="fireOffBtn">❄️ Fire Off</button>
+      </div>
+      <button class="btn btn-reset" id="resetBtn">↺ Reset Experiment</button>
+      <div class="speed-row">
+        <span>Speed:</span>
+        <select id="speedSel">
+          <option value="1">1×</option>
+          <option value="2" selected>2×</option>
+          <option value="4">4×</option>
+          <option value="8">8×</option>
+        </select>
+      </div>
+    </div>
 
-        let currentMat = MATERIALS['Water'];
-        let temperature = CONFIG.startTemp;
-        let accumulatedLatentHeat = 0; // Energy stored during phase change
-        let isBoiling = false;
+    <!-- Heat energy Q -->
+    <div class="card">
+      <div class="card-title">🧮 HEAT ABSORBED (Q = m·c·ΔT)</div>
+      <div class="q-calc">
+        <div class="qrow"><span>mass</span><span>100 g</span></div>
+        <div class="qrow"><span class="qw">c (water)</span><span class="qw">4.18 J/g°C</span></div>
+        <div class="qrow"><span class="qo">c (oil)</span><span class="qo">2.09 J/g°C</span></div>
+        <div class="qrow"><span class="qw">Q water</span><span class="qw" id="qwEl">0 J</span></div>
+        <div class="qrow"><span class="qo">Q oil</span><span class="qo" id="qoEl">0 J</span></div>
+      </div>
+    </div>
+  </div>
 
-        // --- 1. RENDERER & SCENE (High Quality) ---
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.toneMapping = THREE.ACESFilmicToneMapping; // Realistic lighting
-        renderer.toneMappingExposure = 1.0;
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(renderer.domElement);
+  <!-- Canvas -->
+  <div class="lab-wrap">
+    <canvas id="labCanvas" width="960" height="520"></canvas>
+  </div>
+</div>
 
-        const scene = new THREE.Scene();
-        // Generate a fake "Room" environment map for reflections
-        const pmremGenerator = new THREE.PMREMGenerator(renderer);
-        scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-        scene.background = new THREE.Color(0x050505);
+<!-- GRAPH CARD -->
+<div class="bottom-row">
+  <div class="graph-card">
+    <h3>
+      <span>📈 Temperature history (0–100°C scale)</span>
+      <div class="legend">
+        <div class="legend-item"><div class="leg-line" style="background:#58a6ff"></div>Water</div>
+        <div class="legend-item"><div class="leg-line" style="background:#f0b429"></div>Oil</div>
+      </div>
+    </h3>
+    <canvas id="graphCanvas" width="820" height="155"></canvas>
+  </div>
+</div>
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
-        camera.position.set(0, 4, 8);
+<!-- Info cards -->
+<div class="info-cards">
+  <div class="info-card"><h4>🌡️ Thermometers right</h4><p>Thermometers shifted further right (THERM_X_OFF = 42) for clear visibility.</p></div>
+  <div class="info-card"><h4>🔄 Natural reheat</h4><p>Fire off → cools. Fire on → resumes heating from current temp, not a jump.</p></div>
+  <div class="info-card"><h4>⏱️ Realistic timing</h4><p>Water boils in 16.0 min, oil in 8.0 min. Cooling from exponential decay.</p></div>
+</div>
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.target.set(0, 1, 0);
-
-        // --- 2. LABORATORY ASSETS ---
-
-        // A. The Hot Plate (Ceramic Look)
-        const plateGeo = new THREE.CylinderGeometry(1.5, 1.6, 0.4, 64);
-        const plateMat = new THREE.MeshPhysicalMaterial({
-            color: 0x111111, roughness: 0.8, clearcoat: 0.2
-        });
-        const plate = new THREE.Mesh(plateGeo, plateMat);
-        plate.position.y = 0.2;
-        plate.receiveShadow = true;
-        scene.add(plate);
-
-        // The Heating Element (Emissive Ring)
-        const coilGeo = new THREE.TorusGeometry(1.0, 0.15, 32, 100);
-        const coilMat = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x000000 });
-        const coil = new THREE.Mesh(coilGeo, coilMat);
-        coil.rotation.x = -Math.PI/2;
-        coil.position.y = 0.41;
-        scene.add(coil);
-
-        // B. The Glass Beaker (Realistic Glass Physics)
-        const glassGeo = new THREE.CylinderGeometry(1.2, 1.2, 2.5, 64, 1, true); // Open top
-        const glassMat = new THREE.MeshPhysicalMaterial({
-            transmission: 1,      // Glass is transparent
-            opacity: 1,
-            metalness: 0,
-            roughness: 0,
-            ior: 1.5,             // Index of Refraction for glass
-            thickness: 0.1,       // Simulated thickness for refraction
-            specularIntensity: 1,
-            color: 0xffffff,
-            side: THREE.DoubleSide
-        });
-        const beaker = new THREE.Mesh(glassGeo, glassMat);
-        beaker.position.y = 1.65;
-        beaker.castShadow = true; 
-        scene.add(beaker);
-        
-        // Beaker bottom
-        const glassBot = new THREE.Mesh(new THREE.CircleGeometry(1.2, 64), glassMat);
-        glassBot.rotation.x = -Math.PI/2;
-        glassBot.position.y = 0.42;
-        scene.add(glassBot);
-
-        // C. The Liquid / Solid Content
-        const liquidGeo = new THREE.CylinderGeometry(1.1, 1.1, 1.8, 64);
-        const liquidMat = new THREE.MeshPhysicalMaterial({
-            color: currentMat.color,
-            transmission: 0.9,    // Water is transmissive
-            opacity: 1,
-            roughness: 0.1,
-            ior: 1.33,            // IOR for Water
-            metalness: 0
-        });
-        const contentMesh = new THREE.Mesh(liquidGeo, liquidMat);
-        contentMesh.position.y = 1.4;
-        scene.add(contentMesh);
-
-        // --- 3. PARTICLE SYSTEMS (Bubbles & Steam) ---
-        
-        // Texture generation
-        function getCircleTexture() {
-            const c = document.createElement('canvas'); c.width=32; c.height=32;
-            const ctx = c.getContext('2d');
-            ctx.beginPath(); ctx.arc(16,16,15,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
-            return new THREE.CanvasTexture(c);
-        }
-
-        // Bubbles (Inside liquid)
-        const bubbleGeo = new THREE.BufferGeometry();
-        const bubbleCount = 200;
-        const bPos = new Float32Array(bubbleCount*3);
-        const bSpeed = new Float32Array(bubbleCount);
-        for(let i=0; i<bubbleCount; i++) {
-            bPos[i*3] = (Math.random()-0.5)*1.8;
-            bPos[i*3+1] = Math.random()*1.8;
-            bPos[i*3+2] = (Math.random()-0.5)*1.8;
-            bSpeed[i] = 0.02 + Math.random()*0.05;
-        }
-        bubbleGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
-        const bubbleMat = new THREE.PointsMaterial({
-            color: 0xffffff, size: 0.1, map: getCircleTexture(), 
-            transparent: true, opacity: 0.6, depthWrite: false
-        });
-        const bubbles = new THREE.Points(bubbleGeo, bubbleMat);
-        bubbles.position.y = 0.5;
-        bubbles.visible = false;
-        scene.add(bubbles);
-
-        // Steam (Above liquid)
-        const steamGeo = new THREE.BufferGeometry();
-        const steamCount = 500;
-        const sPos = new Float32Array(steamCount*3);
-        const sLife = new Float32Array(steamCount); // Life 0 to 1
-        for(let i=0; i<steamCount; i++) {
-            sPos[i*3] = (Math.random()-0.5)*1.0;
-            sPos[i*3+1] = Math.random()*3;
-            sPos[i*3+2] = (Math.random()-0.5)*1.0;
-            sLife[i] = Math.random();
-        }
-        steamGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
-        const steamMat = new THREE.PointsMaterial({
-            color: 0xaaaaaa, size: 0.5, map: getCircleTexture(),
-            transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending
-        });
-        const steam = new THREE.Points(steamGeo, steamMat);
-        steam.position.y = 2.5;
-        scene.add(steam);
-
-        // --- 4. LIGHTING ---
-        RectAreaLightUniformsLib.init();
-        const rectLight = new THREE.RectAreaLight(0xffffff, 5, 10, 10);
-        rectLight.position.set(5, 5, 0);
-        rectLight.lookAt(0, 0, 0);
-        scene.add(rectLight);
-        
-        // Point light inside the heater for glow
-        const heaterLight = new THREE.PointLight(0xff3300, 0, 3);
-        heaterLight.position.set(0, 0.6, 0);
-        scene.add(heaterLight);
-
-
-        // --- 5. LOGIC & ANIMATION ---
-        const clock = new THREE.Clock();
-        const graphCanvas = document.getElementById('graphCanvas');
-        const ctx = graphCanvas.getContext('2d');
-        let graphData = [];
-
-        // UI References
-        const uiTemp = document.getElementById('tempVal');
-        const uiState = document.getElementById('stateVal');
-        const uiPower = document.getElementById('powerVal');
-        const uiName = document.getElementById('matName');
-        const uiStatus = document.getElementById('simStatus');
-
-        // Initial material set
-        function setMaterial(name) {
-            currentMat = MATERIALS[name];
-            CONFIG.mass = (name === 'Water') ? 200 : 1000; // Metals are heavier in same volume
-            
-            // Update Visuals
-            if(currentMat.type === 'liquid') {
-                contentMesh.material.color.setHex(currentMat.color);
-                contentMesh.material.transmission = 0.9;
-                contentMesh.material.metalness = 0;
-                contentMesh.material.roughness = 0.1;
-            } else {
-                contentMesh.material.color.setHex(currentMat.color);
-                contentMesh.material.transmission = 0; // Solid
-                contentMesh.material.metalness = 1.0;
-                contentMesh.material.roughness = 0.3;
-            }
-            
-            temperature = CONFIG.startTemp;
-            accumulatedLatentHeat = 0;
-            graphData = [];
-            uiName.innerText = name;
-        }
-
-        // GUI
-        const gui = new GUI({ title: 'Lab Controls' });
-        gui.add(CONFIG, 'power', 0, 5000).name('Heater Power (W)').onChange(v => {
-            if(v > 0) uiStatus.innerText = "HEATING ACTIVE";
-            else uiStatus.innerText = "COOLING (AMBIENT)";
-        });
-        gui.add({ mat: 'Water' }, 'mat', Object.keys(MATERIALS)).name('Substance').onChange(setMaterial);
-        gui.add({ reset: () => { temperature = CONFIG.startTemp; graphData = []; accumulatedLatentHeat=0; } }, 'reset').name('Reset Temp');
-
-
-        function updatePhysics(dt) {
-            if(dt > 0.1) dt = 0.1; // Cap time step
-            const simDt = dt * CONFIG.speed;
-
-            // 1. Calculate Heat Input (Joules)
-            const inputQ = CONFIG.power * simDt;
-
-            // 2. Calculate Heat Loss (Newton's Law of Cooling)
-            // Approximate loss coefficient (h) * Area * DeltaT
-            const lossQ = 2.0 * (temperature - CONFIG.ambientTemp) * simDt; 
-
-            const netQ = inputQ - lossQ;
-
-            // 3. Apply Temperature Change
-            if(netQ !== 0) {
-                // Check Phase Change
-                if(temperature >= currentMat.boilPt && netQ > 0) {
-                    // WE ARE BOILING
-                    isBoiling = true;
-                    temperature = currentMat.boilPt; // Clamp temp
-                    
-                    // Add energy to latent heat bucket
-                    accumulatedLatentHeat += netQ;
-                    
-                    // Check if fully evaporated (Simulation reset or stop)
-                    const totalNeeded = CONFIG.mass * currentMat.latentV;
-                    if(accumulatedLatentHeat > totalNeeded) {
-                        uiState.innerText = "GAS (EVAPORATED)";
-                        contentMesh.scale.y = Math.max(0, 1 - (accumulatedLatentHeat - totalNeeded)/1000); // Visual shrink
-                    } else {
-                        uiState.innerText = `BOILING (${Math.round((accumulatedLatentHeat/totalNeeded)*100)}%)`;
-                    }
-
-                } else {
-                    // NORMAL HEATING/COOLING
-                    isBoiling = false;
-                    uiState.innerText = currentMat.type === 'liquid' ? "LIQUID" : "SOLID";
-                    accumulatedLatentHeat = 0;
-                    
-                    const deltaT = netQ / (CONFIG.mass * currentMat.c);
-                    temperature += deltaT;
-                }
-            }
-        }
-
-        function updateVisuals(dt) {
-            // UI Updates
-            uiTemp.innerText = temperature.toFixed(1) + " °C";
-            if(temperature > 50) uiTemp.classList.add('hot'); else uiTemp.classList.remove('hot');
-            uiPower.innerText = Math.round(CONFIG.power) + " W";
-
-            // 1. Heater Glow
-            const glowRatio = Math.min(CONFIG.power / 3000, 1);
-            coil.material.emissive.setRGB(glowRatio, glowRatio*0.2, 0);
-            heaterLight.intensity = glowRatio * 20;
-
-            // 2. Boiling Effects
-            if(isBoiling && currentMat.type === 'liquid') {
-                bubbles.visible = true;
-                const positions = bubbles.geometry.attributes.position.array;
-                for(let i=0; i<bubbleCount; i++) {
-                    positions[i*3+1] += bSpeed[i]; // Move up
-                    if(positions[i*3+1] > 0.8) positions[i*3+1] = -0.8; // Reset
-                }
-                bubbles.geometry.attributes.position.needsUpdate = true;
-            } else {
-                bubbles.visible = false;
-            }
-
-            // 3. Steam Effects (Depends on temp > 80C)
-            const steamAmount = Math.max(0, (temperature - 80) / 20); // 0 at 80C, 1 at 100C
-            if(steamAmount > 0 && currentMat.type === 'liquid') {
-                steam.visible = true;
-                steam.material.opacity = steamAmount * 0.3;
-                const pos = steam.geometry.attributes.position.array;
-                for(let i=0; i<steamCount; i++) {
-                    pos[i*3+1] += 0.02 * steamAmount; 
-                    // Wiggle
-                    pos[i*3] += Math.sin(pos[i*3+1]*5 + clock.elapsedTime)*0.005;
-                    
-                    if(pos[i*3+1] > 2.0) {
-                        pos[i*3+1] = 0;
-                        pos[i*3] = (Math.random()-0.5);
-                    }
-                }
-                steam.geometry.attributes.position.needsUpdate = true;
-            } else {
-                steam.visible = false;
-            }
-
-            // 4. Graph Drawing
-            drawGraph();
-        }
-
-        function drawGraph() {
-            graphData.push(temperature);
-            if(graphData.length > 300) graphData.shift();
-
-            ctx.fillStyle = '#050a10';
-            ctx.fillRect(0,0,300,100);
-
-            ctx.beginPath();
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = 2;
-            
-            const maxTemp = Math.max(120, temperature + 20);
-            
-            for(let i=0; i<graphData.length; i++) {
-                const x = (i / 300) * 300;
-                const y = 100 - (graphData[i] / maxTemp) * 100;
-                if(i===0) ctx.moveTo(x,y);
-                else ctx.lineTo(x,y);
-            }
-            ctx.stroke();
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const dt = clock.getDelta();
-            updatePhysics(dt);
-            updateVisuals(dt);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        document.getElementById('loading').style.opacity = 0;
-        animate();
-
-    </script>
+<script src="index.js">
+</script>
 </body>
 </html>

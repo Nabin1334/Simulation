@@ -1,1124 +1,761 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Experiment: Calculate Acceleration due to Gravity</title>
-    <style>
-        :root {
-            --sky: linear-gradient(to bottom, #87CEEB, #E0F7FA);
-            --building: #F5F5DC;
-            --accent: #E74C3C;
-            --accent-light: #FF6B6B;
-            --text: #2C3E50;
-            --text-light: #5D6D7E;
-            --success: #27ae60;
-            --ground: #7DCEA0;
-            --measurement: #3498DB;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Anomalous Expansion of Water — Realistic 3D Physics Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* === same structure – no layout changes, only visual tuning inside canvas === */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#07101c;font-family:'Inter',sans-serif;color:#e4eef8}
+.app{display:flex;height:100vh}
 
-        * {
-            box-sizing: border-box;
-        }
+/* panel unchanged (only subtle micro‑refinements) */
+.panel{width:300px;flex-shrink:0;background:#0b1828;border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;overflow:hidden;}
+.pscroll{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+.pscroll::-webkit-scrollbar{width:3px}
+.pscroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            background-image: linear-gradient(to bottom, #f0f4f8, #d9e4ec);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+.badge{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.28)}
+.title{font-size:1.08rem;font-weight:800;line-height:1.3;margin-top:3px}
+.title span{color:#38bdf8}
+.subtitle{font-size:.68rem;color:rgba(255,255,255,.28);font-weight:500;margin-top:2px}
 
-        h1 {
-            color: var(--text);
-            margin: 15px 0 5px 0;
-            font-size: 28px;
-            text-align: center;
-            z-index: 10;
-        }
+.temp-card{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px}
+.t-label{font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.t-num{font-family:'JetBrains Mono',monospace;font-size:3.4rem;font-weight:600;line-height:1;transition:color .4s}
+.t-deg{font-size:1.2rem;opacity:.4;font-weight:400}
+.phase-pill{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 14px;border-radius:999px;font-size:.76rem;font-weight:700;border:1.5px solid;transition:all .4s;width:fit-content;}
 
-        .subtitle {
-            color: var(--text-light);
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 16px;
-            max-width: 800px;
-            z-index: 10;
-        }
-        
-        /* Floating Control Panel in Upper Left */
-        #control-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            z-index: 100;
-            min-width: 200px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
-        }
+.slabel{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;outline:none;cursor:pointer;margin-top:8px;
+  background:linear-gradient(90deg,#60a5fa 0%,#60a5fa 11%,#a78bfa 11%,#a78bfa 15%,#38bdf8 15%,#38bdf8 34%,#0ea5e9 34%,#0ea5e9 50%,#34d399 50%,#34d399 65%,#fbbf24 65%,#fbbf24 81%,#fb923c 81%,#fb923c 90%,#ef4444 90%,#ef4444 100%);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;cursor:grab;box-shadow:0 0 0 3px rgba(255,255,255,.16),0 3px 10px rgba(0,0,0,.5);transition:transform .1s;}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2);cursor:grabbing}
+.marks{display:flex;justify-content:space-between;margin-top:4px}
+.mk{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.28)}
+.mk.hi{color:rgba(56,189,248,.7);font-weight:600}
 
-        .control-group {
-            margin-bottom: 15px;
-        }
+.burner-box{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);font-size:.76rem;font-weight:700;transition:all .4s;}
+.burner-dot{width:10px;height:10px;border-radius:50%;background:#334155;transition:background .4s;flex-shrink:0}
 
-        .control-group h3 {
-            margin: 0 0 10px 0;
-            color: var(--text);
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.scard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:10px 12px}
+.sc-l{font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:rgba(255,255,255,.32);margin-bottom:3px}
+.sc-v{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;transition:color .35s}
+.sc-u{font-size:.55rem;color:rgba(255,255,255,.25);margin-top:2px}
 
-        .control-group h3 i {
-            margin-right: 8px;
-            color: var(--accent);
-        }
+.fact{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.16);border-radius:10px;padding:12px;font-size:.72rem;line-height:1.6;color:rgba(255,255,255,.52);transition:background .4s,border-color .4s}
 
-        #action-btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            width: 100%;
-            box-shadow: 0 4px 6px rgba(231, 76, 60, 0.3);
-        }
+.etitle{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.28)}
+.ecards{display:flex;flex-direction:column;gap:6px}
+.ecard{border-radius:9px;padding:10px 12px 10px 13px;border:1.5px solid rgba(255,255,255,.06);border-left:3px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);opacity:.28;transition:all .4s ease;}
+.ecard.on{opacity:1}
+.ecard.on.cice{background:rgba(147,197,253,.08);border-color:rgba(147,197,253,.22);border-left-color:#93c5fd}
+.ecard.on.cblu{background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.22); border-left-color:#38bdf8}
+.ecard.on.cgld{background:rgba(251,191,36,.08); border-color:rgba(251,191,36,.22); border-left-color:#fbbf24}
+.ecard.on.cred{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.22);border-left-color:#f87171}
+.ecard.on.cgrn{background:rgba(52,211,153,.08); border-color:rgba(52,211,153,.22); border-left-color:#34d399}
+.ecard.on.cpur{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.22);border-left-color:#a78bfa}
+.ehead{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.eico{font-size:.95rem}
+.enm{font-size:.78rem;font-weight:700}
+.edsc{font-size:.67rem;color:rgba(255,255,255,.45);line-height:1.5}
 
-        #action-btn:hover { 
-            background-color: #c0392b; 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(231, 76, 60, 0.4);
-        }
+/* view – canvas will be fully overhauled with realism */
+.view{flex:1;position:relative;overflow:hidden;background:#010810}
+#c{display:block;width:100%;height:100%}
+.ov{position:absolute;inset:0;pointer-events:none}
+.tbar{position:absolute;top:0;left:0;right:0;padding:13px 22px;background:linear-gradient(to bottom,rgba(1,8,16,.88) 0%,transparent 100%);display:flex;justify-content:space-between;align-items:center;}
+.tbar-ph{font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;transition:color .4s}
+.tbar-d{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.32);transition:color .4s}
 
-        #action-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
-        }
+.fl{position:absolute;pointer-events:none;background:rgba(1,8,16,.82);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-left:2.5px solid;padding:5px 12px;border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:.64rem;color:#e4eef8;opacity:0;transition:opacity .5s;white-space:nowrap;}
+.fl.v{opacity:1}
+#fl-ice  {top:18%;right:22px;border-left-color:#93c5fd}
+#fl-cold {top:37%;right:22px;border-left-color:#a78bfa}
+#fl-4c   {top:54%;right:22px;border-left-color:#fbbf24}
+#fl-bub  {top:43%;right:22px;border-left-color:#34d399}
+#fl-stm  {top:12%;right:22px;border-left-color:#f87171}
 
-        #action-btn:disabled { 
-            background-color: #95a5a6; 
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        #reset-btn {
-            background-color: var(--text-light);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #reset-btn:hover {
-            background-color: var(--text);
-        }
-
-        /* Height selector */
-        .height-selector {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 5px;
-        }
-
-        .height-option {
-            padding: 12px;
-            background: #f0f4f8;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 14px;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .height-option:hover {
-            background: #e3e8ef;
-        }
-
-        .height-option.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        .height-info {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        /* The container for the simulation */
-        #sim-container {
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--sky);
-            width: 800px;
-            height: 500px;
-            border: 1px solid rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-
-        /* Data Display Panel */
-        #data-panel {
-            margin-top: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            width: 800px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 15px;
-            box-sizing: border-box;
-        }
-
-        .data-group {
-            text-align: center;
-            padding: 15px;
-            background: #F8F9FA;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: 1px solid #E9ECEF;
-        }
-
-        .data-group.active {
-            background-color: #E3F2FD;
-            border-color: var(--measurement);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-light);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .value {
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: var(--text);
-        }
-
-        .unit {
-            font-size: 14px;
-            color: var(--text-light);
-            font-weight: normal;
-            margin-left: 2px;
-        }
-
-        /* The Formula Display */
-        #calculation {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 800px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-
-        #calculation h3 {
-            color: var(--text);
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-        }
-
-        #calculation h3 i {
-            margin-right: 10px;
-            color: var(--success);
-        }
-
-        .formula {
-            font-size: 20px;
-            color: var(--text);
-            font-family: 'Courier New', monospace;
-            background-color: #F8F9FA;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .result {
-            font-size: 22px;
-            color: var(--success);
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            padding: 10px;
-            background-color: rgba(39, 174, 96, 0.1);
-            border-radius: 8px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .error {
-            color: #E74C3C;
-        }
-
-        .info-box {
-            background-color: #E3F2FD;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text);
-            border-left: 4px solid var(--measurement);
-        }
-
-        .info-box p {
-            margin: 5px 0;
-        }
-
-        .info-box .accent {
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        /* Measurement lines */
-        .measurement-line {
-            stroke: var(--measurement);
-            stroke-width: 2;
-            stroke-dasharray: 5, 5;
-        }
-
-        .measurement-text {
-            fill: var(--measurement);
-            font-size: 14px;
-            font-weight: bold;
-            user-select: none;
-        }
-
-        /* Real-time data indicator */
-        .realtime-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(231, 76, 60, 0.9);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-            display: none;
-            z-index: 100;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-
-        /* Physics speed info */
-        .physics-info {
-            background: rgba(52, 152, 219, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 12px;
-            text-align: center;
-            border: 1px dashed rgba(52, 152, 219, 0.3);
-        }
-
-        .physics-info .highlight {
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        /* Height visualization */
-        .height-visual {
-            position: absolute;
-            right: 20px;
-            bottom: 80px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 2px solid var(--measurement);
-            z-index: 50;
-            text-align: center;
-            min-width: 100px;
-        }
-
-        .height-visual h4 {
-            margin: 0 0 3px 0;
-            color: var(--measurement);
-            font-size: 12px;
-        }
-
-        .height-visual .value {
-            font-size: 18px;
-            color: var(--accent);
-        }
-
-        /* Scale indicator */
-        .scale-indicator {
-            position: absolute;
-            left: 20px;
-            bottom: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            z-index: 50;
-        }
-    </style>
+.bbar{position:absolute;bottom:0;left:0;right:0;padding:12px 24px 16px;background:linear-gradient(to top,rgba(1,8,16,.9) 0%,transparent 100%);text-align:center;}
+.bfact{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.65;max-width:520px;margin:0 auto}
+</style>
 </head>
 <body>
+<div class="app">
+<aside class="panel"><div class="pscroll">
+  <div><div class="badge">Class 10 · Physics Lab</div><div class="title">Anomalous Expansion<br>of <span>Water</span></div><div class="subtitle">Photorealistic 3D Simulation</div></div>
+  <div class="temp-card"><div class="t-label">Water Temperature</div><div class="t-num" id="tnum">20.0<span class="t-deg">°C</span></div><div class="phase-pill" id="ppill">💧 Liquid Water</div></div>
+  <div><div class="slabel">Set Temperature</div><input type="range" id="sl" min="-15" max="115" step="0.5" value="20"/><div class="marks"><span class="mk">−15°C</span><span class="mk hi">0°C</span><span class="mk hi">4°C</span><span class="mk">50°C</span><span class="mk hi">100°C</span></div></div>
+  <div class="burner-box" id="bbox"><div class="burner-dot" id="bdot"></div><span id="btxt">Stable — no heat change</span></div>
+  <div><div class="slabel" style="margin-bottom:7px">Physical Properties</div><div class="sgrid"><div class="scard"><div class="sc-l">Density</div><div class="sc-v" id="sden">0.99821</div><div class="sc-u">g/cm³</div></div><div class="scard"><div class="sc-l">Volume</div><div class="sc-v" id="svol">1.00180</div><div class="sc-u">rel. to 4°C</div></div><div class="scard"><div class="sc-l">Expansion</div><div class="sc-v" id="sexp">+0.18%</div><div class="sc-u">from 4°C</div></div><div class="scard"><div class="sc-l">State</div><div class="sc-v" id="ssta">Liquid</div><div class="sc-u">phase</div></div></div></div>
+  <div class="fact" id="fact">Liquid water at 20°C. Density decreasing slightly as temperature rises — standard thermal expansion.</div>
+  <div><div class="etitle" style="margin-bottom:7px">Effects of Anomalous Expansion</div><div class="ecards">
+      <div class="ecard" id="e1"><div class="ehead"><span class="eico">🧊</span><span class="enm">Ice Floats on Water</span></div><div class="edsc">Freezing expands water ~9%. Ice density = 0.917 g/cm³, less than liquid water. So ice floats, insulating lakes.</div></div>
+      <div class="ecard" id="e2"><div class="ehead"><span class="eico">🐟</span><span class="enm">Aquatic Life Survives Winter</span></div><div class="edsc">Densest water (4°C) sinks to lake bottom. Ice forms on top. Fish survive in warm layer below ice all winter.</div></div>
+      <div class="ecard" id="e3"><div class="ehead"><span class="eico">⭐</span><span class="enm">Maximum Density at 4°C</span></div><div class="edsc">Water is densest at exactly 4°C. Both cooling below AND heating above cause expansion — unique to water!</div></div>
+      <div class="ecard" id="e4"><div class="ehead"><span class="eico">💥</span><span class="enm">Burst Water Pipes in Winter</span></div><div class="edsc">Freezing water expands with ~25,000 psi force, bursting metal and plastic pipes in cold climates.</div></div>
+      <div class="ecard" id="e5"><div class="ehead"><span class="eico">🗿</span><span class="enm">Weathering of Rocks</span></div><div class="edsc">Water in rock cracks freezes, expands, splits the rock. Repeated freeze-thaw cycles shape mountains into soil.</div></div>
+      <div class="ecard" id="e6"><div class="ehead"><span class="eico">♨️</span><span class="enm">Boiling &amp; Steam Power</span></div><div class="edsc">At 100°C water becomes steam, expanding ~1700×. Latent heat = 2260 J/g. Powers steam engines &amp; turbines.</div></div>
+  </div></div>
+</div></aside>
 
-    <!-- Floating Control Panel -->
-    <div id="control-panel">
-        <div class="control-group">
-            <h3><i>⚙️</i> Experiment Controls</h3>
-            <button id="action-btn">START EXPERIMENT</button>
-            <button id="reset-btn" disabled>RESET</button>
-        </div>
-        
-        <div class="control-group">
-            <h3><i>📏</i> Drop Height</h3>
-            <div class="height-selector">
-                <div class="height-option active" data-height="5">
-                    <span>5 meters</span>
-                    <span class="height-info">~1.01s fall</span>
-                </div>
-                <div class="height-option" data-height="10">
-                    <span>10 meters</span>
-                    <span class="height-info">~1.43s fall</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <h3><i>⏱️</i> Physics Settings</h3>
-            <div class="physics-info">
-                Using <span class="highlight">REAL EARTH GRAVITY</span><br>
-                g = 9.80665 m/s²<br>
-                Scale: 1m = 40 pixels
-            </div>
-        </div>
-    </div>
+<div class="view"><canvas id="c"></canvas><div class="ov">
+  <div class="tbar"><div class="tbar-ph" id="ophase">Liquid Water</div><div class="tbar-d" id="oden">ρ = 0.99821 g/cm³</div></div>
+  <div class="fl" id="fl-ice">🧊 Ice layer — density 0.917 g/cm³ — floats!</div>
+  <div class="fl" id="fl-cold">❄️ Anomalous zone: cooling EXPANDS water (0–4°C)</div>
+  <div class="fl" id="fl-4c">⭐ 4°C — water at MAXIMUM density</div>
+  <div class="fl" id="fl-bub">🫧 Nucleate boiling — bubbles rise from the bottom</div>
+  <div class="fl" id="fl-stm">♨️ Steam — water converts to gas phase</div>
+  <div class="bbar"><div class="bfact" id="bfact">Move the slider to change temperature and observe the effects.</div></div>
+</div></div></div>
 
-    <!-- Real-time indicator -->
-    <div id="realtime-indicator" class="realtime-indicator">REAL-TIME PHYSICS</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   PHYSICS — IAPWS accurate water density formula (unchanged)
+══════════════════════════════════════════════════════════════ */
+function density(T){
+  if(T<=0) return 0.9168;
+  const t=Math.min(Math.max(T,0),100);
+  return(999.842594+6.793952e-2*t-9.095290e-3*t*t
+        +1.001685e-4*t*t*t-1.120083e-6*Math.pow(t,4)
+        +6.536332e-9*Math.pow(t,5))/1000;
+}
+const D4=density(4); // max density reference
 
-    <!-- Height visual indicator -->
-    <div id="height-visual" class="height-visual">
-        <h4>REMAINING HEIGHT</h4>
-        <div class="value">5.00 <span class="unit">m</span></div>
-    </div>
+/* ══════════════════════════════════════════════════════════════
+   RENDERER & SCENE — upgraded realism: shadows, tone, antialias
+══════════════════════════════════════════════════════════════ */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap; // softer edges
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.3; // brighter, more contrast
+renderer.outputEncoding=THREE.sRGBEncoding;
 
-    <!-- Scale indicator -->
-    <div class="scale-indicator">Scale: 1 meter = 40 pixels</div>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x030a14); // deeper, richer dark
 
-    <h1>Acceleration due to Gravity</h1>
-    <p class="subtitle">Drop a stone from a known height and measure the time of fall to calculate g using the equation: h = ½gt²</p>
+const camera=new THREE.PerspectiveCamera(44,1,0.1,200);
+camera.position.set(0,5.2,24); // slightly lower, more dramatic angle
+camera.lookAt(0,2.5,0);
 
-    <div id="sim-container">
-        <!-- Simulation will be rendered here by Two.js -->
-    </div>
+function resize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(renderer.domElement.width===w&&renderer.domElement.height===h)return;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas);
+resize();
 
-    <div id="data-panel">
-        <div class="data-group">
-            <label>Drop Height (h)</label>
-            <div class="value" id="height-display">5.00 <span class="unit">m</span></div>
-        </div>
-        
-        <div class="data-group" id="time-group">
-            <label>Fall Time (t)</label>
-            <div class="value" id="timer-display">0.00 <span class="unit">s</span></div>
-        </div>
+/* ══════════════════════════════════════════════════════════════
+   LIGHTING — rich, layered, real
+══════════════════════════════════════════════════════════════ */
+scene.add(new THREE.AmbientLight(0x1e2f4a,1.0)); // dim blue fill
 
-        <div class="data-group" id="velocity-group">
-            <label>Impact Velocity (v)</label>
-            <div class="value" id="velocity-display">0.00 <span class="unit">m/s</span></div>
-        </div>
+// Main key light (warm, directional)
+const sun=new THREE.DirectionalLight(0xfff2d6,3.2);
+sun.position.set(10,18,14);
+sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-14,right:14,top:14,bottom:-14,near:5,far:40});
+sun.shadow.bias=-0.0008;
+sun.shadow.normalBias=0.02;
+scene.add(sun);
 
-        <div class="data-group" id="acceleration-group">
-            <label>Calculated g</label>
-            <div class="value" id="g-display">0.00 <span class="unit">m/s²</span></div>
-        </div>
-    </div>
+// Cool fill from right back
+const fill1=new THREE.DirectionalLight(0xaaccff,0.9);
+fill1.position.set(-8,6,-10);
+scene.add(fill1);
 
-    <div id="calculation">
-        <h3><i>📐</i> Calculation of Acceleration due to Gravity (g)</h3>
-        <div class="formula">
-            <span style="margin: 0 5px;">Equation of motion:</span>
-            <span style="margin: 0 10px; font-weight: bold; color: var(--accent);">h = ½gt²</span>
-            <span style="margin: 0 5px;">→</span>
-            <span style="margin: 0 10px; font-weight: bold; color: var(--success);">g = 2h / t²</span>
-        </div>
-        <div id="result-display" class="result">Select a drop height and click "START EXPERIMENT" to begin</div>
-        <div class="info-box">
-            <p><span class="accent">Standard Earth gravity:</span> g = 9.80665 m/s²</p>
-            <p><span class="accent">Current experiment:</span> h = <span id="current-height-display">5.00</span> m</p>
-            <p><span class="accent">Theoretical fall time:</span> t = √(2h/g) = <span id="theoretical-time">1.01</span> s</p>
-            <p><span class="accent">Impact velocity:</span> v = gt = <span id="theoretical-velocity">9.90</span> m/s</p>
-        </div>
-    </div>
+// Under‑table bounce (subtle)
+const fill2=new THREE.PointLight(0x1e3a5f,0.5,30);
+fill2.position.set(0,-6,6);
+scene.add(fill2);
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.8.10/two.min.js"></script>
+// Back rim light to separate glass
+const rim=new THREE.DirectionalLight(0xccddff,1.4);
+rim.position.set(0,5,-16);
+scene.add(rim);
 
-    <script>
-        // --- PHYSICS CONSTANTS ---
-        const STANDARD_G = 9.80665; // Standard Earth gravity in m/s² (EXACT VALUE)
-        const METERS_TO_PIXELS = 40; // 1 meter = 40 pixels on screen
-        const CANVAS_WIDTH = 800;
-        const CANVAS_HEIGHT = 500;
-        const GROUND_HEIGHT = 50; // Height of ground area at bottom
-        
-        // Simulation parameters
-        let currentHeight = 5.0; // Default drop height in meters
-        let groundY; // Y-coordinate of ground level
-        
-        // Simulation state
-        let isSimulating = false;
-        let simulationStartTime = 0;
-        let currentPhysicsTime = 0;
-        let stonePosition = 0;
-        let stoneVelocity = 0;
-        let calculatedG = 0;
-        let animationId = null;
-        let lastFrameTime = 0;
-        
-        // DOM Elements
-        const actionBtn = document.getElementById('action-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const heightDisplay = document.getElementById('height-display');
-        const timerDisplay = document.getElementById('timer-display');
-        const velocityDisplay = document.getElementById('velocity-display');
-        const gDisplay = document.getElementById('g-display');
-        const resultDisplay = document.getElementById('result-display');
-        const currentHeightDisplay = document.getElementById('current-height-display');
-        const theoreticalTimeDisplay = document.getElementById('theoretical-time');
-        const theoreticalVelocityDisplay = document.getElementById('theoretical-velocity');
-        const heightVisual = document.getElementById('height-visual');
-        const timeGroup = document.getElementById('time-group');
-        const velocityGroup = document.getElementById('velocity-group');
-        const accelerationGroup = document.getElementById('acceleration-group');
-        const realtimeIndicator = document.getElementById('realtime-indicator');
-        
-        // Two.js setup
-        const two = new Two({ 
-            width: CANVAS_WIDTH, 
-            height: CANVAS_HEIGHT,
-            type: Two.Types.svg
-        }).appendTo(document.getElementById('sim-container'));
+// Water glow (dynamic)
+const wglow=new THREE.PointLight(0x2a9df4,2.0,20);
+wglow.position.set(0,0,0);
+scene.add(wglow);
 
-        // Store visual elements
-        const visuals = {
-            ground: null,
-            building: null,
-            balcony: null,
-            person: null,
-            stone: null,
-            measurementLine: null,
-            measurementText: null,
-            velocityVector: null,
-            velocityLabel: null,
-            trajectoryPath: null,
-            timeDisplay: null,
-            heightScale: []
-        };
+// Burner / cryo lights
+const heatL=new THREE.PointLight(0xff5500,0,14);
+heatL.position.set(0,-4.8,0);
+scene.add(heatL);
+const coldL=new THREE.PointLight(0x2266ff,0,14);
+coldL.position.set(0,-4.8,0);
+scene.add(coldL);
 
-        // Initialize the simulation
-        function initSimulation() {
-            createScene();
-            setupEventListeners();
-            updateHeightDisplay();
-            updateTheoreticalValues();
-            resetSimulation();
-        }
+// Extra specular on metal
+const specLight=new THREE.PointLight(0xffffff,0.6,20);
+specLight.position.set(4,10,8);
+scene.add(specLight);
 
-        // Create the visual scene
-        function createScene() {
-            // Clear any existing elements
-            two.clear();
-            
-            // Calculate ground position
-            groundY = CANVAS_HEIGHT - GROUND_HEIGHT / 2;
-            
-            // 1. The Ground
-            visuals.ground = two.makeRectangle(CANVAS_WIDTH/2, groundY, CANVAS_WIDTH, GROUND_HEIGHT);
-            visuals.ground.fill = '#7DCEA0';
-            visuals.ground.noStroke();
-            
-            // 2. The Building - Scale for max 10m height
-            const buildingVisualHeight = currentHeight + 3; // Building extends 3m above drop point
-            const buildingHeightPixels = buildingVisualHeight * METERS_TO_PIXELS;
-            const buildingY = groundY - buildingHeightPixels/2;
-            
-            const buildingWidth = 220;
-            const buildingX = 150;
-            visuals.building = two.makeRectangle(buildingX, buildingY, buildingWidth, buildingHeightPixels);
-            visuals.building.fill = '#F5F5DC';
-            visuals.building.stroke = '#D3D3D3';
-            visuals.building.linewidth = 2;
-            
-            // Add windows to building (scaled based on building height)
-            const windowRows = Math.floor(buildingVisualHeight / 3);
-            for(let i = 0; i < windowRows; i++) {
-                for(let j = 0; j < 2; j++) {
-                    const windowX = buildingX - buildingWidth/2 + 50 + j * 80;
-                    const windowY = buildingY - buildingHeightPixels/2 + 70 + i * (buildingHeightPixels/windowRows * 0.7);
-                    const window = two.makeRectangle(windowX, windowY, 30, 35);
-                    window.fill = '#A3D1FF';
-                    window.stroke = '#85A8C9';
-                    window.linewidth = 1;
-                }
-            }
-            
-            // Calculate stone starting position
-            const stoneStartY = groundY - (currentHeight * METERS_TO_PIXELS);
-            
-            // 3. The Balcony
-            visuals.balcony = two.makeRectangle(buildingX + buildingWidth/2 + 25, stoneStartY + 8, 55, 16);
-            visuals.balcony.fill = '#5D6D7E';
-            visuals.balcony.stroke = '#2C3E50';
-            visuals.balcony.linewidth = 2;
-            
-            // 4. The Person
-            visuals.person = createPerson(buildingX + buildingWidth/2, stoneStartY);
-            
-            // 5. Measurement Line
-            const measureX = buildingX + buildingWidth/2 + 120;
-            visuals.measurementLine = two.makeLine(measureX, stoneStartY, measureX, groundY);
-            visuals.measurementLine.stroke = '#3498DB';
-            visuals.measurementLine.linewidth = 2;
-            visuals.measurementLine.dashes = [5, 5];
-            
-            // Arrowheads
-            const topArrow = two.makePolygon(measureX, stoneStartY, 5, 6);
-            topArrow.fill = '#3498DB';
-            topArrow.noStroke();
-            topArrow.rotation = Math.PI/2;
-            
-            const bottomArrow = two.makePolygon(measureX, groundY, 5, 6);
-            bottomArrow.fill = '#3498DB';
-            bottomArrow.noStroke();
-            bottomArrow.rotation = -Math.PI/2;
-            
-            // Measurement Text
-            visuals.measurementText = two.makeText(`${currentHeight.toFixed(1)} m`, measureX + 50, (stoneStartY + groundY)/2);
-            visuals.measurementText.size = 16;
-            visuals.measurementText.fill = '#3498DB';
-            visuals.measurementText.style.fontWeight = 'bold';
-            
-            // 6. The Stone
-            visuals.stone = two.makeCircle(buildingX + buildingWidth/2 + 25, stoneStartY - 5, 10);
-            visuals.stone.fill = '#2C3D50';
-            visuals.stone.stroke = '#1A252F';
-            visuals.stone.linewidth = 2;
-            
-            // 7. Velocity Vector
-            visuals.velocityVector = two.makeLine(0, 0, 0, 0);
-            visuals.velocityVector.stroke = '#E74C3C';
-            visuals.velocityVector.linewidth = 2;
-            visuals.velocityVector.visible = false;
-            
-            visuals.velocityLabel = two.makeText("", 0, 0);
-            visuals.velocityLabel.size = 12;
-            visuals.velocityLabel.fill = '#E74C3C';
-            visuals.velocityLabel.style.fontWeight = 'bold';
-            visuals.velocityLabel.visible = false;
-            
-            // 8. Trajectory path
-            visuals.trajectoryPath = two.makePath(0, 0, 0, 0);
-            visuals.trajectoryPath.stroke = 'rgba(231, 76, 60, 0.3)';
-            visuals.trajectoryPath.linewidth = 2;
-            visuals.trajectoryPath.dashes = [2, 4];
-            visuals.trajectoryPath.visible = false;
-            
-            // 9. Height scale markers
-            createHeightScale(measureX - 15, stoneStartY, groundY);
-            
-            // 10. Time display
-            visuals.timeDisplay = two.makeText("Time: 0.00 s", CANVAS_WIDTH - 80, 25);
-            visuals.timeDisplay.size = 14;
-            visuals.timeDisplay.fill = '#2C3E50';
-            visuals.timeDisplay.style.fontWeight = 'bold';
-            
-            two.update();
-        }
-        
-        // Create height scale markers
-        function createHeightScale(x, topY, bottomY) {
-            visuals.heightScale = [];
-            const totalHeightMeters = currentHeight;
-            const markerCount = Math.min(5, Math.floor(totalHeightMeters));
-            
-            for(let i = 0; i <= markerCount; i++) {
-                const heightMeters = i * (totalHeightMeters / markerCount);
-                const markerY = topY + (heightMeters / totalHeightMeters) * (bottomY - topY);
-                
-                // Marker line
-                const marker = two.makeLine(x - 8, markerY, x, markerY);
-                marker.stroke = '#666';
-                marker.linewidth = 1;
-                visuals.heightScale.push(marker);
-                
-                // Marker label
-                const label = two.makeText(`${heightMeters.toFixed(1)} m`, x - 20, markerY);
-                label.size = 10;
-                label.fill = '#666';
-                label.alignment = 'right';
-                visuals.heightScale.push(label);
-            }
-        }
-        
-        // Create a stick figure person
-        function createPerson(x, y) {
-            const personGroup = two.makeGroup();
-            
-            // Head
-            const head = two.makeCircle(0, -20, 8);
-            head.fill = '#FAD7A0';
-            head.stroke = '#333';
-            head.linewidth = 1.5;
-            
-            // Body
-            const body = two.makeLine(0, -12, 0, 8);
-            body.stroke = '#333';
-            body.linewidth = 1.5;
-            
-            // Arms
-            const leftArm = two.makeLine(-4, -6, -16, 4);
-            leftArm.stroke = '#333';
-            leftArm.linewidth = 1.5;
-            
-            const rightArm = two.makeLine(4, -6, 20, -4);
-            rightArm.stroke = '#333';
-            rightArm.linewidth = 1.5;
-            
-            // Legs
-            const leftLeg = two.makeLine(0, 8, -8, 20);
-            leftLeg.stroke = '#333';
-            leftLeg.linewidth = 1.5;
-            
-            const rightLeg = two.makeLine(0, 8, 8, 20);
-            rightLeg.stroke = '#333';
-            rightLeg.linewidth = 1.5;
-            
-            // Clothing
-            const shirt = two.makeRectangle(0, 0, 16, 16);
-            shirt.fill = '#E74C3C';
-            shirt.noStroke();
-            
-            personGroup.add(head, body, leftArm, rightArm, leftLeg, rightLeg, shirt);
-            personGroup.translation.set(x, y);
-            
-            return personGroup;
-        }
-        
-        // Set up event listeners
-        function setupEventListeners() {
-            actionBtn.addEventListener('click', toggleSimulation);
-            resetBtn.addEventListener('click', resetSimulation);
-            
-            // Height selector
-            document.querySelectorAll('.height-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    if (isSimulating) return;
-                    
-                    // Update active state
-                    document.querySelectorAll('.height-option').forEach(opt => {
-                        opt.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Update height
-                    currentHeight = parseFloat(this.getAttribute('data-height'));
-                    updateHeightDisplay();
-                    createScene();
-                    updateTheoreticalValues();
-                    resetSimulation();
-                });
-            });
-        }
-        
-        // Toggle simulation state
-        function toggleSimulation() {
-            if (isSimulating) {
-                stopSimulation();
-            } else {
-                startSimulation();
-            }
-        }
-        
-        // Start the simulation
-        function startSimulation() {
-            if (isSimulating) return;
-            
-            // Reset simulation state
-            isSimulating = true;
-            simulationStartTime = Date.now();
-            currentPhysicsTime = 0;
-            stonePosition = groundY - (currentHeight * METERS_TO_PIXELS);
-            stoneVelocity = 0;
-            calculatedG = 0;
-            lastFrameTime = performance.now();
-            
-            // Update UI
-            actionBtn.textContent = "STOP EXPERIMENT";
-            actionBtn.style.backgroundColor = "#3498DB";
-            resetBtn.disabled = true;
-            realtimeIndicator.style.display = 'block';
-            
-            // Activate data groups
-            timeGroup.classList.add('active');
-            velocityGroup.classList.add('active');
-            accelerationGroup.classList.add('active');
-            
-            // Show velocity vector
-            visuals.velocityVector.visible = true;
-            visuals.velocityLabel.visible = true;
-            visuals.trajectoryPath.visible = true;
-            
-            // Reset result display
-            resultDisplay.textContent = `Experiment in progress: Dropping from ${currentHeight}m height...`;
-            resultDisplay.style.color = "#3498DB";
-            
-            // Update height visual
-            updateHeightVisual(currentHeight);
-            
-            // Start animation loop
-            if (animationId) cancelAnimationFrame(animationId);
-            animationId = requestAnimationFrame(updateSimulation);
-        }
-        
-        // Update simulation with real physics
-        function updateSimulation(currentTime) {
-            if (!isSimulating) return;
-            
-            // Calculate delta time
-            const deltaTime = (currentTime - lastFrameTime) / 1000;
-            lastFrameTime = currentTime;
-            
-            // Update physics time
-            currentPhysicsTime += deltaTime;
-            
-            // Calculate fallen distance using REAL physics: s = ½gt²
-            const fallenDistance = 0.5 * STANDARD_G * currentPhysicsTime * currentPhysicsTime;
-            
-            // Check if stone is still falling
-            if (fallenDistance <= currentHeight) {
-                // Update stone position in pixels
-                stonePosition = groundY - (currentHeight * METERS_TO_PIXELS) + (fallenDistance * METERS_TO_PIXELS);
-                
-                // Calculate velocity (v = gt)
-                stoneVelocity = STANDARD_G * currentPhysicsTime;
-                
-                // Calculate remaining height
-                const remainingHeight = currentHeight - fallenDistance;
-                
-                // Update displays
-                timerDisplay.textContent = currentPhysicsTime.toFixed(2);
-                velocityDisplay.textContent = stoneVelocity.toFixed(2);
-                
-                // Calculate acceleration from measured values
-                if (currentPhysicsTime > 0) {
-                    calculatedG = (2 * fallenDistance) / (currentPhysicsTime * currentPhysicsTime);
-                    gDisplay.textContent = calculatedG.toFixed(2);
-                }
-                
-                // Update stone position visually
-                visuals.stone.translation.y = stonePosition;
-                
-                // Update velocity vector
-                updateVelocityVector();
-                
-                // Update trajectory path
-                updateTrajectoryPath();
-                
-                // Update in-simulation time display
-                visuals.timeDisplay.value = `Time: ${currentPhysicsTime.toFixed(2)} s`;
-                
-                // Update height visual indicator
-                updateHeightVisual(remainingHeight);
-                
-                // Continue animation
-                animationId = requestAnimationFrame(updateSimulation);
-            } else {
-                // Stone has hit the ground
-                finishSimulation();
-            }
-        }
-        
-        // Update velocity vector
-        function updateVelocityVector() {
-            const vectorScale = 3;
-            visuals.velocityVector.vertices[0].set(
-                visuals.stone.translation.x + 10,
-                visuals.stone.translation.y
-            );
-            visuals.velocityVector.vertices[1].set(
-                visuals.stone.translation.x + 10,
-                visuals.stone.translation.y + stoneVelocity * vectorScale
-            );
-            
-            // Update velocity label
-            visuals.velocityLabel.translation.set(
-                visuals.stone.translation.x + 30,
-                visuals.stone.translation.y + (stoneVelocity * vectorScale) / 2
-            );
-            visuals.velocityLabel.value = `${stoneVelocity.toFixed(1)} m/s`;
-        }
-        
-        // Update trajectory path
-        function updateTrajectoryPath() {
-            const startX = visuals.stone.translation.x;
-            const startY = groundY - (currentHeight * METERS_TO_PIXELS);
-            
-            visuals.trajectoryPath.vertices[0].set(startX, startY);
-            visuals.trajectoryPath.vertices[1].set(visuals.stone.translation.x, visuals.stone.translation.y);
-        }
-        
-        // Update height visual indicator
-        function updateHeightVisual(remainingHeight) {
-            const heightVisualValue = heightVisual.querySelector('.value');
-            heightVisualValue.textContent = `${remainingHeight.toFixed(2)} m`;
-            
-            // Position the height visual near the stone
-            const stoneY = visuals.stone.translation.y;
-            heightVisual.style.bottom = `${CANVAS_HEIGHT - stoneY + 50}px`;
-            
-            // Change color based on height
-            if (remainingHeight < currentHeight * 0.2) {
-                heightVisual.style.borderColor = '#E74C3C';
-                heightVisual.style.background = 'rgba(231, 76, 60, 0.9)';
-                heightVisual.querySelector('h4').style.color = 'white';
-                heightVisual.querySelector('.value').style.color = 'white';
-            } else if (remainingHeight < currentHeight * 0.5) {
-                heightVisual.style.borderColor = '#F39C12';
-                heightVisual.style.background = 'rgba(243, 156, 18, 0.9)';
-            } else {
-                heightVisual.style.borderColor = '#3498DB';
-                heightVisual.style.background = 'rgba(255, 255, 255, 0.9)';
-            }
-        }
-        
-        // Update height visual position
-        function updateHeightVisualPosition() {
-            const heightVisualValue = heightVisual.querySelector('.value');
-            heightVisualValue.textContent = `${currentHeight.toFixed(2)} m`;
-            
-            heightVisual.style.bottom = '80px';
-            heightVisual.style.borderColor = '#3498DB';
-            heightVisual.style.background = 'rgba(255, 255, 255, 0.9)';
-            heightVisual.querySelector('h4').style.color = '#3498DB';
-            heightVisual.querySelector('.value').style.color = '#E74C3C';
-        }
-        
-        // Stop the simulation
-        function stopSimulation() {
-            isSimulating = false;
-            
-            // Update UI
-            actionBtn.textContent = "RESUME";
-            actionBtn.style.backgroundColor = "var(--accent)";
-            resetBtn.disabled = false;
-            realtimeIndicator.style.display = 'none';
-        }
-        
-        // Finish simulation
-        function finishSimulation() {
-            isSimulating = false;
-            
-            // Calculate exact theoretical time for the drop
-            const theoreticalTime = Math.sqrt((2 * currentHeight) / STANDARD_G);
-            
-            // Use theoretical time for final calculation
-            calculatedG = (2 * currentHeight) / (theoreticalTime * theoreticalTime);
-            
-            // Snap stone to ground
-            visuals.stone.translation.y = groundY - 10;
-            
-            // Calculate impact velocity
-            const impactVelocity = STANDARD_G * theoreticalTime;
-            
-            // Update displays with final values
-            timerDisplay.textContent = theoreticalTime.toFixed(2);
-            velocityDisplay.textContent = impactVelocity.toFixed(2);
-            gDisplay.textContent = calculatedG.toFixed(2);
-            
-            // Update height visual to show ground impact
-            const heightVisualValue = heightVisual.querySelector('.value');
-            heightVisualValue.textContent = "0.00 m";
-            heightVisual.style.borderColor = '#E74C3C';
-            heightVisual.style.background = 'rgba(231, 76, 60, 0.9)';
-            heightVisual.querySelector('h4').style.color = 'white';
-            heightVisual.querySelector('.value').style.color = 'white';
-            
-            // Update result display
-            const formula = `g = 2 × ${currentHeight}m / (${theoreticalTime.toFixed(2)}s)²`;
-            const result = `= ${calculatedG.toFixed(2)} m/s²`;
-            
-            resultDisplay.innerHTML = `
-                <div style="margin-bottom: 5px;">${formula}</div>
-                <div style="font-size: 24px; color: var(--success)">${result}</div>
-                <div style="font-size: 14px; margin-top: 10px; color: var(--text-light)">
-                    <strong>Experiment Complete!</strong><br>
-                    Stone fell ${currentHeight}m in ${theoreticalTime.toFixed(2)} seconds<br>
-                    Impact velocity: ${impactVelocity.toFixed(2)} m/s
-                </div>
-            `;
-            
-            // Update theoretical values display
-            updateTheoreticalValues();
-            
-            // Update in-simulation time display
-            visuals.timeDisplay.value = `Time: ${theoreticalTime.toFixed(2)} s`;
-            
-            // Update UI
-            actionBtn.textContent = "START EXPERIMENT";
-            actionBtn.style.backgroundColor = "var(--accent)";
-            resetBtn.disabled = false;
-            realtimeIndicator.style.display = 'none';
-            
-            // Deactivate data groups
-            timeGroup.classList.remove('active');
-            velocityGroup.classList.remove('active');
-            accelerationGroup.classList.remove('active');
-            
-            // Hide velocity vector
-            visuals.velocityVector.visible = false;
-            visuals.velocityLabel.visible = false;
-            
-            two.update();
-        }
-        
-        // Reset the simulation
-        function resetSimulation() {
-            // Stop any running animation
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-            
-            // Reset simulation state
-            isSimulating = false;
-            currentPhysicsTime = 0;
-            stonePosition = groundY - (currentHeight * METERS_TO_PIXELS);
-            stoneVelocity = 0;
-            calculatedG = 0;
-            
-            // Reset stone position
-            if (visuals.stone) {
-                visuals.stone.translation.y = stonePosition;
-            }
-            
-            // Reset UI displays
-            timerDisplay.textContent = "0.00";
-            velocityDisplay.textContent = "0.00";
-            gDisplay.textContent = "0.00";
-            
-            // Reset result display
-            resultDisplay.textContent = `Select a drop height and click "START EXPERIMENT" to begin`;
-            resultDisplay.style.color = "var(--text-light)";
-            
-            // Update height visual
-            updateHeightVisualPosition();
-            
-            // Reset buttons
-            actionBtn.textContent = "START EXPERIMENT";
-            actionBtn.style.backgroundColor = "var(--accent)";
-            actionBtn.disabled = false;
-            resetBtn.disabled = true;
-            realtimeIndicator.style.display = 'none';
-            
-            // Reset in-simulation time display
-            if (visuals.timeDisplay) {
-                visuals.timeDisplay.value = "Time: 0.00 s";
-            }
-            
-            // Deactivate data groups
-            timeGroup.classList.remove('active');
-            velocityGroup.classList.remove('active');
-            accelerationGroup.classList.remove('active');
-            
-            // Hide visual elements
-            if (visuals.velocityVector) {
-                visuals.velocityVector.visible = false;
-                visuals.velocityLabel.visible = false;
-                visuals.trajectoryPath.visible = false;
-            }
-            
-            two.update();
-        }
-        
-        // Update height display
-        function updateHeightDisplay() {
-            heightDisplay.textContent = currentHeight.toFixed(2);
-            currentHeightDisplay.textContent = currentHeight.toFixed(2);
-            
-            if (visuals.measurementText) {
-                visuals.measurementText.value = `${currentHeight.toFixed(1)} m`;
-            }
-        }
-        
-        // Update theoretical values display
-        function updateTheoreticalValues() {
-            const theoreticalTime = Math.sqrt((2 * currentHeight) / STANDARD_G);
-            const impactVelocity = STANDARD_G * theoreticalTime;
-            
-            theoreticalTimeDisplay.textContent = theoreticalTime.toFixed(2);
-            theoreticalVelocityDisplay.textContent = impactVelocity.toFixed(2);
-            
-            // Update height selector info
-            document.querySelectorAll('.height-option').forEach(option => {
-                const height = parseFloat(option.getAttribute('data-height'));
-                const time = Math.sqrt((2 * height) / STANDARD_G).toFixed(2);
-                option.querySelector('.height-info').textContent = `~${time}s fall`;
-            });
-        }
-        
-        // Start the Two.js animation loop
-        two.play();
-        
-        // Initialize the simulation
-        initSimulation();
+/* ══════════════════════════════════════════════════════════════
+   LAB TABLE + STAND — more detailed, realistic materials
+══════════════════════════════════════════════════════════════ */
+// Table top (thick oak-like)
+const tableMat=new THREE.MeshStandardMaterial({
+  color:0x3a2c1f,
+  roughness:0.75,
+  metalness:0.05,
+  emissive:0x000000
+});
+const table=new THREE.Mesh(new THREE.BoxGeometry(30,1.2,16),tableMat);
+table.position.set(0,-7.8,0);
+table.receiveShadow=true;
+table.castShadow=true;
+scene.add(table);
 
-    </script>
+// Table edge trim
+const trimMat=new THREE.MeshStandardMaterial({color:0x5e4b33,roughness:0.6});
+const trim=new THREE.Mesh(new THREE.BoxGeometry(30.2,0.25,16.2),trimMat);
+trim.position.set(0,-7.2,0);
+trim.receiveShadow=true;
+scene.add(trim);
+
+// Tripod legs — brushed metal
+const legMat=new THREE.MeshStandardMaterial({color:0x9bb7d4,roughness:0.28,metalness:0.92,emissive:0x000000});
+for(let i=0;i<3;i++){
+  const angle=(i/3)*Math.PI*2;
+  const leg=new THREE.Mesh(new THREE.CylinderGeometry(.16,.22,7.2,12),legMat);
+  leg.position.set(Math.cos(angle)*3.8,-4.5+0.6,Math.sin(angle)*3.8);
+  leg.rotation.z=Math.cos(angle)*0.18;
+  leg.rotation.x=Math.sin(angle)*0.18;
+  leg.castShadow=true;leg.receiveShadow=true;
+  scene.add(leg);
+}
+
+// Ring holder — polished metal
+const ringMat=new THREE.MeshStandardMaterial({color:0xc0d0e0,roughness:0.22,metalness:0.95,emissive:0x000000});
+const ringGeo=new THREE.TorusGeometry(4.6,0.15,16,64);
+const ringMesh=new THREE.Mesh(ringGeo,ringMat);
+ringMesh.rotation.x=Math.PI/2;
+ringMesh.position.y=-1.7;
+ringMesh.castShadow=true;ringMesh.receiveShadow=true;
+scene.add(ringMesh);
+
+// Burner base (metal)
+const bplateMat=new THREE.MeshStandardMaterial({color:0x70869c,roughness:0.35,metalness:0.85});
+const bplate=new THREE.Mesh(new THREE.CylinderGeometry(4.2,4.6,0.8,32),bplateMat);
+bplate.position.y=-5.5;
+bplate.castShadow=true;bplate.receiveShadow=true;
+scene.add(bplate);
+
+// Heating pad (emissive controlled by script)
+const hpadMat=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.7,metalness:0.2,emissive:0x000000});
+const hpad=new THREE.Mesh(new THREE.CylinderGeometry(4.0,4.0,0.4,32),hpadMat);
+hpad.position.y=-5.0;
+hpad.castShadow=true;hpad.receiveShadow=true;
+scene.add(hpad);
+
+/* ══════════════════════════════════════════════════════════════
+   GLASS BEAKER — ultra‑realistic: thickness, roughness, IOR
+══════════════════════════════════════════════════════════════ */
+const BR=3.8;        // beaker radius (slightly larger)
+const BH=12.2;       // height
+const BBOT=-4.8;     // bottom Y
+
+// Outer glass (slightly blue, very transparent)
+const glassOuterMat=new THREE.MeshPhysicalMaterial({
+  color:0xd0ecff,
+  transmission:0.98,
+  roughness:0.012,
+  metalness:0,
+  ior:1.51,
+  thickness:2.5,
+  transparent:true,
+  opacity:0.16,
+  side:THREE.DoubleSide,
+  envMapIntensity:1.2
+});
+
+const bwall=new THREE.Mesh(new THREE.CylinderGeometry(BR,BR,BH,64,1,true),glassOuterMat);
+bwall.position.y=BBOT+BH/2;
+bwall.castShadow=true;bwall.receiveShadow=true;
+bwall.renderOrder=15;
+scene.add(bwall);
+
+// Inner "water contact" layer to simulate liquid-glass interface
+const glassInnerMat=new THREE.MeshPhysicalMaterial({
+  color:0xf0f8ff,
+  transmission:0.92,
+  roughness:0.008,
+  ior:1.34,
+  thickness:1.8,
+  transparent:true,
+  opacity:0.22,
+  side:THREE.BackSide
+});
+const binner=new THREE.Mesh(new THREE.CylinderGeometry(BR-0.2,BR-0.2,BH-0.6,64,1,true),glassInnerMat);
+binner.position.y=BBOT+BH/2;
+binner.renderOrder=16;
+scene.add(binner);
+
+// Bottom disc (glass)
+const bbase=new THREE.Mesh(new THREE.CircleGeometry(BR,64),glassOuterMat);
+bbase.rotation.x=-Math.PI/2;
+bbase.position.y=BBOT;
+bbase.renderOrder=14;
+scene.add(bbase);
+
+// Rim (metal)
+const brimMat=new THREE.MeshStandardMaterial({color:0xaac0d0,roughness:0.18,metalness:0.88});
+const brim=new THREE.Mesh(new THREE.TorusGeometry(BR,0.15,12,64),brimMat);
+brim.rotation.x=Math.PI/2;
+brim.position.y=BBOT+BH;
+brim.castShadow=true;brim.receiveShadow=true;
+scene.add(brim);
+
+// Graduation marks (engraved style)
+const gradMat=new THREE.MeshStandardMaterial({color:0x668899,emissive:0x112233});
+for(let i=1;i<=5;i++){
+  const ln=new THREE.Mesh(new THREE.TorusGeometry(BR+0.02,0.03,8,64,Math.PI*0.02),gradMat);
+  ln.rotation.x=Math.PI/2;
+  ln.position.y=BBOT+i*2.0;
+  ln.scale.set(1,0.02,1);
+  scene.add(ln);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CAUSTICS — refined, moving
+══════════════════════════════════════════════════════════════ */
+function mkCausticTex(){
+  const sz=512,c=document.createElement('canvas');
+  c.width=c.height=sz;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#000';ctx.fillRect(0,0,sz,sz);
+  ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<480;i++){
+    const x=Math.random()*sz,y=Math.random()*sz,r=6+Math.random()*32;
+    const grad=ctx.createRadialGradient(x,y,0,x,y,r);
+    grad.addColorStop(0,`rgba(80,200,255,${0.2+Math.random()*0.3})`);
+    grad.addColorStop(0.6,`rgba(20,100,200,0.08)`);
+    grad.addColorStop(1,'rgba(0,40,100,0)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+  }
+  const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,1);
+  return t;
+}
+const causticTex=mkCausticTex();
+const causticMat=new THREE.MeshBasicMaterial({map:causticTex,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+const causticM=new THREE.Mesh(new THREE.CircleGeometry(BR-0.3,64),causticMat);
+causticM.rotation.x=-Math.PI/2;
+causticM.position.y=BBOT+0.3;
+causticM.renderOrder=1;
+scene.add(causticM);
+
+/* ══════════════════════════════════════════════════════════════
+   WATER SURFACE — more realistic wave shader (added foam, glitter)
+══════════════════════════════════════════════════════════════ */
+const VS=`
+uniform float uT; uniform float uAmp;
+varying vec3 vP; varying vec3 vN; varying vec2 vUv;
+vec3 gw(vec2 xz,vec2 d,float a,float k,float sp,float ph){
+  return vec3(0.,a*sin(k*dot(d,xz)+sp*uT+ph),0.);
+}
+void main(){
+  vUv=uv; vec3 p=position;
+  p+=gw(p.xz,normalize(vec2(1.,0.5)), .22*uAmp,0.9,1.3,0.0);
+  p+=gw(p.xz,normalize(vec2(-0.7,0.8)), .16*uAmp,1.4,1.7,1.2);
+  p+=gw(p.xz,normalize(vec2(0.6,-0.6)), .12*uAmp,2.3,2.1,2.5);
+  p+=gw(p.xz,normalize(vec2(0.9,0.3)), .08*uAmp,3.5,3.0,1.8);
+  p+=gw(p.xz,normalize(vec2(-0.4,-0.9)), .05*uAmp,5.2,4.0,3.3);
+  vP=(modelMatrix*vec4(p,1.)).xyz;
+  float e=0.1;
+  vec3 px=position+vec3(e,0,0);
+  px+=gw(px.xz,normalize(vec2(1.,0.5)),.22*uAmp,0.9,1.3,0.0);
+  px+=gw(px.xz,normalize(vec2(-0.7,0.8)),.16*uAmp,1.4,1.7,1.2);
+  vec3 pz=position+vec3(0,0,e);
+  pz+=gw(pz.xz,normalize(vec2(1.,0.5)),.22*uAmp,0.9,1.3,0.0);
+  pz+=gw(pz.xz,normalize(vec2(-0.7,0.8)),.16*uAmp,1.4,1.7,1.2);
+  vN=normalMatrix*normalize(cross(
+    normalize(pz-p+vec3(0,0,e)),
+    normalize(px-p+vec3(e,0,0))));
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+}`;
+
+const FS=`
+precision highp float;
+uniform float uT; uniform float uTemp; uniform vec3 uCam;
+varying vec3 vP; varying vec3 vN; varying vec2 vUv;
+
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.545);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.2;a*=.5;}return v;}
+
+void main(){
+  float T=uTemp;
+  vec3 deep; float rough, alpha, foam=0.0;
+  if(T<=0.){deep=vec3(.65,.85,.96); rough=.02; alpha=.92; foam=0.;}
+  else if(T<4.){float f=T/4.; deep=mix(vec3(.65,.85,.96),vec3(.20,.70,.95),f); rough=.025; alpha=.88; foam=0.;}
+  else if(T<30.){float f=(T-4.)/26.; deep=mix(vec3(.20,.70,.95),vec3(.10,.50,.85),f); rough=.03; alpha=.83; foam=0.;}
+  else if(T<60.){float f=(T-30.)/30.; deep=mix(vec3(.10,.50,.85),vec3(.05,.30,.70),f); rough=.045; alpha=.74; foam=0.;}
+  else if(T<80.){float f=(T-60.)/20.; deep=mix(vec3(.05,.30,.70),vec3(.25,.20,.40),f); rough=.08; alpha=.60; foam=0.;}
+  else if(T<98.){float f=(T-80.)/18.; deep=mix(vec3(.25,.20,.40),vec3(.65,.15,.15),f); rough=.15; alpha=.45; foam=0.;}
+  else if(T<101.){ deep=vec3(.80,.50,.40); rough=.28; alpha=.28; foam=0.5; }
+  else{ deep=vec3(.90,.85,.90); rough=.42; alpha=.10; foam=1.0; }
+
+  vec3 N=normalize(vN);
+  vec3 V=normalize(uCam-vP);
+  vec3 L=normalize(vec3(0.8,1.0,0.6));
+  vec3 H=normalize(L+V);
+
+  // micro‑perturb normal for glitter
+  float nv=fbm(vUv*12.+uT*0.2);
+  N+=vec3((nv-0.5)*0.4,(nv-0.5)*0.2,(nv-0.5)*0.4);
+  N=normalize(N);
+
+  float NdV=max(dot(N,V),0.);
+  float NdL=max(dot(N,L),0.);
+  float NdH=max(dot(N,H),0.);
+
+  float F=0.02+0.98*pow(1.-NdV,5.);
+  float a=rough*rough+0.001;
+  float D=(a*a)/(3.14159*pow(NdH*NdH*(a*a-1.)+1.,2.));
+  vec3 spec=vec3(1.0)*D*F*NdL*0.9;
+
+  // subsurface + ambient
+  float sss=pow(max(dot(-L,-V),0.),2.5)*0.8;
+  vec3 col=deep*NdL*0.7*(1.-F)+deep*sss*1.8+deep*(0.5+0.5*NdV)*0.3;
+
+  // foam near boiling
+  if(foam>0.0){
+    float fpat=fbm(vUv*20.+uT*3.0);
+    col=mix(col,vec3(0.95,0.95,1.0),smoothstep(0.3,0.7,fpat)*foam*0.9);
+  }
+
+  col+=spec;
+  col+=vec3(0.05,0.1,0.15)*pow(1.-NdV,2.);
+  gl_FragColor=vec4(col,alpha);
+}`;
+
+const surfGeo=new THREE.CircleGeometry(BR-0.3,80);
+surfGeo.rotateX(-Math.PI/2);
+const surfMat=new THREE.ShaderMaterial({
+  vertexShader:VS,fragmentShader:FS,
+  uniforms:{uT:{value:0},uAmp:{value:0.4},uTemp:{value:20},uCam:{value:camera.position}},
+  transparent:true,depthWrite:false,side:THREE.FrontSide
+});
+const surfM=new THREE.Mesh(surfGeo,surfMat);
+surfM.renderOrder=7;
+scene.add(surfM);
+
+/* ══════════════════════════════════════════════════════════════
+   WATER BODY — more realistic volume (less opacity, more refractive)
+══════════════════════════════════════════════════════════════ */
+const wbGeo=new THREE.CylinderGeometry(BR-0.35,BR-0.35,1,64);
+wbGeo.translate(0,0.5,0);
+const wbMat=new THREE.MeshPhysicalMaterial({
+  color:0x3a8fe0,
+  transmission:0.96,
+  roughness:0.02,
+  thickness:6,
+  ior:1.33,
+  transparent:true,
+  opacity:0.42,
+  attenuationColor:new THREE.Color(0x2266aa),
+  attenuationDistance:3.5,
+  depthWrite:false
+});
+const wbM=new THREE.Mesh(wbGeo,wbMat);
+wbM.renderOrder=3;
+scene.add(wbM);
+
+/* ══════════════════════════════════════════════════════════════
+   ICE — crystalline, frosty
+══════════════════════════════════════════════════════════════ */
+function mkIceTexture(){
+  const sz=1024,c=document.createElement('canvas');
+  c.width=c.height=sz;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#ddeeff';ctx.fillRect(0,0,sz,sz);
+  for(let i=0;i<300;i++){
+    ctx.strokeStyle=`rgba(255,255,255,${0.2+Math.random()*0.4})`;
+    ctx.lineWidth=1+Math.random()*5;
+    ctx.beginPath();
+    let x=Math.random()*sz,y=Math.random()*sz;
+    ctx.moveTo(x,y);
+    for(let j=0;j<5;j++){x+=(Math.random()-0.5)*120;y+=(Math.random()-0.5)*120;ctx.lineTo(x,y);}
+    ctx.stroke();
+  }
+  for(let i=0;i<200;i++){
+    ctx.fillStyle=`rgba(210,235,255,${0.1+Math.random()*0.2})`;
+    ctx.beginPath();ctx.arc(Math.random()*sz,Math.random()*sz,5+Math.random()*20,0,2*Math.PI);ctx.fill();
+  }
+  return new THREE.CanvasTexture(c);
+}
+const iceTex=mkIceTexture();
+iceTex.wrapS=iceTex.wrapT=THREE.RepeatWrapping; iceTex.repeat.set(2,2);
+
+const iceGeo=new THREE.CylinderGeometry(BR-0.35,BR-0.35,1,64);
+iceGeo.translate(0,-0.5,0);
+const iceMat=new THREE.MeshPhysicalMaterial({
+  color:0xc0e0ff,
+  map:iceTex,
+  roughness:0.45,
+  metalness:0.0,
+  transmission:0.3,
+  ior:1.31,
+  transparent:true,
+  opacity:0,
+  emissive:0x000000
+});
+const iceM=new THREE.Mesh(iceGeo,iceMat);
+iceM.renderOrder=9;
+scene.add(iceM);
+
+const iceTopGeo=new THREE.CircleGeometry(BR-0.35,64);
+iceTopGeo.rotateX(-Math.PI/2);
+const iceTopMat=new THREE.MeshStandardMaterial({
+  color:0xe2f4ff,
+  roughness:0.3,
+  metalness:0.0,
+  transparent:true,
+  opacity:0
+});
+const iceTopM=new THREE.Mesh(iceTopGeo,iceTopMat);
+iceTopM.renderOrder=10;
+scene.add(iceTopM);
+
+/* ══════════════════════════════════════════════════════════════
+   BUBBLES & STEAM (unchanged but with better material)
+══════════════════════════════════════════════════════════════ */
+const NBUB=120,bubs=[];
+const bubG=new THREE.SphereGeometry(1,16,12);
+for(let i=0;i<NBUB;i++){
+  const m=new THREE.Mesh(bubG,new THREE.MeshPhysicalMaterial({
+    color:0xf0faff,transmission:0.98,roughness:0.01,
+    thickness:0.2,ior:1.0,transparent:true,opacity:0.4,depthWrite:false
+  }));
+  m.visible=false;scene.add(m);
+  bubs.push({mesh:m,on:false,x:0,y:0,z:0,vy:0,wx:0,wz:0,ws:0,r:.08,ph:0});
+}
+function spawnBub(b,topY,T){
+  b.on=true;
+  const a=Math.random()*Math.PI*2,rd=Math.random()*(BR-1.5);
+  b.x=Math.cos(a)*rd; b.z=Math.sin(a)*rd;
+  b.y=BBOT+1.0;
+  b.r=T>100?.18+Math.random()*.3:.06+Math.random()*.12;
+  b.vy=.5+Math.random()*2.5;
+  b.wx=(Math.random()-.5)*.5;b.wz=(Math.random()-.5)*.5;
+  b.ws=1.2+Math.random()*3.0;b.ph=Math.random()*Math.PI*2;
+  b.mesh.scale.setScalar(b.r);b.mesh.visible=true;
+}
+
+const NSTM=260,stms=[];
+function mkSteamTex(){
+  const c=document.createElement('canvas');c.width=c.height=128;
+  const ctx=c.getContext('2d');
+  const g=ctx.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,'rgba(255,255,255,0.95)');
+  g.addColorStop(0.5,'rgba(210,230,255,0.45)');
+  g.addColorStop(1,'rgba(180,200,240,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+}
+const stTex=mkSteamTex();
+for(let i=0;i<NSTM;i++){
+  const m=new THREE.Sprite(new THREE.SpriteMaterial({map:stTex,transparent:true,opacity:0,depthWrite:false,blending:THREE.NormalBlending}));
+  m.visible=false;scene.add(m);
+  stms.push({mesh:m,life:0,ml:2,x:0,z:0,vx:0,vy:0,vz:0,sz:1});
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STATE & UI (unchanged)
+══════════════════════════════════════════════════════════════ */
+const BH_WATER=8.8; // water column height at 4°C inside beaker
+let targetT=20,simT=20,curTop=BBOT+BH_WATER,curIceH=0;
+const HEAT_RATE=10;
+document.getElementById('sl').addEventListener('input',function(){targetT=parseFloat(this.value);});
+
+const FACTS={'-15':"Ice! ...",'-5':"...",'0':"Freezing/melting point ...",'1':"⚠️ ANOMALOUS ZONE ...",'4':"⭐ MAXIMUM DENSITY ...",'10':"Normal liquid water ...",'30':"Warm water ...",'60':"Hot water ...",'80':"Nucleate boiling ...",'96':"Vigorous boiling ...",'100':"BOILING POINT ...",'110':"Superheated steam ..."};
+function getFact(T){const ks=Object.keys(FACTS).map(Number).sort((a,b)=>a-b);for(let i=ks.length-1;i>=0;i--)if(T>=ks[i])return FACTS[ks[i]];return FACTS['-15'];}
+function fl(id,on){document.getElementById(id).classList[on?'add':'remove']('v');}
+function ec(id,on,cls){const el=document.getElementById(id);['cice','cblu','cgld','cred','cgrn','cpur'].forEach(c=>el.classList.remove(c));el.classList[on?'add':'remove']('on');if(on&&cls)el.classList.add(cls);}
+
+function ui(T){
+  const den=density(T),vol=D4/den,exp=(vol-1)*100;
+  let tc='#38bdf8';
+  if(T<0)tc='#93c5fd'; else if(T<4)tc='#a78bfa'; else if(T<30)tc='#38bdf8'; else if(T<70)tc='#fbbf24'; else if(T<100)tc='#fb923c'; else tc='#f87171';
+  document.getElementById('tnum').innerHTML=T.toFixed(1)+'<span class="t-deg">°C</span>';
+  document.getElementById('tnum').style.color=tc;
+  let ph,pc,pb,pbr;
+  if(T<0){ph='🧊 Solid Ice';pc='#93c5fd';pb='rgba(147,197,253,.12)';pbr='rgba(147,197,253,.3)';}
+  else if(T<4){ph='❄️ Anomalous Liquid';pc='#a78bfa';pb='rgba(167,139,250,.12)';pbr='rgba(167,139,250,.3)';}
+  else if(T<100){ph='💧 Liquid Water';pc='#38bdf8';pb='rgba(56,189,248,.12)';pbr='rgba(56,189,248,.3)';}
+  else{ph='♨️ Steam (Gas)';pc='#f87171';pb='rgba(248,113,113,.12)';pbr='rgba(248,113,113,.3)';}
+  const pill=document.getElementById('ppill'); pill.textContent=ph;pill.style.color=pc;pill.style.background=pb;pill.style.borderColor=pbr;
+  document.getElementById('sden').textContent=den.toFixed(5);document.getElementById('sden').style.color=tc;
+  document.getElementById('svol').textContent=vol.toFixed(5);
+  document.getElementById('sexp').textContent=(exp>=0?'+':'')+exp.toFixed(3)+'%';
+  document.getElementById('sexp').style.color=Math.abs(exp)<.003?'#fbbf24':exp>0?'#fb923c':'#38bdf8';
+  document.getElementById('ssta').textContent=T<0?'Solid Ice':T<100?'Liquid':'Gas';
+  document.getElementById('fact').textContent=getFact(T);
+  const fb=document.getElementById('fact');
+  if(T<0){fb.style.background='rgba(147,197,253,.06)';fb.style.borderColor='rgba(147,197,253,.18)';}
+  else if(T<4){fb.style.background='rgba(167,139,250,.06)';fb.style.borderColor='rgba(167,139,250,.18)';}
+  else if(T<100){fb.style.background='rgba(56,189,248,.06)';fb.style.borderColor='rgba(56,189,248,.18)';}
+  else{fb.style.background='rgba(248,113,113,.06)';fb.style.borderColor='rgba(248,113,113,.18)';}
+  document.getElementById('bfact').textContent=getFact(T);
+  let ps='Liquid Water';
+  if(T<0)ps='Solid Ice — Frozen Water';
+  else if(T<4)ps='Anomalous Expansion Zone (0–4°C)';
+  else if(T<4.8)ps='⭐ Maximum Density — 4°C';
+  else if(T>=100)ps='♨️ Steam — Gas Phase';
+  document.getElementById('ophase').textContent=ps;document.getElementById('ophase').style.color=tc;
+  document.getElementById('oden').textContent=`ρ = ${den.toFixed(5)} g/cm³`;document.getElementById('oden').style.color=tc;
+  fl('fl-ice',T<-.3); fl('fl-cold',T>.2&&T<4.6); fl('fl-4c',T>3.2&&T<5.2); fl('fl-bub',T>62&&T<100); fl('fl-stm',T>80);
+  const diff=targetT-simT, bb=document.getElementById('bbox'), bd=document.getElementById('bdot'), bt=document.getElementById('btxt');
+  if(Math.abs(diff)>1.5){ bb.style.background=diff>0?'rgba(124,45,18,.4)':'rgba(23,37,84,.4)'; bb.style.borderColor=diff>0?'rgba(251,146,60,.25)':'rgba(96,165,250,.25)'; bd.style.background=diff>0?'#fb923c':'#60a5fa'; bt.textContent=diff>0?'🔥 Heating — burner ON':'❄️ Cooling — temperature falling'; bt.style.color=diff>0?'#fb923c':'#60a5fa'; }
+  else{ bb.style.background='rgba(255,255,255,.03)'; bb.style.borderColor='rgba(255,255,255,.07)'; bd.style.background='#334155'; bt.textContent='— Stable temperature'; bt.style.color='rgba(255,255,255,.35)'; }
+  ec('e1',T<5,T<0?'cice':'cblu'); ec('e2',T<12,'cblu'); ec('e3',T>2&&T<8,'cgld'); ec('e4',T<1,'cred'); ec('e5',T<1,'cred'); ec('e6',T>=80,'cgrn');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMATION LOOP — enhanced
+══════════════════════════════════════════════════════════════ */
+let clk=0,lt=performance.now();
+function frame(){
+  requestAnimationFrame(frame);
+  resize();
+  const now=performance.now();
+  const dt=Math.min((now-lt)*.001,.05);lt=now;clk+=dt;
+
+  const diff=targetT-simT;
+  if(Math.abs(diff)>.05){ simT+=Math.sign(diff)*HEAT_RATE*dt; if(Math.sign(targetT-simT)!==Math.sign(diff))simT=targetT; }
+  const T=simT;
+
+  // Burner / cryo emissive
+  if(diff>1.5){ const i=Math.min(diff/45,1); hpadMat.emissive.setHex(0xff5500); hpadMat.emissiveIntensity=i*2.5; heatL.intensity=i*1.8; coldL.intensity=0; }
+  else if(diff<-1.5){ const i=Math.min(-diff/45,1); hpadMat.emissive.setHex(0x2266ff); hpadMat.emissiveIntensity=i*1.8; coldL.intensity=i*1.2; heatL.intensity=0; }
+  else{ hpadMat.emissiveIntensity=0; heatL.intensity=0; coldL.intensity=0; }
+
+  // Water level
+  const den=density(T), vol=D4/den;
+  const tgt=BBOT+BH_WATER*vol;
+  curTop+=(tgt-curTop)*.07;
+  const wH=Math.max(.02,curTop-BBOT);
+  surfM.position.y=curTop;
+  wbM.position.y=BBOT; wbM.scale.y=wH;
+
+  // Water color
+  const wc=new THREE.Color();
+  if(T<=0)wc.setHex(0x5a9ed9);
+  else if(T<4)wc.setHex(0x1e96d0);
+  else if(T<40)wc.setHex(0x1269b0);
+  else if(T<80)wc.setHex(0x1d3a70);
+  else if(T<100)wc.setHex(0x7a2e1a);
+  else wc.setHex(0x8a8a96);
+  wbMat.color.lerp(wc,.06);
+  wbMat.opacity=T>=100?.12:.42;
+
+  // Caustics drift
+  causticTex.offset.set(Math.sin(clk*.2)*.15,Math.cos(clk*.18)*.12);
+  causticTex.needsUpdate=true;
+  causticMat.opacity=T<=0?0:Math.min(.55,T/100+.1);
+
+  // Wave amp
+  let amp=0;
+  if(T>0)amp=T<8?.008+T*.009: T<40?.07+(T-8)*.003: T<80?.13+(T-40)*.006: T<100?.28+(T-80)*.015:.58;
+  surfMat.uniforms.uAmp.value+=(amp-surfMat.uniforms.uAmp.value)*.1;
+  surfMat.uniforms.uT.value=clk;
+  surfMat.uniforms.uTemp.value=T;
+  surfMat.uniforms.uCam.value.copy(camera.position);
+
+  // Underwater glow
+  const gc=new THREE.Color();
+  if(T<0)gc.setHex(0x4fa0e0);
+  else if(T<4)gc.setHex(0x35d0fa);
+  else if(T<40)gc.setHex(0x0d9eef);
+  else if(T<80)gc.setHex(0xfb9f2a);
+  else gc.setHex(0xff6b35);
+  wglow.color.lerp(gc,.08);
+  wglow.position.y=curTop-3.0;
+  wglow.intensity=T>=100?.25:2.2;
+
+  // Ice layer
+  const iceTgt=T<0?Math.min(1,(-T)/8)*4.2:0;
+  curIceH+=(iceTgt-curIceH)*.06;
+  if(curIceH>.08){
+    iceM.visible=iceTopM.visible=true;
+    iceM.position.y=curTop;
+    iceM.scale.y=curIceH;
+    iceTopM.position.y=curTop+.02;
+    iceMat.opacity=Math.min(.9,curIceH/3.8+.3);
+    iceTopMat.opacity=Math.min(.7,curIceH/4.0+.2);
+    iceTex.offset.x+=0.001;
+  }else{ iceM.visible=iceTopM.visible=false; }
+
+  // Bubbles
+  const maxB=T<62?0:T<80?6:T<93?28:T<100?72:140;
+  let nB=0;
+  bubs.forEach(b=>{
+    if(!b.on){ if(nB<maxB&&Math.random()<(T>95?.7:.1)){spawnBub(b,curTop,T);nB++;} return; }
+    nB++; b.y+=b.vy*dt;
+    b.mesh.position.set(b.x+Math.sin(clk*b.ws+b.ph)*b.wx*0.9, b.y, b.z+Math.cos(clk*b.ws*0.7+b.ph)*b.wz*0.9);
+    b.r*=(1+dt*.06);
+    b.mesh.scale.setScalar(b.r);
+    if(b.y>curTop+.7){b.on=false;b.mesh.visible=false;}
+  });
+
+  // Steam
+  const maxS=T<68?0:T<82?15:T<96?80:T<100?150:260;
+  let nS=0;
+  stms.forEach(s=>{
+    if(!s.mesh.visible){
+      if(nS<maxS&&Math.random()<.18){
+        const a=Math.random()*Math.PI*2, rd=Math.random()*(BR-1.6);
+        s.x=Math.cos(a)*rd; s.z=Math.sin(a)*rd;
+        s.mesh.position.set(s.x,curTop+.2,s.z);
+        s.life=0; s.ml=2.0+Math.random()*3.0;
+        s.vx=(Math.random()-.5)*0.6;
+        s.vy=0.4+Math.random()*2.2;
+        s.vz=(Math.random()-.5)*0.6;
+        s.sz=0.5+Math.random()*2.8;
+        s.mesh.visible=true; nS++;
+      }return;
+    }
+    nS++; s.life+=dt;
+    if(s.life>s.ml){s.mesh.visible=false;return;}
+    s.mesh.position.x+=s.vx*dt; s.mesh.position.y+=s.vy*dt; s.mesh.position.z+=s.vz*dt;
+    s.vx+=(Math.random()-.5)*.06*dt*60; s.vz+=(Math.random()-.5)*.06*dt*60;
+    const lr=s.life/s.ml;
+    s.mesh.material.opacity= lr<.2?lr/.2: lr>.7?(1-lr)/.3:1.0;
+    s.mesh.material.opacity*=(T>98?.85:.4);
+    const sz=s.sz*(1+lr*4.0);
+    s.mesh.scale.set(sz,sz,1);
+  });
+
+  // Background tint
+  const bg=new THREE.Color();
+  if(T<0)bg.setHex(0x020812);
+  else if(T<4)bg.setHex(0x04101c);
+  else if(T<40)bg.setHex(0x03111f);
+  else if(T<80)bg.setHex(0x140a02);
+  else bg.setHex(0x200404);
+  scene.background.lerp(bg,.04);
+
+  ui(T);
+  renderer.render(scene,camera);
+}
+ui(20);
+frame();
+</script>
 </body>
 </html>

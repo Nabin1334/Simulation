@@ -3,298 +3,774 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Properties of the magnet</title>
+    <title>Interactive Magnetic Properties Simulator</title>
     <style>
         :root {
-            --primary: #4ecdc4;
-            --secondary: #2b6cb0;
-            --bg-glass: rgba(0, 0, 0, 0.4);
-            --border-glass: rgba(255, 255, 255, 0.2);
+            --primary: #00d4ff;
+            --secondary: #ff006e;
+            --accent: #8338ec;
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #00ff88;
+            --warning: #ffaa00;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
             color: white;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .bg-particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
         }
 
         header {
-            text-align: center;
-            padding: 10px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            margin-bottom: 10px;
-            flex-shrink: 0;
-        }
-
-        .magnet-icon {
-            font-size: 1.8em;
-            display: inline-block;
-            animation: magnetFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes magnetFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(10deg); }
-        }
-
-        h1 { font-size: 1.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .subtitle { color: #a4b0be; font-size: 0.85em; }
-
-        .main-container {
-            display: flex;
-            gap: 15px;
-            padding: 0 15px 15px 15px;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar, .description-panel {
-            width: 250px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
-            border: 1px solid var(--border-glass);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            border-bottom: 2px solid rgba(78, 205, 196, 0.5);
-            padding-bottom: 8px;
-        }
-
-        .experiment-btn {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-glass);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            text-align: left;
-            color: white;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .experiment-btn:hover { background: rgba(255, 255, 255, 0.15); }
-        
-        .experiment-btn.active {
-            background: linear-gradient(135deg, rgba(78, 205, 196, 0.8), rgba(43, 108, 176, 0.8));
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
-        }
-
-        .experiment-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            color: #0f2027;
-            border-radius: 50%;
-            margin-right: 10px;
-            font-weight: bold;
-            font-size: 0.8em;
-        }
-
-        .experiment-area {
-            flex: 1;
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid var(--border-glass);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            min-width: 0;
-        }
-
-        .experiment-header {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            height: 40px;
-        }
-
-        .experiment-title { font-size: 1.3em; color: var(--primary); margin: 0; }
-        .experiment-id { 
-            background: rgba(78, 205, 196, 0.15); 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            border: 1px solid var(--primary); 
-            font-size: 0.8em; 
-        }
-
-        .animation-container {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
             position: relative;
-            margin-bottom: 10px;
+            z-index: 100;
         }
 
-        #threejs-canvas { width: 100%; height: 100%; display: block; outline: none; }
-
-        .controls-panel {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .control-btn {
-            background: var(--primary);
-            color: #0f2027;
-            border: none;
+        .magnet-icon {
+            font-size: 2em;
+            filter: drop-shadow(0 0 10px var(--primary));
+            animation: magnetPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes magnetPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo h1 {
+            font-size: 1.5em;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
             padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-            float: right;
-        }
-        .control-btn:hover { transform: translateY(-2px); }
-
-        .status-bar {
-            margin-top: 8px;
-            padding: 5px;
-            font-size: 0.85em;
-            color: #a4b0be;
-            border-top: 1px solid var(--border-glass);
-            text-align: center;
-            clear: both;
-        }
-
-        .experiment-info {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 3px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
             font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .header-btn.active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 80px);
+            position: relative;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .panel::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .panel-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .experiment-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .experiment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .experiment-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .experiment-card:hover::before {
+            opacity: 1;
+        }
+
+        .experiment-card.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(131, 56, 236, 0.15));
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .experiment-card.active::before {
+            opacity: 1;
+        }
+
+        .exp-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .exp-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .exp-title {
+            font-size: 1em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .exp-desc {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
             line-height: 1.4;
         }
 
-        .key-points ul { padding-left: 20px; font-size: 0.85em; }
-        .key-points li { margin-bottom: 5px; color: #ddd; }
-
-        .overlay-status {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            color: var(--primary);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            border: 1px solid var(--primary);
-            pointer-events: none;
+        .canvas-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
         }
 
-        /* Compass */
-        .compass-2d {
+        #threejs-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--primary);
+            font-size: 0.9em;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .compass {
             position: absolute;
             top: 15px;
             right: 15px;
-            width: 90px;
-            height: 90px;
-            pointer-events: none;
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        .compass-symbol {
+
+        .compass-needle {
+            width: 60%;
+            height: 2px;
+            position: relative;
+        }
+
+        .compass-needle::before {
+            content: 'N';
+            position: absolute;
+            left: -20px;
+            top: -8px;
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .compass-needle::after {
+            content: 'S';
+            position: absolute;
+            right: -20px;
+            top: -8px;
+            color: #4444ff;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .compass-labels {
+            position: absolute;
             width: 100%;
             height: 100%;
-            position: relative;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            background: rgba(0,0,0,0.2);
         }
-        .dir { position: absolute; font-weight: bold; font-size: 14px; transform: translate(-50%, -50%); }
-        .c-n { top: 50%; left: 15%; color: #ff4444; }
-        .c-s { top: 50%; left: 85%; color: #4444ff; }
-        .c-e { top: 15%; left: 50%; color: #44ff44; }
-        .c-w { top: 85%; left: 50%; color: #ffff44; }
-        .c-center { top: 50%; left: 50%; color: var(--primary); font-size: 20px; }
 
-        @media (max-width: 1024px) {
-            .main-container { flex-direction: column; overflow-y: auto; }
-            .sidebar, .description-panel { width: 100%; height: auto; max-height: 200px; }
-            .experiment-area { height: 500px; flex: none; }
-            body { height: auto; overflow-y: auto; }
+        .compass-label {
+            position: absolute;
+            font-size: 11px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+        }
+
+        .compass-label.n { top: 8%; left: 50%; color: #ff4444; }
+        .compass-label.s { top: 92%; left: 50%; color: #4444ff; }
+        .compass-label.e { top: 50%; left: 92%; color: #ffaa44; }
+        .compass-label.w { top: 50%; left: 8%; color: #44ff44; }
+
+        .control-bar {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            font-size: 1em;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card {
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .physics-formula {
+            background: rgba(131, 56, 236, 0.1);
+            border: 1px solid rgba(131, 56, 236, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            margin: 10px 0;
+            color: var(--accent);
+        }
+
+        .key-points {
+            list-style: none;
+            padding: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .key-points li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+        }
+
+        .tutorial-hint {
+            position: absolute;
+            background: rgba(0, 212, 255, 0.9);
+            color: var(--bg-dark);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            z-index: 20;
+            pointer-events: none;
+            animation: bounce 2s infinite;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.5);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tutorial-hint::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(0, 212, 255, 0.9);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.85em;
+            border: 1px solid var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .slider-container {
+            margin: 15px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+           
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                overflow-y: auto;
+            }
+            
+            .panel {
+                max-height: none;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeOut 1s 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+    <!-- Background particles -->
+    <div class="bg-particle" style="width: 200px; height: 200px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+    <div class="bg-particle" style="width: 150px; height: 150px; top: 60%; right: 15%; animation-delay: 5s;"></div>
+    <div class="bg-particle" style="width: 180px; height: 180px; bottom: 20%; left: 50%; animation-delay: 10s;"></div>
+
+    <!-- Loading screen -->
+    <div class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Header -->
     <header>
-        <div class="magnet-icon">🧲</div>
-        <h1>Properties of the Magnet</h1>
-        
+        <div class="logo">
+            <div class="magnet-icon">🧲</div>
+            <div>
+                <h1>Magnetic Properties Simulator</h1>
+                <div style="font-size: 0.8em; color: rgba(255,255,255,0.6);">Interactive Physics Learning</div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button class="header-btn" id="helpBtn" title="Show tutorial">
+                <span>❓</span> Help
+            </button>
+            <button class="header-btn" id="fullscreenBtn" title="Toggle fullscreen">
+                <span>⛶</span> Fullscreen
+            </button>
+            <button class="header-btn" id="settingsBtn" title="Settings">
+                <span>⚙️</span> Settings
+            </button>
+        </div>
     </header>
 
+    <!-- Main content -->
     <div class="main-container">
-        <div class="sidebar">
-            <h2>Experiments</h2>
-            <div id="btn-container"></div>
+        <!-- Left sidebar: Experiments -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>🔬</span> Experiments
+            </div>
+            <div id="experiments-container"></div>
         </div>
 
-        <div class="experiment-area">
-            <div class="experiment-header">
-                <h2 class="experiment-title" id="exTitle">Loading...</h2>
-                <div class="experiment-id" id="exId">Exp 1</div>
+        <!-- Center: 3D Canvas -->
+        <div class="canvas-container">
+            <div class="canvas-overlay" id="statusOverlay">
+                <div class="status-dot"></div>
+                <span id="statusText">Ready to explore</span>
             </div>
             
-            <div class="animation-container" id="canvas-container">
-                <div class="overlay-status" id="animStatus">Ready</div>
-                <canvas id="threejs-canvas"></canvas>
-                <div class="compass-2d">
-                    <div class="compass-symbol">
-                        <div class="dir c-n">N</div>
-                        <div class="dir c-s">S</div>
-                        <div class="dir c-w">W</div>
-                        <div class="dir c-e">E</div>
-                        <div class="dir c-center">+</div>
+            <canvas id="threejs-canvas"></canvas>
+            
+            <div class="compass">
+                <div class="compass-labels">
+                    <div class="compass-label n">N</div>
+                    <div class="compass-label s">S</div>
+                    <div class="compass-label e">E</div>
+                    <div class="compass-label w">W</div>
+                </div>
+                <div class="compass-needle" id="compassNeedle" style="background: linear-gradient(90deg, #ff4444 0%, #4444ff 100%);"></div>
+            </div>
+
+            <div class="control-bar">
+                <button class="control-btn tooltip" id="resetBtn">
+                    <span>↺</span> Reset
+                    <span class="tooltiptext">Reset current experiment</span>
+                </button>
+                <button class="control-btn tooltip" id="pauseBtn">
+                    <span>⏸</span> Pause
+                    <span class="tooltiptext">Pause/Resume physics</span>
+                </button>
+                <button class="control-btn tooltip" id="fieldBtn">
+                    <span>🔮</span> Field Lines
+                    <span class="tooltiptext">Toggle magnetic field visualization</span>
+                </button>
+                <button class="control-btn tooltip" id="slowMotionBtn">
+                    <span>🐌</span> Slow-Mo
+                    <span class="tooltiptext">Enable slow motion</span>
+                </button>
+            </div>
+
+            <div class="tutorial-hint" id="tutorialHint" style="display: none; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                👆 Drag the magnet to begin!
+            </div>
+        </div>
+
+        <!-- Right sidebar: Info panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>📊</span> Information
+            </div>
+            
+            <div class="info-section">
+                <h3>📖 Description</h3>
+                <div class="info-card" id="descriptionText">
+                    Select an experiment to see details
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>🧮 Physics</h3>
+                <div class="physics-formula" id="physicsFormula">
+                    F = k(m₁m₂)/r²
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>✨ Key Points</h3>
+                <ul class="key-points" id="keyPoints">
+                    <li>Select an experiment to begin</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h3>🎮 Controls</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Particle Count</span>
+                        <span id="particleValue">300</span>
                     </div>
+                    <input type="range" min="100" max="500" value="300" class="slider" id="particleSlider">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Field Strength</span>
+                        <span id="strengthValue">100%</span>
+                    </div>
+                    <input type="range" min="50" max="200" value="100" class="slider" id="strengthSlider">
                 </div>
             </div>
-            
-            <div class="controls-panel">
-                <div style="height: 35px;">
-                    <span style="color:var(--primary); font-weight:bold; line-height: 35px;">Controls</span>
-                    <button class="control-btn" id="resetBtn">↺ Reset Experiment</button>
-                </div>
-                <div class="status-bar" id="statusText">Select an experiment to begin.</div>
-            </div>
-        </div>
 
-        <div class="description-panel">
-            <h2>Details</h2>
-            <div class="experiment-info" id="exDesc"></div>
-            <div class="key-points">
-                <h3>Key Takeaways</h3>
-                <ul id="exPoints"></ul>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="particlesStat">0</div>
+                    <div class="stat-label">Active Particles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="magnetsStat">0</div>
+                    <div class="stat-label">Magnets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="forceStat">0</div>
+                    <div class="stat-label">Force (N)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fpsStat">60</div>
+                    <div class="stat-label">FPS</div>
+                </div>
             </div>
         </div>
     </div>
@@ -302,54 +778,104 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <script>
+        // Configuration
         const CONFIG = {
             colors: {
                 north: 0xff3333,
-                south: 0x3333ff,
-                body: 0x888888,
-                iron: 0x888888, // Lighter iron color for visibility
-                bg: 0x0a1929
+                south: 0x3366ff,
+                body: 0x555555,
+                iron: 0xcccccc,
+                bg: 0x0a0e27,
+                fieldLine: 0x00d4ff
+            },
+            physics: {
+                magneticConstant: 1.2,
+                friction: 0.94,
+                earthFieldStrength: 0.025,
+                particleMass: 0.1,
+                rotationDamping: 0.95,
+                timeScale: 1.0,
+                particleCount: 300,
+                fieldStrength: 1.0
             }
         };
 
+        // Experiment definitions with detailed info
         const EXPERIMENTS = [
             {
                 id: 0,
                 title: "Directional Property",
-                desc: "A freely suspended magnet always aligns North-South.",
-                points: ["Aligns with Earth's field", "North pole -> Geographic North", "Always returns to orientation"],
-                msg: "Drag to rotate the magnet. Release to see it align."
+                shortDesc: "Earth's magnetic field alignment",
+                desc: "A freely suspended bar magnet experiences a torque from Earth's magnetic field, causing it to rotate until aligned in the North-South direction. This demonstrates that magnets are magnetic dipoles that interact with external fields.",
+                formula: "τ = m × B (Magnetic torque)",
+                points: [
+                    "Magnet aligns with Earth's magnetic field",
+                    "North pole points to geographic north",
+                    "Restoring torque brings magnet back after disturbance",
+                    "Used in magnetic compasses for navigation"
+                ],
+                instruction: "Drag to rotate the magnet. Release and watch it realign with Earth's field."
             },
             {
                 id: 1,
-                title: "Magnetic Power Distribution",
-                desc: "Magnetic force is strongest at the poles. Iron filings stick to the ends.",
-                points: ["Strongest at poles", "Weakest at center", "Drag magnet to collect dust"],
-                msg: "Drag the magnet slowly over the iron dust."
+                title: "Magnetic Field Distribution",
+                shortDesc: "Field strength varies with position",
+                desc: "Iron filings become temporary magnets when exposed to a magnetic field (induced magnetism). They align with and visualize the field lines. Field strength follows the inverse square law (B ∝ 1/r²) - strongest at poles where field lines are most concentrated, and weakest at the center. Watch particles lift off the surface and cluster at the poles!",
+                formula: "B = μ₀m/(4πr²) | F = qvB sin(θ)",
+                points: [
+                    "Field strength follows inverse square law",
+                    "Maximum concentration at magnetic poles",
+                    "Neutral point at magnet center (zero field)",
+                    "Particles align with field lines showing 3D pattern",
+                    "Real-time visualization of invisible magnetic field"
+                ],
+                instruction: "Drag the magnet slowly over iron filings. Watch them lift and cluster at poles where the field is strongest!"
             },
             {
                 id: 2,
                 title: "Like Poles Repel",
-                desc: "North-North or South-South interactions push away.",
-                points: ["Same poles repel", "Force increases as they get closer"],
-                msg: "Drag the right magnet towards the left magnet."
+                shortDesc: "Same poles push apart",
+                desc: "When two like poles (N-N or S-S) face each other, they exert a repulsive force. The force magnitude follows the inverse square law (F ∝ 1/r²), increasing dramatically as magnets approach. The magnetic field lines compress and push against each other.",
+                formula: "F = k(m₁m₂)/r² (Repulsive force)",
+                points: [
+                    "N-N or S-S configuration creates repulsion",
+                    "Force increases with inverse square of distance",
+                    "Energy barrier prevents contact",
+                    "Field lines never cross or connect"
+                ],
+                instruction: "Drag right magnet toward the left. Feel the invisible force pushing back!"
             },
             {
                 id: 3,
                 title: "Unlike Poles Attract",
-                desc: "North-South interactions pull together.",
-                points: ["Opposite poles attract", "Magnets snap together"],
-                msg: "Drag the right magnet towards the left magnet."
+                shortDesc: "Opposite poles pull together",
+                desc: "When opposite poles (N-S) face each other, they create an attractive force following F ∝ 1/r². The field lines connect smoothly between the poles, creating a strong interaction. At close range, the attractive force overcomes separation, causing magnets to 'snap' together.",
+                formula: "F = k(m₁m₂)/r² (Attractive force)",
+                points: [
+                    "N-S configuration creates attraction",
+                    "Field lines merge and connect between poles",
+                    "Force follows inverse square law",
+                    "Magnets snap together at close range"
+                ],
+                instruction: "Bring the magnets together. Watch them snap together when close enough!"
             },
             {
                 id: 4,
-                title: "Poles Never Separate",
-                desc: "Breaking a magnet creates smaller complete magnets.",
-                points: ["No monopoles", "Each piece has N and S"],
-                msg: "Click the magnet to break it."
+                title: "Magnetic Dipoles",
+                shortDesc: "No magnetic monopoles exist",
+                desc: "When a bar magnet is broken, each piece becomes a complete dipole with both N and S poles. Magnetic monopoles (isolated N or S poles) do not exist in nature. This is a fundamental property of magnetism, differing from electric charges which can be isolated.",
+                formula: "∇·B = 0 (Gauss's law for magnetism)",
+                points: [
+                    "No isolated magnetic poles (monopoles) exist",
+                    "Breaking a magnet creates smaller complete dipoles",
+                    "Each fragment has both N and S poles",
+                    "Fundamental law: Magnetic field divergence = 0"
+                ],
+                instruction: "Click the magnet to break it. Each piece retains both N and S poles!"
             }
         ];
 
+        // State management
         const state = {
             currentExp: 0,
             isDragging: false,
@@ -357,87 +883,314 @@
             sceneObjects: [],
             particles: [],
             magnets: [],
-            startPos: new THREE.Vector3()
+            fieldLines: [],
+            showFieldLines: false,
+            isPaused: false,
+            isSlowMotion: false,
+            velocities: new Map(),
+            angularVelocities: new Map(),
+            totalForce: 0,
+            fps: 60,
+            showTutorial: true
         };
 
-        let scene, camera, renderer, raycaster;
+        let scene, camera, renderer, raycaster, plane, clock;
         const mouse = new THREE.Vector2();
         
+        // Resources (geometry and materials)
         const Resources = {
             geo: {
                 magnet: new THREE.BoxGeometry(1, 1, 1),
                 pole: new THREE.BoxGeometry(1, 1, 1),
-                particle: new THREE.SphereGeometry(0.06, 5, 5) // Slightly larger particles
+                particle: new THREE.SphereGeometry(0.07, 8, 8),
             },
             mat: {
-                body: new THREE.MeshStandardMaterial({ color: CONFIG.colors.body, roughness: 0.4 }),
-                north: new THREE.MeshStandardMaterial({ color: CONFIG.colors.north, roughness: 0.2 }),
-                south: new THREE.MeshStandardMaterial({ color: CONFIG.colors.south, roughness: 0.2 }),
-                iron: new THREE.MeshStandardMaterial({ color: CONFIG.colors.iron }),
-                thread: new THREE.LineBasicMaterial({ color: 0xffffff })
+                body: new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.body, 
+                    roughness: 0.3,
+                    metalness: 0.8
+                }),
+                north: new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.north, 
+                    roughness: 0.2,
+                    metalness: 0.6,
+                    emissive: CONFIG.colors.north,
+                    emissiveIntensity: 0.3
+                }),
+                south: new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.south, 
+                    roughness: 0.2,
+                    metalness: 0.6,
+                    emissive: CONFIG.colors.south,
+                    emissiveIntensity: 0.3
+                }),
+                iron: new THREE.MeshStandardMaterial({ 
+                    color: CONFIG.colors.iron,
+                    roughness: 0.4,
+                    metalness: 0.9
+                }),
+                thread: new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 }),
+                fieldLine: new THREE.LineBasicMaterial({ 
+                    color: CONFIG.colors.fieldLine, 
+                    transparent: true, 
+                    opacity: 0.6 
+                })
             }
         };
 
+        // Initialize Three.js scene
         function init() {
-            const container = document.getElementById('canvas-container');
+            const container = document.querySelector('.canvas-container');
+            
             scene = new THREE.Scene();
             scene.background = new THREE.Color(CONFIG.colors.bg);
+            scene.fog = new THREE.Fog(CONFIG.colors.bg, 15, 40);
 
-            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 6, 9); // Higher camera angle
+            camera = new THREE.PerspectiveCamera(
+                45, 
+                container.clientWidth / container.clientHeight, 
+                0.1, 
+                100
+            );
+            camera.position.set(0, 8, 12);
             camera.lookAt(0, 0, 0);
 
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threejs-canvas'), antialias: true });
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('threejs-canvas'), 
+                antialias: true,
+                alpha: true
+            });
             renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-            const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Lighting
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambLight);
+
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(5, 10, 5);
+            dirLight.position.set(6, 12, 8);
             dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 1024;
-            dirLight.shadow.mapSize.height = 1024;
-            scene.add(ambLight, dirLight);
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 50;
+            scene.add(dirLight);
 
-            const floorGeo = new THREE.PlaneGeometry(50, 50);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
+            const pointLight1 = new THREE.PointLight(0x00d4ff, 0.6, 25);
+            pointLight1.position.set(0, 5, 5);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0xff006e, 0.4, 20);
+            pointLight2.position.set(-5, 3, -5);
+            scene.add(pointLight2);
+
+            // Floor
+            const floorGeo = new THREE.PlaneGeometry(60, 60);
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x0f1729, 
+                roughness: 0.8,
+                metalness: 0.2
+            });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.position.y = -2;
             floor.receiveShadow = true;
             scene.add(floor);
 
+            // Grid
+            const gridHelper = new THREE.GridHelper(30, 30, 0x00d4ff, 0x1a1f3a);
+            gridHelper.position.y = -1.98;
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+
             raycaster = new THREE.Raycaster();
-            setupInputs(renderer.domElement);
+            plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            clock = new THREE.Clock();
+            
             setupUI();
+            setupControls();
+            setupEventListeners();
+            
             animate();
             loadExperiment(0);
+            
             window.addEventListener('resize', onWindowResize);
         }
 
-        function clearScene() {
-            state.sceneObjects.forEach(obj => scene.remove(obj));
-            state.sceneObjects = [];
-            state.magnets = [];
-            state.particles = [];
-            state.dragObject = null;
-            state.isDragging = false;
+        // Setup UI elements
+        function setupUI() {
+            const container = document.getElementById('experiments-container');
+            
+            EXPERIMENTS.forEach((exp, i) => {
+                const card = document.createElement('div');
+                card.className = 'experiment-card';
+                if (i === 0) card.classList.add('active');
+                
+                card.innerHTML = `
+                    <div class="exp-header">
+                        <div class="exp-number">${i + 1}</div>
+                        <div class="exp-title">${exp.title}</div>
+                    </div>
+                    <div class="exp-desc">${exp.shortDesc}</div>
+                `;
+                
+                card.onclick = () => loadExperiment(i);
+                container.appendChild(card);
+            });
         }
 
-        function createMagnet(x, y, z, length = 3, isNorthLeft = true) {
+        // Setup controls and event listeners
+        function setupControls() {
+            const canvas = document.getElementById('threejs-canvas');
+            
+            const getMouse = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
+                return {x, y};
+            };
+
+            const onDown = (e) => {
+                getMouse(e);
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(state.sceneObjects, true);
+
+                if (intersects.length > 0) {
+                    let target = intersects[0].object;
+                    while(target.parent && !target.userData.isMagnet) {
+                        target = target.parent;
+                    }
+
+                    if (target.userData.isMagnet) {
+                        if (state.currentExp === 4 && target.userData.breakable) {
+                            breakMagnet(target);
+                        } else if (target.userData.draggable || target.userData.suspended) {
+                            state.isDragging = true;
+                            state.dragObject = target;
+                            canvas.style.cursor = 'grabbing';
+                            
+                            // Hide tutorial hint
+                            document.getElementById('tutorialHint').style.display = 'none';
+                        }
+                    }
+                }
+            };
+
+            const onMove = (e) => {
+                if (!state.isDragging || !state.dragObject) return;
+                getMouse(e);
+                
+                raycaster.setFromCamera(mouse, camera);
+                const targetPoint = new THREE.Vector3();
+                
+                if (state.currentExp === 0) {
+                    state.dragObject.rotation.y = mouse.x * Math.PI * 1.5;
+                    state.angularVelocities.set(state.dragObject.uuid, 0);
+                } else if (state.dragObject.userData.draggable) {
+                    plane.constant = -state.dragObject.position.y;
+                    raycaster.ray.intersectPlane(plane, targetPoint);
+                    
+                    if (targetPoint) {
+                        const vel = state.velocities.get(state.dragObject.uuid);
+                        if (vel) {
+                            vel.subVectors(targetPoint, state.dragObject.position);
+                        }
+                        state.dragObject.position.x = Math.max(-8, Math.min(8, targetPoint.x));
+                        state.dragObject.position.z = Math.max(-6, Math.min(6, targetPoint.z));
+                    }
+                }
+            };
+
+            const onUp = () => {
+                state.isDragging = false;
+                state.dragObject = null;
+                canvas.style.cursor = 'default';
+            };
+
+            canvas.addEventListener('mousedown', onDown);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onUp);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(e); }, {passive:false});
+            window.addEventListener('touchmove', (e) => { if(state.isDragging) e.preventDefault(); onMove(e); }, {passive:false});
+            window.addEventListener('touchend', onUp);
+        }
+
+        function setupEventListeners() {
+            // Control buttons
+            document.getElementById('resetBtn').onclick = () => loadExperiment(state.currentExp);
+            
+            document.getElementById('pauseBtn').onclick = function() {
+                state.isPaused = !state.isPaused;
+                this.innerHTML = state.isPaused ? '<span>▶</span> Play' : '<span>⏸</span> Pause';
+                this.classList.toggle('active', state.isPaused);
+            };
+            
+            document.getElementById('fieldBtn').onclick = function() {
+                state.showFieldLines = !state.showFieldLines;
+                this.classList.toggle('active', state.showFieldLines);
+                updateFieldLines();
+            };
+            
+            document.getElementById('slowMotionBtn').onclick = function() {
+                state.isSlowMotion = !state.isSlowMotion;
+                CONFIG.physics.timeScale = state.isSlowMotion ? 0.3 : 1.0;
+                this.classList.toggle('active', state.isSlowMotion);
+            };
+
+            // Sliders
+            document.getElementById('particleSlider').oninput = function() {
+                CONFIG.physics.particleCount = parseInt(this.value);
+                document.getElementById('particleValue').textContent = this.value;
+            };
+            
+            document.getElementById('strengthSlider').oninput = function() {
+                CONFIG.physics.fieldStrength = parseInt(this.value) / 100;
+                document.getElementById('strengthValue').textContent = this.value + '%';
+            };
+
+            // Header buttons
+            document.getElementById('helpBtn').onclick = () => {
+                alert('🧲 Magnetic Properties Simulator\n\n' +
+                      '• Select experiments from the left panel\n' +
+                      '• Drag magnets to interact with them\n' +
+                      '• Toggle field lines to visualize magnetic fields\n' +
+                      '• Adjust particle count and field strength\n' +
+                      '• Use slow motion for detailed observation\n\n' +
+                      'Enjoy exploring the fascinating world of magnetism!');
+            };
+
+            document.getElementById('fullscreenBtn').onclick = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            };
+        }
+
+        // Create magnet with poles
+        function createMagnet(x, y, z, length = 3, isNorthLeft = true, canBreak = false) {
             const group = new THREE.Group();
-            const h = 0.6, d = 0.6;
-            const poleLen = length * 0.15; // Poles are 15% of length
+            const h = 0.7, d = 0.7;
+            const poleLen = length * 0.2;
             const bodyLen = length - (poleLen * 2);
 
-            const body = new THREE.Mesh(Resources.geo.magnet, Resources.mat.body);
+            // Body
+            const body = new THREE.Mesh(Resources.geo.magnet, Resources.mat.body.clone());
             body.scale.set(bodyLen, h, d);
             body.castShadow = true;
+            body.receiveShadow = true;
             group.add(body);
 
-            const nPole = new THREE.Mesh(Resources.geo.pole, Resources.mat.north);
+            // Poles
+            const nPole = new THREE.Mesh(Resources.geo.pole, Resources.mat.north.clone());
             nPole.scale.set(poleLen, h, d);
-            const sPole = new THREE.Mesh(Resources.geo.pole, Resources.mat.south);
+            const sPole = new THREE.Mesh(Resources.geo.pole, Resources.mat.south.clone());
             sPole.scale.set(poleLen, h, d);
 
             if (isNorthLeft) {
@@ -450,93 +1203,259 @@
 
             nPole.castShadow = true;
             sPole.castShadow = true;
-            group.add(nPole);
-            group.add(sPole);
+            group.add(nPole, sPole);
 
-            addLabel(group, "N", nPole.position.x, h/2 + 0.5, 0, "red");
-            addLabel(group, "S", sPole.position.x, h/2 + 0.5, 0, "blue");
+            // Labels
+            addLabel(group, "N", nPole.position.x, h/2 + 0.6, 0, "#ff3333");
+            addLabel(group, "S", sPole.position.x, h/2 + 0.6, 0, "#3366ff");
 
             group.position.set(x, y, z);
             group.userData = { 
                 isMagnet: true, 
                 draggable: true,
-                length: length // Important for collision/breaking
+                length: length,
+                isNorthLeft: isNorthLeft,
+                breakable: canBreak,
+                northPolePos: new THREE.Vector3(nPole.position.x, 0, 0),
+                southPolePos: new THREE.Vector3(sPole.position.x, 0, 0)
             };
 
             state.sceneObjects.push(group);
             state.magnets.push(group);
+            state.velocities.set(group.uuid, new THREE.Vector3());
+            state.angularVelocities.set(group.uuid, 0);
+            
             scene.add(group);
             return group;
         }
 
-        function addLabel(parent, text, x, y, z, colorStr) {
+        function addLabel(parent, text, x, y, z, color) {
             const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
+            canvas.width = 128;
+            canvas.height = 128;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = colorStr === 'red' ? '#ffcccc' : '#ccccff';
-            ctx.font = 'bold 48px Arial';
+            
+            ctx.fillStyle = color;
+            ctx.font = 'bold 80px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, 32, 32);
+            ctx.fillText(text, 64, 64);
             
             const tex = new THREE.CanvasTexture(canvas);
-            const spriteMat = new THREE.SpriteMaterial({ map: tex });
+            const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
             const sprite = new THREE.Sprite(spriteMat);
             sprite.position.set(x, y, z);
-            sprite.scale.set(0.8, 0.8, 0.8);
+            sprite.scale.set(1, 1, 1);
             parent.add(sprite);
         }
 
+        // Calculate magnetic field at a point
+        function getMagneticField(position, magnets) {
+            const field = new THREE.Vector3();
+            const strength = CONFIG.physics.magneticConstant * CONFIG.physics.fieldStrength;
+            
+            magnets.forEach(mag => {
+                const magPos = new THREE.Vector3();
+                mag.getWorldPosition(magPos);
+                
+                const northWorld = new THREE.Vector3();
+                const southWorld = new THREE.Vector3();
+                
+                const northLocal = mag.userData.northPolePos.clone();
+                const southLocal = mag.userData.southPolePos.clone();
+                
+                northLocal.applyQuaternion(mag.quaternion);
+                southLocal.applyQuaternion(mag.quaternion);
+                
+                northWorld.copy(magPos).add(northLocal);
+                southWorld.copy(magPos).add(southLocal);
+                
+                // North pole field
+                const toNorth = position.clone().sub(northWorld);
+                const distN = toNorth.length();
+                if (distN > 0.1) {
+                    toNorth.normalize().multiplyScalar(strength / (distN * distN));
+                    field.add(toNorth);
+                }
+                
+                // South pole field
+                const toSouth = position.clone().sub(southWorld);
+                const distS = toSouth.length();
+                if (distS > 0.1) {
+                    toSouth.normalize().multiplyScalar(-strength / (distS * distS));
+                    field.add(toSouth);
+                }
+            });
+            
+            return field;
+        }
+
+        // Update field line visualization
+        function updateFieldLines() {
+            state.fieldLines.forEach(line => {
+                if (line.geometry) line.geometry.dispose();
+                scene.remove(line);
+            });
+            state.fieldLines = [];
+            
+            if (!state.showFieldLines || state.magnets.length === 0) return;
+            
+            state.magnets.forEach(mag => {
+                const magPos = new THREE.Vector3();
+                mag.getWorldPosition(magPos);
+                
+                const northWorld = new THREE.Vector3();
+                const northLocal = mag.userData.northPolePos.clone();
+                northLocal.applyQuaternion(mag.quaternion);
+                northWorld.copy(magPos).add(northLocal);
+                
+                // Create field lines
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const startOffset = new THREE.Vector3(
+                        Math.cos(angle) * 0.4,
+                        Math.sin(angle) * 0.4,
+                        0
+                    ).applyQuaternion(mag.quaternion);
+                    
+                    const points = [];
+                    let currentPos = northWorld.clone().add(startOffset);
+                    
+                    for (let step = 0; step < 40; step++) {
+                        points.push(currentPos.clone());
+                        const field = getMagneticField(currentPos, state.magnets);
+                        if (field.length() < 0.01) break;
+                        currentPos.add(field.normalize().multiplyScalar(0.15));
+                        if (currentPos.length() > 20) break;
+                    }
+                    
+                    if (points.length > 1) {
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const line = new THREE.Line(geometry, Resources.mat.fieldLine);
+                        scene.add(line);
+                        state.fieldLines.push(line);
+                    }
+                }
+            });
+        }
+
+        // Clear scene
+        function clearScene() {
+            state.sceneObjects.forEach(obj => {
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) {
+                    if (Array.isArray(obj.material)) {
+                        obj.material.forEach(m => m.dispose());
+                    } else {
+                        obj.material.dispose();
+                    }
+                }
+                scene.remove(obj);
+            });
+            
+            state.fieldLines.forEach(line => {
+                if (line.geometry) line.geometry.dispose();
+                scene.remove(line);
+            });
+            
+            state.sceneObjects = [];
+            state.magnets = [];
+            state.particles = [];
+            state.fieldLines = [];
+            state.dragObject = null;
+            state.isDragging = false;
+            state.velocities.clear();
+            state.angularVelocities.clear();
+        }
+
+        // Load experiment
         function loadExperiment(idx) {
             clearScene();
             state.currentExp = idx;
-            const data = EXPERIMENTS[idx];
-            document.getElementById('exTitle').innerText = data.title;
-            document.getElementById('exId').innerText = `Exp ${idx + 1}`;
-            document.getElementById('exDesc').innerText = data.desc;
-            document.getElementById('statusText').innerText = data.msg;
-            document.getElementById('animStatus').innerText = "Ready";
+            const exp = EXPERIMENTS[idx];
             
-            const list = document.getElementById('exPoints');
-            list.innerHTML = "";
-            data.points.forEach(p => {
+            // Update UI
+            document.getElementById('descriptionText').textContent = exp.desc;
+            document.getElementById('physicsFormula').textContent = exp.formula;
+            document.getElementById('statusText').textContent = exp.instruction;
+            
+            const keyPoints = document.getElementById('keyPoints');
+            keyPoints.innerHTML = '';
+            exp.points.forEach(point => {
                 const li = document.createElement('li');
-                li.innerText = p;
-                list.appendChild(li);
+                li.textContent = point;
+                keyPoints.appendChild(li);
             });
-
-            document.querySelectorAll('.experiment-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === idx);
+            
+            // Update experiment cards
+            document.querySelectorAll('.experiment-card').forEach((card, i) => {
+                card.classList.toggle('active', i === idx);
             });
-
+            
+            // Show tutorial hint for first experiment
+            if (idx === 0 && state.showTutorial) {
+                document.getElementById('tutorialHint').style.display = 'block';
+            }
+            
+            // Setup experiment
             if (idx === 0) setupExp1();
-            if (idx === 1) setupExp2();
-            if (idx === 2) setupExp3(true);
-            if (idx === 3) setupExp3(false);
-            if (idx === 4) setupExp4();
+            else if (idx === 1) setupExp2();
+            else if (idx === 2) setupExp3(true);
+            else if (idx === 3) setupExp3(false);
+            else if (idx === 4) setupExp4();
+            
+            updateFieldLines();
+            updateStats();
         }
 
+        // Experiment setups
         function setupExp1() {
-            const mag = createMagnet(0, 0, 0, 3, true);
-            const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 4, 0)];
-            const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), Resources.mat.thread);
-            line.position.y = 0.3;
+            const mag = createMagnet(0, 0, 0, 4, true);
+            
+            const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 5, 0)];
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points), 
+                Resources.mat.thread
+            );
+            line.position.y = 0.35;
             mag.add(line);
-            mag.userData.canRotate = true;
+            
+            mag.userData.suspended = true;
             mag.userData.draggable = false;
+            mag.rotation.y = Math.PI / 3;
         }
 
         function setupExp2() {
-            createMagnet(0, 1, 0, 4, true);
-            // Scatter particles
-            for(let i=0; i<300; i++) {
+            createMagnet(0, 0.5, 0, 5, true);
+            
+            const count = CONFIG.physics.particleCount;
+            for(let i = 0; i < count; i++) {
                 const p = new THREE.Mesh(Resources.geo.particle, Resources.mat.iron.clone());
-                // Spread randomly on floor
-                p.position.set((Math.random()-0.5)*10, -1.9, (Math.random()-0.5)*8);
+                
+                // Distribute particles more realistically on floor
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 7;
+                p.position.set(
+                    Math.cos(angle) * radius,
+                    -1.85 + Math.random() * 0.05, // Slight height variation
+                    Math.sin(angle) * radius
+                );
+                
+                p.castShadow = true;
+                p.receiveShadow = true;
                 p.userData = { 
                     isIron: true, 
                     attached: false,
-                    attachOffset: new THREE.Vector3() // Store relative position
+                    velocity: new THREE.Vector3(),
+                    angularVelocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.01,
+                        (Math.random() - 0.5) * 0.01,
+                        (Math.random() - 0.5) * 0.01
+                    ),
+                    mass: CONFIG.physics.particleMass,
+                    friction: 0.88,
+                    isAligning: false,
+                    targetRotation: new THREE.Quaternion()
                 };
                 scene.add(p);
                 state.particles.push(p);
@@ -545,425 +1464,418 @@
         }
 
         function setupExp3(isRepel) {
-            const leftMag = createMagnet(-3.5, 0, 0, 2.5, true); 
+            const leftMag = createMagnet(-4.5, 0, 0, 3.5, true); 
             leftMag.userData.draggable = false;
-            const rightMag = createMagnet(3.5, 0, 0, 2.5, !isRepel); 
+            leftMag.userData.fixed = true;
+            
+            const rightMag = createMagnet(4.5, 0, 0, 3.5, !isRepel); 
             rightMag.userData.draggable = true;
             
-            // Add demonstration particles
-            for(let i=0; i<20; i++) {
-                const p = new THREE.Mesh(Resources.geo.particle, Resources.mat.iron.clone());
-                // Position particles between the magnets
-                p.position.set((Math.random() - 0.5) * 4, 0.5 + Math.random() * 1, (Math.random() - 0.5) * 2);
-                p.userData = { 
-                    isDemoParticle: true, 
-                    repelMode: isRepel
-                };
-                scene.add(p);
-                state.particles.push(p);
-                state.sceneObjects.push(p);
-            }
+            // No particles for experiments 3 and 4 - just magnets
         }
 
         function setupExp4() {
-            const mag = createMagnet(0, 0, 0, 5, true); // Longer magnet
+            const mag = createMagnet(0, 0, 0, 6, true, true);
             mag.userData.breakable = true;
             
-            // Add some particles around the magnet
-            for(let i=0; i<15; i++) {
-                const p = new THREE.Mesh(Resources.geo.particle, Resources.mat.iron.clone());
-                // Position particles around the magnet
-                const angle = (i / 15) * Math.PI * 2;
-                const radius = 3 + Math.random() * 2;
-                p.position.set(Math.cos(angle) * radius, 0.5, Math.sin(angle) * radius);
-                p.userData = { 
-                    isBreakParticle: true
-                };
-                scene.add(p);
-                state.particles.push(p);
-                state.sceneObjects.push(p);
-            }
-            
-            document.getElementById('statusText').innerText = "Click the magnet to break it!";
+            // No particles for experiment 5 - just the breakable magnet
         }
 
-        function setupInputs(canvas) {
-            const getMouse = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.touches ? e.touches[0].clientX : e.clientX;
-                const y = e.touches ? e.touches[0].clientY : e.clientY;
-                mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
-                return {x, y};
-            };
-
-            const onDown = (e) => {
-                const {x, y} = getMouse(e);
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(state.sceneObjects, true);
-
-                if (intersects.length > 0) {
-                    let target = intersects[0].object;
-                    while(target.parent && !target.userData.isMagnet) target = target.parent;
-
-                    if (target.userData.isMagnet) {
-                        if (state.currentExp === 4 && target.userData.breakable) {
-                            breakMagnet(target);
-                        } else if (target.userData.draggable || target.userData.canRotate) {
-                            state.isDragging = true;
-                            state.dragObject = target;
-                            document.body.style.cursor = 'grabbing';
-                        }
-                    }
-                }
-            };
-
-            const onMove = (e) => {
-                if (!state.isDragging || !state.dragObject) return;
-                const {x, y} = getMouse(e);
-                
-                const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -state.dragObject.position.y);
-                raycaster.setFromCamera(mouse, camera);
-                const targetPoint = new THREE.Vector3();
-                raycaster.ray.intersectPlane(plane, targetPoint);
-
-                if (targetPoint) {
-                    if (state.currentExp === 0) {
-                        state.dragObject.rotation.y = mouse.x * Math.PI;
-                    } else if (state.dragObject.userData.draggable) {
-                        state.dragObject.position.x = Math.max(-6, Math.min(6, targetPoint.x));
-                        state.dragObject.position.z = Math.max(-4, Math.min(4, targetPoint.z));
-                    }
-                }
-            };
-
-            const onUp = () => {
-                state.isDragging = false;
-                state.dragObject = null;
-                document.body.style.cursor = 'default';
-            };
-
-            canvas.addEventListener('mousedown', onDown);
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onUp);
-            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(e); }, {passive:false});
-            window.addEventListener('touchmove', (e) => { if(state.isDragging) e.preventDefault(); onMove(e); }, {passive:false});
-            window.addEventListener('touchend', onUp);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (state.currentExp === 0 && !state.isDragging && state.magnets[0]) {
-                state.magnets[0].rotation.y += (0 - state.magnets[0].rotation.y) * 0.05;
-            }
-
-            // FIX 1: Dust Particles Logic
-            if (state.currentExp === 1 && state.magnets.length > 0) {
-                const mag = state.magnets[0];
-                const magPos = mag.position;
-                const magLen = 4; // Length defined in setupExp2
-
-                state.particles.forEach(p => {
-                    if (p.userData.attached) {
-                        // FIX: Hard-lock position relative to magnet
-                        p.position.copy(magPos).add(p.userData.attachOffset);
-                    } else {
-                        const dist = p.position.distanceTo(magPos);
-                        if (dist < 2.0) {
-                            p.userData.attached = true;
-                            
-                            // FIX: Calculate precise offset for poles - attach to nearest pole
-                            const particleX = p.position.x - magPos.x;
-                            const isNorth = particleX < 0; // Left side = North pole, Right side = South pole
-                            const isPole = true; // 100% go to poles
-                            
-                            // Poles are at +/- length/2. We subtract a bit to be inside the visual mesh
-                            const poleX = (magLen / 2) - 0.2; 
-                            const targetX = isNorth ? -poleX : poleX;
-                            
-                            // Create offset vector
-                            p.userData.attachOffset.set(
-                                targetX + (Math.random() - 0.5) * 0.5, // Jitter X
-                                0.3 + Math.random() * 0.3,             // Height on magnet
-                                (Math.random() - 0.5) * 0.6            // Width jitter
-                            );
-                            
-                            // Color
-                            if(isPole) p.material.color.setHex(isNorth ? CONFIG.colors.north : CONFIG.colors.south);
-                        }
-                    }
-                });
-            }
-
-            // FIX 2: Attraction Overlap Logic
-            if ((state.currentExp === 2 || state.currentExp === 3 || state.currentExp === 4) && state.magnets.length >= 2) {
-                const fixed = state.magnets[0];
-                const moving = state.magnets[1];
-
-                // Move demo particles
-                state.particles.forEach(p => {
-                    if (p.userData.isDemoParticle) {
-                        if (p.userData.attached) {
-                            // Keep attached particles in place relative to their magnet
-                            const attachedMagnet = p.userData.attachedMagnet;
-                            if (attachedMagnet) {
-                                p.position.copy(attachedMagnet.position).add(p.userData.attachOffset);
-                            }
-                        } else {
-                            const isRepel = p.userData.repelMode;
-                            const centerX = (fixed.position.x + moving.position.x) / 2;
-                            const distToCenter = Math.abs(p.position.x - centerX);
-                            
-                            // Check for attachment to either magnet
-                            let attached = false;
-                            [fixed, moving].forEach(mag => {
-                                const distToMag = p.position.distanceTo(mag.position);
-                                if (distToMag < 2.5 && !attached) {
-                                    attached = true;
-                                    p.userData.attached = true;
-                                    p.userData.attachedMagnet = mag;
-                                    
-                                    // Determine which pole based on particle position relative to magnet
-                                    const particleX = p.position.x - mag.position.x;
-                                    const isNorthPole = particleX < 0; // Left side = North pole
-                                    
-                                    // Calculate pole position
-                                    const magLen = mag.userData.length;
-                                    const poleX = (magLen / 2) - 0.2;
-                                    const targetX = isNorthPole ? -poleX : poleX;
-                                    
-                                    // Create offset
-                                    p.userData.attachOffset = new THREE.Vector3(
-                                        targetX + (Math.random() - 0.5) * 0.3,
-                                        0.3 + Math.random() * 0.3,
-                                        (Math.random() - 0.5) * 0.4
-                                    );
-                                    
-                                    // Color based on pole
-                                    p.material.color.setHex(isNorthPole ? CONFIG.colors.north : CONFIG.colors.south);
-                                }
-                            });
-                            
-                            if (!attached) {
-                                if (isRepel) {
-                                    // Repel: Push particles away from center
-                                    if (distToCenter < 2) {
-                                        const force = (2 - distToCenter) * 0.02;
-                                        if (p.position.x > centerX) {
-                                            p.position.x += force;
-                                        } else {
-                                            p.position.x -= force;
-                                        }
-                                    }
-                                } else {
-                                    // Attract: Pull particles toward center
-                                    if (distToCenter > 0.5) {
-                                        const force = distToCenter * 0.01;
-                                        if (p.position.x > centerX) {
-                                            p.position.x -= force;
-                                        } else {
-                                            p.position.x += force;
-                                        }
-                                    }
-                                }
-                                
-                                // Keep particles within bounds
-                                p.position.x = Math.max(-8, Math.min(8, p.position.x));
-                                p.position.z = Math.max(-3, Math.min(3, p.position.z));
-                            }
-                        }
-                    }
-                });
-
-                // Handle dragging for experiment 4 (both pieces can be dragged)
-                const isDraggingMagnet = state.isDragging && (state.dragObject === fixed || state.dragObject === moving);
-                
-                if (isDraggingMagnet) {
-                    const dx = moving.position.x - fixed.position.x;
-                    const dist = Math.abs(dx);
-                    
-                    // Calculate EXACT touching distance
-                    // Both magnets have scale length defined in their creation.
-                    // For exp 4, lengths may vary, so calculate based on actual lengths
-                    const touchDist = (fixed.userData.length / 2) + (moving.userData.length / 2);
-
-                    if (dist < 4.0) { // Attraction zone
-                        if (state.currentExp === 2) { // Repel
-                            const force = (4.0 - dist) * 0.1;
-                            if (state.dragObject === moving) {
-                                moving.position.x += force; // Push right
-                            }
-                            document.getElementById('animStatus').innerText = "Repelling!";
-                            document.getElementById('animStatus').style.color = "#ff4444";
-                        } else if (state.currentExp === 4) { // Broken pieces attract
-                            // Both pieces can move toward each other
-                            if (dist <= touchDist + 0.05) {
-                                // Snap to touch position - move both pieces
-                                const centerX = (fixed.position.x + moving.position.x) / 2;
-                                fixed.position.x = centerX - touchDist / 2;
-                                moving.position.x = centerX + touchDist / 2;
-                                document.getElementById('animStatus').innerText = "Pieces attached!";
-                            } else {
-                                // Both pieces move toward each other
-                                const force = 0.08;
-                                if (moving.position.x > fixed.position.x) {
-                                    if (state.dragObject !== fixed) fixed.position.x += force * 0.3;
-                                    if (state.dragObject !== moving) moving.position.x -= force * 0.3;
-                                } else {
-                                    if (state.dragObject !== fixed) fixed.position.x -= force * 0.3;
-                                    if (state.dragObject !== moving) moving.position.x += force * 0.3;
-                                }
-                                document.getElementById('animStatus').innerText = "Pieces attracting!";
-                                document.getElementById('animStatus').style.color = "#44ff44";
-                            }
-                        } else { // Attract (Exp 3)
-                            // FIX: Check overlap
-                            if (dist <= touchDist + 0.05) {
-                                // Snap to touch position
-                                moving.position.x = fixed.position.x + touchDist + 0.05;
-                                document.getElementById('animStatus').innerText = "Attached!";
-                            } else {
-                                if (state.dragObject === moving) {
-                                    moving.position.x -= 0.15; // Pull left
-                                }
-                                document.getElementById('animStatus').innerText = "Attracting!";
-                                document.getElementById('animStatus').style.color = "#44ff44";
-                            }
-                        }
-                    } else {
-                        document.getElementById('animStatus').innerText = "Drag closer...";
-                        document.getElementById('animStatus').style.color = "#4ecdc4";
-                    }
-                }
-            }
-
-            // Animate break particles toward poles
-            if (state.currentExp === 4 && state.magnets.length > 0) {
-                state.particles.forEach(p => {
-                    if (p.userData.isBreakParticle && !p.userData.attached) {
-                        // Check all magnets for attachment
-                        let attached = false;
-                        state.magnets.forEach(mag => {
-                            const magPos = mag.position;
-                            const magLen = mag.userData.length;
-                            const dist = p.position.distanceTo(magPos);
-                            
-                            if (dist < 2.5 && !attached) {
-                                attached = true;
-                                p.userData.attached = true;
-                                p.userData.attachedMagnet = mag;
-                                
-                                // Determine which pole based on particle position relative to magnet
-                                const particleX = p.position.x - magPos.x;
-                                const isNorthPole = particleX < 0; // Left side = North pole
-                                
-                                // Calculate pole position
-                                const poleX = (magLen / 2) - 0.2;
-                                const targetX = isNorthPole ? -poleX : poleX;
-                                
-                                // Create offset
-                                p.userData.attachOffset = new THREE.Vector3(
-                                    targetX + (Math.random() - 0.5) * 0.3,
-                                    0.3 + Math.random() * 0.3,
-                                    (Math.random() - 0.5) * 0.4
-                                );
-                                
-                                // Color based on pole
-                                p.material.color.setHex(isNorthPole ? CONFIG.colors.north : CONFIG.colors.south);
-                            }
-                        });
-                        
-                        if (!attached) {
-                            // If not attached, slowly move toward the nearest magnet
-                            let nearestMag = null;
-                            let minDist = Infinity;
-                            
-                            state.magnets.forEach(mag => {
-                                const dist = p.position.distanceTo(mag.position);
-                                if (dist < minDist) {
-                                    minDist = dist;
-                                    nearestMag = mag;
-                                }
-                            });
-                            
-                            if (nearestMag && minDist < 4.0) {
-                                const magPos = nearestMag.position;
-                                const magLen = nearestMag.userData.length;
-                                const particleX = p.position.x - magPos.x;
-                                const targetX = particleX < 0 ? -(magLen/2 - 0.3) : (magLen/2 - 0.3);
-                                
-                                p.position.x += (magPos.x + targetX - p.position.x) * 0.03;
-                                p.position.y += (magPos.y + 0.3 - p.position.y) * 0.03;
-                                p.position.z += (magPos.z - p.position.z) * 0.03;
-                            }
-                        }
-                    } else if (p.userData.isBreakParticle && p.userData.attached) {
-                        // Keep attached particles in place
-                        const attachedMagnet = p.userData.attachedMagnet;
-                        if (attachedMagnet) {
-                            p.position.copy(attachedMagnet.position).add(p.userData.attachOffset);
-                        }
-                    }
-                });
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // FIX 3: Breaking Overlap Logic
+        // Break magnet function
         function breakMagnet(target) {
-            scene.remove(target);
             const idx = state.magnets.indexOf(target);
-            if(idx > -1) state.magnets.splice(idx, 1);
+            if (idx > -1) state.magnets.splice(idx, 1);
+            scene.remove(target);
             
-            // Get current dimensions
             const p = target.position;
             const oldLen = target.userData.length;
             
-            if (oldLen < 1.0) {
-                document.getElementById('statusText').innerText = "Too small to break further!";
-                // Put it back
+            if (oldLen < 1.5) {
+                document.getElementById('statusText').textContent = "Magnet too small to break further!";
                 scene.add(target);
                 state.magnets.push(target);
                 return;
             }
-
-            const newLen = oldLen / 2;
-            // FIX: Offset is calculated based on NEW length to ensure centers don't overlap
-            // Center of Left Child = ParentCenter - (OldLen/4)
-            // Center of Right Child = ParentCenter + (OldLen/4)
-            const offset = oldLen / 4 + 0.1; // +0.1 for visual gap
-
-            const m1 = createMagnet(p.x - offset, p.y, p.z, newLen, true);
-            const m2 = createMagnet(p.x + offset, p.y, p.z, newLen, true);
             
-            m1.userData.breakable = true;
-            m2.userData.breakable = true;
-
-            document.getElementById('statusText').innerText = `Broken into pieces of length ${newLen.toFixed(1)}!`;
+            const newLen = oldLen / 2;
+            const gap = 0.4;
+            const offset = newLen / 2 + gap;
+            
+            const m1 = createMagnet(p.x - offset, p.y, p.z, newLen, true, true);
+            const m2 = createMagnet(p.x + offset, p.y, p.z, newLen, true, true);
+            
+            m1.userData.draggable = true;
+            m2.userData.draggable = true;
+            
+            state.velocities.get(m1.uuid).set(-0.08, 0, 0);
+            state.velocities.get(m2.uuid).set(0.08, 0, 0);
+            
+            document.getElementById('statusText').textContent = `Broken! Each piece is now ${newLen.toFixed(1)} units with N and S poles.`;
+            
+            // No particles to detach in experiment 5
+            
+            updateFieldLines();
+            updateStats();
         }
 
-        function setupUI() {
-            const container = document.getElementById('btn-container');
-            EXPERIMENTS.forEach((exp, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'experiment-btn';
-                if(i===0) btn.classList.add('active');
-                btn.innerHTML = `<span class="experiment-number">${i+1}</span> ${exp.title}`;
-                btn.onclick = () => loadExperiment(i);
-                container.appendChild(btn);
-            });
-            document.getElementById('resetBtn').onclick = () => loadExperiment(state.currentExp);
+        // Update statistics
+        function updateStats() {
+            document.getElementById('particlesStat').textContent = state.particles.length;
+            document.getElementById('magnetsStat').textContent = state.magnets.length;
+            document.getElementById('forceStat').textContent = state.totalForce.toFixed(2);
         }
 
+        // Main animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (state.isPaused) {
+                renderer.render(scene, camera);
+                return;
+            }
+            
+            const delta = clock.getDelta() * CONFIG.physics.timeScale;
+            const targetFPS = 60;
+            state.fps = Math.round(1 / (delta / CONFIG.physics.timeScale));
+            document.getElementById('fpsStat').textContent = state.fps;
+            
+            state.totalForce = 0;
+            
+            // Experiment 1: Earth field alignment
+            if (state.currentExp === 0 && !state.isDragging && state.magnets[0]) {
+                const mag = state.magnets[0];
+                const targetAngle = 0;
+                let angleDiff = targetAngle - mag.rotation.y;
+                
+                while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                
+                const torque = angleDiff * CONFIG.physics.earthFieldStrength;
+                let angVel = state.angularVelocities.get(mag.uuid);
+                angVel += torque;
+                angVel *= CONFIG.physics.rotationDamping;
+                
+                mag.rotation.y += angVel;
+                state.angularVelocities.set(mag.uuid, angVel);
+                
+                // Update compass
+                const compassNeedle = document.getElementById('compassNeedle');
+                compassNeedle.style.transform = `rotate(${mag.rotation.y}rad)`;
+                
+                if (Math.abs(angVel) > 0.001) {
+                    document.getElementById('statusText').textContent = "Aligning with Earth's field...";
+                } else {
+                    document.getElementById('statusText').textContent = "Aligned! ✓";
+                }
+            }
+            
+            // Experiment 2: Iron particle attraction with realistic field alignment
+            if (state.currentExp === 1 && state.magnets.length > 0) {
+                const mag = state.magnets[0];
+                const magPos = new THREE.Vector3();
+                mag.getWorldPosition(magPos);
+                
+                // Get pole positions in world space
+                const northWorld = new THREE.Vector3();
+                const southWorld = new THREE.Vector3();
+                const northLocal = mag.userData.northPolePos.clone();
+                const southLocal = mag.userData.southPolePos.clone();
+                northLocal.applyQuaternion(mag.quaternion);
+                southLocal.applyQuaternion(mag.quaternion);
+                northWorld.copy(magPos).add(northLocal);
+                southWorld.copy(magPos).add(southLocal);
+                
+                let attachedCount = 0;
+                
+                state.particles.forEach(p => {
+                    if (p.userData.attached) {
+                        // Keep particle locked to magnet with slight jitter
+                        const basePos = magPos.clone().add(p.userData.attachOffset);
+                        const jitter = Math.sin(Date.now() * 0.002 + p.id) * 0.01;
+                        p.position.copy(basePos);
+                        p.position.y += jitter;
+                        
+                        // Align particle with field direction
+                        if (p.userData.targetRotation) {
+                            p.quaternion.slerp(p.userData.targetRotation, 0.1);
+                        }
+                        
+                        // Check if magnet moved too far away - detach particle
+                        const currentDist = p.position.distanceTo(magPos);
+                        if (currentDist > 4.5) {
+                            p.userData.attached = false;
+                            p.userData.velocity.set(
+                                (Math.random() - 0.5) * 0.02,
+                                -0.05,
+                                (Math.random() - 0.5) * 0.02
+                            );
+                            // Reset appearance
+                            p.material.color.setHex(CONFIG.colors.iron);
+                            p.material.emissive.setHex(0x000000);
+                            p.material.emissiveIntensity = 0;
+                            p.scale.set(1, 1, 1);
+                        } else {
+                            attachedCount++;
+                        }
+                    } else {
+                        const field = getMagneticField(p.position, [mag]);
+                        const fieldStrength = field.length();
+                        const distToMag = p.position.distanceTo(magPos);
+                        
+                        // Calculate distance to nearest pole
+                        const distToNorth = p.position.distanceTo(northWorld);
+                        const distToSouth = p.position.distanceTo(southWorld);
+                        const distToNearestPole = Math.min(distToNorth, distToSouth);
+                        const isNearNorth = distToNorth < distToSouth;
+                        
+                        // Only attract if within reasonable range
+                        if (distToMag < 5.5 && p.position.y < 0) {
+                            // Apply magnetic force - stronger near poles
+                            const force = field.clone().multiplyScalar(p.userData.mass * 1.5);
+                            p.userData.velocity.add(force);
+                            
+                            // Add lifting force when close to magnet
+                            if (distToNearestPole < 3.5) {
+                                const liftForce = (3.5 - distToNearestPole) / 3.5;
+                                p.userData.velocity.y += liftForce * 0.05;
+                            }
+                            
+                            // Apply friction
+                            p.userData.velocity.multiplyScalar(p.userData.friction);
+                            
+                            // Update position
+                            p.position.add(p.userData.velocity);
+                            
+                            // Keep particles on or above floor when not attached
+                            if (p.position.y < -1.85) {
+                                p.position.y = -1.85;
+                                p.userData.velocity.y *= -0.3; // Bounce with damping
+                                p.userData.velocity.x *= 0.7;
+                                p.userData.velocity.z *= 0.7;
+                            }
+                            
+                            // Align particle rotation with field direction
+                            if (fieldStrength > 0.01) {
+                                const fieldDir = field.clone().normalize();
+                                const targetQuat = new THREE.Quaternion();
+                                const up = new THREE.Vector3(0, 1, 0);
+                                const axis = new THREE.Vector3().crossVectors(up, fieldDir).normalize();
+                                const angle = Math.acos(up.dot(fieldDir));
+                                if (!isNaN(angle)) {
+                                    targetQuat.setFromAxisAngle(axis, angle);
+                                    p.quaternion.slerp(targetQuat, 0.05);
+                                }
+                            }
+                            
+                            state.totalForce += force.length();
+                            
+                            // Attachment logic - prefer poles
+                            if (distToNearestPole < 2.8) {
+                                p.userData.attached = true;
+                                
+                                // Determine which pole and create offset
+                                const magLen = mag.userData.length;
+                                const poleX = (magLen / 2) - 0.3;
+                                
+                                // Add particles in layers around the pole
+                                const layerAngle = Math.random() * Math.PI * 2;
+                                const layerRadius = 0.2 + Math.random() * 0.3;
+                                const layerHeight = 0.3 + Math.random() * 0.6;
+                                
+                                p.userData.attachOffset = new THREE.Vector3(
+                                    (isNearNorth ? -poleX : poleX) + Math.cos(layerAngle) * layerRadius,
+                                    layerHeight,
+                                    Math.sin(layerAngle) * layerRadius
+                                );
+                                
+                                // Store target rotation for field alignment
+                                const polePos = isNearNorth ? northWorld : southWorld;
+                                const toParticle = p.position.clone().sub(polePos).normalize();
+                                const targetQuat = new THREE.Quaternion();
+                                const up = new THREE.Vector3(0, 1, 0);
+                                const axis = new THREE.Vector3().crossVectors(up, toParticle).normalize();
+                                const angle = Math.acos(Math.max(-1, Math.min(1, up.dot(toParticle))));
+                                if (!isNaN(angle) && axis.length() > 0) {
+                                    targetQuat.setFromAxisAngle(axis, angle);
+                                    p.userData.targetRotation = targetQuat;
+                                }
+                                
+                                // Color particles based on which pole they're attached to
+                                const attachColor = isNearNorth ? CONFIG.colors.north : CONFIG.colors.south;
+                                p.material.color.setHex(attachColor);
+                                p.material.emissive.setHex(attachColor);
+                                p.material.emissiveIntensity = 0.5;
+                                
+                                // Scale particles slightly for visual effect
+                                p.scale.set(1.2, 1.2, 1.2);
+                            }
+                        } else {
+                            // Particles far from magnet - apply friction to settle
+                            p.userData.velocity.multiplyScalar(0.95);
+                            p.position.add(p.userData.velocity);
+                            
+                            // Floor constraint
+                            if (p.position.y < -1.85) {
+                                p.position.y = -1.85;
+                                p.userData.velocity.y = 0;
+                            }
+                        }
+                        
+                        // Boundary constraints
+                        if (Math.abs(p.position.x) > 10) {
+                            p.position.x = Math.sign(p.position.x) * 10;
+                            p.userData.velocity.x *= -0.5;
+                        }
+                        if (Math.abs(p.position.z) > 10) {
+                            p.position.z = Math.sign(p.position.z) * 10;
+                            p.userData.velocity.z *= -0.5;
+                        }
+                    }
+                });
+                
+                // Update status based on attached particles
+                const attachmentPercent = (attachedCount / state.particles.length * 100).toFixed(0);
+                if (attachedCount > 0) {
+                    document.getElementById('statusText').textContent = 
+                        `${attachedCount} particles attached (${attachmentPercent}%) - Poles show maximum field strength!`;
+                } else {
+                    document.getElementById('statusText').textContent = 
+                        "Drag the magnet over particles to attract them to the poles.";
+                }
+            }
+            
+            // Experiments 2, 3, 4: Magnet interactions
+            if ((state.currentExp === 2 || state.currentExp === 3 || state.currentExp === 4) && state.magnets.length >= 2) {
+                const mag1 = state.magnets[0];
+                const mag2 = state.magnets[1];
+                
+                const pos1 = new THREE.Vector3();
+                const pos2 = new THREE.Vector3();
+                mag1.getWorldPosition(pos1);
+                mag2.getWorldPosition(pos2);
+                
+                const distance = pos1.distanceTo(pos2);
+                const direction = new THREE.Vector3().subVectors(pos2, pos1).normalize();
+                
+                let forceMagnitude = 0;
+                const minDist = (mag1.userData.length + mag2.userData.length) / 2 + 0.15;
+                
+                if (state.currentExp === 2) {
+                    // Repulsion
+                    if (distance < 6) {
+                        forceMagnitude = CONFIG.physics.magneticConstant * CONFIG.physics.fieldStrength * 4 / (distance * distance);
+                        if (!mag2.userData.fixed && !state.isDragging) {
+                            const vel = state.velocities.get(mag2.uuid);
+                            vel.add(direction.clone().multiplyScalar(forceMagnitude * delta));
+                        }
+                        document.getElementById('statusText').textContent = "Repelling! Force: " + forceMagnitude.toFixed(2) + " N";
+                        state.totalForce = forceMagnitude;
+                    }
+                } else {
+                    // Attraction
+                    if (distance > minDist && distance < 7) {
+                        forceMagnitude = -CONFIG.physics.magneticConstant * CONFIG.physics.fieldStrength * 3 / (distance * distance);
+                        if (!mag2.userData.fixed && !state.isDragging) {
+                            const vel = state.velocities.get(mag2.uuid);
+                            vel.add(direction.clone().multiplyScalar(forceMagnitude * delta));
+                        }
+                        document.getElementById('statusText').textContent = "Attracting! Force: " + Math.abs(forceMagnitude).toFixed(2) + " N";
+                        state.totalForce = Math.abs(forceMagnitude);
+                    } else if (distance <= minDist) {
+                        mag2.position.x = mag1.position.x + direction.x * minDist;
+                        mag2.position.z = mag1.position.z + direction.z * minDist;
+                        state.velocities.get(mag2.uuid).set(0, 0, 0);
+                        document.getElementById('statusText').textContent = "Magnets attached! ✓";
+                    }
+                }
+                
+                // Update field particles - only for experiments that have them
+                if (state.currentExp !== 2 && state.currentExp !== 3) {
+                    state.particles.forEach(p => {
+                        if (p.userData.isFieldParticle) {
+                            if (p.userData.attached) {
+                                const attachedMag = p.userData.attachedMagnet;
+                                if (attachedMag) {
+                                    const magPos = new THREE.Vector3();
+                                    attachedMag.getWorldPosition(magPos);
+                                    p.position.copy(magPos).add(p.userData.attachOffset);
+                                }
+                            } else {
+                                const field = getMagneticField(p.position, state.magnets);
+                                const force = field.multiplyScalar(p.userData.mass * 0.6);
+                                
+                                p.userData.velocity.add(force);
+                                p.userData.velocity.multiplyScalar(CONFIG.physics.friction);
+                                p.position.add(p.userData.velocity);
+                                
+                                // Check attachment
+                                [mag1, mag2].forEach(mag => {
+                                    const magPos = new THREE.Vector3();
+                                    mag.getWorldPosition(magPos);
+                                    const dist = p.position.distanceTo(magPos);
+                                    
+                                    if (dist < 2.5 && !p.userData.attached) {
+                                        p.userData.attached = true;
+                                        p.userData.attachedMagnet = mag;
+                                        
+                                        const particleX = p.position.x - magPos.x;
+                                        const isNorthPole = particleX < 0;
+                                        
+                                        const magLen = mag.userData.length;
+                                        const poleX = (magLen / 2) - 0.25;
+                                        const targetX = isNorthPole ? -poleX : poleX;
+                                        
+                                        p.userData.attachOffset = new THREE.Vector3(
+                                            targetX + (Math.random() - 0.5) * 0.35,
+                                            0.35 + Math.random() * 0.35,
+                                            (Math.random() - 0.5) * 0.45
+                                        );
+                                        
+                                        p.material.color.setHex(isNorthPole ? CONFIG.colors.north : CONFIG.colors.south);
+                                    }
+                                });
+                                
+                                p.position.x = Math.max(-12, Math.min(12, p.position.x));
+                                p.position.z = Math.max(-8, Math.min(8, p.position.z));
+                            }
+                        }
+                    });
+                }
+                
+                // Apply velocities
+                if (!state.isDragging) {
+                    [mag1, mag2].forEach(mag => {
+                        if (!mag.userData.fixed) {
+                            const vel = state.velocities.get(mag.uuid);
+                            vel.multiplyScalar(CONFIG.physics.friction);
+                            mag.position.add(vel);
+                        }
+                    });
+                }
+            }
+            
+            // Experiment 4: No particles to animate - removed per user request
+            // The magnets themselves will still interact after breaking
+            if (state.currentExp === 4) {
+                // Magnet pieces interact with each other via the magnetic force code above
+            }
+            
+            updateStats();
+            renderer.render(scene, camera);
+        }
+
+        // Window resize handler
         function onWindowResize() {
-            camera.aspect = document.getElementById('canvas-container').clientWidth / document.getElementById('canvas-container').clientHeight;
+            const container = document.querySelector('.canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(document.getElementById('canvas-container').clientWidth, document.getElementById('canvas-container').clientHeight);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         }
 
-        init();
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            init();
+        });
     </script>
 </body>
 </html>

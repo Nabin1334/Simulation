@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Thermometer Calibration</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #1e1e1e, #333333);
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+        }
+
+        .lab-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin-top: 0;
+            color: #cccccc;
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .step-chip {
+            background: #444444;
+            border-radius: 20px;
+            padding: 5px 10px;
+            margin: 5px;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .step-chip.active {
+            background: #007bff;
+        }
+
+        .step-chip.completed {
+            background: #28a745;
+        }
+
+        .step-chip.completed::after {
+            content: " ✓";
+        }
+
+        canvas {
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            background: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #ffff00;
+        }
+
+        .temp-readout {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            .lab-card {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 14px;
+            }
+
+            .step-chip {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lab-card">
+        <h1>Scientific Thermometer Calibration</h1>
+        <h2>Step-by-step lab procedure – mark fixed points & create Celsius scale</h2>
+        <div class="stepper">
+            <div class="step-chip" id="step1">1. Wrap thermometer</div>
+            <div class="step-chip" id="step2">2. Prepare ice bath</div>
+            <div class="step-chip" id="step3">3. Lower into ice</div>
+            <div class="step-chip" id="step4">4. Mark 0°C</div>
+            <div class="step-chip" id="step5">5. Set up hypsometer</div>
+            <div class="step-chip" id="step6">6. Steam equilibrium</div>
+            <div class="step-chip" id="step7">7. Mark 100°C</div>
+            <div class="step-chip" id="step8">8. Interpolate scale</div>
+        </div>
+        <canvas id="labCanvas" width="800" height="500"></canvas>
+        <div class="controls">
+            <div class="status" id="status">Click 'Start' to begin the calibration procedure.</div>
+            <div class="temp-readout" id="tempReadout">??.? °C</div>
+            <button id="actionButton">Start</button>
+        </div>
+    </div>
+    <script>
+        // State Management
+        const state = {
+            currentStep: 0,
+            temp: 25, // Room temperature start
+            targetTemp: 25,
+            paperOn: false,
+            iceReady: false,
+            steamReady: false,
+            lowMark: null,
+            highMark: null,
+            calibrated: false,
+            thermoX: 400, // Center
+            thermoY: 100 // Top
+        };
+
+        // Canvas setup
+        const canvas = document.getElementById('labCanvas');
+        const ctx = canvas.getContext('2d');
+        const steps = document.querySelectorAll('.step-chip');
+        const statusEl = document.getElementById('status');
+        const tempReadout = document.getElementById('tempReadout');
+        const actionButton = document.getElementById('actionButton');
+
+        // Constants
+        const THERMO_HEIGHT = 300;
+        const THERMO_WIDTH = 20;
+        const BULB_RADIUS = 15;
+        const MERCURY_COLOR = '#ff0000';
+        const GLASS_COLOR = '#a0d0ff';
+        const PAPER_WIDTH = 40;
+        const PAPER_HEIGHT = 320;
+        const PAPER_COLOR = '#fffdf0';
+        const ICE_X = 150;
+        const STEAM_X = 650;
+        const BEAKER_HEIGHT = 200;
+        const BEAKER_WIDTH = 100;
+        const EASING = 0.05;
+        const STABLE_THRESHOLD = 0.5;
+
+        // Update stepper UI
+        function updateStepper() {
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < state.currentStep) {
+                    step.classList.add('completed');
+                } else if (index === state.currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        // Draw thermometer
+        function drawThermometer(x, y) {
+            // Glass tube
+            ctx.fillStyle = GLASS_COLOR;
+            ctx.fillRect(x - THERMO_WIDTH / 2, y, THERMO_WIDTH, THERMO_HEIGHT);
+            // Bulb
+            ctx.beginPath();
+            ctx.arc(x, y + THERMO_HEIGHT + BULB_RADIUS, BULB_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mercury
+            const mercuryHeight = mapTempToHeight(state.temp);
+            ctx.fillStyle = MERCURY_COLOR;
+            ctx.fillRect(x - THERMO_WIDTH / 4, y + THERMO_HEIGHT - mercuryHeight, THERMO_WIDTH / 2, mercuryHeight);
+            // Bulb mercury
+            ctx.beginPath();
+            ctx.arc(x, y + THERMO_HEIGHT + BULB_RADIUS, BULB_RADIUS - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Highlight
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x - THERMO_WIDTH / 2 + 2, y);
+            ctx.lineTo(x - THERMO_WIDTH / 2 + 2, y + THERMO_HEIGHT);
+            ctx.stroke();
+        }
+
+        // Map temperature to mercury height (0-100 -> 0-THERMO_HEIGHT)
+        function mapTempToHeight(temp) {
+            return (Math.min(Math.max(temp, 0), 100) / 100) * (THERMO_HEIGHT - 20); // Leave space
+        }
+
+        // Draw paper scale
+        function drawPaper(x, y) {
+            if (!state.paperOn) return;
+            const paperX = x + THERMO_WIDTH / 2 + 5;
+            ctx.fillStyle = PAPER_COLOR;
+            ctx.fillRect(paperX, y - 10, PAPER_WIDTH, PAPER_HEIGHT);
+
+            // Marks
+            if (state.lowMark !== null) {
+                drawMark(paperX, y + THERMO_HEIGHT - mapTempToHeight(0), '0°C', true);
+            }
+            if (state.highMark !== null) {
+                drawMark(paperX, y + THERMO_HEIGHT - mapTempToHeight(100), '100°C', true);
+            }
+            if (state.calibrated) {
+                const interval = (state.highMark - state.lowMark) / 10;
+                for (let i = 1; i < 10; i++) {
+                    drawMark(paperX, state.lowMark + i * interval, '', false);
+                }
+            }
+        }
+
+        // Draw mark on paper
+        function drawMark(paperX, y, label, isFixed) {
+            ctx.strokeStyle = isFixed ? '#ff0000' : '#000000';
+            ctx.lineWidth = isFixed ? 2 : 1;
+            ctx.beginPath();
+            ctx.moveTo(paperX, y);
+            ctx.lineTo(paperX + PAPER_WIDTH - 10, y);
+            ctx.stroke();
+
+            if (label) {
+                ctx.fillStyle = '#000000';
+                ctx.font = '12px Arial';
+                ctx.fillText(label, paperX + PAPER_WIDTH - 30, y + 5);
+            }
+        }
+
+        // Draw ice bath
+        function drawIceBath() {
+            if (!state.iceReady) return;
+            // Beaker
+            ctx.fillStyle = '#add8e6';
+            ctx.fillRect(ICE_X - BEAKER_WIDTH / 2, 300, BEAKER_WIDTH, BEAKER_HEIGHT);
+            // Label
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.fillText('❄️ ICE (0°C)', ICE_X - 50, 280);
+        }
+
+        // Draw steam hypsometer
+        function drawSteam() {
+            if (!state.steamReady) return;
+            // Beaker
+            ctx.fillStyle = '#ffcccb';
+            ctx.fillRect(STEAM_X - BEAKER_WIDTH / 2, 300, BEAKER_WIDTH, BEAKER_HEIGHT);
+            // Steam clouds
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(STEAM_X - 20, 280, 10, 0, Math.PI * 2);
+            ctx.arc(STEAM_X, 270, 15, 0, Math.PI * 2);
+            ctx.arc(STEAM_X + 20, 280, 10, 0, Math.PI * 2);
+            ctx.fill();
+            // Label
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.fillText('💨 STEAM (100°C)', STEAM_X - 60, 280);
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update temperature
+            state.temp += (state.targetTemp - state.temp) * EASING;
+
+            // Draw elements
+            drawIceBath();
+            drawSteam();
+            drawThermometer(state.thermoX, state.thermoY);
+            drawPaper(state.thermoX, state.thermoY);
+
+            // Update readout if calibrated
+            if (state.calibrated) {
+                tempReadout.textContent = state.temp.toFixed(1) + ' °C';
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Check if temperature stable
+        function isStable(target) {
+            return Math.abs(state.temp - target) < STABLE_THRESHOLD;
+        }
+
+        // Advance step
+        function advanceStep() {
+            switch (state.currentStep) {
+                case 0:
+                    // Step 1: Wrap with paper
+                    state.paperOn = true;
+                    statusEl.textContent = 'Thermometer wrapped with paper scale.';
+                    actionButton.textContent = 'Continue Procedure';
+                    state.currentStep++;
+                    break;
+                case 1:
+                    // Step 2: Prepare ice bath
+                    state.iceReady = true;
+                    statusEl.textContent = 'Ice bath prepared.';
+                    state.currentStep++;
+                    break;
+                case 2:
+                    // Step 3: Lower into ice
+                    state.thermoX = ICE_X;
+                    state.targetTemp = 0;
+                    statusEl.textContent = 'Thermometer lowered into ice bath. Wait for stabilization.';
+                    state.currentStep++;
+                    break;
+                case 3:
+                    // Step 4: Mark 0°C
+                    if (isStable(0)) {
+                        state.lowMark = state.thermoY + THERMO_HEIGHT - mapTempToHeight(state.temp);
+                        statusEl.textContent = 'Lower Fixed Point (0°C) marked.';
+                        state.thermoX = 400; // Back to center
+                        state.targetTemp = 25;
+                        state.currentStep++;
+                    } else {
+                        statusEl.textContent = 'Temperature not stable yet. Wait...';
+                    }
+                    break;
+                case 4:
+                    // Step 5: Set up hypsometer
+                    state.steamReady = true;
+                    statusEl.textContent = 'Hypsometer set up for steam.';
+                    state.currentStep++;
+                    break;
+                case 5:
+                    // Step 6: Steam equilibrium
+                    state.thermoX = STEAM_X;
+                    state.targetTemp = 100;
+                    statusEl.textContent = 'Thermometer in steam. Wait for equilibrium.';
+                    state.currentStep++;
+                    break;
+                case 6:
+                    // Step 7: Mark 100°C
+                    if (isStable(100)) {
+                        state.highMark = state.thermoY + THERMO_HEIGHT - mapTempToHeight(state.temp);
+                        statusEl.textContent = 'Upper Fixed Point (100°C) marked.';
+                        state.thermoX = 400; // Back to center
+                        state.targetTemp = 25;
+                        state.currentStep++;
+                    } else {
+                        statusEl.textContent = 'Temperature not stable yet. Wait...';
+                    }
+                    break;
+                case 7:
+                    // Step 8: Interpolate
+                    if (state.lowMark && state.highMark) {
+                        state.calibrated = true;
+                        statusEl.textContent = 'Calibration complete! Scale interpolated.';
+                        actionButton.textContent = 'Done';
+                        state.targetTemp = Math.random() * 100; // Random temp for demo
+                    }
+                    state.currentStep++;
+                    break;
+                default:
+                    // Done
+                    statusEl.textContent = 'Experiment complete. You can now read temperatures.';
+            }
+            updateStepper();
+            updateButtonLabel();
+        }
+
+        // Update button label
+        function updateButtonLabel() {
+            if (state.currentStep < 8) {
+                actionButton.textContent = 'Continue Procedure';
+            } else {
+                actionButton.textContent = 'Done';
+            }
+        }
+
+        // Event listeners
+        actionButton.addEventListener('click', advanceStep);
+        canvas.addEventListener('click', advanceStep);
+
+        // Initial setup
+        updateStepper();
+        animate();
+    </script>
+</body>
+</html>

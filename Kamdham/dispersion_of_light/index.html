@@ -3,933 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prism Light Dispersion Animation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Real prism · simple light pass</title>
     <style>
+        /* ABSOLUTELY SIMPLE — REALISTIC, NO DISTRACTIONS */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
+            background: #1a1e2c;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-        }
-
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px 0;
-            background: rgba(10, 20, 40, 0.7);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(100, 150, 255, 0.2);
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff3366, #33ccff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(51, 204, 255, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #aaccff;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-
-        .content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
-        }
-
-        .animation-section {
-            flex: 2;
-            min-width: 300px;
-            background: rgba(15, 25, 45, 0.8);
-            border-radius: 15px;
+            min-height: 100vh;
+            font-family: system-ui, 'Inter', sans-serif;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(100, 150, 255, 0.2);
         }
 
-        .canvas-container {
+        .real-card {
+            max-width: 1000px;
             width: 100%;
-            position: relative;
-            background: #000011;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid rgba(100, 150, 255, 0.3);
-            margin-bottom: 15px;
+            background: #0e121c;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.7);
+            border: 1px solid #384b64;
         }
 
-        #prismCanvas {
-            width: 100%;
-            height: 500px;
+        .title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            color: white;
+            flex-wrap: wrap;
+        }
+
+        .title h2 {
+            font-weight: 450;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        .title span {
+            background: #2a3f5a;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #d2ecff;
+            font-size: 0.95rem;
+            border-left: 4px solid #99d6ff;
+        }
+
+        /* CANVAS — CLEAN, DARK, REALISTIC */
+        .canvas-holder {
+            background: #080b12;
+            border-radius: 16px;
+            padding: 4px;
+        }
+
+        canvas {
             display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            background: #0a0e16;
             cursor: pointer;
         }
 
-        .canvas-overlay {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: rgba(0, 0, 30, 0.8);
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(100, 150, 255, 0.3);
-            font-size: 0.9rem;
-            color: #ccddff;
-        }
-
-        .controls {
+        /* MINIMAL CONTROLS */
+        .actions {
             display: flex;
+            gap: 16px;
+            margin: 20px 0 16px 0;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 15px;
         }
 
         .btn {
-            background: linear-gradient(135deg, #3366ff 0%, #6633ff 100%);
-            color: white;
+            background: #25344a;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+            border-bottom: 3px solid #4f7a9e;
+            color: white;
+            padding: 10px 26px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(51, 102, 255, 0.2);
+            gap: 10px;
+            transition: 0.05s;
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(51, 102, 255, 0.4);
+            background: #314e6e;
+            border-bottom-color: #90c8ff;
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #444477 0%, #664477 100%);
-        }
-
-        .btn-small {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-        }
-
-        .info-section {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(15, 25, 45, 0.8);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(100, 150, 255, 0.2);
-        }
-
-        .info-section h2 {
-            color: #33ccff;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(100, 150, 255, 0.3);
-        }
-
-        .info-section h3 {
-            color: #ff9966;
-            margin: 20px 0 10px 0;
-        }
-
-        .info-section p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-            color: #ccddff;
-        }
-
-        .physics-concepts {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(100, 150, 255, 0.2);
-        }
-
-        .concept-list {
-            list-style-type: none;
-        }
-
-        .concept-list li {
-            background: rgba(30, 40, 70, 0.5);
-            margin-bottom: 10px;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #33ccff;
-        }
-
-        .concept-list li i {
-            color: #ff9966;
-            margin-right: 10px;
-        }
-
-        .color-spectrum {
+        .status {
+            background: #1a2537;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: #c4e0ff;
             display: flex;
-            margin: 20px 0;
-            height: 40px;
-            border-radius: 8px;
+            gap: 24px;
+            border: 1px solid #4e779b;
+        }
+
+        /* SPECTRUM — REAL COLORS, NO TEXT OVERLOAD */
+        .spectrum {
+            display: flex;
+            height: 36px;
+            margin: 20px 0 0 0;
+            border-radius: 40px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #567c9c;
+            opacity: 0.9;
         }
 
-        .color-item {
+        .spectrum div {
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-            font-size: 0.8rem;
         }
 
-        .status-bar {
+        /* SIMPLE INFO */
+        .real-note {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(20, 30, 60, 0.7);
-            border-radius: 10px;
-            border: 1px solid rgba(100, 150, 255, 0.2);
-        }
-
-        .status-item {
-            text-align: center;
-        }
-
-        .status-label {
+            margin-top: 18px;
+            color: #b0cce0;
             font-size: 0.9rem;
-            color: #aaccff;
-            margin-bottom: 5px;
+            padding: 0 6px;
+            flex-wrap: wrap;
         }
 
-        .status-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #33ff99;
-        }
-
-        .keyboard-shortcuts {
-            margin-top: 25px;
-            padding: 15px;
-            background: rgba(20, 30, 60, 0.5);
-            border-radius: 10px;
-            font-size: 0.9rem;
-        }
-
-        .shortcut {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 3px 8px;
-            margin: 0 5px;
-            border-radius: 4px;
-            border: 1px solid rgba(100, 150, 255, 0.3);
-            font-family: monospace;
+        .key {
+            background: #1f2c3c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #cde1ff;
         }
 
         footer {
             text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: #8899cc;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(100, 150, 255, 0.2);
-            width: 100%;
+            margin-top: 24px;
+            color: #7b98b3;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 768px) {
-            .content {
-                flex-direction: column;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .btn {
-                padding: 10px 15px;
-            }
-        }
+        /* no animations, no blinking — pure */
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-gem"></i> Prism Light Dispersion</h1>
-            <p class="subtitle">An interactive simulation demonstrating how white light disperses into a spectrum of colors when passing through a prism</p>
-        </header>
-        
-        <div class="content">
-            <section class="animation-section">
-                <div class="canvas-container">
-                    <canvas id="prismCanvas"></canvas>
-                    <div class="canvas-overlay">
-                        <i class="fas fa-mouse-pointer"></i> Click to pause/resume • Double-click to reset
-                    </div>
-                </div>
-                
-                <div class="controls">
-                    <button class="btn" id="playPauseBtn">
-                        <i class="fas fa-play"></i> Start
-                    </button>
-                    <button class="btn" id="resetBtn">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                    <button class="btn btn-secondary" id="labelsBtn">
-                        <i class="fas fa-tag"></i> Label
-                    </button>
-                </div>
-                
-                <div class="status-bar">
-                    <div class="status-item">
-                        <div class="status-label">Phase</div>
-                        <div class="status-value" id="phaseValue">Entering Prism</div>
-                    </div>
-                    <div class="status-item">
-                        <div class="status-label">Progress</div>
-                        <div class="status-value" id="progressValue">25%</div>
-                    </div>
-                    <div class="status-item">
-                        <div class="status-label">Speed</div>
-                        <div class="status-value" id="speedValue">1.0x</div>
-                    </div>
-                </div>
-                
-                <div class="color-spectrum">
-                    <div class="color-item" style="background-color: #ff0000;">RED</div>
-                    <div class="color-item" style="background-color: #ff8800;">ORANGE</div>
-                    <div class="color-item" style="background-color: #ffff00;">YELLOW</div>
-                    <div class="color-item" style="background-color: #00ff00;">GREEN</div>
-                    <div class="color-item" style="background-color: #0088ff;">BLUE</div>
-                    <div class="color-item" style="background-color: #4b0082; color: #ddd;">INDIGO</div>
-                    <div class="color-item" style="background-color: #8b00ff;">VIOLET</div>
-                </div>
-            </section>
-            
-            <section class="info-section">
-                <h2><i class="fas fa-lightbulb"></i> About This Simulation</h2>
-                <p>This animation demonstrates the dispersion of white light into its constituent colors (the visible spectrum) when it passes through a glass prism.</p>
-                
-                <h3>How It Works:</h3>
-                <p>White light enters the prism and slows down as it moves from air to glass (refraction). Different colors of light bend at slightly different angles because they travel at different speeds in glass. This separation of colors is called dispersion.</p>
-                
-                <div class="physics-concepts">
-                    <h3><i class="fas fa-graduation-cap"></i> Physics Concepts:</h3>
-                    <ul class="concept-list">
-                        <li><i class="fas fa-arrow-right"></i> <strong>Refraction:</strong> Bending of light when it passes from one medium to another</li>
-                        <li><i class="fas fa-rainbow"></i> <strong>Dispersion:</strong> Separation of white light into its component colors</li>
-                        <li><i class="fas fa-wave-square"></i> <strong>Wavelength:</strong> Different colors have different wavelengths (Red: 700nm, Violet: 400nm)</li>
-                        <li><i class="fas fa-tachometer-alt"></i> <strong>Speed Variation:</strong> Light travels at different speeds in different media</li>
-                    </ul>
-                </div>
-                
-                <div class="keyboard-shortcuts">
-                    <h4><i class="fas fa-keyboard"></i> Keyboard Shortcuts:</h4>
-                    <p>
-                        <span class="shortcut">SPACE</span> Start/Pause • 
-                        <span class="shortcut">R</span> Reset • 
-                        <span class="shortcut">L</span> Toggle Labels
-                    </p>
-                </div>
-            </section>
+    <div class="real-card">
+        <!-- HEADER — PLAIN -->
+        <div class="title">
+            <h2>🔷 prism · real pass</h2>
+            <span>light → spectrum</span>
         </div>
-        
 
+        <!-- CANVAS — REALISTIC LIGHT TRAVEL -->
+        <div class="canvas-holder">
+            <canvas id="prismCanvas" width="1000" height="460"></canvas>
+        </div>
+
+        <!-- SIMPLE BUTTONS -->
+        <div class="actions">
+            <button class="btn" id="playBtn"><span>▶</span> play</button>
+            <button class="btn" id="resetBtn"><span>↺</span> reset</button>
+            <div class="status">
+                <span id="phaseText">⚡ entering</span>
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <!-- REAL SPECTRUM — NO LABELS, JUST COLOR -->
+        <div class="spectrum">
+            <div style="background:#ff3a3a;"></div>
+            <div style="background:#ff8c1a;"></div>
+            <div style="background:#ffe600;"></div>
+            <div style="background:#33dd33;"></div>
+            <div style="background:#3399ff;"></div>
+            <div style="background:#6a4ec7;"></div>
+            <div style="background:#c45aff;"></div>
+        </div>
+
+        <!-- MINIMAL FOOTER -->
+        <div class="real-note">
+            <span>⬩ white light enters ➔ bends ➔ splits</span>
+            <span class="key">␣ pause · R reset</span>
+        </div>
+        <footer>realistic refraction · simple path</footer>
     </div>
 
     <script>
-        // Enhanced Prism Dispersion Animation
+        // --------------------------------------------------------
+        // REALISTIC, SIMPLE LIGHT PASS THROUGH PRISM
+        // NO fake glow, NO overdone effects — just clear, real beam
+        // --------------------------------------------------------
+
         const canvas = document.getElementById('prismCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // UI Elements
-        const playPauseBtn = document.getElementById('playPauseBtn');
+        const phaseText = document.getElementById('phaseText');
+        const progressText = document.getElementById('progressText');
+        const playBtn = document.getElementById('playBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const labelsBtn = document.getElementById('labelsBtn');
-        const phaseValue = document.getElementById('phaseValue');
-        const progressValue = document.getElementById('progressValue');
-        const speedValue = document.getElementById('speedValue');
 
-        // Rainbow colors with wavelength data for educational purposes
-        const colors = [
-            { name: 'RED', value: '#ff0000', angle: -0.3, wavelength: 700 },
-            { name: 'ORANGE', value: '#ff8800', angle: -0.2, wavelength: 620 },
-            { name: 'YELLOW', value: '#ffff00', angle: -0.1, wavelength: 580 },
-            { name: 'GREEN', value: '#00ff00', angle: 0.0, wavelength: 550 },
-            { name: 'BLUE', value: '#0088ff', angle: 0.1, wavelength: 470 },
-            { name: 'INDIGO', value: '#4b0082', angle: 0.2, wavelength: 445 },
-            { name: 'VIOLET', value: '#8b00ff', angle: 0.3, wavelength: 400 }
+        // ---------- FIXED, CLEAN DIMENSIONS ----------
+        let w, h, cx, cy, prismSize;
+
+        function setSize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = Math.max(900, rect.width || 1000);
+            canvas.height = 460;
+            w = canvas.width;
+            h = canvas.height;
+            cx = w * 0.5;
+            cy = h * 0.58;
+            prismSize = Math.min(w * 0.2, 160);
+        }
+
+        // ---------- REAL SPECTRAL COLORS (VIBGYOR) ----------
+        const spectrumColors = [
+            { name: 'red', hex: '#ff3a3a', angle: -0.38 },
+            { name: 'orange', hex: '#ff8c1a', angle: -0.24 },
+            { name: 'yellow', hex: '#ffe600', angle: -0.10 },
+            { name: 'green', hex: '#33dd33', angle: 0.06 },
+            { name: 'blue', hex: '#3399ff', angle: 0.22 },
+            { name: 'indigo', hex: '#6a4ec7', angle: 0.34 },
+            { name: 'violet', hex: '#c45aff', angle: 0.46 }
         ];
 
-        // Animation state
-        let state = {
-            phase: 0, // 0: initial, 1: entering, 2: bending, 3: exiting, 4: complete
-            progress: 0,
-            isPlaying: true,
-            speed: 1.0,
-            showLabels: true,
-            showPhysics: false
-        };
+        // ---------- ANIMATION STATE (simple) ----------
+        let phase = 0;        // 0:ready, 1:to prism, 2:inside, 3:exit, 4:spectrum
+        let progress = 0.0;
+        let playing = true;
+        let animFrame;
 
-        // Easing functions for smooth animations
-        const easing = {
-            easeOutCubic: (x) => 1 - Math.pow(1 - x, 3),
-            easeInOutSine: (x) => -(Math.cos(Math.PI * x) - 1) / 2,
-            easeInQuad: (x) => x * x,
-            easeOutBack: (x) => {
-                const c1 = 1.70158;
-                const c3 = c1 + 1;
-                return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-            }
-        };
-
-        // Cached values for performance
-        let cachedValues = {
-            prismSize: null,
-            scale: null,
-            centerX: null,
-            centerY: null
-        };
-
-        // Setup canvas size
-        function setupCanvas() {
-            const container = canvas.parentElement;
-            const width = container.clientWidth;
-            const height = 500;
-            
-            canvas.width = width;
-            canvas.height = height;
-            
-            return { width, height };
+        // ---------- RESET (clean start) ----------
+        function resetSim() {
+            phase = 0;
+            progress = 0.0;
+            playing = true;
+            phaseText.innerText = '⚡ entering';
+            progressText.innerText = '0%';
+            playBtn.innerHTML = '<span>⏸</span> pause';
+            drawScene();
         }
 
-        // Calculate responsive sizes and cache them
-        function calculateSizes(width, height) {
-            cachedValues.scale = Math.min(width / 800, 1);
-            cachedValues.centerX = width / 2;
-            cachedValues.centerY = height / 2;
-            cachedValues.prismSize = Math.min(width * 0.2, 150) * cachedValues.scale;
-            
-            return cachedValues;
+        // ---------- TOGGLE PLAY ----------
+        function togglePlay() {
+            playing = !playing;
+            playBtn.innerHTML = playing ? '<span>⏸</span> pause' : '<span>▶</span> play';
+            if (playing) animate();
         }
 
-        // Draw glowing effect
-        function drawGlowingCircle(x, y, radius, color, glow = 10) {
-            ctx.save();
-            ctx.shadowColor = color;
-            ctx.shadowBlur = glow;
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
+        // ---------- EVENT LISTENERS (simple) ----------
+        playBtn.addEventListener('click', togglePlay);
+        resetBtn.addEventListener('click', resetSim);
+        canvas.addEventListener('click', togglePlay);
+        canvas.addEventListener('dblclick', (e) => { e.preventDefault(); resetSim(); });
 
-        // Draw light beam with glow
-        function drawGlowingBeam(x1, y1, x2, y2, color, width, hasGlow = true) {
-            ctx.save();
-            if (hasGlow) {
-                ctx.shadowColor = color;
-                ctx.shadowBlur = 15;
-            }
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.lineCap = 'round';
-            
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.restore();
-        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+            if (e.key === 'r' || e.key === 'R') resetSim();
+        });
 
-        // Draw the prism with enhanced glass effect
-        function drawPrism(centerX, centerY, prismSize, scale) {
-            // Draw glass effect
-            ctx.save();
-            
-            // Main prism shape
-            const gradient = ctx.createLinearGradient(
-                centerX - prismSize, centerY - prismSize,
-                centerX + prismSize, centerY + prismSize
-            );
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
-            gradient.addColorStop(0.5, 'rgba(200, 220, 255, 0.15)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
-            
-            ctx.fillStyle = gradient;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.lineWidth = 2 * scale;
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY - prismSize);
-            ctx.lineTo(centerX - prismSize, centerY + prismSize * 0.6);
-            ctx.lineTo(centerX + prismSize, centerY + prismSize * 0.6);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            
-            // Add glass highlights
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1 * scale;
-            ctx.beginPath();
-            ctx.moveTo(centerX - prismSize * 0.3, centerY - prismSize * 0.2);
-            ctx.lineTo(centerX + prismSize * 0.3, centerY - prismSize * 0.1);
-            ctx.stroke();
-            
-            ctx.restore();
-            
-            // Label
-            if (state.showLabels) {
-                ctx.fillStyle = '#ffffff';
-                ctx.font = `${14 * scale}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillText('PRISM', centerX, centerY + prismSize + 30 * scale);
-            }
-        }
-
-        // Draw realistic light path through prism
-        function drawLightPath(centerX, centerY, prismSize, scale, progress) {
-            const pathProgress = easing.easeInOutSine(progress);
-            
-            // Calculate entry, bend, and exit points
-            const entryX = centerX - prismSize * 0.6;
-            const entryY = centerY;
-            const bendX = centerX;
-            const bendY = centerY - prismSize * 0.3;
-            const exitX = centerX + prismSize * 0.6;
-            const exitY = centerY;
-            
-            // Draw light path
-            if (pathProgress > 0) {
-                // Calculate intermediate points based on progress
-                const currentBendProgress = Math.min(pathProgress * 3, 1);
-                const currentExitProgress = Math.max(0, (pathProgress - 0.33) * 1.5);
-                
-                // Entry to bend point
-                if (currentBendProgress > 0) {
-                    const currentBendX = entryX + (bendX - entryX) * currentBendProgress;
-                    const currentBendY = entryY + (bendY - entryY) * currentBendProgress;
-                    
-                    drawGlowingBeam(entryX, entryY, currentBendX, currentBendY, '#ffffff', 4 * scale, true);
-                    
-                    // Entry point glow
-                    if (currentBendProgress > 0.1) {
-                        drawGlowingCircle(entryX, entryY, 5 * scale, '#ffffff', 20);
-                    }
-                }
-                
-                // Bend to exit point
-                if (currentExitProgress > 0) {
-                    const currentExitX = bendX + (exitX - bendX) * currentExitProgress;
-                    const currentExitY = bendY + (exitY - bendY) * currentExitProgress;
-                    
-                    drawGlowingBeam(bendX, bendY, currentExitX, currentExitY, '#ffffff', 4 * scale, true);
-                    
-                    // Bend point glow
-                    if (currentBendProgress > 0.5 && currentExitProgress < 1) {
-                        drawGlowingCircle(bendX, bendY, 5 * scale, '#ffffff', 20);
-                    }
-                    
-                    // Exit point glow
-                    if (currentExitProgress > 0.9) {
-                        drawGlowingCircle(exitX, exitY, 5 * scale, '#ffffff', 20);
-                    }
-                }
-            }
-            
-            // Draw physics explanation
-            if (state.showPhysics && pathProgress > 0.5) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.font = `${11 * scale}px Arial`;
-                ctx.textAlign = 'center';
-                
-                // Refraction labels
-                ctx.fillText('Refraction', entryX - 40 * scale, entryY - 20 * scale);
-                ctx.fillText('Bending', bendX, bendY - 25 * scale);
-                ctx.fillText('Refraction', exitX + 40 * scale, exitY - 20 * scale);
-                
-                // Draw angle indicators
-                drawAngleIndicator(entryX, entryY, bendX, bendY, scale);
-                drawAngleIndicator(bendX, bendY, exitX, exitY, scale);
-            }
-        }
-
-        // Draw angle indicator for physics demonstration
-        function drawAngleIndicator(x1, y1, x2, y2, scale) {
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            const radius = 25 * scale;
-            
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 1 * scale;
-            ctx.setLineDash([5, 3]);
-            
-            ctx.beginPath();
-            ctx.arc(x1, y1, radius, angle - 0.3, angle + 0.3);
-            ctx.stroke();
-            
-            ctx.restore();
-        }
-
-        // Draw rainbow spectrum
-        function drawRainbowSpectrum(centerX, centerY, prismSize, scale, progress) {
-            const exitX = centerX + prismSize * 0.6;
-            const exitY = centerY;
-            const rainbowProgress = easing.easeOutCubic(Math.max(0, progress - 1));
-            
-            // Draw continuous spectrum first (background)
-            if (rainbowProgress > 0.2) {
-                const spectrumWidth = 200 * scale * rainbowProgress;
-                const gradient = ctx.createLinearGradient(exitX, exitY - 50 * scale, exitX + spectrumWidth, exitY + 50 * scale);
-                
-                colors.forEach((color, i) => {
-                    gradient.addColorStop(i / colors.length, color.value);
-                    gradient.addColorStop((i + 1) / colors.length, color.value);
-                });
-                
-                ctx.save();
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 25 * scale;
-                ctx.lineCap = 'round';
-                
-                ctx.beginPath();
-                ctx.moveTo(exitX, exitY);
-                ctx.lineTo(exitX + spectrumWidth, exitY);
-                ctx.stroke();
-                ctx.restore();
-            }
-            
-            // Draw individual colored beams
-            colors.forEach((color, index) => {
-                const beamProgress = Math.min(rainbowProgress * 2 - index * 0.1, 1);
-                if (beamProgress > 0) {
-                    const beamLength = beamProgress * (250 * scale);
-                    const endX = exitX + beamLength;
-                    const endY = exitY + color.angle * (150 * scale) * beamProgress;
-                    
-                    // Draw beam
-                    drawGlowingBeam(exitX, exitY, endX, endY, color.value, 5 * scale, true);
-                    
-                    // Draw wavelength info
-                    if (beamProgress > 0.7 && state.showLabels) {
-                        ctx.save();
-                        ctx.fillStyle = color.value;
-                        ctx.font = `${12 * scale}px Arial`;
-                        ctx.textAlign = 'left';
-                        
-                        // Color name
-                        ctx.fillText(color.name, endX + 10 * scale, endY);
-                        
-                        // Wavelength
-                        if (state.showPhysics) {
-                            ctx.font = `${10 * scale}px Arial`;
-                            ctx.fillText(`${color.wavelength}nm`, endX + 10 * scale, endY + 15 * scale);
-                        }
-                        
-                        ctx.restore();
-                    }
-                }
-            });
-        }
-
-        // Draw educational information
-        function drawInfoPanel(width, height, scale) {
-            if (!state.showLabels) return;
-            
-            const panelWidth = 200 * scale;
-            const panelX = width - panelWidth - 20;
-            const panelY = 20;
-            
-            // Panel background
-            ctx.fillStyle = 'rgba(0, 0, 30, 0.7)';
-            ctx.strokeStyle = 'rgba(100, 150, 255, 0.5)';
-            ctx.lineWidth = 1;
-            ctx.fillRect(panelX, panelY, panelWidth, 120 * scale);
-            ctx.strokeRect(panelX, panelY, panelWidth, 120 * scale);
-            
-            // Panel content
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `${12 * scale}px Arial`;
-            ctx.textAlign = 'left';
-            
-            const phaseNames = ['Initializing', 'Light Enters Prism', 'Light Bends Inside', 'Dispersion Occurs', 'Complete'];
-            const info = [
-                `Phase: ${phaseNames[state.phase]}`,
-                `Progress: ${Math.round(state.progress * 100)}%`,
-                'Click to pause/resume',
-                'Double click to reset'
-            ];
-            
-            info.forEach((line, i) => {
-                ctx.fillText(line, panelX + 10, panelY + 30 + (i * 20 * scale));
-            });
-        }
-
-        // Draw the complete scene
+        // ---------- DRAW — REALISTIC, CLEAN, MINIMAL ----------
         function drawScene() {
-            const { width, height } = setupCanvas();
-            const { scale, centerX, centerY, prismSize } = calculateSizes(width, height);
-            
-            // Clear with gradient background
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, '#000011');
-            gradient.addColorStop(1, '#000033');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, height);
-            
-            // Draw stars for ambiance
-            drawStars(width, height, scale);
-            
-            // Draw prism
-            drawPrism(centerX, centerY, prismSize, scale);
-            
-            // Phase 1: White light beam
-            if (state.phase >= 1) {
-                const beamProgress = easing.easeOutCubic(Math.min(state.progress, 1));
-                const beamLength = beamProgress * (centerX - width * 0.1 - prismSize * 0.6);
-                
-                // Light source
-                drawGlowingCircle(width * 0.1, centerY, 10 * scale, '#ffffff', 25);
-                
-                // Beam
-                if (beamLength > 0) {
-                    drawGlowingBeam(width * 0.1, centerY, width * 0.1 + beamLength, centerY, '#ffffff', 10 * scale, true);
-                }
-                
-                // Label
-                if (state.showLabels) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = `${14 * scale}px Arial`;
-                    ctx.fillText('White Light Source', width * 0.02, centerY + 50 * scale);
-                }
-            }
-            
-            // Phase 2: Light path through prism
-            if (state.phase >= 2) {
-                const pathProgress = Math.max(0, (state.progress - 0.3) / 0.7);
-                drawLightPath(centerX, centerY, prismSize, scale, pathProgress);
-            }
-            
-            // Phase 3: Rainbow spectrum
-            if (state.phase >= 3) {
-                drawRainbowSpectrum(centerX, centerY, prismSize, scale, state.progress);
-            }
-            
-            // Draw info panel
-            drawInfoPanel(width, height, scale);
-            
-            // Draw title
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${18 * scale}px Arial`;
+            if (!w || !h) setSize();
+            ctx.clearRect(0, 0, w, h);
+
+            // soft dark background (realistic)
+            ctx.fillStyle = '#0c101a';
+            ctx.fillRect(0, 0, w, h);
+
+            // ---------- PRISM — clean, subtle ----------
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - prismSize * 0.8);
+            ctx.lineTo(cx - prismSize * 0.85, cy + prismSize * 0.55);
+            ctx.lineTo(cx + prismSize * 0.85, cy + prismSize * 0.55);
+            ctx.closePath();
+
+            // transparent prism – only edges visible
+            ctx.fillStyle = 'rgba(25, 35, 55, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(200, 225, 255, 0.5)';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            // simple label
+            ctx.font = '14px "Inter", system-ui, sans-serif';
+            ctx.fillStyle = '#a0bedb';
             ctx.textAlign = 'center';
-            ctx.fillText('PRISM LIGHT DISPERSION DEMONSTRATION', width / 2, 30 * scale);
-        }
+            ctx.fillText('prism', cx, cy + prismSize * 0.8);
 
-        // Draw background stars
-        function drawStars(width, height, scale) {
+            // ---------- LIGHT SOURCE (small, clean) ----------
+            const srcX = cx - prismSize * 1.9;
+            const srcY = cy - 8;
+
+            ctx.beginPath();
+            ctx.arc(srcX, srcY, 9, 0, 2 * Math.PI);
+            ctx.fillStyle = '#fffef0';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ffeebb';
+            ctx.fill();
+            ctx.shadowBlur = 0;
             ctx.fillStyle = '#ffffff';
-            for (let i = 0; i < 50; i++) {
-                const x = (i * 137) % width;
-                const y = (i * 97) % height;
-                const size = Math.random() * 1.5 * scale;
+            ctx.font = '12px "Inter"';
+            ctx.fillText('white', srcX-20, srcY-25);
+
+            // ---------- PHASE 1: BEAM TO PRISM ----------
+            if (phase >= 1) {
+                let enter = (phase === 1) ? Math.min(progress, 1.0) : 1.0;
+                const entryX = cx - prismSize * 0.5;
+                const entryY = srcY;
+                const beamEndX = srcX + (entryX - srcX) * enter;
+
                 ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.moveTo(srcX, srcY);
+                ctx.lineTo(beamEndX, srcY);
+                ctx.strokeStyle = 'rgba(255, 255, 245, 0.9)';
+                ctx.lineWidth = 5;
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = '#fffde7';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
             }
+
+            // ---------- PHASE 2 & 3: LIGHT PASS INSIDE PRISM (REAL, CLEAR) ----------
+            if (phase >= 2) {
+                // fixed geometry – realistic path through prism
+                const entryX = cx - prismSize * 0.5;
+                const entryY = cy - 8;
+                const bendX = cx;
+                const bendY = cy - prismSize * 0.28;
+                const exitX = cx + prismSize * 0.55;
+                const exitY = cy - 5;
+
+                // ---------- PHASE 2: entry → bend ----------
+                if (phase === 2) {
+                    let prog = Math.min(progress, 1.0);
+                    let currX = entryX + (bendX - entryX) * prog;
+                    let currY = entryY + (bendY - entryY) * prog;
+
+                    // beam entry→current (clean, visible)
+                    ctx.beginPath();
+                    ctx.moveTo(entryX, entryY);
+                    ctx.lineTo(currX, currY);
+                    ctx.strokeStyle = '#fffee7';
+                    ctx.lineWidth = 6.5;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ffe694';
+                    ctx.stroke();
+
+                    // small dot at tip
+                    ctx.beginPath();
+                    ctx.arc(currX, currY, 4, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#fffff0';
+                    ctx.shadowBlur = 16;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                // ---------- PHASE 3: bend → exit (full entry→bend + moving exit) ----------
+                if (phase === 3) {
+                    let prog = Math.min(progress, 1.0);
+                    let currX = bendX + (exitX - bendX) * prog;
+                    let currY = bendY + (exitY - bendY) * prog;
+
+                    // full entry→bend (already there)
+                    ctx.beginPath();
+                    ctx.moveTo(entryX, entryY);
+                    ctx.lineTo(bendX, bendY);
+                    ctx.strokeStyle = '#fffee7';
+                    ctx.lineWidth = 6.5;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ffe694';
+                    ctx.stroke();
+
+                    // moving bend→exit
+                    ctx.beginPath();
+                    ctx.moveTo(bendX, bendY);
+                    ctx.lineTo(currX, currY);
+                    ctx.strokeStyle = '#fffee7';
+                    ctx.lineWidth = 6.5;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ffe694';
+                    ctx.stroke();
+
+                    // tip
+                    ctx.beginPath();
+                    ctx.arc(currX, currY, 4.5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#fffff0';
+                    ctx.shadowBlur = 18;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                // ---------- PHASE 4: full inside path complete ----------
+                if (phase >= 4) {
+                    // draw entire path through prism (steady, realistic)
+                    ctx.beginPath();
+                    ctx.moveTo(entryX, entryY);
+                    ctx.lineTo(bendX, bendY);
+                    ctx.lineTo(exitX, exitY);
+                    ctx.strokeStyle = '#fffee0';
+                    ctx.lineWidth = 6.5;
+                    ctx.shadowBlur = 22;
+                    ctx.shadowColor = '#ffdb8c';
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    // exit dot
+                    ctx.beginPath();
+                    ctx.arc(exitX, exitY, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ffffea';
+                    ctx.shadowBlur = 18;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // ---------- PHASE 4/5: DISPERSION (REAL SPECTRUM) ----------
+            if (phase >= 4) {
+                const exitX = cx + prismSize * 0.55;
+                const exitY = cy - 5;
+                let exitProg = (phase === 4) ? Math.min(progress, 1.0) : 1.0;
+
+                spectrumColors.forEach((color, i) => {
+                    let delay = i * 0.055;
+                    let strength = Math.max(0, Math.min(1, (exitProg - delay) * 1.6));
+                    if (strength <= 0) return;
+
+                    let yOff = color.angle * 150 * strength;
+                    let endX = exitX + 140 * strength + 20;
+                    let endY = exitY + yOff;
+
+                    ctx.beginPath();
+                    ctx.moveTo(exitX, exitY);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = color.hex;
+                    ctx.lineWidth = 4.5;
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = color.hex;
+                    ctx.stroke();
+                });
+                ctx.shadowBlur = 0;
+            }
+
+            // tiny real label: direction
+            ctx.font = '11px monospace';
+            ctx.fillStyle = '#99bbdd';
+            ctx.textAlign = 'left';
+            ctx.fillText('← source', 20, h-30);
+            ctx.fillStyle = '#ddccaa';
+            ctx.fillText('prism →', cx+30, h-30);
         }
 
-        // Update UI status
-        function updateUI() {
-            // Update phase text
-            const phaseNames = ['Initializing', 'Light Enters Prism', 'Light Bends Inside', 'Dispersion Occurs', 'Complete'];
-            phaseValue.textContent = phaseNames[state.phase];
-            
-            // Update progress
-            progressValue.textContent = `${Math.round(state.progress * 100)}%`;
-            
-            // Update speed
-            speedValue.textContent = `${state.speed.toFixed(1)}x`;
-            
-            // Update play/pause button
-            playPauseBtn.innerHTML = state.isPlaying ? 
-                '<i class="fas fa-pause"></i> Pause' : 
-                '<i class="fas fa-play"></i> Start';
-                
-            // Update labels button
-            labelsBtn.innerHTML = '<i class="fas fa-tag"></i> Label';
-        }
-
-        // Animation loop
+        // ---------- ANIMATION (simple timing) ----------
         function animate() {
-            if (state.isPlaying) {
-                // Update animation state
-                if (state.phase === 0) {
-                    state.phase = 1;
-                    state.progress = 0;
-                } else if (state.phase === 1) {
-                    state.progress += 0.008 * state.speed;
-                    if (state.progress >= 0.3) {
-                        state.phase = 2;
-                    }
-                } else if (state.phase === 2) {
-                    state.progress += 0.008 * state.speed;
-                    if (state.progress >= 1) {
-                        state.phase = 3;
-                    }
-                } else if (state.phase === 3) {
-                    state.progress += 0.006 * state.speed;
-                    if (state.progress >= 2.5) {
-                        state.phase = 4;
-                        state.progress = 2.5;
-                    }
-                } else if (state.phase === 4) {
-                    // Complete state - auto-reset after delay
-                    if (state.progress >= 2.5 && state.isPlaying) {
-                        setTimeout(resetAnimation, 5000); // Auto-reset after 5 seconds
-                    }
-                }
-                
-                updateUI();
+            if (!playing) {
                 drawScene();
+                animFrame = requestAnimationFrame(animate);
+                return;
             }
-            
-            requestAnimationFrame(animate);
-        }
 
-        // Reset animation
-        function resetAnimation() {
-            state.phase = 1;
-            state.progress = 0;
-            state.isPlaying = true;
-            updateUI();
+            // state machine – clean transitions
+            if (phase === 0) { phase = 1; progress = 0.0; }
+            else if (phase === 1) { progress += 0.0052; if (progress >= 1.0) { progress = 0.0; phase = 2; } }
+            else if (phase === 2) { progress += 0.0052; if (progress >= 1.0) { progress = 0.0; phase = 3; } }
+            else if (phase === 3) { progress += 0.0052; if (progress >= 1.0) { progress = 0.0; phase = 4; } }
+            else if (phase === 4) { progress += 0.0048; if (progress >= 1.0) progress = 1.0; }
+
+            // update text – minimal
+            if (phase === 1) phaseText.innerText = '⚡ entering';
+            else if (phase === 2) phaseText.innerText = '✨ inside prism';
+            else if (phase === 3) phaseText.innerText = '✨ traveling';
+            else if (phase === 4) phaseText.innerText = '🌈 spectrum';
+            
+            let per = 0;
+            if (phase === 1) per = Math.floor(progress * 100);
+            else if (phase === 2) per = Math.floor(progress * 100);
+            else if (phase === 3) per = Math.floor(progress * 100);
+            else if (phase === 4) per = Math.floor(progress * 100);
+            progressText.innerText = per + '%';
+
             drawScene();
+            animFrame = requestAnimationFrame(animate);
         }
 
-        // Toggle play/pause
-        function togglePlayPause() {
-            state.isPlaying = !state.isPlaying;
-            updateUI();
-        }
-
-        // Toggle labels
-        function toggleLabels() {
-            state.showLabels = !state.showLabels;
-            updateUI();
-            drawScene();
-        }
-
-        // Toggle physics info
-        function togglePhysics() {
-            state.showPhysics = !state.showPhysics;
-            updateUI();
-            drawScene();
-        }
-
-        // Change animation speed
-        function changeSpeed(factor) {
-            state.speed = Math.max(0.1, Math.min(3, state.speed * factor));
-            updateUI();
-        }
-
-        // Initialize UI event listeners
-        function initUI() {
-            playPauseBtn.addEventListener('click', togglePlayPause);
-            resetBtn.addEventListener('click', resetAnimation);
-            labelsBtn.addEventListener('click', toggleLabels);
-            
-            // Handle canvas click
-            canvas.addEventListener('click', togglePlayPause);
-            
-            // Handle double click to reset
-            canvas.addEventListener('dblclick', (e) => {
-                e.preventDefault();
-                resetAnimation();
-            });
-            
-            // Handle keyboard controls
-            document.addEventListener('keydown', (e) => {
-                switch (e.key.toLowerCase()) {
-                    case ' ': // Spacebar
-                        e.preventDefault();
-                        togglePlayPause();
-                        break;
-                    case 'r':
-                        resetAnimation();
-                        break;
-                    case 'l':
-                        toggleLabels();
-                        break;
-                }
-            });
-        }
-
-        // Handle window resize
-        function handleResize() {
-            cachedValues = {
-                prismSize: null,
-                scale: null,
-                centerX: null,
-                centerY: null
-            };
-            drawScene();
-        }
-
-        // Initialize everything
-        function init() {
-            setupCanvas();
-            initUI();
-            updateUI();
-            
-            // Set accessibility attributes
-            canvas.setAttribute('aria-label', 'Interactive animation demonstrating how a prism disperses white light into a rainbow spectrum. Shows refraction and dispersion physics.');
-            canvas.setAttribute('role', 'img');
-            canvas.setAttribute('tabindex', '0');
-            
-            window.addEventListener('resize', handleResize);
-            
-            // Start animation
-            setTimeout(() => {
-                state.phase = 1;
-                animate();
-            }, 500);
-        }
-
-        // Start when page loads
-        window.addEventListener('load', init);
+        // ---------- INIT ----------
+        window.addEventListener('load', () => {
+            setSize();
+            resetSim();
+            animate();
+        });
+        window.addEventListener('resize', () => { setSize(); drawScene(); });
     </script>
 </body>
-</html>
+</html> 
+

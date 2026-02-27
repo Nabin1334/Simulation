@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple 2D · specific heat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1b4f66;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 16px;
+        }
+        .simple-box {
+            background: #eaf2f5;
+            border-radius: 50px;
+            padding: 30px 30px 40px;
+            max-width: 1100px;
+            width: 100%;
+            box-shadow: 0 30px 40px #00000060;
+            border: 2px solid #ffcd94;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.6rem;
+            font-weight: 400;
+            margin: 0 0 10px;
+            color: #033b4a;
+        }
+        .sub {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: #0d4e63;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #a1cfdf;
+            border-radius: 40px;
+            border: 4px solid white;
+            box-shadow: 0 15px 25px #00000050;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .flex-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0 10px;
+        }
+        .tag {
+            background: #0b3d51;
+            color: white;
+            border-radius: 60px;
+            padding: 15px 25px;
+            font-size: 1.4rem;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 5px 0 #05242f;
+        }
+        .tag span {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+        .explain {
+            background: #ffffffdb;
+            border-radius: 50px;
+            padding: 22px 30px;
+            border-left: 12px solid #ffaa33;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            box-shadow: 0 8px 18px #00000030;
+        }
+        .footer {
+            text-align: center;
+            color: #05455a;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="simple-box">
+    <h1>🌡️ SPECIFIC HEAT · 2D simple</h1>
+    <div class="sub">☀️ drag the sun up/down — see how materials respond</div>
+
+    <canvas id="myCanvas" width="1000" height="400"></canvas>
+
+    <div class="flex-row">
+        <div class="tag"><span>💧</span> WATER 4184</div>
+        <div class="tag"><span>🏖️</span> SAND ~800</div>
+        <div class="tag"><span>⚙️</span> METAL 385</div>
+    </div>
+
+    <div class="explain" id="explainText">
+        🔹 <strong>Water</strong> (high SHC) changes slowly · stores heat · example: hot water bottle.<br>
+        🔹 <strong>Sand</strong> (medium) heats faster · beach sand burns feet, sea stays cool.<br>
+        🔹 <strong>Metal</strong> (low) reacts instantly · frying pan, radiator.
+    </div>
+    <div class="footer">
+        ⬆️ click sun and drag UP to increase power, DOWN to reduce
+    </div>
+</div>
+
+<script>
+    (function simpleHeat() {
+        // ----- canvas setup -----
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+
+        // ----- temperatures (0=cold, 1=hot) -----
+        let water = 0.45;
+        let sand  = 0.45;
+        let metal = 0.45;
+
+        // sun intensity (0.2 .. 1.6)
+        let sun = 0.9;
+        let dragging = false;
+
+        // ----- helper: map range -----
+        function map(v, a, b, c, d) {
+            return c + (d - c) * ((v - a) / (b - a));
+        }
+
+        // ----- update temperatures based on sun -----
+        function updateTemps(dtSec) {
+            // target from sun (0.2 .. 1.6 → 0.2 .. 0.95)
+            let rawTarget = map(sun, 0.2, 1.6, 0.2, 0.95);
+            rawTarget = Math.min(0.98, Math.max(0.15, rawTarget));
+
+            // each material has different sensitivity and speed
+            let waterTarget = 0.3  + rawTarget * 0.55;   // 0.3 .. 0.82
+            let sandTarget  = 0.2  + rawTarget * 0.7;    // 0.2 .. 0.86
+            let metalTarget = 0.1  + rawTarget * 0.85;   // 0.1 .. 0.91
+
+            // speed (lower SHC = faster)
+            const waterSpeed = 1.5;   // slow
+            const sandSpeed  = 3.2;   // medium
+            const metalSpeed = 7.0;   // fast
+
+            // move toward target (exponential approach)
+            water += (waterTarget - water) * Math.min(1, waterSpeed * dtSec * 1.8);
+            sand  += (sandTarget - sand)   * Math.min(1, sandSpeed  * dtSec * 1.8);
+            metal += (metalTarget - metal) * Math.min(1, metalSpeed * dtSec * 1.8);
+
+            // tiny randomness to look natural
+            water += (Math.random() - 0.5) * 0.002;
+            sand  += (Math.random() - 0.5) * 0.004;
+            metal += (Math.random() - 0.5) * 0.007;
+
+            // keep inside 0..1
+            water = Math.min(0.95, Math.max(0.18, water));
+            sand  = Math.min(1.0,  Math.max(0.15, sand));
+            metal = Math.min(1.0,  Math.max(0.1, metal));
+        }
+
+        // ----- draw everything -----
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+
+            // sky
+            ctx.fillStyle = '#aad0e6';
+            ctx.fillRect(0, 0, w, h);
+
+            // ---- sun (interactive) ----
+            const sunX = 820, sunY = 90, sunR = 48;
+            ctx.shadowColor = '#ffaa33';
+            ctx.shadowBlur = 38 * sun;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunR, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffd966';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.font = '46px "Segoe UI"';
+            ctx.shadowColor = '#000';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = 'white';
+            ctx.fillText('☀️', sunX-30, sunY+15);
+            ctx.shadowBlur = 0;
+            // intensity meter
+            ctx.fillStyle = '#ffffff90';
+            ctx.fillRect(sunX-45, sunY+50, 90, 12);
+            ctx.fillStyle = '#ffaa33';
+            ctx.fillRect(sunX-45, sunY+50, 90 * ((sun-0.2)/1.4), 12);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sunX-45, sunY+50, 90, 12);
+
+            // ground
+            ctx.fillStyle = '#5d909d';
+            ctx.fillRect(0, h-70, w, 70);
+            ctx.fillStyle = '#386f7c';
+            ctx.fillRect(0, h-35, w, 35);
+
+            const baseY = h - 120;
+
+            // ---- WATER (left) ----
+            ctx.fillStyle = '#1e5f7a';
+            roundRect(ctx, 100, baseY-85, 180, 125, 25);
+            ctx.fill();
+            // water color (blue varies with temp)
+            let wR = 30 + water*50, wG = 60 + water*80, wB = 140 + water*90;
+            ctx.fillStyle = `rgb(${wR},${wG},${wB})`;
+            ctx.shadowColor = `rgba(70,160,255,${water*0.6})`;
+            ctx.shadowBlur = 20;
+            roundRect(ctx, 120, baseY-60, 140, 90, 18);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.font = '42px "Segoe UI"';
+            ctx.fillStyle = '#ddf2ff';
+            ctx.fillText('💧', 150, baseY-5);
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('WATER', 135, baseY-35);
+            // temp bar
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(120, baseY-95, 100 * water, 8);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(120, baseY-95, 100, 8);
+
+            // ---- SAND (middle) ----
+            ctx.shadowColor = '#6f542b';
+            for (let i=0; i<4; i++) {
+                let wS = 160 - i*12;
+                let hS = 38 - i*5;
+                let sR = 170 + sand*80, sG = 120 + sand*60, sB = 60 + sand*20;
+                ctx.fillStyle = `rgb(${sR},${sG},${sB})`;
+                ctx.beginPath();
+                ctx.ellipse(400 + i*3, baseY-40 - i*11, wS/2, hS/2, 0, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.font = '42px "Segoe UI"';
+            ctx.fillStyle = '#fbebc0';
+            ctx.fillText('🏖️', 360, baseY-5);
+            ctx.fillStyle = '#382e1a';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('SAND', 355, baseY-40);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(360, baseY-95, 100 * sand, 8);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(360, baseY-95, 100, 8);
+
+            // ---- METAL (right) ----
+            ctx.shadowColor = '#6f7f8c';
+            let mR = 150 + metal*80, mG = 140 + metal*70, mB = 160 + metal*60;
+            ctx.fillStyle = `rgb(${mR},${mG},${mB})`;
+            roundRect(ctx, 620, baseY-85, 180, 125, 25);
+            ctx.fill();
+            // highlight
+            ctx.fillStyle = `rgba(255,255,255,${0.2+metal*0.3})`;
+            roundRect(ctx, 645, baseY-50, 60, 30, 12);
+            ctx.fill();
+            ctx.font = '46px "Segoe UI"';
+            ctx.fillStyle = '#f0f5fa';
+            ctx.fillText('⚙️', 660, baseY-5);
+            ctx.fillStyle = '#222';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('METAL', 645, baseY-40);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(640, baseY-95, 100 * metal, 8);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(640, baseY-95, 100, 8);
+
+            ctx.shadowBlur = 0;
+        }
+
+        // helper rounded rect
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x+r, y);
+            ctx.lineTo(x+w-r, y);
+            ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+            ctx.lineTo(x+w, y+h-r);
+            ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            ctx.lineTo(x+r, y+h);
+            ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+            ctx.lineTo(x, y+r);
+            ctx.quadraticCurveTo(x, y, x+r, y);
+            ctx.closePath();
+        }
+
+        // ----- mouse interaction (drag sun) -----
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = w / rect.width;
+            const scaleY = h / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            // sun at (820,90) radius ~55
+            if (Math.hypot(mx - 820, my - 90) < 60) {
+                dragging = true;
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('mouseup', () => dragging = false);
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleY = h / rect.height;
+            const my = (e.clientY - rect.top) * scaleY;
+            // map Y to sun intensity (0.2 - 1.6)
+            let newSun = map(my, 30, 230, 1.6, 0.2);
+            sun = Math.min(1.6, Math.max(0.2, newSun));
+        });
+
+        // ----- animation loop -----
+        let lastTime = 0;
+        function step(now) {
+            if (!lastTime) lastTime = now;
+            const dt = Math.min(0.1, (now - lastTime) / 1000); // seconds
+            lastTime = now;
+
+            updateTemps(dt);
+            draw();
+
+            requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    })();
+</script>
+</body>
+</html>
