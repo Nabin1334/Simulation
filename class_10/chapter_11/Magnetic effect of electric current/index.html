@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magnetic Effect of Electric Current</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;}
+body{
+  background:#02060e;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;padding:14px 12px 22px;
+  font-family:'Share Tech Mono',monospace;
+}
+h1{
+  font-family:'Orbitron',monospace;font-size:1.28rem;font-weight:900;
+  color:#3a9cff;letter-spacing:5px;text-transform:uppercase;
+  text-shadow:0 0 40px #1a6cff40,0 0 80px #1a6cff18;
+  text-align:center;margin-bottom:4px;
+}
+.sub{font-size:.7rem;color:#1e4060;letter-spacing:2.5px;text-align:center;margin-bottom:10px;}
+.wrap{border:1px solid #0a1e34;border-radius:12px;overflow:hidden;
+  box-shadow:0 0 80px #001428,0 0 150px #00080f;}
+canvas{display:block;}
+.ctrls{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.card{background:#060d1a;border:1px solid #0c1c30;border-radius:8px;
+  padding:10px 16px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:128px;}
+.clbl{font-size:.6rem;letter-spacing:2.5px;color:#1e4060;text-transform:uppercase;}
+.cval{font-family:'Orbitron',monospace;font-size:1.15rem;font-weight:700;}
+.cy{color:#e8a828;text-shadow:0 0 14px #e8a82840;}
+.cg{color:#28e880;text-shadow:0 0 14px #28e88040;}
+.cb{color:#28a8ff;text-shadow:0 0 14px #28a8ff40;}
+.cr{color:#ff5528;text-shadow:0 0 14px #ff552840;}
+input[type=range]{width:135px;-webkit-appearance:none;appearance:none;
+  height:4px;background:#08141e;border-radius:4px;outline:none;border:1px solid #182840;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;
+  background:#e8a828;border-radius:50%;cursor:pointer;box-shadow:0 0 8px #e8a82870;}
+.pbtn{font-family:'Orbitron',monospace;font-size:.75rem;font-weight:700;
+  letter-spacing:3px;padding:9px 22px;border-radius:6px;cursor:pointer;
+  border:1px solid;transition:box-shadow .12s,background .12s;text-transform:uppercase;align-self:center;}
+.pbtn.on{background:#08180e;border-color:#20b850;color:#20b850;box-shadow:0 0 18px #20b85018;}
+.pbtn.on:hover{box-shadow:0 0 30px #20b85055;background:#0a2014;}
+.pbtn.off{background:#160808;border-color:#b83020;color:#b83020;box-shadow:0 0 14px #b8302015;}
+.pbtn.off:hover{box-shadow:0 0 26px #b8302050;}
+</style>
+</head>
+<body>
+<h1>⚡ Magnetic Effect of Electric Current</h1>
+<p class="sub">Oersted's Principle &nbsp;·&nbsp; Solenoid Electromagnet &nbsp;·&nbsp; Right-Hand Rule &nbsp;·&nbsp; Dipole Field</p>
+<div class="wrap"><canvas id="c" width="1200" height="648"></canvas></div>
+<div class="ctrls">
+  <div class="card">
+    <span class="clbl">EMF Voltage</span>
+    <input type="range" id="sv" min="1" max="12" step="0.5" value="6">
+    <span class="cval cy" id="dv">6.0 V</span>
+  </div>
+  <div class="card">
+    <span class="clbl">Resistance</span>
+    <input type="range" id="sr" min="1" max="10" step="0.5" value="3">
+    <span class="cval cy" id="dr">3.0 &#937;</span>
+  </div>
+  <div class="card">
+    <span class="clbl">Current (I)</span>
+    <span class="cval cg" id="di">2.00 A</span>
+  </div>
+  <div class="card">
+    <span class="clbl">Field (B)</span>
+    <span class="cval cb" id="db">12.57 mT</span>
+  </div>
+  <div class="card">
+    <span class="clbl">Power (P)</span>
+    <span class="cval cr" id="dp">12.0 W</span>
+  </div>
+  <button id="pb" class="pbtn on">&#9679; POWER ON</button>
+</div>
+
+<script src="index.js">
+</script>
+</body>
+</html>

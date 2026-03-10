@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetic flux</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background-color: black;
+        }
+        /* theory overlay – compact, glassmorphism, can be hidden */
+        #theory-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            max-width: 300px;
+            background: rgba(8, 18, 32, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            color: #f0f5ff;
+            border: 1px solid rgba(72, 140, 255, 0.35);
+            box-shadow: 0 20px 40px -10px #000000cc, 0 0 0 1px #2e4c7a inset;
+            z-index: 20;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        #theory-panel h3 {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            font-size: 1.3rem;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        #theory-panel h3 span {
+            background: #2563eb;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+        .eq {
+            background: #0f1f33;
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            border-left: 4px solid #3b82f6;
+            margin: 12px 0;
+        }
+        #theory-panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+        #theory-panel li {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            align-items: flex-start;
+        }
+        .bullet {
+            background: #1f3a6b;
+            width: 22px;
+            height: 22px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        #controls-note {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            background: rgba(0, 8, 22, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 0.5rem 1.8rem;
+            border-radius: 40px;
+            color: #c6dcff;
+            border: 1px solid #3466a0;
+            z-index: 15;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            pointer-events: none;
+        }
+        #legend {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(6, 16, 30, 0.7);
+            backdrop-filter: blur(16px);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            color: white;
+            display: flex;
+            gap: 2.2rem;
+            border: 1px solid #3d68a5;
+            z-index: 15;
+            font-size: 1rem;
+            box-shadow: 0 10px 26px #00000080;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .north-dot { width: 18px; height: 18px; background: #ff4d6d; border-radius: 20px; box-shadow: 0 0 20px #ff6f91; }
+        .south-dot { width: 18px; height: 18px; background: #4d9eff; border-radius: 20px; box-shadow: 0 0 20px #7fb5ff; }
+        .flux-dot { width: 18px; height: 18px; background: #ffb347; border-radius: 4px; box-shadow: 0 0 20px #ffaa33; }
+        #toggle-theory {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #1e3b64;
+            border: 1px solid #5980c0;
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 40px;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            z-index: 30;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.95rem;
+        }
+        #toggle-theory:hover {
+            background: #2b4f8a;
+        }
+        /* make labels more readable */
+        .label-n, .label-s {
+            font-weight: 700;
+            text-shadow: 0 0 25px currentColor;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="theory-panel">
+        <h3>⚡ MAGNETIC FLUX <span>Φ</span></h3>
+        <div class="eq">Φ = ∫ B · dA  [Wb]</div>
+        <ul>
+            <li><span class="bullet">🌐</span> <strong>Flux</strong> = total B-field through a surface</li>
+            <li><span class="bullet">📐</span> dA = vector area · orientation matters</li>
+            <li><span class="bullet">🌀</span> Line density ∝ flux strength · closed loops</li>
+            <li><span class="bullet">🔴🔵</span> N (red) → S (blue) dipole</li>
+        </ul>
+    </div>
+    <button id="toggle-theory">📘 HIDE THEORY</button>
+    <div id="controls-note">🖱️ DRAG TO ROTATE · SCROLL ZOOM · AUTO‑ROTATE (can be stopped)</div>
+    <div id="legend">
+        <div class="legend-item"><div class="north-dot"></div> North</div>
+        <div class="legend-item"><div class="south-dot"></div> South</div>
+        <div class="legend-item"><div class="flux-dot"></div> Flux lines</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- scene setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050b17); // deep navy
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(9, 3, 9);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+        document.body.appendChild(renderer.domElement);
+
+        // label renderer for crisp N / S
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        // controls – free rotation, see every angle
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.8; // slightly faster to appreciate 3D
+        controls.enableZoom = true;
+        controls.maxPolarAngle = Math.PI; // allow full top/bottom
+        controls.minDistance = 4;
+        controls.maxDistance = 30;
+        controls.target.set(0, 0, 0);
+
+        // --- lighting to bring out 3D form ---
+        const ambient = new THREE.AmbientLight(0x404c6a);
+        scene.add(ambient);
+
+        const keyLight = new THREE.DirectionalLight(0xfff5e6, 1.3);
+        keyLight.position.set(3, 5, 5);
+        scene.add(keyLight);
+
+        const fillLight = new THREE.PointLight(0x4477aa, 0.8);
+        fillLight.position.set(-4, 2, 4);
+        scene.add(fillLight);
+
+        const backLight = new THREE.PointLight(0x3366aa, 0.6);
+        backLight.position.set(0, 3, -8);
+        scene.add(backLight);
+
+        // glowing poles
+        const northGlow = new THREE.PointLight(0xff4d6d, 2.0, 12);
+        northGlow.position.set(2.6, 0, 0);
+        scene.add(northGlow);
+        const southGlow = new THREE.PointLight(0x4d9eff, 2.0, 12);
+        southGlow.position.set(-2.6, 0, 0);
+        scene.add(southGlow);
+
+        // subtle grid floor (helps orientation)
+        const gridHelper = new THREE.GridHelper(20, 24, 0x3a6a9a, 0x1a3a5a);
+        gridHelper.position.y = -1.4;
+        scene.add(gridHelper);
+
+        // --- magnet with realistic finish ---
+        const magnetGroup = new THREE.Group();
+
+        // main body (dark metal)
+        const bodyGeo = new THREE.CylinderGeometry(1.2, 1.2, 5.0, 36);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x222831, roughness: 0.28, metalness: 0.8, emissive: 0x10141c });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.rotation.x = Math.PI/2;
+        body.rotation.z = Math.PI/2;
+        body.position.set(0, 0, 0);
+        magnetGroup.add(body);
+
+        // north cap (red/ warm)
+        const nCapGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.8, 40);
+        const nCapMat = new THREE.MeshStandardMaterial({ color: 0xff3b5c, emissive: 0x3a141c, roughness: 0.2, metalness: 0.2 });
+        const nCap = new THREE.Mesh(nCapGeo, nCapMat);
+        nCap.rotation.x = Math.PI/2;
+        nCap.rotation.z = Math.PI/2;
+        nCap.position.set(2.75, 0, 0);
+        magnetGroup.add(nCap);
+
+        // south cap (blue)
+        const sCapGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.8, 40);
+        const sCapMat = new THREE.MeshStandardMaterial({ color: 0x3d7eff, emissive: 0x14223a, roughness: 0.2, metalness: 0.2 });
+        const sCap = new THREE.Mesh(sCapGeo, sCapMat);
+        sCap.rotation.x = Math.PI/2;
+        sCap.rotation.z = Math.PI/2;
+        sCap.position.set(-2.75, 0, 0);
+        magnetGroup.add(sCap);
+
+        // decorative rings (glossy)
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xccddee, roughness: 0.15, metalness: 0.9, emissive: 0x111c2a });
+        const ringGeo = new THREE.TorusGeometry(1.35, 0.1, 20, 56, Math.PI);
+        [2.75, -2.75].forEach(pos => {
+            const r1 = new THREE.Mesh(ringGeo, ringMat);
+            r1.rotation.y = Math.PI/2;
+            r1.rotation.x = Math.PI/2;
+            r1.position.set(pos, 0, 0.5);
+            magnetGroup.add(r1);
+            const r2 = new THREE.Mesh(ringGeo, ringMat);
+            r2.rotation.y = Math.PI/2;
+            r2.rotation.x = Math.PI/2;
+            r2.position.set(pos, 0, -0.5);
+            magnetGroup.add(r2);
+        });
+
+        scene.add(magnetGroup);
+
+        // --- CSS labels N / S (large, readable from any angle) ---
+        const nDiv = document.createElement('div');
+        nDiv.textContent = 'N';
+        nDiv.style.color = 'white';
+        nDiv.style.fontSize = '42px';
+        nDiv.style.fontWeight = '800';
+        nDiv.style.textShadow = '0 0 30px #ff4d6d, 0 0 60px #ff9999';
+        nDiv.style.background = 'rgba(50,0,0,0.7)';
+        nDiv.style.padding = '4px 24px';
+        nDiv.style.borderRadius = '60px';
+        nDiv.style.border = '3px solid #ff9f9f';
+        nDiv.style.backdropFilter = 'blur(8px)';
+        const nLabel = new CSS2DObject(nDiv);
+        nLabel.position.set(3.5, 1.1, 0);
+        scene.add(nLabel);
+
+        const sDiv = document.createElement('div');
+        sDiv.textContent = 'S';
+        sDiv.style.color = 'white';
+        sDiv.style.fontSize = '42px';
+        sDiv.style.fontWeight = '800';
+        sDiv.style.textShadow = '0 0 30px #4d9eff, 0 0 60px #99ccff';
+        sDiv.style.background = 'rgba(0,20,60,0.7)';
+        sDiv.style.padding = '4px 24px';
+        sDiv.style.borderRadius = '60px';
+        sDiv.style.border = '3px solid #99bbff';
+        sDiv.style.backdropFilter = 'blur(8px)';
+        const sLabel = new CSS2DObject(sDiv);
+        sLabel.position.set(-3.5, 1.1, 0);
+        scene.add(sLabel);
+
+        // --- FLUX LINES: dense, varied, fully 3D (rotate around X) ---
+        function createFieldLine(points, color, opacity = 0.65) {
+            const geom = new THREE.BufferGeometry();
+            const vertices = points.flatMap(p => [p.x, p.y, p.z]);
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity });
+            return new THREE.Line(geom, mat);
+        }
+
+        // generate a line emerging at angle 'rotAngle' around X axis
+        function generateFluxLine(rotAngle, variant = 0) {
+            const points = [];
+            const steps = 80;
+            // vary radius function a bit for variety
+            const rMin = 2.3;
+            const rMax = 7.2 + variant * 1.2;
+            
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps; // 0..1, north->south
+                const theta = t * Math.PI; // 0 at +X, PI at -X
+                
+                // magnetic field line shape: r = a * sin^2(theta) + b (dipole approximation)
+                const r = rMin + (rMax - rMin) * Math.pow(Math.sin(theta), 1.5 + variant*0.3);
+                
+                // base 2D coordinates (in XY plane, then rotate)
+                const x = r * Math.cos(theta);
+                const y = r * Math.sin(theta) * 0.9;
+                
+                // rotate around X by rotAngle
+                const cosR = Math.cos(rotAngle);
+                const sinR = Math.sin(rotAngle);
+                const px = x;
+                const py = y * cosR;
+                const pz = y * sinR;
+                
+                points.push({ x: px, y: py, z: pz });
+            }
+            // color: golden with slight variation
+            const hue = 0.12 + (rotAngle * 0.02) % 0.1;
+            const color = new THREE.Color().setHSL(hue, 1.0, 0.6);
+            return createFieldLine(points, color.getHex(), 0.7);
+        }
+
+        const lineGroup = new THREE.Group();
+        // dense coverage – many lines (72) to see flux from every angle
+        for (let i = 0; i < 72; i++) {
+            const angle = (i / 72) * Math.PI * 2;
+            const line = generateFluxLine(angle, i % 3);
+            lineGroup.add(line);
+        }
+        // add extra lines with larger loops
+        for (let i = 0; i < 28; i++) {
+            const angle = (i / 28) * Math.PI * 2 + 0.2;
+            const points = [];
+            for (let j = 0; j <= 80; j++) {
+                const t = j/80;
+                const theta = t * Math.PI;
+                const r = 2.4 + 7.0 * Math.pow(Math.sin(theta), 2.2);
+                const x = r * Math.cos(theta);
+                const y = r * Math.sin(theta) * 1.0;
+                const rot = angle;
+                const px = x;
+                const py = y * Math.cos(rot);
+                const pz = y * Math.sin(rot);
+                points.push({ x: px, y: py, z: pz });
+            }
+            const col = new THREE.Color().setHSL(0.1, 1.0, 0.55);
+            const line = createFieldLine(points, col.getHex(), 0.55);
+            lineGroup.add(line);
+        }
+
+        scene.add(lineGroup);
+
+        // --- flux surfaces (semi-transparent loops) to suggest area A ---
+        const loopMaterial = new THREE.LineBasicMaterial({ color: 0x4da6ff, transparent: true, opacity: 0.25 });
+        for (let k = 0; k < 3; k++) {
+            const radius = 3.2 + k * 1.6;
+            const points = [];
+            for (let a = 0; a <= 64; a++) {
+                const ang = (a / 64) * Math.PI * 2;
+                const x = 0.8 + k * 0.3; // offset
+                const y = radius * Math.cos(ang);
+                const z = radius * Math.sin(ang) * 0.9;
+                points.push(new THREE.Vector3(x, y, z));
+            }
+            const geom = new THREE.BufferGeometry().setFromPoints(points);
+            const loop = new THREE.LineLoop(geom, loopMaterial);
+            scene.add(loop);
+        }
+
+        // additional loop perpendicular
+        const perpPoints = [];
+        for (let a = 0; a <= 64; a++) {
+            const ang = (a / 64) * Math.PI * 2;
+            const r = 4.2;
+            const x = -0.5;
+            const y = r * Math.cos(ang) * 0.6;
+            const z = r * Math.sin(ang) * 1.4;
+            perpPoints.push(new THREE.Vector3(x, y, z));
+        }
+        const perpLoop = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(perpPoints), new THREE.LineBasicMaterial({ color: 0xffaa33, transparent: true, opacity: 0.2 }));
+        scene.add(perpLoop);
+
+        // --- particle cloud (iron filings effect) to enhance depth ---
+        const particleCount = 2400;
+        const particleGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        const colorArray = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+            // random in a flattened ellipsoid
+            const u = Math.random();
+            const v = Math.random();
+            const w = Math.random();
+            const theta = 2 * Math.PI * u;
+            const phi = Math.acos(2 * v - 1);
+            const r = 2.5 + 5.0 * Math.pow(w, 1.3);
+            
+            const x = r * Math.cos(phi);
+            const y = r * Math.sin(phi) * Math.cos(theta) * 0.9;
+            const z = r * Math.sin(phi) * Math.sin(theta) * 0.9;
+            
+            posArray[i*3] = x;
+            posArray[i*3+1] = y;
+            posArray[i*3+2] = z;
+            
+            // color by region
+            const tX = (x + 4) / 8;
+            const rCol = Math.min(1, Math.max(0, tX * 1.2));
+            const bCol = Math.min(1, Math.max(0, (1 - tX) * 1.2));
+            colorArray[i*3] = rCol * 0.8 + 0.2;
+            colorArray[i*3+1] = 0.4;
+            colorArray[i*3+2] = bCol * 0.8 + 0.2;
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particleGeo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        const particleMat = new THREE.PointsMaterial({ size: 0.1, vertexColors: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // --- starfield background (distant) for depth perception ---
+        const starGeo = new THREE.BufferGeometry();
+        const starPositions = new Float32Array(3000 * 3);
+        for (let i = 0; i < 3000; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 250;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 250;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 250 - 70;
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xaac3dd, size: 0.3, transparent: true, opacity: 0.45 });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // --- animation loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // auto-rotate enabled
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+
+        // --- resize handler ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- toggle theory panel visibility ---
+        const theoryPanel = document.getElementById('theory-panel');
+        const toggleBtn = document.getElementById('toggle-theory');
+        let theoryVisible = true;
+        toggleBtn.addEventListener('click', () => {
+            if (theoryVisible) {
+                theoryPanel.style.opacity = '0';
+                theoryPanel.style.pointerEvents = 'none';
+                toggleBtn.textContent = '📘 SHOW THEORY';
+                theoryVisible = false;
+            } else {
+                theoryPanel.style.opacity = '1';
+                theoryPanel.style.pointerEvents = 'none';
+                toggleBtn.textContent = '📘 HIDE THEORY';
+                theoryVisible = true;
+            }
+        });
+    </script>
+</body>
+</html>
