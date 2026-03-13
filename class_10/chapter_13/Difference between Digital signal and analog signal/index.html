@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+    />
+    <title>analog vs digital · massive comparison</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Inter",
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      body {
+        background: linear-gradient(145deg, #c9dbe9 0%, #b0c9de 100%);
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        padding: 0;
+      }
+
+      /* FULL SCREEN CONTAINER */
+      .full-screen {
+        width: 100vw;
+        min-height: 100vh;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+
+      /* COMPARISON CARD - MASSIVE SIZE */
+      .comparison-card {
+        background: white;
+        border-radius: 5rem;
+        padding: 3.5rem 3.5rem;
+        box-shadow: 0 40px 50px -20px #1e4059;
+        border: 3px solid rgba(255, 255, 255, 0.9);
+        width: 100%;
+        max-width: 1800px;
+        margin: 0 auto;
+      }
+
+      .comparison-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .comparison-header h2 {
+        font-size: 4rem;
+        font-weight: 700;
+        color: #113946;
+        display: inline-block;
+        border-bottom: 6px solid #f39c12;
+        padding-bottom: 0.8rem;
+      }
+
+      .split-container {
+        display: flex;
+        gap: 3rem;
+        min-height: 0;
+      }
+
+      .signal-half {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f8fafc;
+        border-radius: 3.5rem;
+        padding: 2.8rem 2.5rem;
+        border: 4px solid;
+        transition: transform 0.2s ease;
+      }
+      .signal-half:hover {
+        transform: translateY(-8px);
+      }
+
+      .analog-half {
+        border-color: #f39c12;
+      }
+      .digital-half {
+        border-color: #2c3e50;
+      }
+
+      .half-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 2rem;
+      }
+      .half-header .icon {
+        font-size: 4rem;
+      }
+      .half-header h3 {
+        font-size: 3.2rem;
+        font-weight: 700;
+      }
+      .analog-half .half-header h3 {
+        color: #b85e00;
+      }
+      .digital-half .half-header h3 {
+        color: #1a2634;
+      }
+
+      .graph-box-small {
+        background: white;
+        border-radius: 3rem;
+        padding: 1.8rem;
+        margin-bottom: 2.5rem;
+        border: 2px solid #c5d5e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02);
+      }
+
+      .small-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 160px;
+        background: white;
+        border-radius: 2.5rem;
+        border: 1px solid #b3c9dd;
+        box-sizing: border-box;
+      }
+
+      /* Responsive canvas for mobile */
+      @media (max-width: 600px) {
+        .small-canvas {
+          max-width: 100%;
+          height: 60px;
+          min-width: 0;
+        }
+      }
+
+      .diff-list {
+        list-style: none;
+        margin: 0.8rem 0 1.5rem;
+      }
+      .diff-list li {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 1rem 0;
+        font-size: 1.8rem;
+        border-bottom: 2px dashed #cbd6e4;
+      }
+      .diff-list li:last-child {
+        border-bottom: none;
+      }
+      .diff-list li span:first-child {
+        font-size: 2.4rem;
+        min-width: 3rem;
+      }
+
+      .examples-mini {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .example-pill {
+        background: #eef4f9;
+        border-radius: 50px;
+        padding: 0.8rem 1.8rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .digital-half .example-pill {
+        background: #e3eaf1;
+      }
+
+      /* ===== FULL SCREEN MOBILE OPTIMIZATION ===== */
+      @media (max-width: 1200px) {
+        .comparison-card {
+          padding: 2.5rem;
+        }
+        .half-header h3 {
+          font-size: 2.8rem;
+        }
+        .diff-list li {
+          font-size: 1.6rem;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .comparison-header h2 {
+          font-size: 3.2rem;
+        }
+        .signal-half {
+          padding: 2rem 1.8rem;
+        }
+        .half-header .icon {
+          font-size: 3.2rem;
+        }
+        .half-header h3 {
+          font-size: 2.4rem;
+        }
+      }
+
+      @media (max-width: 800px) {
+        .split-container {
+          flex-direction: column;
+          gap: 2rem;
+        }
+        .comparison-card {
+          padding: 2rem;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .full-screen {
+          padding: 0.5rem;
+        }
+        .comparison-card {
+          padding: 1rem 0.5rem;
+          border-radius: 2rem;
+        }
+        .comparison-header h2 {
+          font-size: 1.6rem;
+          border-bottom-width: 3px;
+          margin-bottom: 1rem;
+        }
+        .half-header {
+          gap: 6px;
+          margin-bottom: 0.8rem;
+        }
+        .half-header .icon {
+          font-size: 1.2rem;
+        }
+        .half-header h3 {
+          font-size: 1.2rem;
+        }
+        .graph-box-small {
+          padding: 0.5rem;
+          border-radius: 1.2rem;
+          margin-bottom: 0.8rem;
+        }
+        .small-canvas {
+          max-height: 60px;
+        }
+        .diff-list li {
+          font-size: 0.9rem;
+          padding: 0.4rem 0;
+          gap: 6px;
+        }
+        .diff-list li span:first-child {
+          font-size: 1rem;
+          min-width: 1.2rem;
+        }
+        .example-pill {
+          font-size: 0.7rem;
+          padding: 0.3rem 0.7rem;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .comparison-header h2 {
+          font-size: 2rem;
+        }
+        .half-header h3 {
+          font-size: 1.7rem;
+        }
+        .diff-list li {
+          font-size: 1.1rem;
+        }
+        .example-pill {
+          font-size: 0.9rem;
+          padding: 0.4rem 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="full-screen">
+      <!-- MAIN COMPARISON CARD - NOW MUCH BIGGER -->
+      <div class="comparison-card">
+        <div class="comparison-header">
+          <h2>analog vs digital</h2>
+        </div>
+
+        <div class="split-container">
+          <!-- ANALOG SIDE - BIGGER -->
+          <div class="signal-half analog-half">
+            <div class="half-header">
+              <span class="icon">🌊</span>
+              <h3>analog</h3>
+            </div>
+            <div class="graph-box-small">
+              <canvas
+                id="analogCanvas"
+                class="small-canvas"
+                width="450"
+                height="140"
+              ></canvas>
+            </div>
+            <ul class="diff-list">
+              <li><span>📈</span> Continuous signal</li>
+              <li><span>🎚️</span> Infinite possible values</li>
+              <li><span>🌊</span> Smooth, curvy wave</li>
+              <li><span>🔊</span> Human voice, old radio</li>
+              <li><span>🌡️</span> Mercury thermometer</li>
+            </ul>
+            <div class="examples-mini">
+              <span class="example-pill">🎤 microphone</span>
+              <span class="example-pill">📻 AM/FM</span>
+              <span class="example-pill">🎚️ volume dial</span>
+            </div>
+          </div>
+
+          <!-- DIGITAL SIDE - BIGGER -->
+          <div class="signal-half digital-half">
+            <div class="half-header">
+              <span class="icon">⚡</span>
+              <h3>digital</h3>
+            </div>
+            <div class="graph-box-small">
+              <canvas
+                id="digitalCanvas"
+                class="small-canvas"
+                width="450"
+                height="140"
+              ></canvas>
+            </div>
+            <ul class="diff-list">
+              <li><span>📊</span> Discrete signal</li>
+              <li><span>🎯</span> Only two values: 0 or 1</li>
+              <li><span>🔲</span> Square wave (on/off)</li>
+              <li><span>💻</span> Computers, smartphones</li>
+              <li><span>💡</span> LED (on/off)</li>
+            </ul>
+            <div class="examples-mini">
+              <span class="example-pill">💽 USB drive</span>
+              <span class="example-pill">⌨️ keyboard</span>
+              <span class="example-pill">📀 CD/DVD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // Responsive canvas sizing
+        function resizeCanvas(canvas) {
+          const parent = canvas.parentElement;
+          canvas.width = parent.offsetWidth;
+          canvas.height = Math.max(60, parent.offsetHeight || 140);
+        }
+
+        const analogCanvas = document.getElementById("analogCanvas");
+        const digitalCanvas = document.getElementById("digitalCanvas");
+
+        function updateCanvasSizes() {
+          resizeCanvas(analogCanvas);
+          resizeCanvas(digitalCanvas);
+        }
+        window.addEventListener("resize", updateCanvasSizes);
+        updateCanvasSizes();
+
+        // animation - automatic
+        let phase = 0;
+        let speed = 1.0;
+
+        function drawAnalog(phaseRad) {
+          const ctx = analogCanvas.getContext("2d");
+          const w = analogCanvas.width,
+            h = analogCanvas.height;
+          ctx.clearRect(0, 0, w, h);
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, w, h);
+          // light grid
+          ctx.strokeStyle = "#d0deeb";
+          ctx.lineWidth = 1;
+          for (let i = 0; i <= w; i += Math.max(30, w / 8)) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, h);
+            ctx.stroke();
+          }
+          for (let j = 0; j <= h; j += Math.max(20, h / 4)) {
+            ctx.beginPath();
+            ctx.moveTo(0, j);
+            ctx.lineTo(w, j);
+            ctx.stroke();
+          }
+          // analog wave
+          ctx.beginPath();
+          ctx.strokeStyle = "#f39c12";
+          ctx.lineWidth = Math.max(2.5, w / 180);
+          ctx.shadowColor = "#f1c40f";
+          ctx.shadowBlur = 8;
+          const amp = Math.max(20, h / 3),
+            center = h / 2;
+          for (let x = 0; x < w; x++) {
+            let y = center + amp * Math.sin((x / w) * 5 * Math.PI + phaseRad);
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          // dots
+          ctx.fillStyle = "#d35400";
+          for (let x = 25; x < w; x += Math.max(35, w / 12)) {
+            let y = center + amp * Math.sin((x / w) * 5 * Math.PI + phaseRad);
+            ctx.beginPath();
+            ctx.arc(x, y, Math.max(2.5, w / 180), 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+
+        function drawDigital(phaseRad) {
+          const ctx = digitalCanvas.getContext("2d");
+          const w = digitalCanvas.width,
+            h = digitalCanvas.height;
+          ctx.clearRect(0, 0, w, h);
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, w, h);
+          ctx.strokeStyle = "#d0deeb";
+          ctx.lineWidth = 1;
+          for (let i = 0; i <= w; i += Math.max(30, w / 8)) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, h);
+            ctx.stroke();
+          }
+          for (let j = 0; j <= h; j += Math.max(20, h / 4)) {
+            ctx.beginPath();
+            ctx.moveTo(0, j);
+            ctx.lineTo(w, j);
+            ctx.stroke();
+          }
+          const lowY = h - 30,
+            highY = 30,
+            cycles = 2.8,
+            cycleW = w / cycles;
+          ctx.beginPath();
+          ctx.strokeStyle = "#2c3e50";
+          ctx.lineWidth = Math.max(2.5, w / 180);
+          ctx.shadowColor = "#2d6a7f";
+          ctx.shadowBlur = 8;
+          for (let i = -2; i <= 4; i++) {
+            let start = i * cycleW - ((phaseRad * 22) % cycleW);
+            let mid = start + cycleW / 2,
+              end = start + cycleW;
+            if (end < -40 || start > w + 40) continue;
+            ctx.moveTo(start, lowY);
+            ctx.lineTo(start, highY);
+            ctx.lineTo(mid, highY);
+            ctx.lineTo(mid, lowY);
+            ctx.lineTo(end, lowY);
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#1e3b4f";
+          for (let i = -2; i <= 4; i++) {
+            let base = i * cycleW - ((phaseRad * 22) % cycleW);
+            if (base >= -25 && base <= w + 25) {
+              ctx.beginPath();
+              ctx.arc(base, lowY, Math.max(2.5, w / 180), 0, 2 * Math.PI);
+              ctx.fill();
+            }
+            let high = base + cycleW / 2;
+            if (high >= -25 && high <= w + 25) {
+              ctx.beginPath();
+              ctx.arc(high, highY, Math.max(2.5, w / 180), 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          }
+          ctx.font = "bold 14px Inter";
+          ctx.fillStyle = "#1e4a5f";
+          ctx.fillText("0", 18, h - 18);
+          ctx.fillText("1", 18, 42);
+        }
+
+        // animation loop
+        function animate() {
+          phase += 0.018 * speed;
+          drawAnalog(phase);
+          drawDigital(phase);
+          requestAnimationFrame(animate);
+        }
+        animate();
+        // initial draw
+        drawAnalog(phase);
+        drawDigital(phase);
+        // Redraw on resize
+        window.addEventListener("resize", function () {
+          updateCanvasSizes();
+          drawAnalog(phase);
+          drawDigital(phase);
+        });
+      })();
+    </script>
+  </body>
+</html>

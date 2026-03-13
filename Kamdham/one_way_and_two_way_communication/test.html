@@ -3,580 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Child Watching Television in 3D</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Modes of Communication · fully responsive & server ready</title>
+    <!-- Bootstrap + Font Awesome with safe fallbacks -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* unified reset & robust mobile-first design */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            background-color: #111;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #3b2b5c 0%, #4f3b7a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* main container controls scroll on small */
         }
-        
-        #scene-container {
-            position: absolute;
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: nowrap;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- LEFT SIDEBAR (fully touch ready) --- */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(4px);
+            padding: 2rem 1.2rem;
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 20;
+            overflow-y: auto;
+            transition: width 0.2s;
+        }
+
+        .sidebar h3 {
+            color: #2a1b4b;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            border-left: 6px solid #8b5cf6;
+            padding-left: 1rem;
+        }
+
+        .nav-btn {
+            padding: 1rem 1.2rem;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            width: 100%;
+            background: #f2ecff;
+            color: #1e123b;
+            border: 1px solid transparent;
+        }
+
+        .nav-btn i {
+            width: 28px;
+            font-size: 1.3rem;
+            color: #6d28d9;
+        }
+
+        .main-btn {
+            background: linear-gradient(115deg, #d9c9ff, #c7b0ff);
+            border-left: 8px solid #4c1d95;
+            font-size: 1.2rem;
+            padding: 1.2rem 1rem;
+        }
+
+        .sub-btn {
+            background: #ffffff;
+            border: 1px solid #ddd6fe;
+            margin-left: 8px;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(145deg, #7c3aed, #6b21a5);
+            color: white;
+            border-color: #ffffff80;
+            box-shadow: 0 15px 25px -8px #5b21b6;
+            transform: scale(1.02) translateX(6px);
+        }
+
+        .nav-btn.active i {
+            color: white;
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: #e7d9ff;
+            transform: translateX(8px);
+            border-color: #b69eff;
+        }
+
+        /* --- middle animation section (flexible & crisp) --- */
+        .animation-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(20, 10, 35, 0.3);
+            min-width: 0;  /* flex overflow control */
+        }
+
+        .animation-container {
+            width: 100%;
+            max-width: 700px;
+            aspect-ratio: 7 / 5;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 20px;
+            box-shadow: 0 40px 60px -20px black;
+            display: none;
+            border: 2px solid rgba(255,255,240,0.25);
+        }
+
+        .animation-container.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: appear 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+
+        @keyframes appear {
+            from { opacity: 0.3; transform: scale(0.96) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* overview animation */
+        .overview-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .comm-circle {
+            width: 160px;
+            height: 160px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: #4f3b7a;
+            box-shadow: 0 20px 35px #281c44, 0 0 0 8px rgba(255,255,255,0.2);
+            animation: softPulse 2.5s infinite;
+        }
+
+        @keyframes softPulse {
+            0%,100% { box-shadow: 0 20px 35px #281c44, 0 0 0 8px rgba(255,255,255,0.2); }
+            50% { box-shadow: 0 25px 45px #3a286b, 0 0 0 14px rgba(255,255,255,0.4); }
+        }
+
+        .comm-waves {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .wave-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #2c1b5c;
+            box-shadow: 0 12px 22px #180e2b;
+            animation: float 3s infinite;
+        }
+
+        .wave-icon:nth-child(2) { animation-delay: 0.3s; background: #f0eaff; }
+        .wave-icon:nth-child(3) { animation-delay: 0.7s; }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-18px); }
+        }
+
+        /* one-way tv scene — all relative units */
+        .tv-scene {
             width: 100%;
             height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1;
+            position: relative;
+            background: linear-gradient(145deg, #537895, #09203f);
+            border-radius: 32px;
+            overflow: hidden;
         }
-        
-        #title {
+
+        .room-wall, .room-floor, .wall-frame, .tv-setup, .couch-setup, .signal-arrows {
             position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+        }
+
+        .room-wall {
+            top:0; left:0; width:100%; height: 60%;
+            background: linear-gradient(to bottom, #c0b7a6, #b0a187);
+        }
+        .room-floor {
+            bottom:0; left:0; width:100%; height: 40%;
+            background: linear-gradient(to bottom, #826c52, #5d4a36);
+            border-top: 4px solid #9c885d;
+        }
+        .wall-frame {
+            top: 12%; right: 8%;
+            width: 12%; height: 16%;
+            background: #98b9d9;
+            border: 4px solid #51412b;
+            border-radius: 6px;
+        }
+
+        .tv-setup {
+            left: 7%; bottom: 18%; width: 30%; min-width: 140px;
+        }
+        .television {
+            width: 100%; aspect-ratio: 4/3;
+            background: #1e1e2f;
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 0 18px 30px #00000080;
+        }
+        .tv-screen {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea, #9b7bda);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 2;
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
+            font-size: 1.8rem;
+            flex-direction: column;
         }
-        
-        #title h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+        .tv-content span { font-size: 0.7rem; background: #00000040; padding: 2px 8px; border-radius: 20px; }
+        .tv-glare { position: absolute; top:0; left:0; width:40%; height:40%; background: radial-gradient(circle at 20% 20%, #ffffff70, transparent 80%); }
+        .tv-stand { width: 40%; height: 6px; background: #3a3a4a; margin: 4px auto 0; border-radius: 10px; }
+        .tv-base { width: 60%; height: 14px; background: #4a4a60; margin: 2px auto; border-radius: 12px; }
+
+        .couch-setup {
+            right: 9%; bottom: 14%; width: 32%;
         }
-        
-        #title p {
-            font-size: 14px;
-            opacity: 0.8;
+        .couch {
+            width: 100%; aspect-ratio: 16/9;
+            background: #7b5e47;
+            border-radius: 50px 50px 15px 15px;
+            box-shadow: -8px 12px 20px #00000055;
         }
-        
-        #instructions {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
+        .person-watching {
+            position: absolute; bottom: 15%; left: 30%; width: 40%;
+        }
+        .head { width: 28px; height: 32px; background: #f5dbb1; border-radius: 45%; margin: auto; }
+        .hair { width: 34px; height: 16px; background: #4a3729; border-radius: 50% 50% 0 0; margin-top: -6px; }
+        .eye { width: 4px; height: 5px; background: #1f1a14; border-radius: 50%; display: inline-block; margin: 6px 2px 0; }
+        .body { width: 40px; height: 40px; background: #3a6ea5; border-radius: 10px; margin: 4px auto; }
+        .leg { width: 15px; height: 25px; background: #1f4a7a; display: inline-block; border-radius: 6px; }
+
+        .signal-arrows {
+            left: 32%; top: 35%; display: flex; gap: 20px;
+            font-size: 2.3rem; color: #fffbc2; text-shadow: 0 0 5px gold;
+            animation: slideArrows 2s infinite;
+        }
+        @keyframes slideArrows { 0%{opacity:0.4; transform:translateX(-8px);} 50%{opacity:1; transform:translateX(10px);} 100%{opacity:0.4; transform:translateX(-8px);} }
+
+        /* two-way smartphone scene robust */
+        .phone-scene {
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, #213b63, #507e9c, #7f5f8c);
+            border-radius: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .location-left, .location-right { position: absolute; bottom:0; width:38%; height:100%; background: #2d4b6e70; clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%); }
+        .location-right { right:0; background: #633d6470; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); }
+        .ground-left, .ground-right { position: absolute; bottom:0; width:38%; height:18%; background: #2d671f; left:0; }
+        .ground-right { right:0; left:auto; background: #844d26; }
+
+        .city-buildings-left, .city-buildings-right { position: absolute; bottom:19%; display: flex; gap:4px; left:5%; }
+        .city-buildings-right { right:5%; left:auto; }
+        .building { width: 20px; height: 60px; background: #202020; border-radius: 2px 2px 0 0; }
+
+        .caller, .receiver { position: absolute; bottom: 18%; display: flex; flex-direction: column; align-items: center; z-index: 15; width: 110px; }
+        .caller { left: 10%; }
+        .receiver { right: 10%; }
+
+        .person-phone { display: flex; flex-direction: column; align-items: center; }
+        .person-head { width: 40px; height: 44px; background: #f8d5a3; border-radius: 50%; position: relative; }
+        .person-hair { width: 44px; height: 20px; background: #382e22; border-radius: 50% 50% 0 0; margin-top: -6px; }
+        .person-eye { width: 5px; height: 5px; background: #121212; border-radius: 50%; position: absolute; top: 16px; }
+        .person-eye-left { left: 8px; }
+        .person-eye-right { right: 8px; }
+        .person-mouth { width: 12px; height: 4px; background: #aa7c5f; border-radius: 0 0 10px 10px; position: absolute; bottom: 8px; left: 14px; }
+
+        .smartphone {
+            width: 40px; height: 70px; background: #1b2b3a; border-radius: 12px; margin: 4px 0; border: 2px solid #354f5e; position: relative;
+        }
+        .phone-screen {
+            width: 32px; height: 56px; background: linear-gradient(145deg, #a974e0, #6251ac); margin: 4px auto; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-size: 0.8rem;
+        }
+
+        .person-body { width: 46px; height: 45px; background: #d34c4c; border-radius: 14px; margin-top: 4px; }
+        .receiver .person-body { background: #3c7dc9; }
+        .person-legs { display: flex; gap: 8px; margin-top: 2px; }
+        .person-leg { width: 20px; height: 30px; background: #34495e; border-radius: 8px; }
+
+        .connection-line { position: absolute; top: 32%; left: 30%; width: 40%; height: 3px; background: rgba(255,255,180,0.8); box-shadow: 0 0 12px yellow; }
+        .signal-dot { width: 12px; height: 12px; background: white; border-radius: 50%; animation: moveDot 3s infinite; position: absolute; }
+        @keyframes moveDot { 0%{ left:0; } 50%{ left:calc(100% - 12px); } 100%{ left:0; } }
+
+        .distance-label { position: absolute; top: 6%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 6px 20px; border-radius: 60px; font-weight: 600; backdrop-filter: blur(4px); z-index: 30; white-space: nowrap; }
+
+        /* description panel — scrollable, crisp on server */
+        .description-section {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(4px);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            box-shadow: -8px 0 32px #1e112e;
+            z-index: 20;
+            scrollbar-width: thin;
+        }
+
+        .description-content {
+            display: none;
+            color: #1b1037;
+        }
+
+        .description-content.active {
+            display: block;
+            animation: fadeDesc 0.4s;
+        }
+
+        @keyframes fadeDesc { from{opacity:0.2;} to{opacity:1;} }
+
+        .badge-custom {
+            background: #4f378b;
             color: white;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px 15px;
-            border-radius: 5px;
-            z-index: 2;
-            font-size: 14px;
-            max-width: 300px;
+            padding: 5px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            display: inline-block;
+            margin-bottom: 1rem;
         }
-        
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 20px;
-            z-index: 100;
-            text-align: center;
+
+        .description-content h2 { color: #281754; font-weight: 700; margin: 0.5rem 0; }
+        .description-content p, li { color: #1f1a35; line-height: 1.6; }
+
+        /* --- ULTRA RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .sidebar { width: 240px; padding: 1.2rem 0.8rem; }
+            .description-section { width: 260px; padding: 1.5rem; }
         }
-        
-        .tv-glow {
-            animation: tv-glow 3s infinite alternate;
+
+        @media (max-width: 700px) {
+            .main-container { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; flex-direction: row; overflow-x: auto; gap: 8px; align-items: center; padding: 12px; }
+            .sidebar h3 { display: none; }
+            .nav-btn { white-space: nowrap; font-size: 0.9rem; padding: 10px 14px; margin: 0; flex-shrink: 0; }
+            .animation-section { min-height: 45vh; }
+            .description-section { width: 100%; max-height: 40vh; }
+            .distance-label { font-size: 0.8rem; padding: 4px 12px; }
         }
-        
-        @keyframes tv-glow {
-            0% { box-shadow: 0 0 5px rgba(100, 150, 255, 0.5); }
-            100% { box-shadow: 0 0 20px rgba(100, 150, 255, 0.8), 0 0 30px rgba(100, 150, 255, 0.4); }
+
+        @media (max-width: 480px) {
+            .animation-container { border-radius: 28px; }
+            .caller, .receiver { width: 80px; }
+            .smartphone { width: 30px; height: 55px; }
+            .phone-screen { width: 26px; height: 42px; font-size: 0.6rem; }
         }
-        
-        .highlight {
-            color: #4fc3f7;
-            font-weight: bold;
-        }
+
+        /* server-side readiness: all interactive and stable */
+        .nav-btn, .description-content, .animation-container { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body>
-    <div id="scene-container"></div>
-    
-    <div id="title">
-        <h1>Child Watching Television in 3D</h1>
-        <p>A fully visible child character watching animated TV content</p>
+<div class="main-container">
+    <!-- SIDEBAR (logical, server-friendly) -->
+    <div class="sidebar">
+        <h3>☎️ COMM</h3>
+        <button class="nav-btn main-btn active" id="btnOverview" onclick="showContent('overview')">
+            <i class="fas fa-broadcast-tower"></i> <span>All modes</span>
+        </button>
+        <button class="nav-btn sub-btn" id="btnOneway" onclick="showContent('oneway')">
+            <i class="fas fa-arrow-right"></i> <span>One‑way</span>
+        </button>
+        <button class="nav-btn sub-btn" id="btnTwoway" onclick="showContent('twoway')">
+            <i class="fas fa-exchange-alt"></i> <span>Two‑way</span>
+        </button>
     </div>
-    
-    <div id="instructions">
-        <p><span class="highlight">Scene Elements:</span></p>
-        <p>• Fully visible child character</p>
-        <p>• Animated television screen</p>
-        <p>• Living room environment</p>
-        <p>• Rotating camera view</p>
-    </div>
-    
-    <div id="loading">Loading 3D scene...</div>
 
-    <script>
-        // Main variables
-        let scene, camera, renderer;
-        let child, television, room;
-        let tvScreenMaterial;
-        let clock = new THREE.Clock();
-        
-        // Initialize the scene
-        function init() {
-            // Create scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x222222);
-            
-            // Create camera - positioned to clearly see the child
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(3, 2, 5); // Better angle to see the child
-            
-            // Create renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            
-            const container = document.getElementById('scene-container');
-            container.appendChild(renderer.domElement);
-            
-            // Add lighting
-            setupLighting();
-            
-            // Create the scene objects
-            createRoom();
-            createTelevision();
-            createChild();
-            createFurniture();
-            
-            // Hide loading text
-            document.getElementById('loading').style.display = 'none';
-            
-            // Handle window resize
-            window.addEventListener('resize', onWindowResize);
+    <!-- MIDDLE ANIMATION (device adaptive) -->
+    <div class="animation-section">
+        <!-- overview -->
+        <div class="animation-container active" id="overview-animation">
+            <div class="overview-animation">
+                <div class="comm-circle"><i class="fas fa-comments"></i></div>
+                <div class="comm-waves">
+                    <div class="wave-icon"><i class="fas fa-tv"></i></div>
+                    <div class="wave-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="wave-icon"><i class="fas fa-satellite-dish"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- one-way (tv scene) -->
+        <div class="animation-container" id="oneway-animation">
+            <div class="tv-scene">
+                <div class="room-wall"></div><div class="room-floor"></div><div class="wall-frame"></div>
+                <div class="tv-setup">
+                    <div class="television"><div class="tv-screen"><i class="fas fa-broadcast-tower"></i><span>NEWS</span><div class="tv-glare"></div></div></div>
+                    <div class="tv-stand"></div><div class="tv-base"></div>
+                </div>
+                <div class="signal-arrows"><i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i></div>
+                <div class="couch-setup">
+                    <div class="couch"></div>
+                    <div class="person-watching">
+                        <div class="head"><div class="hair"></div><div class="eye"></div><div class="eye"></div></div>
+                        <div class="body"></div>
+                        <div style="display:flex;gap:6px;margin-top:4px;"><div class="leg"></div><div class="leg"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- two-way (phone scene) -->
+        <div class="animation-container" id="twoway-animation">
+            <div class="phone-scene">
+                <div class="location-left"></div><div class="ground-left"></div>
+                <div class="city-buildings-left"><div class="building"></div><div class="building" style="height:80px;"></div><div class="building"></div></div>
+                <div class="location-right"></div><div class="ground-right"></div>
+                <div class="city-buildings-right"><div class="building"></div><div class="building" style="height:70px;"></div><div class="building"></div></div>
+                <div class="distance-label"><i class="fas fa-globe"></i> long distance</div>
+                <div class="connection-line"><div class="signal-dot"></div></div>
+                <!-- caller left -->
+                <div class="caller">
+                    <div class="person-phone">
+                        <div class="person-head"><div class="person-hair"></div><div class="person-eye person-eye-left"></div><div class="person-eye person-eye-right"></div><div class="person-mouth"></div></div>
+                        <div class="smartphone"><div class="phone-screen"><i class="fas fa-phone-alt"></i><span style="font-size:8px;">02:34</span></div></div>
+                        <div class="person-body"></div>
+                        <div class="person-legs"><div class="person-leg"></div><div class="person-leg"></div></div>
+                    </div>
+                </div>
+                <!-- receiver right -->
+                <div class="receiver">
+                    <div class="person-phone">
+                        <div class="person-head"><div class="person-hair"></div><div class="person-eye person-eye-left"></div><div class="person-eye person-eye-right"></div><div class="person-mouth"></div></div>
+                        <div class="smartphone"><div class="phone-screen"><i class="fas fa-phone-alt"></i><span style="font-size:8px;">02:34</span></div></div>
+                        <div class="person-body"></div>
+                        <div class="person-legs"><div class="person-leg"></div><div class="person-leg"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT DESCRIPTION (clean & scroll) -->
+    <div class="description-section">
+        <div class="description-content active" id="overview-desc">
+            <span class="badge-custom">📡 overview</span>
+            <h2>Modes of Communication</h2>
+            <p>Exchange of information shapes our world. Two fundamental modes: <strong>one‑way</strong> (broadcast) and <strong>two‑way</strong> (interactive).</p>
+            <p><i class="fa-regular fa-circle-check"></i> Each fits different needs: mass media, private conversation, collaboration.</p>
+        </div>
+        <div class="description-content" id="oneway-desc">
+            <span class="badge-custom">📺 one‑way</span>
+            <h2>One‑way communication</h2>
+            <p>Information flows from sender to receiver without immediate feedback.</p>
+            <ul>
+                <li>TV / radio broadcasts</li>
+                <li>Newspapers, newsletters</li>
+                <li>Billboards, announcements</li>
+                <li>Passive consumption</li>
+            </ul>
+            <p><strong>efficient for large audiences, consistent message.</strong></p>
+        </div>
+        <div class="description-content" id="twoway-desc">
+            <span class="badge-custom">📱 two‑way</span>
+            <h2>Two‑way communication</h2>
+            <p>Interactive dialogue with continuous feedback.</p>
+            <ul>
+                <li>Phone / video calls</li>
+                <li>Chat & messaging</li>
+                <li>Meetings & discussions</li>
+                <li>Social media interaction</li>
+            </ul>
+            <p><strong>builds understanding, immediate clarification.</strong></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // single function — robust and works on any device / server environment
+    function showContent(section) {
+        // update buttons
+        const btnOverview = document.getElementById('btnOverview');
+        const btnOne = document.getElementById('btnOneway');
+        const btnTwo = document.getElementById('btnTwoway');
+        [btnOverview, btnOne, btnTwo].forEach(b => b?.classList.remove('active'));
+
+        // animations & descriptions
+        const overviewAnim = document.getElementById('overview-animation');
+        const onewayAnim = document.getElementById('oneway-animation');
+        const twowayAnim = document.getElementById('twoway-animation');
+        const overviewDesc = document.getElementById('overview-desc');
+        const onewayDesc = document.getElementById('oneway-desc');
+        const twowayDesc = document.getElementById('twoway-desc');
+
+        [overviewAnim, onewayAnim, twowayAnim].forEach(a => a?.classList.remove('active'));
+        [overviewDesc, onewayDesc, twowayDesc].forEach(d => d?.classList.remove('active'));
+
+        if (section === 'overview') {
+            btnOverview?.classList.add('active');
+            overviewAnim?.classList.add('active');
+            overviewDesc?.classList.add('active');
+        } else if (section === 'oneway') {
+            btnOne?.classList.add('active');
+            onewayAnim?.classList.add('active');
+            onewayDesc?.classList.add('active');
+        } else if (section === 'twoway') {
+            btnTwo?.classList.add('active');
+            twowayAnim?.classList.add('active');
+            twowayDesc?.classList.add('active');
         }
-        
-        // Set up lighting for the scene
-        function setupLighting() {
-            // Ambient light
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            // Main directional light (like sunlight through a window)
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-            directionalLight.position.set(5, 10, 5);
-            directionalLight.castShadow = true;
-            directionalLight.shadow.mapSize.width = 2048;
-            directionalLight.shadow.mapSize.height = 2048;
-            directionalLight.shadow.camera.near = 0.5;
-            directionalLight.shadow.camera.far = 50;
-            directionalLight.shadow.camera.left = -10;
-            directionalLight.shadow.camera.right = 10;
-            directionalLight.shadow.camera.top = 10;
-            directionalLight.shadow.camera.bottom = -10;
-            scene.add(directionalLight);
-            
-            // TV screen light (emissive light from the TV)
-            const tvLight = new THREE.PointLight(0x88aaff, 0.7, 10);
-            tvLight.position.set(0, 1.2, -2);
-            scene.add(tvLight);
-            
-            // Additional light to illuminate the child
-            const childLight = new THREE.PointLight(0xffffcc, 0.4, 8);
-            childLight.position.set(1, 1.5, -1);
-            scene.add(childLight);
-        }
-        
-        // Create the room (walls, floor, ceiling)
-        function createRoom() {
-            room = new THREE.Group();
-            
-            // Floor with a grid pattern for better depth perception
-            const floorGeometry = new THREE.PlaneGeometry(20, 20);
-            const floorMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x3a3a3a, 
-                roughness: 0.8,
-                side: THREE.DoubleSide
-            });
-            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = Math.PI / 2;
-            floor.receiveShadow = true;
-            room.add(floor);
-            
-            // Add a grid helper to the floor for better spatial understanding
-            const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
-            gridHelper.position.y = 0.01;
-            room.add(gridHelper);
-            
-            // Back wall
-            const backWallGeometry = new THREE.PlaneGeometry(20, 10);
-            const wallMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x4a4a5a,
-                roughness: 0.7
-            });
-            const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
-            backWall.position.z = -10;
-            backWall.position.y = 5;
-            backWall.receiveShadow = true;
-            room.add(backWall);
-            
-            // Left wall
-            const leftWall = new THREE.Mesh(backWallGeometry, wallMaterial);
-            leftWall.rotation.y = Math.PI / 2;
-            leftWall.position.x = -10;
-            leftWall.position.y = 5;
-            leftWall.receiveShadow = true;
-            room.add(leftWall);
-            
-            // Right wall
-            const rightWall = new THREE.Mesh(backWallGeometry, wallMaterial);
-            rightWall.rotation.y = Math.PI / 2;
-            rightWall.position.x = 10;
-            rightWall.position.y = 5;
-            rightWall.receiveShadow = true;
-            room.add(rightWall);
-            
-            // Ceiling
-            const ceiling = new THREE.Mesh(backWallGeometry, new THREE.MeshStandardMaterial({ 
-                color: 0x3a3a4a,
-                roughness: 0.9
-            }));
-            ceiling.rotation.x = Math.PI;
-            ceiling.position.y = 10;
-            ceiling.receiveShadow = true;
-            room.add(ceiling);
-            
-            scene.add(room);
-        }
-        
-        // Create the television
-        function createTelevision() {
-            television = new THREE.Group();
-            
-            // TV body (main frame)
-            const tvBodyGeometry = new THREE.BoxGeometry(5, 3, 0.3);
-            const tvBodyMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x222222,
-                roughness: 0.3,
-                metalness: 0.7
-            });
-            const tvBody = new THREE.Mesh(tvBodyGeometry, tvBodyMaterial);
-            tvBody.castShadow = true;
-            tvBody.receiveShadow = true;
-            television.add(tvBody);
-            
-            // TV screen
-            const tvScreenGeometry = new THREE.PlaneGeometry(4.5, 2.5);
-            // Create animated TV screen material
-            tvScreenMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x000000,
-                emissive: 0x223344,
-                emissiveIntensity: 0.8
-            });
-            const tvScreen = new THREE.Mesh(tvScreenGeometry, tvScreenMaterial);
-            tvScreen.position.z = 0.16; // Slightly in front of the TV body
-            television.add(tvScreen);
-            
-            // TV stand
-            const tvStandGeometry = new THREE.BoxGeometry(1.5, 0.5, 1);
-            const tvStandMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x333333,
-                roughness: 0.5,
-                metalness: 0.5
-            });
-            const tvStand = new THREE.Mesh(tvStandGeometry, tvStandMaterial);
-            tvStand.position.y = -1.75;
-            tvStand.castShadow = true;
-            tvStand.receiveShadow = true;
-            television.add(tvStand);
-            
-            // TV base
-            const tvBaseGeometry = new THREE.BoxGeometry(2, 0.1, 1.5);
-            const tvBase = new THREE.Mesh(tvBaseGeometry, tvStandMaterial);
-            tvBase.position.y = -2;
-            tvBase.castShadow = true;
-            tvBase.receiveShadow = true;
-            television.add(tvBase);
-            
-            // Position the TV in the room
-            television.position.set(0, 1.5, -8);
-            
-            scene.add(television);
-        }
-        
-        // Create the child character - fully visible and clear
-        function createChild() {
-            child = new THREE.Group();
-            
-            // Child's body colors
-            const skinColor = 0xf0c8a0;
-            const shirtColor = 0x4287f5;
-            const pantsColor = 0x2a5caa;
-            const hairColor = 0x8B4513;
-            const shoeColor = 0x222222;
-            
-            // Head (sphere)
-            const headGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-            const headMaterial = new THREE.MeshStandardMaterial({ 
-                color: skinColor,
-                roughness: 0.8
-            });
-            const head = new THREE.Mesh(headGeometry, headMaterial);
-            head.position.y = 0.9;
-            head.castShadow = true;
-            child.add(head);
-            
-            // Hair (slightly larger sphere on top of head)
-            const hairGeometry = new THREE.SphereGeometry(0.32, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-            const hairMaterial = new THREE.MeshStandardMaterial({ 
-                color: hairColor,
-                roughness: 0.9
-            });
-            const hair = new THREE.Mesh(hairGeometry, hairMaterial);
-            hair.position.y = 1.02;
-            hair.castShadow = true;
-            child.add(hair);
-            
-            // Eyes
-            const eyeGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
-            
-            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-            leftEye.position.set(-0.1, 0.95, 0.28);
-            child.add(leftEye);
-            
-            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-            rightEye.position.set(0.1, 0.95, 0.28);
-            child.add(rightEye);
-            
-            // Body (torso - cube for simpler shape)
-            const bodyGeometry = new THREE.BoxGeometry(0.6, 0.7, 0.4);
-            const bodyMaterial = new THREE.MeshStandardMaterial({ 
-                color: shirtColor,
-                roughness: 0.8
-            });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.position.y = 0.35;
-            body.castShadow = true;
-            child.add(body);
-            
-            // Arms (cylinders)
-            const armGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.6, 8);
-            const armMaterial = new THREE.MeshStandardMaterial({ 
-                color: skinColor,
-                roughness: 0.8
-            });
-            
-            // Left arm
-            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
-            leftArm.position.set(-0.35, 0.4, 0);
-            leftArm.rotation.z = 0.3;
-            leftArm.castShadow = true;
-            child.add(leftArm);
-            
-            // Right arm
-            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
-            rightArm.position.set(0.35, 0.4, 0);
-            rightArm.rotation.z = -0.3;
-            rightArm.castShadow = true;
-            child.add(rightArm);
-            
-            // Legs (pants - two separate cylinders for clearer shape)
-            const legGeometry = new THREE.CylinderGeometry(0.1, 0.08, 0.6, 8);
-            const legMaterial = new THREE.MeshStandardMaterial({ 
-                color: pantsColor,
-                roughness: 0.8
-            });
-            
-            // Left leg
-            const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-            leftLeg.position.set(-0.15, -0.3, 0);
-            leftLeg.castShadow = true;
-            child.add(leftLeg);
-            
-            // Right leg
-            const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
-            rightLeg.position.set(0.15, -0.3, 0);
-            rightLeg.castShadow = true;
-            child.add(rightLeg);
-            
-            // Shoes (small boxes at the bottom of legs)
-            const shoeGeometry = new THREE.BoxGeometry(0.15, 0.1, 0.25);
-            const shoeMaterial = new THREE.MeshStandardMaterial({ 
-                color: shoeColor,
-                roughness: 0.5
-            });
-            
-            const leftShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
-            leftShoe.position.set(-0.15, -0.65, 0.05);
-            leftShoe.castShadow = true;
-            child.add(leftShoe);
-            
-            const rightShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
-            rightShoe.position.set(0.15, -0.65, 0.05);
-            rightShoe.castShadow = true;
-            child.add(rightShoe);
-            
-            // Position the child in the room - fully visible
-            child.position.set(0, 0, -3);
-            child.rotation.y = Math.PI; // Face the TV
-            
-            // Add a subtle highlight to make the child stand out
-            const childHighlight = new THREE.PointLight(0xffffff, 0.3, 3);
-            childHighlight.position.set(0, 1, 0);
-            child.add(childHighlight);
-            
-            scene.add(child);
-        }
-        
-        // Create additional furniture
-        function createFurniture() {
-            // Small rug in front of the TV
-            const rugGeometry = new THREE.CylinderGeometry(2, 2, 0.05, 32);
-            const rugMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x654321,
-                roughness: 0.9
-            });
-            const rug = new THREE.Mesh(rugGeometry, rugMaterial);
-            rug.position.set(0, 0.025, -5);
-            rug.receiveShadow = true;
-            scene.add(rug);
-            
-            // Small table next to the child
-            const tableGeometry = new THREE.CylinderGeometry(0.5, 0.6, 0.5, 8);
-            const tableMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x8B4513,
-                roughness: 0.8
-            });
-            const table = new THREE.Mesh(tableGeometry, tableMaterial);
-            table.position.set(2, 0.25, -3);
-            table.castShadow = true;
-            table.receiveShadow = true;
-            scene.add(table);
-            
-            // Table top
-            const tableTopGeometry = new THREE.CylinderGeometry(0.7, 0.7, 0.1, 8);
-            const tableTop = new THREE.Mesh(tableTopGeometry, tableMaterial);
-            tableTop.position.y = 0.3;
-            tableTop.castShadow = true;
-            tableTop.receiveShadow = true;
-            table.add(tableTop);
-            
-            // Toy car on the table
-            const toyCarGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.15);
-            const toyCarMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0xff3333,
-                roughness: 0.3,
-                metalness: 0.7
-            });
-            const toyCar = new THREE.Mesh(toyCarGeometry, toyCarMaterial);
-            toyCar.position.set(0, 0.4, 0);
-            toyCar.castShadow = true;
-            table.add(toyCar);
-            
-            // Window on the wall with a simple frame
-            const windowFrameGeometry = new THREE.BoxGeometry(3.2, 2.2, 0.2);
-            const windowFrameMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x8B4513,
-                roughness: 0.7
-            });
-            const windowFrame = new THREE.Mesh(windowFrameGeometry, windowFrameMaterial);
-            windowFrame.position.set(-8, 5, -9.9);
-            windowFrame.castShadow = true;
-            scene.add(windowFrame);
-            
-            const windowGeometry = new THREE.PlaneGeometry(3, 2);
-            const windowMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x87CEEB,
-                emissive: 0x87CEEB,
-                emissiveIntensity: 0.3,
-                transparent: true,
-                opacity: 0.7
-            });
-            const window = new THREE.Mesh(windowGeometry, windowMaterial);
-            window.position.set(-8, 5, -9.8);
-            window.receiveShadow = true;
-            scene.add(window);
-            
-            // Add a simple sofa for context
-            const sofaBaseGeometry = new THREE.BoxGeometry(2, 0.5, 1);
-            const sofaBaseMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x6d4c41,
-                roughness: 0.8
-            });
-            const sofaBase = new THREE.Mesh(sofaBaseGeometry, sofaBaseMaterial);
-            sofaBase.position.set(-3, 0.25, -4);
-            sofaBase.castShadow = true;
-            sofaBase.receiveShadow = true;
-            scene.add(sofaBase);
-            
-            const sofaBackGeometry = new THREE.BoxGeometry(2, 1, 0.2);
-            const sofaBack = new THREE.Mesh(sofaBackGeometry, sofaBaseMaterial);
-            sofaBack.position.set(-3, 0.75, -4.5);
-            sofaBack.castShadow = true;
-            scene.add(sofaBack);
-        }
-        
-        // Animate the scene
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const elapsedTime = clock.getElapsedTime();
-            
-            // Animate the TV screen with colorful patterns
-            if (tvScreenMaterial) {
-                // Create a pulsing effect for the TV screen
-                const pulseIntensity = 0.7 + 0.3 * Math.sin(elapsedTime * 2);
-                tvScreenMaterial.emissiveIntensity = pulseIntensity;
-                
-                // Change TV screen color over time to simulate changing content
-                const hue = (elapsedTime * 0.2) % 1;
-                const color = new THREE.Color().setHSL(hue, 0.8, 0.6);
-                tvScreenMaterial.emissive = color;
-            }
-            
-            // Gentle bobbing motion for the child (like breathing)
-            if (child) {
-                // Subtle up and down movement
-                child.position.y = 0.01 * Math.sin(elapsedTime * 2);
-                
-                // Slight head movement (looking at TV)
-                const head = child.children[0];
-                if (head) {
-                    // Very subtle head movement to show the child is engaged
-                    head.rotation.y = 0.02 * Math.sin(elapsedTime * 0.8);
-                }
-                
-                // Gentle arm movement as if slightly fidgeting
-                const leftArm = child.children[4]; // Left arm
-                const rightArm = child.children[5]; // Right arm
-                if (leftArm && rightArm) {
-                    leftArm.rotation.z = 0.3 + 0.03 * Math.sin(elapsedTime * 1.2);
-                    rightArm.rotation.z = -0.3 + 0.03 * Math.sin(elapsedTime * 1.2 + 1);
-                }
-            }
-            
-            // Slowly rotate the camera around the scene for a better view
-            // but keep the child clearly visible at all times
-            const cameraRadius = 6;
-            const cameraHeight = 2.5;
-            const cameraAngle = elapsedTime * 0.15;
-            
-            camera.position.x = Math.sin(cameraAngle) * cameraRadius;
-            camera.position.z = Math.cos(cameraAngle) * cameraRadius - 3;
-            camera.position.y = cameraHeight + 0.5 * Math.sin(cameraAngle * 0.5);
-            
-            // Make the camera look at a point between the child and TV
-            camera.lookAt(0, 1, -5);
-            
-            renderer.render(scene, camera);
-        }
-        
-        // Handle window resize
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-        
-        // Start everything
-        init();
-        animate();
-    </script>
+    }
+
+    // ensure that after load everything is consistent (overview active)
+    window.addEventListener('load', function() {
+        showContent('overview');
+        // extra: set ARIA / server side safe
+    });
+
+    // optional: touch / click handling already via onclick
+</script>
+<!-- no external heavy dependency — just bootstrap & font awesome for icons, both with fallback -->
 </body>
 </html>

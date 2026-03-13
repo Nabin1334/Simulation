@@ -1,446 +1,555 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Large-scale electricity sources · 10th class visual</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Large-scale electricity</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+      }
 
-        body {
-            background: linear-gradient(145deg, #0b1c2a 0%, #1e4352 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+      body {
+        background: linear-gradient(145deg, #0b1c2a 0%, #1e4352 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
 
+      .main-card {
+        max-width: 1400px;
+        width: 100%;
+        background: #123845;
+        border-radius: 3rem;
+        box-shadow:
+          0 30px 50px rgba(0, 0, 0, 0.8),
+          inset 0 2px 2px #6bc3e6;
+        border: 1px solid #389fc7;
+        overflow: hidden;
+      }
+
+      /* header */
+      .header {
+        padding: 2rem 2.5rem 1rem 2.5rem;
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      h1 {
+        font-size: clamp(2.2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        color: #f0fbff;
+        text-shadow: 0 4px 10px #005177;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      h1 span {
+        background: #1c637e;
+        padding: 0.3rem 1.5rem;
+        border-radius: 80px;
+        font-size: 1.3rem;
+        font-weight: 500;
+        border: 1px solid #8cd4f5;
+      }
+
+      .global-box {
+        background: #0c3648;
+        border-radius: 60px;
+        padding: 0.7rem 2rem;
+        border: 1px solid #50b3db;
+        color: #ddf3ff;
+        font-size: 1.4rem;
+        font-weight: 500;
+      }
+
+      .global-box strong {
+        font-size: 2rem;
+        color: #fffac2;
+        margin-left: 8px;
+      }
+
+      /* split layout */
+      .split-layout {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+
+      /* LEFT: ALL SOURCE BUTTONS */
+      .left-buttons {
+        flex: 1 1 320px;
+        background: #0d3341;
+        padding: 1.8rem 1.8rem 2.5rem 1.8rem;
+        border-radius: 0 2rem 2rem 0;
+        border-right: 3px solid #318daf;
+        min-width: 220px;
+        max-width: 350px;
+        height: 100%;
+        max-height: 600px;
+        overflow-y: auto;
+      }
+
+      .left-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #ffeeb5;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: sticky;
+        top: 0;
+        background: #0d3341;
+        z-index: 2;
+      }
+
+      .btn-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+
+      .source-btn {
+        background: #195670;
+        border: none;
+        border-radius: 100px;
+        padding: 1.3rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: white;
+        border: 2px solid #48b5e0;
+        box-shadow:
+          0 7px 0 #0d3848,
+          0 8px 16px black;
+        cursor: pointer;
+        transition: 0.08s linear;
+        width: 100%;
+        text-align: left;
+        justify-content: space-between;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .source-btn:active {
+        transform: translateY(5px);
+        box-shadow:
+          0 2px 0 #0d3848,
+          0 6px 12px black;
+      }
+
+      .source-btn.active {
+        background: #2f86a8;
+        border-color: #ffdb8e;
+      }
+
+      .btn-emoji {
+        font-size: 2.4rem;
+      }
+
+      .btn-cap {
+        background: #104155;
+        margin-left: auto;
+        padding: 0.3rem 1.4rem;
+        border-radius: 60px;
+        font-size: 1.2rem;
+        border: 1px solid #9ad9f5;
+      }
+
+      /* RIGHT: IMAGE COVERS SCREEN + THEORY ON TOP */
+      .right-display {
+        flex: 3 1 600px;
+        padding: 2rem 2.5rem;
+        min-width: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* image container – makes image cover the area, theory placed on top */
+      .image-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 950px;
+        border-radius: 2.5rem;
+        overflow: hidden;
+        box-shadow: 0 18px 28px black;
+        border: 3px solid #38a1c9;
+        margin: 0 auto;
+        height: 540px;
+        max-height: 70vw;
+      }
+
+      .power-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: #154c5e;
+      }
+
+      /* theory box outside image */
+      .theory-box {
+        width: 100%;
+        max-width: 650px;
+        margin: 0 auto 1.2rem auto;
+        background: linear-gradient(90deg, #1c3a4a 80%, #2e5c6e 100%);
+        color: #fff;
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        padding: 0.4rem 1.2rem 0.4rem 1.2rem;
+        font-size: 0.98rem;
+      }
+
+      .theory-box .source-badge {
+        margin-bottom: 10px;
+      }
+
+      .source-badge {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+      }
+
+      .source-badge span {
+        font-size: 2rem;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 0.3rem 1.5rem;
+        border-radius: 60px;
+        border: 1px solid #ffd966;
+        color: #fff5cf;
+        font-weight: 600;
+        backdrop-filter: blur(4px);
+      }
+
+      .fact-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px 30px;
+        margin-top: 8px;
+      }
+
+      .fact-item {
+        background: rgba(10, 50, 70, 0.85);
+        backdrop-filter: blur(4px);
+        padding: 0.5rem 1.8rem;
+        border-radius: 60px;
+        font-size: 1.2rem;
+        border: 1px solid #94dcff;
+        color: #fff2bf;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+
+      .image-caption {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 40, 60, 0.8);
+        backdrop-filter: blur(4px);
+        padding: 0.4rem 1.5rem;
+        border-radius: 60px;
+        color: #dcf2ff;
+        font-size: 1rem;
+        border: 1px solid #8ac5e2;
+      }
+
+      /* extra footer */
+      .footer-note {
+        text-align: center;
+        color: #689eb3;
+        margin-top: 1.8rem;
+      }
+
+      @media (max-width: 900px) {
         .main-card {
-            max-width: 1400px;
-            width: 100%;
-            background: #123845;
-            border-radius: 3rem;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.8), inset 0 2px 2px #6bc3e6;
-            border: 1px solid #389fc7;
-            overflow: hidden;
+          border-radius: 1.5rem;
         }
-
-        /* header */
-        .header {
-            padding: 2rem 2.5rem 1rem 2.5rem;
-        }
-
-        .title-row {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        h1 {
-            font-size: clamp(2.2rem, 5vw, 3.5rem);
-            font-weight: 700;
-            color: #f0fbff;
-            text-shadow: 0 4px 10px #005177;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        h1 span {
-            background: #1c637e;
-            padding: 0.3rem 1.5rem;
-            border-radius: 80px;
-            font-size: 1.3rem;
-            font-weight: 500;
-            border: 1px solid #8cd4f5;
-        }
-
-        .global-box {
-            background: #0c3648;
-            border-radius: 60px;
-            padding: 0.7rem 2rem;
-            border: 1px solid #50b3db;
-            color: #ddf3ff;
-            font-size: 1.4rem;
-            font-weight: 500;
-        }
-
-        .global-box strong {
-            font-size: 2rem;
-            color: #fffac2;
-            margin-left: 8px;
-        }
-
-        /* split layout */
         .split-layout {
-            display: flex;
-            flex-wrap: wrap;
+          flex-direction: column;
         }
-
-        /* LEFT: ALL SOURCE BUTTONS */
         .left-buttons {
-            flex: 1 1 300px;
-            background: #0d3341;
-            padding: 1.8rem 1.8rem 2.5rem 1.8rem;
-            border-radius: 0 2rem 2rem 0;
-            border-right: 3px solid #318daf;
+          max-width: 100%;
+          border-radius: 1.5rem 1.5rem 0 0;
+          border-right: none;
+          border-bottom: 3px solid #318daf;
+          min-width: 0;
         }
-
-        .left-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #ffeeb5;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-
-        .source-btn {
-            background: #195670;
-            border: none;
-            border-radius: 100px;
-            padding: 1.3rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: white;
-            border: 2px solid #48b5e0;
-            box-shadow: 0 7px 0 #0d3848, 0 8px 16px black;
-            cursor: pointer;
-            transition: 0.08s linear;
-            width: 100%;
-            text-align: left;
-        }
-
-        .source-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #0d3848, 0 6px 12px black;
-        }
-
-        .source-btn.active {
-            background: #2f86a8;
-            border-color: #ffdb8e;
-        }
-
-        .btn-emoji {
-            font-size: 2.4rem;
-        }
-
-        .btn-cap {
-            background: #104155;
-            margin-left: auto;
-            padding: 0.3rem 1.4rem;
-            border-radius: 60px;
-            font-size: 1.2rem;
-            border: 1px solid #9ad9f5;
-        }
-
-        .left-note {
-            background: #0b3c4e;
-            border-radius: 2rem;
-            padding: 1.5rem;
-            border: 1px solid #44a9cf;
-            color: #ccecff;
-            font-size: 1.1rem;
-        }
-
-        /* RIGHT: BIG IMAGE + SIMPLE FACTS (NO THEORY) */
         .right-display {
-            flex: 3 1 600px;
-            padding: 2rem 2.5rem;
+          padding: 1.2rem 0.5rem;
         }
-
-        .image-container {
-            background: #0e3848;
-            border-radius: 2.5rem;
-            padding: 1.5rem;
-            border: 2px solid #38a1c9;
-            box-shadow: inset 0 0 0 2px #146077, 0 18px 28px black;
+        .theory-box,
+        .image-wrapper {
+          max-width: 100vw;
         }
-
-        .power-image {
-            width: 100%;
-            height: auto;
-            max-height: 330px;
-            object-fit: cover;
-            border-radius: 1.8rem;
-            border: 5px solid #7ad0f5;
-            background: #154c5e;
-            box-shadow: 0 10px 20px black;
+        .image-wrapper {
+          height: 250px;
         }
-
-        .image-caption {
-            text-align: center;
-            font-size: 1.3rem;
-            color: #e1f3ff;
-            margin-top: 15px;
-            font-weight: 500;
+      }
+      @media (max-width: 600px) {
+        .main-card {
+          border-radius: 0.5rem;
         }
-
-        /* simple fact panel – no long theory, just 10th-grade friendly */
-        .fact-panel {
-            background: #0e3140;
-            border-radius: 2rem;
-            padding: 1.8rem 2rem;
-            margin-top: 2rem;
-            border-left: 12px solid #f0b323;
-            box-shadow: 0 10px 20px black;
+        .left-buttons {
+          padding: 1rem 0.5rem 1.2rem 0.5rem;
         }
-
-        .source-name-large {
-            font-size: 2.4rem;
-            color: #fff0bc;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 1rem;
+        .theory-box {
+          padding: 1rem 0.5rem 0.8rem 0.5rem;
         }
-
-        .fact-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px 40px;
-            margin: 15px 0 5px;
+        .image-wrapper {
+          height: 160px;
         }
-
-        .fact-item {
-            background: #195067;
-            padding: 0.5rem 1.8rem;
-            border-radius: 60px;
-            border: 1px solid #73c8ed;
-            color: white;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* small extra */
         .footer-note {
-            text-align: center;
-            color: #689eb3;
-            margin-top: 1.8rem;
+          font-size: 0.95rem;
         }
+      }
     </style>
-</head>
-<body>
-<div class="main-card">
-    <div class="header">
+  </head>
+  <body>
+    <div class="main-card">
+      <div class="header">
         <div class="title-row">
-            <h1>
-                ⚡ large‑scale electricity
-                <span>class 10</span>
-            </h1>
-            <div class="global-box">
-                🌍 total <strong id="totalCap">8320</strong> GW
-            </div>
+          <h1>
+            ⚡ large‑scale electricity
+            <span></span>
+          </h1>
+          <div class="global-box">
+            🌍 total <strong id="totalCap">8320</strong> GW
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div class="split-layout">
+      <div class="split-layout">
         <!-- LEFT: ALL BUTTONS (simple) -->
         <div class="left-buttons">
-            <div class="left-title">
-                <span>🔘</span> tap any source
-            </div>
-            <div class="btn-stack" id="buttonPanel">
-                <!-- JS will insert buttons -->
-            </div>
-            <div class="left-note">
-                <p>📌 <strong>10th standard:</strong> large‑scale = power plants ≥10 MW (0.01 GW).</p>
-                <p>⚡ capacity = maximum output (GW).</p>
-                <p>🌱 low‑carbon = hydro, nuclear, wind, solar, bio.</p>
-            </div>
+          <div class="left-title"><span>🔘</span>  source</div>
+          <div class="btn-stack" id="buttonPanel">
+            <!-- JS will insert buttons -->
+          </div>
         </div>
 
-        <!-- RIGHT: BIG IMAGE + SIMPLE FACTS (NO THEORY) -->
+        <!-- RIGHT: BIG IMAGE COVERING WITH THEORY ON TOP -->
         <div class="right-display">
-            <div class="image-container">
-                <img class="power-image" id="mainImg" src="https://images.unsplash.com/photo-1563699952505-1bc0ab8f36b0?w=1200&auto=format" alt="power plant">
-                <div class="image-caption" id="imgCaption">Coal power plant · cooling towers</div>
+          <div class="theory-box" id="theoryBox">
+            <div class="source-badge" id="sourceNameBadge">
+              <span>🪨 Coal</span>
             </div>
-
-            <!-- simple facts box – exactly for 10th grade -->
-            <div class="fact-panel" id="factPanel">
-                <div class="source-name-large" id="sourceName">
-                    <span>🪨</span> Coal
-                </div>
-                <div class="fact-row">
-                    <span class="fact-item" id="typeFact">🔥 fossil fuel</span>
-                    <span class="fact-item" id="capFact">⚡ 2150 GW</span>
-                </div>
-                <div class="fact-row" id="extraFacts">
-                    <span class="fact-item">🏭 used for 100+ years</span>
-                    <span class="fact-item">🌎 35% of world power</span>
-                </div>
+            <div class="fact-grid" id="factGrid">
+              <div class="fact-item" id="typeFact">🔥 fossil fuel</div>
+              <div class="fact-item" id="capFact">⚡ 2150 GW</div>
+              <div class="fact-item" id="extraFact1">🏭 used 100+ years</div>
+              <div class="fact-item" id="extraFact2">🌎 35% world power</div>
             </div>
-            <div class="footer-note">
-                👆 click left buttons to change image and facts
+          </div>
+          <div class="image-wrapper" id="imageWrapper">
+            <img
+              class="power-image"
+              id="mainImg"
+              src="https://images.unsplash.com/photo-1563699952505-1bc0ab8f36b0?w=1200&auto=format"
+              alt="power plant"
+            />
+            <!-- caption at top right (small) -->
+            <div class="image-caption" id="imgCaption">
+              Coal plant · cooling towers
             </div>
+          </div>
+          <div class="footer-note">
+            👈 Click a source on the left – facts appear above the image
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-    (function() {
-        // ------ 7 LARGE-SCALE SOURCES – 10TH GRADE FRIENDLY (no long theory) ------
+    <script>
+      (function () {
+        // ------ 7 LARGE-SCALE SOURCES – 10TH GRADE FRIENDLY (short facts) ------
         const sources = [
-            {
-                name: 'Coal',
-                emoji: '🪨',
-                capacity: 2150,
-                type: '🔥 fossil fuel',
-                imageUrl: '',
-                caption: 'Coal plant · steam and cooling towers',
-                fact1: '🏭 used for 100+ years',
-                fact2: '🌎 35% of world power'
-            },
-            {
-                name: 'Gas',
-                emoji: '🔥',
-                capacity: 1980,
-                type: '⚙️ fossil fuel',
-                imageUrl: '',
-                caption: 'Gas plant · combined cycle units',
-                fact1: '⏱️ starts in minutes',
-                fact2: '⚡ up to 62% efficient'
-            },
-            {
-                name: 'Hydro',
-                emoji: '🌊',
-                capacity: 1360,
-                type: '💧 renewable',
-                imageUrl: '',
-                caption: 'Hydroelectric dam · water power',
-                fact1: '🏞️ oldest renewable',
-                fact2: '🌊 largest dam: 22.5 GW'
-            },
-            {
-                name: 'Nuclear',
-                emoji: '☢️',
-                capacity: 415,
-                type: '⚛️ low‑carbon',
-                imageUrl: '',
-                caption: 'Nuclear plant · reactor & cooling towers',
-                fact1: '⚛️ no CO₂',
-                fact2: '🔋 runs 90% of the time'
-            },
-            {
-                name: 'Wind',
-                emoji: '💨',
-                capacity: 1120,
-                type: '🌬️ renewable',
-                imageUrl: '',
-                caption: 'Wind farm · onshore turbines',
-                fact1: '🌬️ fastest growing',
-                fact2: '🏭 turbines as tall as 150m'
-            },
-            {
-                name: 'Solar',
-                emoji: '☀️',
-                capacity: 940,
-                type: '🔆 renewable',
-                imageUrl: '',
-                caption: 'Solar PV farm · panels tracking sun',
-                fact1: '☀️ cost dropped 90%',
-                fact2: '🔋 works only daytime'
-            },
-            {
-                name: 'Bio & other',
-                emoji: '🌱',
-                capacity: 355,
-                type: '🪵 renewable',
-                imageUrl: '',
-                caption: 'Biomass plant · wood chips',
-                fact1: '🌱 burns plant waste',
-                fact2: '🌋 includes geothermal'
-            }
+          {
+            name: "Coal",
+            emoji: "🪨",
+            capacity: 2150,
+            type: "🔥 fossil fuel",
+            imageUrl: "coal.webp",
+            caption: "Coal plant · cooling towers",
+            fact1: "🏭 used 100+ years",
+            fact2: "🌎 35% world power",
+          },
+          {
+            name: "Gas",
+            emoji: "🔥",
+            capacity: 1980,
+            type: "⚙️ fossil fuel",
+            imageUrl: "fossil-fuel.png",
+            caption: "Gas plant · combined cycle",
+            fact1: "⏱️ starts in minutes",
+            fact2: "⚡ up to 62% efficient",
+          },
+          {
+            name: "Hydro",
+            emoji: "🌊",
+            capacity: 1360,
+            type: "💧 renewable",
+            imageUrl: "hydropower.webp",
+            caption: "Hydro dam · water power",
+            fact1: "🏞️ oldest renewable",
+            fact2: "🌊 largest: 22.5 GW",
+          },
+          {
+            name: "Nuclear",
+            emoji: "☢️",
+            capacity: 415,
+            type: "⚛️ low‑carbon",
+            imageUrl: "neclear.webp",
+            caption: "Nuclear plant · cooling towers",
+            fact1: "⚛️ no CO₂",
+            fact2: "🔋 runs 90% of time",
+          },
+          {
+            name: "Wind",
+            emoji: "💨",
+            capacity: 1120,
+            type: "🌬️ renewable",
+            imageUrl: "wind.webp",
+            caption: "Wind farm · onshore",
+            fact1: "🌬️ fastest growing",
+            fact2: "🏭 turbines 150m tall",
+          },
+          {
+            name: "Solar",
+            emoji: "☀️",
+            capacity: 940,
+            type: "🔆 renewable",
+            imageUrl: "solar.webp",
+            caption: "Solar farm · tracking sun",
+            fact1: "☀️ cost -90%",
+            fact2: "🔋 works daytime",
+          },
+          {
+            name: "Bio & other",
+            emoji: "🌱",
+            capacity: 355,
+            type: "🪵 renewable",
+            imageUrl: "bio.webp",
+            caption: "Biomass · wood chips",
+            fact1: "🌱 burns plant waste",
+            fact2: "🌋 geothermal included",
+          },
         ];
 
+        // real unsplash images (high quality, cover)
+        // assigning consistent unsplash images to each source
 
-        
         // total capacity
-        document.getElementById('totalCap').innerText = sources.reduce((acc, s) => acc + s.capacity, 0).toLocaleString();
+        document.getElementById("totalCap").innerText = sources
+          .reduce((acc, s) => acc + s.capacity, 0)
+          .toLocaleString();
 
-        const btnPanel = document.getElementById('buttonPanel');
-        const mainImg = document.getElementById('mainImg');
-        const imgCaption = document.getElementById('imgCaption');
-        const sourceName = document.getElementById('sourceName');
-        const typeFact = document.getElementById('typeFact');
-        const capFact = document.getElementById('capFact');
-        const extraFacts = document.getElementById('extraFacts');
+        const btnPanel = document.getElementById("buttonPanel");
+        const mainImg = document.getElementById("mainImg");
+        const imgCaption = document.getElementById("imgCaption");
+        const sourceNameBadge = document.getElementById("sourceNameBadge");
+        const typeFact = document.getElementById("typeFact");
+        const capFact = document.getElementById("capFact");
+        const extraFact1 = document.getElementById("extraFact1");
+        const extraFact2 = document.getElementById("extraFact2");
 
         // create buttons
         function buildButtons() {
-            let html = '';
-            sources.forEach(s => {
-                html += `
-                    <button class="source-btn" data-name="${s.name}">
-                        <span class="btn-emoji">${s.emoji}</span>
-                        <span>${s.name}</span>
-                        <span class="btn-cap">${s.capacity} GW</span>
-                    </button>
-                `;
-            });
-            btnPanel.innerHTML = html;
+          let html = "";
+          sources.forEach((s, idx) => {
+            html += `
+              <button class="source-btn" data-name="${s.name}">
+                <span class="btn-emoji">${s.emoji}</span>
+                <span>${s.name}</span>
+                <span class="btn-cap">${s.capacity} GW</span>
+              </button>
+            `;
+          });
+          btnPanel.innerHTML = html;
 
-            // add click listeners
-            document.querySelectorAll('.source-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+          // add click listeners
+          document.querySelectorAll(".source-btn").forEach((btn, idx) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll(".source-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
 
-                    const name = btn.dataset.name;
-                    const source = sources.find(s => s.name === name);
-                    if (source) updateDisplay(source);
-                });
+              const name = btn.dataset.name;
+              const source = sources.find((s) => s.name === name);
+              if (source) updateDisplay(source);
             });
+            // Always ensure button is clickable
+            btn.disabled = false;
+            btn.style.opacity = 1;
+            btn.style.pointerEvents = "auto";
+          });
         }
 
-        // update right side (image + simple facts)
+        // update right side – image + overlay theory
         function updateDisplay(s) {
-            mainImg.src = s.imageUrl;
-            mainImg.alt = s.name;
-            imgCaption.innerText = s.caption;
-            sourceName.innerHTML = `<span>${s.emoji}</span> ${s.name}`;
-            typeFact.innerHTML = s.type;
-            capFact.innerHTML = `⚡ ${s.capacity} GW`;
-            extraFacts.innerHTML = `
-                <span class="fact-item">${s.fact1}</span>
-                <span class="fact-item">${s.fact2}</span>
-            `;
+          // Try to use local image, fallback to Unsplash if not found
+          const fallbackImages = {
+            Coal: "https://images.unsplash.com/photo-1563699952505-1bc0ab8f36b0?w=1200&auto=format",
+            Gas: "https://images.unsplash.com/photo-1506744034316-4cf4e9f9c39c?w=1200&auto=format",
+            Hydro:
+              "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1200&auto=format",
+            Nuclear:
+              "https://images.unsplash.com/photo-1464983953574-0892a7167e67?w=1200&auto=format",
+            Wind: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?w=1200&auto=format",
+            Solar:
+              "https://images.unsplash.com/photo-1465101046530-73398c7f1d0c?w=1200&auto=format",
+            "Bio & other":
+              "https://images.unsplash.com/photo-1465101178521-c1f9c7f1d0c?w=1200&auto=format",
+          };
+          mainImg.onerror = function () {
+            mainImg.src = fallbackImages[s.name] || fallbackImages["Coal"];
+          };
+          mainImg.src = s.imageUrl;
+          mainImg.alt = s.name;
+          imgCaption.innerText = s.caption;
+
+          // update theory box (outside image)
+          sourceNameBadge.innerHTML = `<span>${s.emoji} ${s.name}</span>`;
+          typeFact.innerHTML = s.type;
+          capFact.innerHTML = `⚡ ${s.capacity} GW`;
+          extraFact1.innerHTML = s.fact1;
+          extraFact2.innerHTML = s.fact2;
         }
 
         buildButtons();
 
         // set default active (coal)
         setTimeout(() => {
-            const first = document.querySelector('.source-btn');
-            if (first) {
-                first.classList.add('active');
-                const defaultSource = sources.find(s => s.name === first.dataset.name);
-                if (defaultSource) updateDisplay(defaultSource);
-            }
+          const first = document.querySelector(".source-btn");
+          if (first) {
+            first.classList.add("active");
+            const defaultSource = sources.find(
+              (s) => s.name === first.dataset.name,
+            );
+            if (defaultSource) updateDisplay(defaultSource);
+          }
         }, 50);
-    })();
-</script>
-</body>
+      })();
+    </script>
+  </body>
 </html>

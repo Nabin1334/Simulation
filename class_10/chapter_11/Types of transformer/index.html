@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Types of Transformers</title>
+    <style>
+        /* CSS Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Left Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar button {
+            padding: 14px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #34495e;
+            color: white;
+            border: 1px solid #5d6d7e;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .sidebar button:hover {
+            background-color: #1abc9c;
+        }
+
+        .sidebar button:active {
+            transform: scale(0.98);
+        }
+
+        /* Right Content Area Styling */
+        .content-area {
+            flex-grow: 1;
+            padding: 40px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        #title {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        #image-container {
+            min-height: 250px; /* Keeps layout stable before image loads */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #image-container img {
+            max-width: 450px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin: 20px 0;
+            background-color: white;
+            padding: 10px;
+        }
+
+        /* Theory Card Styling */
+        .theory-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 20px auto 0;
+            text-align: left;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            line-height: 1.6;
+        }
+
+        .theory-card h3 {
+            color: #1abc9c;
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar">
+            <h2>Transformers</h2>
+            <button onclick="showTransformer('step-up')">Step-Up Transformer</button>
+            <button onclick="showTransformer('step-down')">Step-Down Transformer</button>
+        </nav>
+
+        <main class="content-area">
+            <h1 id="title">Select a Transformer Type</h1>
+            
+            <div id="image-container">
+                <p style="color: #7f8c8d;"><i>Click a button on the left to view the diagram and theory.</i></p>
+            </div>
+
+            <div class="theory-card">
+                <h3>Theory & Application</h3>
+                <p id="description">Transformers are devices that transfer electrical energy from one circuit to another through electromagnetic induction, changing the voltage in the process.</p>
+                <div id="details"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // JavaScript Logic Data Object
+        const transformerData = {
+            'step-up': {
+                title: "Step-Up Transformer",
+                // Using a reliable public domain image for demonstration
+                image: "step-up.png",
+                description: "A Step-up transformer is designed to increase the alternating voltage (AC).",
+                details: `
+                    <ul>
+                        <li><strong>Coil Structure:</strong> The number of turns in the <span class="highlight">secondary coil (Ns)</span> is greater than the <span class="highlight">primary coil (Np)</span>.</li>
+                        <li><strong>Voltage Relationship:</strong> Secondary Voltage (Vs) > Primary Voltage (Vp).</li>
+                        <li><strong>Real-Life Use:</strong> Used at power generating stations (like hydropower plants) to step up the voltage before transmitting electricity over long distances. High voltage means lower current, which reduces heat loss in the transmission wires.</li>
+                    </ul>
+                `
+            },
+            'step-down': {
+                title: "Step-Down Transformer",
+                image: "step-down.png",
+                description: "A Step-down transformer is designed to decrease the alternating voltage (AC).",
+                details: `
+                    <ul>
+                        <li><strong>Coil Structure:</strong> The number of turns in the <span class="highlight">secondary coil (Ns)</span> is less than the <span class="highlight">primary coil (Np)</span>.</li>
+                        <li><strong>Voltage Relationship:</strong> Secondary Voltage (Vs) < Primary Voltage (Vp).</li>
+                        <li><strong>Real-Life Use:</strong> Used near homes to step down the high transmission voltage to a safer level (like 220V) for household appliances. Also found inside phone chargers and radios.</li>
+                    </ul>
+                `
+            }
+        };
+
+        // Function triggered by clicking the sidebar buttons
+        function showTransformer(type) {
+            const data = transformerData[type];
+            
+            // 1. Update the Main Title
+            document.getElementById('title').innerText = data.title;
+            
+            // 2. Add the Image dynamically - optimized size for better user experience
+            const imgContainer = document.getElementById('image-container');
+            imgContainer.innerHTML = `<img src="${data.image}" alt="${data.title}" style="max-width: 100%; height: auto; width: 400px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); border: 2px solid #f0f0f0;">`;
+            
+            // 3. Update the Theory Text
+            document.getElementById('description').innerText = data.description;
+            document.getElementById('details').innerHTML = data.details;
+        }
+    </script>
+</body>
+</html>
