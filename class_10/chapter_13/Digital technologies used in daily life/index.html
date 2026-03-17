@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technologies in Daily Life</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tech-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border-bottom: 5px solid var(--primary-color);
+        }
+
+        .tech-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .tech-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .theory-box {
+            background: #e9ecef;
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .example-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Digital Technologies in Daily Life</h1>
+        <p class="subtitle">Click on any card to learn how we use these tools every day!</p>
+    </header>
+
+    <div class="grid-container" id="card-container">
+        </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <img src="" alt="Technology Image" class="modal-image" id="m-image">
+            <div class="modal-body">
+                <h2 id="m-title">Title</h2>
+                
+                <h3>What is it? (Theory)</h3>
+                <div class="theory-box" id="m-theory"></div>
+                
+                <h3>Real Life Example</h3>
+                <div class="example-box" id="m-example"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for the digital technologies
+        const technologies = [
+            {
+                id: 'library',
+                title: 'Digital Library',
+                icon: '📚',
+                image: 'EL.webp',
+                theory: 'A digital library is a collection of books, articles, and documents stored in electronic format. Instead of physical shelves, everything is stored on computer servers and accessed via the internet.',
+                example: 'Instead of going to a physical library, students can use platforms like E-Pustakalaya to download textbooks, read storybooks, and access study materials on their phones or computers at any time.'
+            },
+            {
+                id: 'news',
+                title: 'Online Newspapers',
+                icon: '📰',
+                image: 'onlinenewspaper.webp',
+                theory: 'Online newspapers are the digital versions of printed news. They are hosted on websites and can be updated instantly as soon as a news event happens, rather than waiting for the next day\'s print.',
+                example: 'Checking websites like OnlineKhabar or eKantipur on a smartphone to see breaking news, weather updates, or sports scores immediately.'
+            },
+            {
+                id: 'wallet',
+                title: 'Digital Wallet',
+                icon: '💳',
+                image: 'wallet.webp',
+                theory: 'A digital wallet is a software application, usually on a smartphone, that allows you to store money digitally and make electronic transactions quickly and securely.',
+                example: 'Paying the electricity bill, buying mobile top-up cards, or paying for groceries at a local shop using a QR code with apps like eSewa or Khalti.'
+            },
+            {
+                id: 'business',
+                title: 'Online Business',
+                icon: '🛒',
+                image: 'onlinebusss.webp',
+                theory: 'Also known as E-commerce, this refers to buying and selling goods or services using the internet. It connects buyers and sellers electronically without needing a physical storefront.',
+                example: 'Ordering clothes, electronics, or books from e-commerce platforms like Daraz, and having the delivery person bring the package directly to your house.'
+            },
+            {
+                id: 'social',
+                title: 'Social Network',
+                icon: '🌐',
+                image: 'Snetwork.webp',
+                theory: 'Social networks are websites and applications that allow users to create and share content, communicate, and build digital relationships with friends, family, and communities.',
+                example: 'Using Facebook to share school project photos, or using WhatsApp/Viber to chat with classmates and ask the teacher questions about homework.'
+            },
+            {
+                id: 'entertainment',
+                title: 'Digital Entertainment',
+                icon: '🎬',
+                image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                theory: 'Digital entertainment encompasses media like video, audio, and games distributed over the internet. It allows for on-demand access to content rather than relying on broadcast schedules.',
+                example: 'Watching educational science animations on YouTube, playing interactive multiplayer games, or streaming music while studying.'
+            }
+        ];
+
+        // Generate the cards dynamically
+        const container = document.getElementById('card-container');
+        
+        technologies.forEach(tech => {
+            const card = document.createElement('div');
+            card.className = 'tech-card';
+            card.onclick = () => openModal(tech);
+            
+            card.innerHTML = `
+                <div class="tech-icon">${tech.icon}</div>
+                <h3>${tech.title}</h3>
+                <p>Click to learn more!</p>
+            `;
+            
+            container.appendChild(card);
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('modal');
+
+        function openModal(tech) {
+            document.getElementById('m-image').src = tech.image;
+            document.getElementById('m-title').textContent = tech.title;
+            document.getElementById('m-theory').textContent = tech.theory;
+            document.getElementById('m-example').textContent = tech.example;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside of the content
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

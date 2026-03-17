@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Reputation | Digital Identity Explainer</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #334155;
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --success: #10b981;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-body);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--secondary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        /* Header Section */
+        header {
+            padding: 40px;
+            background: linear-gradient(to right, #ffffff, #f1f5f9);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .status-pill {
+            background: var(--accent-blue);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Banner & Social Chips */
+        .social-banner {
+            padding: 20px 40px;
+            background: #fdfdfd;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+        }
+
+        .social-chip {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .social-chip:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* Main Grid */
+        .main-grid {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Reputation Score Gauge */
+        .score-hero {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg { fill: none; stroke: #e2e8f0; stroke-width: 10; }
+        .gauge-value {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 2s ease-out;
+        }
+
+        #score-num {
+            position: absolute;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .score-text h2 { color: var(--primary); margin-bottom: 10px; }
+
+        /* Content Cards */
+        .card {
+            padding: 30px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .card:hover { border-color: var(--accent-blue); box-shadow: var(--shadow); }
+
+        .card-personal { border-top: 5px solid var(--accent-blue); }
+        .card-org { border-top: 5px solid var(--accent-indigo); }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .icon-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .check-icon { color: var(--success); font-weight: bold; }
+
+        /* Action Section */
+        .action-footer {
+            grid-column: 1 / -1;
+            padding: 30px;
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .btn-tip {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .btn-tip:hover { background: #2563eb; transform: scale(1.05); }
+
+        #tip-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid { grid-template-columns: 1fr; padding: 20px; }
+            .score-hero { flex-direction: column; text-align: center; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-title">
+            <h1>Online Reputation</h1>
+            <span class="status-pill">● Real-life & Virtual Integration</span>
+        </div>
+        <p style="margin-top: 15px; font-size: 1.1rem;">
+            Reputation management is essential for <strong>netizens</strong>. Just as offline character defines you, your digital footprint defines your global authority.
+        </p>
+    </header>
+
+    <div class="social-banner">
+        <div class="social-chip">📘 Facebook</div>
+        <div class="social-chip">📷 Instagram</div>
+        <div class="social-chip">💼 LinkedIn</div>
+        <div class="social-chip">✖️ X (Twitter)</div>
+        <div class="social-chip">👤 Custom Username</div>
+    </div>
+
+    <main class="main-grid">
+        <section class="score-hero">
+            <div class="gauge-container">
+                <svg class="gauge-svg" width="150" height="150">
+                    <circle class="gauge-bg" cx="75" cy="75" r="70"></circle>
+                    <circle id="gauge-progress" class="gauge-value" cx="75" cy="75" r="70"></circle>
+                </svg>
+                <div id="score-num">0</div>
+            </div>
+            <div class="score-text">
+                <h2>Authenticity Metric</h2>
+                <p>Calculated based on <strong>Consistency, Security, and Professionalism</strong>. Using the same username across platforms boosts this score significantly.</p>
+            </div>
+        </section>
+
+        <article class="card card-personal">
+            <h3>👤 Personal Reputation</h3>
+            <p>Your real name and photo are markers of reliability. Your digital footprint is a mirror of your expertise.</p>
+            <ul class="icon-list">
+                <li><span class="check-icon">✓</span> Unified username across all platforms.</li>
+                <li><span class="check-icon">✓</span> Content reflects real-world knowledge.</li>
+                <li><span class="check-icon">✓</span> Proactive Security: Avoiding password theft.</li>
+            </ul>
+        </article>
+
+        <article class="card card-org">
+            <h3>🏢 Organizational Brand</h3>
+            <p>Official presence on major networks indicates credibility. Institutional reputation grows through engagement.</p>
+            <ul class="icon-list">
+                <li><span class="check-icon">✓</span> Follower count indicates social proof.</li>
+                <li><span class="check-icon">✓</span> Resolution of public complaints/comments.</li>
+                <li><span class="check-icon">✓</span> Verified official websites & social pages.</li>
+            </ul>
+        </article>
+
+        <footer class="action-footer">
+            <h3>Reputation is easily built but hard to repair.</h3>
+            <p>Are your privacy settings protecting your professional image?</p>
+            <button class="btn-tip" id="tipBtn">Get Security Tip</button>
+            <div id="tip-box">
+                💡 <strong>Privacy First:</strong> Poor settings lead to harmful posts from third parties. Audit your "Tagging" permissions today!
+            </div>
+        </footer>
+    </main>
+</div>
+
+<script>
+    // 1. Gauge and Counter Animation
+    function animateDashboard() {
+        const scoreElement = document.getElementById('score-num');
+        const gauge = document.getElementById('gauge-progress');
+        const targetScore = 352;
+        const maxScore = 500; // Assuming 500 is max
+        
+        // Counter Animation
+        let count = 0;
+        const duration = 2000; // 2 seconds
+        const increment = targetScore / (duration / 16);
+
+        const timer = setInterval(() => {
+            count += increment;
+            if (count >= targetScore) {
+                clearInterval(timer);
+                scoreElement.innerText = targetScore;
+            } else {
+                scoreElement.innerText = Math.floor(count);
+            }
+        }, 16);
+
+        // SVG Gauge Animation
+        const circumference = 2 * Math.PI * 70;
+        const offset = circumference - (targetScore / maxScore) * circumference;
+        gauge.style.strokeDasharray = circumference;
+        gauge.style.strokeDashoffset = offset;
+    }
+
+    // 2. Interactive Tip Toggle
+    const tipBtn = document.getElementById('tipBtn');
+    const tipBox = document.getElementById('tip-box');
+
+    tipBtn.addEventListener('click', () => {
+        const isVisible = tipBox.style.display === 'block';
+        tipBox.style.display = isVisible ? 'none' : 'block';
+        tipBtn.innerText = isVisible ? 'Get Security Tip' : 'Close Tip';
+    });
+
+    // Run animations on load
+    window.onload = animateDashboard;
+</script>
+
+</body>
+</html>

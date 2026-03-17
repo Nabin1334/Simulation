@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Digitalization · Transforming Technology</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0f2a38 0%, #1a3a4a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .full-screen {
+      width: 100%;
+      height: 100%;
+      background: rgba(20, 35, 45, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 40px;
+      padding: 20px;
+      border: 3px solid #f39c12;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header - compact */
+    .header {
+      text-align: center;
+      margin-bottom: 15px;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header h1 span {
+      font-size: 2rem;
+    }
+
+    .subhead {
+      background: #f39c12;
+      color: #0a1a2a;
+      padding: 5px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    /* Main layout: left buttons, right content - full height */
+    .main-row {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* LEFT SIDE - Category Buttons (stacked, full height) */
+    .category-sidebar {
+      flex: 0 0 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .category-sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .category-sidebar::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    
+    .category-sidebar::-webkit-scrollbar-thumb {
+      background: #f39c12;
+      border-radius: 10px;
+    }
+
+    .cat-btn {
+      background: rgba(30, 45, 60, 0.9);
+      border: 2px solid #f39c12;
+      border-radius: 50px;
+      padding: 16px 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      text-align: left;
+      backdrop-filter: blur(5px);
+      flex-shrink: 0;
+    }
+
+    .cat-btn span {
+      font-size: 1.6rem;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .cat-btn:hover {
+      background: #f39c12;
+      color: #0a1a2a;
+      transform: translateX(3px);
+      box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+    }
+
+    .cat-btn.active {
+      background: #f39c12;
+      color: #0a1a2a;
+      border-color: white;
+      box-shadow: 0 0 15px #f39c12;
+    }
+
+    .btn-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* RIGHT SIDE - Content Panel (full height) */
+    .content-panel {
+      flex: 1;
+      background: rgba(25, 45, 60, 0.7);
+      backdrop-filter: blur(5px);
+      border-radius: 35px;
+      padding: 20px;
+      border: 2px solid #f39c12;
+      height: 100%;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .content-panel::-webkit-scrollbar {
+      width: 5px;
+    }
+    
+    .content-panel::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    
+    .content-panel::-webkit-scrollbar-thumb {
+      background: #f39c12;
+      border-radius: 10px;
+    }
+
+    /* Category content */
+    .category-content {
+      display: none;
+      height: 100%;
+      animation: fadeIn 0.3s;
+    }
+
+    .category-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #f39c12;
+      padding-bottom: 10px;
+    }
+
+    .content-header .big-icon {
+      font-size: 2.2rem;
+      background: #f39c12;
+      color: #0a1a2a;
+      width: 50px;
+      height: 50px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .content-header h2 {
+      color: white;
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .content-header h2 span {
+      color: #f39c12;
+      font-size: 0.8rem;
+      display: block;
+    }
+
+    /* Visual representation canvas */
+    .visual-canvas {
+      background: #0a2530;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 15px;
+      border: 1px solid #f39c12;
+    }
+
+    .vis-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .vis-icon {
+      font-size: 2rem;
+      background: #1e3f50;
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #f39c12;
+    }
+
+    .vis-label {
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .vis-arrow {
+      color: #f39c12;
+      font-size: 2rem;
+    }
+
+    .vis-bar-container {
+      width: 100%;
+      height: 20px;
+      background: #0a1a2a;
+      border-radius: 10px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+
+    .vis-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #f39c12, #e67e22);
+      border-radius: 10px;
+      width: 0%;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #0a1a2a;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #f39c12;
+      border-radius: 4px;
+      width: 0%;
+    }
+
+    /* Info cards - more compact */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .info-card {
+      background: rgba(15, 35, 45, 0.8);
+      border-radius: 20px;
+      padding: 15px;
+      border-left: 6px solid #f39c12;
+      box-shadow: 3px 3px 0 #0a1a2a;
+    }
+
+    .info-card h3 {
+      color: #f39c12;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-card p {
+      color: #ddd;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .highlight-badge {
+      background: #f39c12;
+      color: #0a1a2a;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.7rem;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    /* Timeline mini - compact */
+    .mini-timeline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      background: #f39c12;
+      border-radius: 50%;
+    }
+
+    .timeline-line {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, #f39c12, #2ecc71);
+    }
+
+    .timeline-text {
+      color: white;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    /* Stats cards - compact */
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .stat-mini {
+      flex: 1;
+      min-width: 70px;
+      background: #1e3f50;
+      border-radius: 15px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #f39c12;
+    }
+
+    .stat-label {
+      color: white;
+      font-size: 0.7rem;
+    }
+
+    /* Comparison table - compact */
+    .compare-table {
+      background: #0a2530;
+      border-radius: 20px;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 8px;
+      border-bottom: 1px solid #2a4a60;
+      font-size: 0.8rem;
+    }
+
+    .compare-row.header {
+      color: #f39c12;
+      font-weight: bold;
+      border-bottom: 2px solid #f39c12;
+      font-size: 0.8rem;
+    }
+
+    .compare-item {
+      color: white;
+    }
+
+    /* Footer - compact */
+    .footer-note {
+      margin-top: 15px;
+      background: #0a2530;
+      border-radius: 40px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 2px solid #f39c12;
+      flex-shrink: 0;
+    }
+
+    .footer-note p {
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .footer-badge {
+      background: #f39c12;
+      color: #0a1a2a;
+      padding: 5px 20px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    /* Ensure no overflow */
+    @media (max-height: 700px) {
+      .header h1 { font-size: 1.5rem; }
+      .cat-btn { padding: 12px 10px; font-size: 1rem; }
+      .content-header h2 { font-size: 1.3rem; }
+      .info-card { padding: 12px; }
+      .info-card h3 { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="full-screen">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span>📡</span> Digitalization · Transforming Technology
+      </h1>
+      <div class="subhead">How digitalization changed different fields</div>
+    </div>
+
+    <!-- Main Row: Left buttons, Right content -->
+    <div class="main-row">
+      
+      <!-- LEFT: Category Buttons (stacked, scrollable if needed) -->
+      <div class="category-sidebar">
+        <button class="cat-btn active" id="btnTelecom">
+          <span>📞</span>
+          <span class="btn-text">Telecommunication</span>
+        </button>
+        <button class="cat-btn" id="btnMedia">
+          <span>📺</span>
+          <span class="btn-text">Media & Entertainment</span>
+        </button>
+        <button class="cat-btn" id="btnTV">
+          <span>📡</span>
+          <span class="btn-text">Digital TV & Broadcasting</span>
+        </button>
+        <button class="cat-btn" id="btnInternet">
+          <span>🌐</span>
+          <span class="btn-text">Internet & Networking</span>
+        </button>
+        <button class="cat-btn" id="btnStorage">
+          <span>💾</span>
+          <span class="btn-text">Storage & Data</span>
+        </button>
+      </div>
+
+      <!-- RIGHT: Content Panel (scrollable if needed) -->
+      <div class="content-panel">
+        
+        <!-- TELECOMMUNICATION CONTENT -->
+        <div id="contentTelecom" class="category-content active">
+          <div class="content-header">
+            <div class="big-icon">📞</div>
+            <h2>Telecommunication<br><span>Digitalization of communication</span></h2>
+          </div>
+
+          <!-- Visual representation -->
+          <div class="visual-canvas">
+            <div class="vis-item">
+              <div class="vis-icon">📞</div>
+              <div class="vis-label">Landline</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">📱</div>
+              <div class="vis-label">Mobile</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">📹</div>
+              <div class="vis-label">Video Call</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>📟 Before Digitalization</h3>
+              <p>Landline phones - stuck at home, one call at a time. Expensive long-distance calls. No texting, no photos.</p>
+              <div class="highlight-badge">Speed: Slow · One conversation</div>
+            </div>
+            <div class="info-card">
+              <h3>📱 After Digitalization</h3>
+              <p>Mobile phones, WhatsApp, video calls. Talk anywhere instantly, send photos, group chats, free calls over internet.</p>
+              <div class="highlight-badge">Speed: Instant · Millions at once</div>
+            </div>
+          </div>
+
+          <div class="mini-timeline">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+            <span class="timeline-text">1980s: Landline → 2024: 5G Video Calls</span>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-mini">
+              <div class="stat-number">1980</div>
+              <div class="stat-label">1% had phone</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">2024</div>
+              <div class="stat-label">7B+ mobile users</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">1000x</div>
+              <div class="stat-label">faster data</div>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row header">
+              <div>Feature</div>
+              <div>Before</div>
+              <div>After</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📞 Calls</div>
+              <div class="compare-item">Wired</div>
+              <div class="compare-item">Wireless</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📨 Messages</div>
+              <div class="compare-item">Postal letters</div>
+              <div class="compare-item">WhatsApp, SMS</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📹 Video</div>
+              <div class="compare-item">Not possible</div>
+              <div class="compare-item">FaceTime, Zoom</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEDIA & ENTERTAINMENT CONTENT -->
+        <div id="contentMedia" class="category-content">
+          <div class="content-header">
+            <div class="big-icon">📺</div>
+            <h2>Media & Entertainment<br><span>Digitalization of music & movies</span></h2>
+          </div>
+
+          <!-- Visual representation -->
+          <div class="visual-canvas">
+            <div class="vis-item">
+              <div class="vis-icon">💿</div>
+              <div class="vis-label">Vinyl/Cassette</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">📀</div>
+              <div class="vis-label">CD/MP3</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">🎧</div>
+              <div class="vis-label">Spotify</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>🎵 Before Digitalization</h3>
+              <p>Vinyl records, cassette tapes, radio. One tape = one album. If tape broke, music gone forever.</p>
+              <div class="highlight-badge">Storage: 1 album per tape</div>
+            </div>
+            <div class="info-card">
+              <h3>🎧 After Digitalization</h3>
+              <p>Spotify, YouTube, MP3. Millions of songs in your pocket. Skip, repeat, share instantly. No wear and tear.</p>
+              <div class="highlight-badge">Storage: 50,000 songs</div>
+            </div>
+          </div>
+
+          <div class="mini-timeline">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+            <span class="timeline-text">1980: Cassette → 2024: Spotify</span>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-mini">
+              <div class="stat-number">1980</div>
+              <div class="stat-label">Physical albums</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">2024</div>
+              <div class="stat-label">100M+ songs</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">1M x</div>
+              <div class="stat-label">more choices</div>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row header">
+              <div>Media</div>
+              <div>Before</div>
+              <div>After</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">🎵 Music</div>
+              <div class="compare-item">Vinyl, Cassette</div>
+              <div class="compare-item">MP3, Spotify</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">🎬 Movies</div>
+              <div class="compare-item">VHS Tape</div>
+              <div class="compare-item">Netflix, DVD</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📷 Photos</div>
+              <div class="compare-item">Film roll</div>
+              <div class="compare-item">Digital camera</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIGITAL TV & BROADCASTING CONTENT -->
+        <div id="contentTV" class="category-content">
+          <div class="content-header">
+            <div class="big-icon">📡</div>
+            <h2>Digital TV & Broadcasting<br><span>Digitalization of television</span></h2>
+          </div>
+
+          <!-- Visual representation -->
+          <div class="visual-canvas">
+            <div class="vis-item">
+              <div class="vis-icon">📺</div>
+              <div class="vis-label">Analog TV</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">Fuzzy</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">🖥️</div>
+              <div class="vis-label">Digital TV</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">HD</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">📱</div>
+              <div class="vis-label">Streaming</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">4K</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>📻 Before Digitalization</h3>
+              <p>Analog TV - fuzzy picture, snow, only a few channels. If signal weak, picture disappears.</p>
+              <div class="highlight-badge">Quality: Low, affected by weather</div>
+            </div>
+            <div class="info-card">
+              <h3>📺 After Digitalization</h3>
+              <p>HD, 4K, hundreds of channels, streaming. Clear picture even with weak signal. Smart TVs.</p>
+              <div class="highlight-badge">Quality: Crystal clear</div>
+            </div>
+          </div>
+
+          <div class="mini-timeline">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+            <span class="timeline-text">1980: 3 channels → 2024: 500+ HD</span>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-mini">
+              <div class="stat-number">1980</div>
+              <div class="stat-label">3-5 channels</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">2024</div>
+              <div class="stat-label">500+ channels</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">4K</div>
+              <div class="stat-label">Ultra HD</div>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row header">
+              <div>Feature</div>
+              <div>Before</div>
+              <div>After</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📺 Picture</div>
+              <div class="compare-item">Fuzzy, snow</div>
+              <div class="compare-item">HD, clear</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📡 Signal</div>
+              <div class="compare-item">Weak = gone</div>
+              <div class="compare-item">Still works</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">🎮 Features</div>
+              <div class="compare-item">Watch only</div>
+              <div class="compare-item">Record, pause</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERNET & NETWORKING CONTENT -->
+        <div id="contentInternet" class="category-content">
+          <div class="content-header">
+            <div class="big-icon">🌐</div>
+            <h2>Internet & Networking<br><span>Digitalization of connectivity</span></h2>
+          </div>
+
+          <!-- Visual representation -->
+          <div class="visual-canvas">
+            <div class="vis-item">
+              <div class="vis-icon">🖥️</div>
+              <div class="vis-label">Standalone</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">🌐</div>
+              <div class="vis-label">Dial-up</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">56k</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">📶</div>
+              <div class="vis-label">Fiber/5G</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">1 Gbps</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>🔌 Before Digitalization</h3>
+              <p>No internet. Computers standalone. Sharing files meant floppy disks. Libraries for research.</p>
+              <div class="highlight-badge">Speed: No connection</div>
+            </div>
+            <div class="info-card">
+              <h3>🌍 After Digitalization</h3>
+              <p>WiFi, fiber optic, 5G. Global connection instantly. Google, Wikipedia, social media.</p>
+              <div class="highlight-badge">Speed: 1 Gbps+</div>
+            </div>
+          </div>
+
+          <div class="mini-timeline">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+            <span class="timeline-text">1990: Dial-up → 2024: Fiber</span>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-mini">
+              <div class="stat-number">1990</div>
+              <div class="stat-label">56 kbps</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">2024</div>
+              <div class="stat-label">1 Gbps</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">18,000x</div>
+              <div class="stat-label">faster</div>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row header">
+              <div>Feature</div>
+              <div>Before</div>
+              <div>After</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📶 Speed</div>
+              <div class="compare-item">56 Kbps</div>
+              <div class="compare-item">1 Gbps</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">💻 Connection</div>
+              <div class="compare-item">Dial-up</div>
+              <div class="compare-item">WiFi</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">🌎 Users</div>
+              <div class="compare-item">Few million</div>
+              <div class="compare-item">5.3 billion</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STORAGE & DATA CONTENT -->
+        <div id="contentStorage" class="category-content">
+          <div class="content-header">
+            <div class="big-icon">💾</div>
+            <h2>Storage & Data<br><span>Digitalization of information</span></h2>
+          </div>
+
+          <!-- Visual representation -->
+          <div class="visual-canvas">
+            <div class="vis-item">
+              <div class="vis-icon">💾</div>
+              <div class="vis-label">Floppy</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">1.44 MB</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">💿</div>
+              <div class="vis-label">CD</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">700 MB</div>
+            </div>
+            <div class="vis-arrow">→</div>
+            <div class="vis-item">
+              <div class="vis-icon">💽</div>
+              <div class="vis-label">SD Card</div>
+              <div style="font-size: 0.7rem; color: #f39c12;">1 TB</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>📚 Before Digitalization</h3>
+              <p>Punched cards, floppy disks (1.44 MB). A room full of tapes = less than one modern USB stick.</p>
+              <div class="highlight-badge">Capacity: 1.44 MB</div>
+            </div>
+            <div class="info-card">
+              <h3>💽 After Digitalization</h3>
+              <p>SD cards (1 TB), SSD, cloud storage. Millions of books in your pocket. Google Drive.</p>
+              <div class="highlight-badge">Capacity: 1 TB</div>
+            </div>
+          </div>
+
+          <div class="mini-timeline">
+            <span class="timeline-dot"></span>
+            <span class="timeline-line"></span>
+            <span class="timeline-text">1980: Floppy → 2024: 1 TB SD</span>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-mini">
+              <div class="stat-number">1980</div>
+              <div class="stat-label">1.44 MB</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">2024</div>
+              <div class="stat-label">1,000,000 MB</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-number">1M x</div>
+              <div class="stat-label">more</div>
+            </div>
+          </div>
+
+          <div class="compare-table">
+            <div class="compare-row header">
+              <div>Storage</div>
+              <div>Before</div>
+              <div>After</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">💾 Portable</div>
+              <div class="compare-item">Floppy disk</div>
+              <div class="compare-item">USB, SD card</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">☁️ Online</div>
+              <div class="compare-item">Not possible</div>
+              <div class="compare-item">Cloud storage</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-item">📊 Capacity</div>
+              <div class="compare-item">KB, MB</div>
+              <div class="compare-item">TB, PB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-note">
+      <p>Digitalization · From analog to digital</p>
+      <div class="footer-badge">Faster · Smaller · Smarter · Connected</div>
+    </div>
+  </div>
+
+  <script>
+    // Get all buttons and content divs
+    const btnTelecom = document.getElementById('btnTelecom');
+    const btnMedia = document.getElementById('btnMedia');
+    const btnTV = document.getElementById('btnTV');
+    const btnInternet = document.getElementById('btnInternet');
+    const btnStorage = document.getElementById('btnStorage');
+    
+    const contentTelecom = document.getElementById('contentTelecom');
+    const contentMedia = document.getElementById('contentMedia');
+    const contentTV = document.getElementById('contentTV');
+    const contentInternet = document.getElementById('contentInternet');
+    const contentStorage = document.getElementById('contentStorage');
+    
+    const allButtons = [btnTelecom, btnMedia, btnTV, btnInternet, btnStorage];
+    const allContents = [contentTelecom, contentMedia, contentTV, contentInternet, contentStorage];
+
+    // Function to switch active tab
+    function setActiveCategory(index) {
+      // Remove active class from all buttons
+      allButtons.forEach(btn => btn.classList.remove('active'));
+      // Add active class to clicked button
+      allButtons[index].classList.add('active');
+      
+      // Hide all content
+      allContents.forEach(content => content.classList.remove('active'));
+      // Show selected content
+      allContents[index].classList.add('active');
+    }
+
+    // Add click handlers
+    btnTelecom.addEventListener('click', () => setActiveCategory(0));
+    btnMedia.addEventListener('click', () => setActiveCategory(1));
+    btnTV.addEventListener('click', () => setActiveCategory(2));
+    btnInternet.addEventListener('click', () => setActiveCategory(3));
+    btnStorage.addEventListener('click', () => setActiveCategory(4));
+
+    // Set initial active state (Telecom)
+    setActiveCategory(0);
+  </script>
+</body>
+</html>

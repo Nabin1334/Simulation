@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌐 real netizen · friendlier digital citizenship</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f2f7fc;
+      font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* main card — like a friendly dashboard */
+    .friendly-card {
+      max-width: 1300px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(6px);
+      border-radius: 2.8rem;
+      box-shadow: 0 40px 60px -20px #1a3f5590, 0 10px 25px -10px #b6d6ed;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    /* header – chatty, warm */
+    .nice-header {
+      background: #0b3b4f;  /* deep teal alternative */
+      background: linear-gradient(125deg, #115e73 0%, #217a94 100%);
+      color: white;
+      padding: 2.5rem 3rem 2rem 3rem;
+      position: relative;
+    }
+
+    .nice-header h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .nice-header h1 i {
+      background: #f5c556;
+      color: #115e73;
+      font-size: 2.2rem;
+      padding: 0.6rem;
+      border-radius: 60% 40% 50% 50%;
+      transform: rotate(-3deg);
+      box-shadow: 0 8px 0 #0d4a5c;
+    }
+
+    .talk-bubble {
+      background: #fef9e7;
+      color: #154f63;
+      padding: 1.3rem 2.2rem;
+      border-radius: 3rem 3rem 3rem 0.5rem;
+      margin-top: 1.8rem;
+      max-width: 750px;
+      font-size: 1.25rem;
+      font-weight: 450;
+      border: 2px solid white;
+      box-shadow: 0 10px 16px -15px black;
+    }
+
+    .talk-bubble i {
+      color: #e68a2e;
+      margin-right: 0.8rem;
+    }
+
+    .friend-badge {
+      background: white;
+      color: #115e73;
+      padding: 0.5rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      display: inline-block;
+      margin-top: 1.2rem;
+      border: 2px solid #f5c556;
+      box-shadow: 0 6px 0 #cd9337;
+    }
+
+    .friend-badge i {
+      color: #e68a2e;
+    }
+
+    /* 2‑column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 2rem;
+      padding: 2.5rem 2rem 2rem 2rem;
+    }
+
+    /* trait grid – more playful */
+    .trait-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .trait-item {
+      background: #ffffffea;
+      border-radius: 2rem;
+      padding: 1.4rem 1.3rem;
+      border: 2px solid #d6e8f5;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      box-shadow: 0 10px 12px -14px #2b5b77;
+    }
+
+    .trait-item:hover, .trait-item.tapped {
+      transform: translateY(-6px);
+      border-color: #f3b740;
+      background: #fffef7;
+      box-shadow: 0 18px 28px -14px #1c607b;
+    }
+
+    .trait-item.tapped {
+      border-width: 3px;
+      border-color: #e0932b;
+      background: #fffae7;
+    }
+
+    .trait-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #236b84;
+    }
+
+    .trait-item:hover .trait-icon {
+      color: #d67e2a;
+    }
+
+    .trait-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #0e4f64;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .trait-desc {
+      color: #346f88;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-top: 0.4rem;
+    }
+
+    .tag {
+      background: #e2f0f9;
+      border-radius: 30px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #1b607b;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+
+    /* right side — realtalk panel */
+    .real-talk {
+      background: #ffffffcf;
+      border-radius: 2.3rem;
+      padding: 2rem 1.8rem;
+      border: 3px solid #f7fbfe;
+      box-shadow: inset 0 1px 6px white, 0 18px 22px -22px #124f66;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .talk-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .talk-header i {
+      font-size: 2.2rem;
+      color: #e68a2e;
+      background: #fef2da;
+      padding: 0.6rem;
+      border-radius: 50%;
+    }
+
+    .talk-header h2 {
+      font-size: 1.8rem;
+      color: #15455a;
+      font-weight: 600;
+    }
+
+    #friendlyContent {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #1b4d5e;
+      background: #eaf5fd;
+      padding: 1.6rem;
+      border-radius: 1.8rem;
+      flex: 1;
+      border-left: 6px solid #f3b33d;
+      margin-bottom: 1rem;
+    }
+
+    .reset-chat {
+      background: white;
+      border: 2px solid #c4dff2;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #115e73;
+      cursor: pointer;
+      transition: all 0.2s;
+      align-self: flex-end;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .reset-chat:hover {
+      background: #115e73;
+      color: white;
+      border-color: #f3b740;
+    }
+
+    /* footer with reminder */
+    .footer-memories {
+      background: #eef3f8;
+      padding: 1.5rem 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 3px solid #9fc7df;
+      font-size: 1rem;
+      color: #1e5f79;
+    }
+
+    .footer-memories i {
+      color: #e68a2e;
+    }
+
+    .pill {
+      background: #faeedc;
+      border-radius: 60px;
+      padding: 0.4rem 1.4rem;
+      font-weight: 600;
+      border: 1px solid #f1c48b;
+    }
+
+    /* small text tribute */
+    .tiny-voice {
+      background: #daeefb;
+      border-radius: 3rem;
+      padding: 0.8rem 1.8rem;
+      margin: 0rem 2rem 2rem 2rem;
+      font-size: 0.85rem;
+      color: #175066;
+      border: 2px solid white;
+      text-align: center;
+    }
+
+    @media (max-width: 800px) {
+      .two-col { grid-template-columns: 1fr; }
+      .nice-header h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="friendly-card">
+    <!-- header with plain‑english intro -->
+    <div class="nice-header">
+      <h1>
+        <i class="fa-regular fa-smile"></i> 
+        netizen next door
+      </h1>
+      <div class="talk-bubble">
+        <i class="fa-regular fa-message"></i> 
+        “the duties of a good netizen = digital citizenship.<br> 
+        let’s make online life kinder, more respectful, and human.”
+      </div>
+      <div class="friend-badge">
+        <i class="fa-regular fa-heart"></i> 10 traits · real talk
+      </div>
+    </div>
+
+    <!-- 2‑col core -->
+    <div class="two-col">
+      <!-- left: trait buttons (still interactive, but more down-to-earth names) -->
+      <div class="trait-grid" id="traitList">
+        <!-- empathy -->
+        <div class="trait-item" data-tid="1" tabindex="0">
+          <div class="trait-icon"><i class="fa-regular fa-heart"></i></div>
+          <div class="trait-name">empathy <span style="font-size:0.9rem;">👂</span></div>
+          <div class="trait-desc">listen first, text later. imagine the human.</div>
+          <span class="tag">respect</span>
+        </div>
+        <!-- critical thinking -->
+        <div class="trait-item" data-tid="2">
+          <div class="trait-icon"><i class="fa-solid fa-brain"></i></div>
+          <div class="trait-name">critical thinking <span>🔎</span></div>
+          <div class="trait-desc">pause before you share – is it real?</div>
+          <span class="tag">verify</span>
+        </div>
+        <!-- privacy respect -->
+        <div class="trait-item" data-tid="3">
+          <div class="trait-icon"><i class="fa-solid fa-user-lock"></i></div>
+          <div class="trait-name">privacy respect <span>🔒</span></div>
+          <div class="trait-desc">don't share others' stuff without asking.</div>
+          <span class="tag">boundaries</span>
+        </div>
+        <!-- digital literacy -->
+        <div class="trait-item" data-tid="4">
+          <div class="trait-icon"><i class="fa-solid fa-laptop"></i></div>
+          <div class="trait-name">digital literacy <span>🧠</span></div>
+          <div class="trait-desc">spot phishing, use 2FA, know your footprint.</div>
+          <span class="tag">savvy</span>
+        </div>
+        <!-- inclusivity -->
+        <div class="trait-item" data-tid="5">
+          <div class="trait-icon"><i class="fa-solid fa-handshake"></i></div>
+          <div class="trait-name">inclusivity <span>🌍</span></div>
+          <div class="trait-desc">everyone's welcome – ability, race, identity.</div>
+          <span class="tag">bridge</span>
+        </div>
+        <!-- civility -->
+        <div class="trait-item" data-tid="6">
+          <div class="trait-icon"><i class="fa-regular fa-comment-dots"></i></div>
+          <div class="trait-name">civility <span>🤝</span></div>
+          <div class="trait-desc">disagree without attacking.</div>
+          <span class="tag">respect</span>
+        </div>
+        <!-- accountability -->
+        <div class="trait-item" data-tid="7">
+          <div class="trait-icon"><i class="fa-solid fa-footprints"></i></div>
+          <div class="trait-name">accountability <span>👣</span></div>
+          <div class="trait-desc">own your words. fix mistakes.</div>
+          <span class="tag">permanent</span>
+        </div>
+        <!-- active citizenship -->
+        <div class="trait-item" data-tid="8">
+          <div class="trait-icon"><i class="fa-regular fa-bell"></i></div>
+          <div class="trait-name">active citizenship <span>📢</span></div>
+          <div class="trait-desc">report harm, help newbies, share good stuff.</div>
+          <span class="tag">contribute</span>
+        </div>
+        <!-- balance -->
+        <div class="trait-item" data-tid="9">
+          <div class="trait-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="trait-name">balance <span>🧘</span></div>
+          <div class="trait-desc">screen time vs. real life. avoid doomscroll.</div>
+          <span class="tag">wellness</span>
+        </div>
+        <!-- ethics & IP -->
+        <div class="trait-item" data-tid="10">
+          <div class="trait-icon"><i class="fa-regular fa-registered"></i></div>
+          <div class="trait-name">ethics / IP <span>©️</span></div>
+          <div class="trait-desc">credit creators, don't steal. cite sources.</div>
+          <span class="tag">fair use</span>
+        </div>
+      </div>
+
+      <!-- right side: friendly analysis + everyday language -->
+      <div class="real-talk">
+        <div class="talk-header">
+          <i class="fa-regular fa-face-smile"></i>
+          <h2>real‑talk breakdown</h2>
+        </div>
+        <div id="friendlyContent">
+          <!-- dynamic friendly message appears here -->
+        </div>
+        <button class="reset-chat" id="resetFriendly"><i class="fa-regular fa-comment"></i> back to overview</button>
+      </div>
+    </div>
+
+    <!-- extra realness: permanent & IP message (straight from text) -->
+    <div class="footer-memories">
+      <span><i class="fa-regular fa-clock"></i> <strong>permanent:</strong> anything posted online stays. think twice.</span>
+      <span class="pill"><i class="fa-regular fa-copyright"></i> cite sources · don't copy</span>
+    </div>
+
+    <!-- tiny block with exact original words (still clear) -->
+    <div class="tiny-voice">
+      ⚡ original duties: polite & civilized language · respect others even if unseen · online is permanent · intellectual property belongs to someone · always cite the source. 
+      <i class="fa-regular fa-face-smile-wink" style="margin-left:0.3rem;"></i>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // more human, conversational explanations — each connects to the original duties
+      const friendlyExplanations = {
+        1: `👂 <strong>empathy, for real:</strong> before you type something snappy, remember there's a human with feelings. ask: “would i say this to their face?” that's digital empathy.`,
+        2: `🧠 <strong>critical thinking (no cap)</strong>: with AI and fake news, be a detective. check the source — if it seems wild, it's probably bait. your share button is powerful.`,
+        3: `🔒 <strong>privacy isn't just yours:</strong> that photo of your friend? ask before posting. other people's boundaries matter. treat data like you'd treat a secret.`,
+        4: `💻 <strong>digital literacy = street smarts online:</strong> know what a phishing email looks like. use two-factor. clean up old accounts. you've got this.`,
+        5: `🌍 <strong>inclusivity:</strong> the internet is for everyone. avoid words that exclude. if you see someone getting harassed, speak up (safely). small acts create big belonging.`,
+        6: `🤝 <strong>civility:</strong> you can disagree without being a jerk. attack ideas, not people. respectful debate > name‑calling.`,
+        7: `👣 <strong>accountability:</strong> we all mess up. if you post something harmful, correct it. don't hide behind a keyboard — own your digital footprint.`,
+        8: `📯 <strong>active citizenship:</strong> don't just lurk. report scams, help a confused user, share knowledge. being a good neighbour online counts.`,
+        9: `⚖️ <strong>balance:</strong> log off sometimes. doomscrolling hurts you. set screen boundaries — the internet will still be there after a walk.`,
+        10: `©️ <strong>ethics & IP:</strong> that meme, that song, that article — someone made it. cite them. don't plagiarise. creative commons is your friend. give credit!`
+      };
+
+      const defaultFriendly = `
+        <div style="background:#fffbee; padding:1rem; border-radius:1.4rem; margin-bottom:1.2rem; border-left:6px solid #f5b342;">
+          🌟 <strong>the golden rule, online edition:</strong> treat others like you’d treat them face to face.
+        </div>
+        <p>👆 <strong>click any trait on the left</strong> — i’ll tell you what it really means, no jargon.<br>
+        all these traits connect to <u>digital citizenship</u>: polite language, respecting privacy, citing sources, and remembering that posts are permanent.</p>
+        <p style="margin-top:1rem;"><i class="fa-regular fa-lightbulb" style="color: #e68a2e;"></i> quick example: “intellectual property” just means give credit. like, if you use someone’s photo, tag or mention them.</p>
+      `;
+
+      const contentDiv = document.getElementById('friendlyContent');
+      const traitItems = document.querySelectorAll('.trait-item');
+      const resetBtn = document.getElementById('resetFriendly');
+
+      function clearActive() {
+        traitItems.forEach(item => item.classList.remove('tapped'));
+      }
+
+      function showExplanation(id) {
+        clearActive();
+        if (id && friendlyExplanations[id]) {
+          const activeItem = document.querySelector(`.trait-item[data-tid="${id}"]`);
+          if (activeItem) activeItem.classList.add('tapped');
+          // friendly wrap with some warmth
+          contentDiv.innerHTML = `<div style="animation: fade 0.2s;">${friendlyExplanations[id]}</div>`;
+        } else {
+          contentDiv.innerHTML = defaultFriendly;
+        }
+      }
+
+      traitItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          const tid = item.getAttribute('data-tid');
+          if (tid) showExplanation(tid);
+        });
+        item.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const tid = item.getAttribute('data-tid');
+            if (tid) showExplanation(tid);
+          }
+        });
+      });
+
+      resetBtn.addEventListener('click', () => {
+        clearActive();
+        contentDiv.innerHTML = defaultFriendly;
+      });
+
+      // initial display
+      showExplanation(null);
+    })();
+  </script>
+</body>
+</html>

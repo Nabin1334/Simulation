@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellbeing Pro | Cause-Effect Simulator</title>
+    <style>
+        :root {
+            /* Dynamic variables that JS will update */
+            --theme-hue: 200; 
+            --bg-gradient: linear-gradient(135deg, hsl(var(--theme-hue), 40%, 85%), hsl(var(--theme-hue), 30%, 75%));
+            --accent: hsl(var(--theme-hue), 60%, 35%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: background 1s ease;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+            padding: 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 3rem;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        @media (max-width: 950px) { .dashboard { grid-template-columns: 1fr; padding: 1.5rem; } }
+
+        /* Left side: Controls */
+        .controls h1 { color: var(--accent); font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 2rem; font-size: 1.1rem; }
+
+        .control-group { margin-bottom: 2rem; }
+        .label-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-weight: 600; color: #444; }
+        .val-badge { background: var(--accent); color: white; padding: 2px 12px; border-radius: 20px; font-size: 0.9rem; }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 8px; background: #ddd; border-radius: 10px; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 24px; height: 24px; background: white; border: 3px solid var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .habit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem; }
+        .habit-btn {
+            background: white; border: 2px solid #eee; padding: 12px; border-radius: 15px; cursor: pointer; transition: 0.2s; font-weight: 500; text-align: left; display: flex; align-items: center; gap: 8px;
+        }
+        .habit-btn.active { border-color: var(--accent); background: hsl(var(--theme-hue), 80%, 96%); }
+
+        /* Right side: Visualizers */
+        .metrics { display: flex; flex-direction: column; gap: 1.5rem; }
+        .pillar-card { background: white; padding: 1.2rem; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .pillar-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .progress-track { height: 12px; background: #eee; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67), background 0.3s; }
+
+        .score-box {
+            background: var(--accent); color: white; padding: 2rem; border-radius: 30px; text-align: center; margin-top: 1rem;
+        }
+        .score-circle { font-size: 4rem; font-weight: 800; display: block; line-height: 1; }
+
+        /* Advisor Panel */
+        .advisor {
+            margin-top: 1rem; padding: 1.5rem; background: #fff; border-radius: 20px; border-left: 6px solid var(--accent); font-size: 0.95rem; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="controls">
+        <h1>Wellbeing Sim</h1>
+        <p class="subtitle">Simulate how daily choices impact your long-term health metrics.</p>
+
+        <div class="control-group">
+            <div class="label-row"><span>🖥️ Screen Leisure</span> <span class="val-badge" id="scr-v">4h</span></div>
+            <input type="range" id="scr-s" min="0" max="14" step="0.5" value="4">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row"><span>🏃 Physical Activity</span> <span class="val-badge" id="act-v">30m</span></div>
+            <input type="range" id="act-s" min="0" max="120" step="5" value="30">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row"><span>😴 Sleep Duration</span> <span class="val-badge" id="slp-v">7h</span></div>
+            <input type="range" id="slp-s" min="4" max="11" step="0.5" value="7">
+        </div>
+
+        <h3>Positive Habits</h3>
+        <div class="habit-grid">
+            <button class="habit-btn" onclick="toggleH(this, 'noph')" title="Eating without screens">📵 No-Phone Meals</button>
+            <button class="habit-btn" onclick="toggleH(this, 'soci')" title="Face-to-face interaction">👥 Social Meetup</button>
+            <button class="habit-btn" onclick="toggleH(this, 'sun')" title="15 mins of morning sun">☀️ Morning Light</button>
+            <button class="habit-btn" onclick="toggleH(this, 'book')" title="Reading before bed">📖 Paper Book</button>
+        </div>
+    </div>
+
+    <div class="metrics">
+        <div class="pillar-card">
+            <div class="pillar-header"><span>🧠 Mental Energy</span> <span id="m-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="m-bar"></div></div>
+        </div>
+        <div class="pillar-card">
+            <div class="pillar-header"><span>💪 Physical Health</span> <span id="p-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="p-bar"></div></div>
+        </div>
+        <div class="pillar-card">
+            <div class="pillar-header"><span>📱 Digital Balance</span> <span id="d-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="d-bar"></div></div>
+        </div>
+
+        <div class="score-box">
+            <span style="font-weight: 600; opacity: 0.9;">Wellbeing Index</span>
+            <span class="score-circle" id="total-score">0</span>
+            <p id="rank">Analyzing...</p>
+        </div>
+
+        <div class="advisor" id="adv-text">
+            Adjust the sliders to begin your simulation.
+        </div>
+    </div>
+</div>
+
+<script>
+    const state = { noph: false, soci: false, sun: false, book: false };
+    
+    function toggleH(btn, key) {
+        state[key] = !state[key];
+        btn.classList.toggle('active');
+        update();
+    }
+
+    function getAdvice(lowestPillar, score) {
+        if (score < 40) return "⚠️ **Critical Imbalance:** Your habits are leading to burnout. Prioritize sleep and immediate screen reduction.";
+        
+        const advice = {
+            mental: "Try 'Non-Sleep Deep Rest' (NSDR) or meditation to recover your mental focus.",
+            physical: "Even a 10-minute walk improves insulin sensitivity and clears cortisol.",
+            digital: "Your brain is overstimulated. Try a 'Grey-scale' mode on your phone to reduce its appeal."
+        };
+        return `💡 **Pro Tip:** ${advice[lowestPillar]}`;
+    }
+
+    function update() {
+        // Values
+        const scr = parseFloat(document.getElementById('scr-s').value);
+        const act = parseFloat(document.getElementById('act-s').value);
+        const slp = parseFloat(document.getElementById('slp-s').value);
+
+        document.getElementById('scr-v').innerText = scr + 'h';
+        document.getElementById('act-v').innerText = act + 'm';
+        document.getElementById('slp-v').innerText = slp + 'h';
+
+        // 1. Digital Formula (Non-linear: screens over 6h hurt 2x more)
+        let d = 85 - (scr * 6);
+        if (scr > 6) d -= (scr - 6) * 10; 
+        if (state.noph) d += 10;
+        if (state.book) d += 5;
+
+        // 2. Physical Formula (Sleep is the foundation)
+        let p = (slp - 4) * 12; 
+        p += (act * 0.3);
+        if (scr > 8) p -= 15; // Sedentary penalty
+        if (state.sun) p += 10;
+
+        // 3. Mental Formula (Interaction between sleep and digital)
+        let m = (slp * 6) + (act * 0.1);
+        m -= (scr * 4);
+        if (state.soci) m += 15;
+        if (state.book) m += 10;
+        if (slp < 6 && scr > 8) m -= 20; // Compound fatigue
+
+        // Clamping
+        const clamp = (v) => Math.max(5, Math.min(100, Math.round(v)));
+        const finalM = clamp(m), finalP = clamp(p), finalD = clamp(d);
+
+        // Update UI
+        const setBar = (id, val) => {
+            const el = document.getElementById(id + '-bar');
+            const pct = document.getElementById(id + '-pct');
+            el.style.width = val + '%';
+            pct.innerText = val + '%';
+            // Dynamic color
+            el.style.background = val > 70 ? '#2ecc71' : val > 40 ? '#f1c40f' : '#e74c3c';
+        };
+
+        setBar('m', finalM); setBar('p', finalP); setBar('d', finalD);
+
+        const total = Math.round((finalM + finalP + finalD) / 3);
+        document.getElementById('total-score').innerText = total;
+
+        // Dynamic Theme Hue (Red: 0, Yellow: 50, Green: 140)
+        const hue = (total * 1.4); 
+        document.documentElement.style.setProperty('--theme-hue', hue);
+
+        // Advisor Logic
+        const pillars = [{n:'mental', v:finalM}, {n:'physical', v:finalP}, {n:'digital', v:finalD}];
+        const lowest = pillars.reduce((prev, curr) => (prev.v < curr.v) ? prev : curr);
+        document.getElementById('adv-text').innerHTML = getAdvice(lowest.n, total);
+
+        const ranks = ["At Risk", "Struggling", "Balanced", "Thriving", "Elite"];
+        document.getElementById('rank').innerText = ranks[Math.floor(total / 21)];
+    }
+
+    // Init
+    document.querySelectorAll('input').forEach(i => i.addEventListener('input', update));
+    update();
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: linear-gradient(145deg, #c9dbe9 0%, #b0c9de 100%);
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+/* main flex row - FULL SCREEN */
+.app-row {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  padding: 1.5rem 2rem;
+  gap: 2.5rem;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* ===== LEFT COLUMN (stacked, top) with controls at bottom ===== */
+.left-stacked {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.8rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  height: 100%;
+  min-height: 100%;
+}
+
+.big-toggle {
+  width: 100%;
+  padding: 1.8rem 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 50px;
+  background: white;
+  box-shadow: 0 16px 24px -12px #1a3b4e;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 4px solid transparent;
+}
+
+.big-toggle span {
+  font-size: 2.8rem;
+}
+
+.big-toggle.analog-btn {
+  color: #b45f06;
+  background: #fff1e0;
+}
+.big-toggle.digital-btn {
+  color: #1f3a4b;
+  background: #e7f0f8;
+}
+
+.big-toggle.active {
+  border-color: currentColor;
+  transform: scale(1.02);
+  box-shadow: 0 26px 32px -12px #0a3140;
+}
+
+.big-toggle.analog-btn.active {
+  background: #f39c12;
+  color: white;
+}
+.big-toggle.digital-btn.active {
+  background: #2c3e50;
+  color: white;
+}
+
+/* CONTROL BAR - inside left column, below digital button */
+.left-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.control-btn {
+  background: white;
+  border: none;
+  padding: 1.2rem 0.5rem;
+  border-radius: 40px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border: 2px solid #2c5f77;
+  color: #1b4f63;
+  cursor: pointer;
+  transition: 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.control-btn:hover {
+  background: #2c5f77;
+  color: white;
+}
+
+.speed-ctrl-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 40px;
+  border: 2px solid #2c5f77;
+  width: 100%;
+}
+.speed-ctrl-left span {
+  font-weight: 600;
+  color: #1b4f63;
+  font-size: 1.4rem;
+}
+.speed-ctrl-left input {
+  width: 120px;
+  accent-color: #2c5f77;
+}
+
+/* ===== RIGHT CONTENT ===== */
+.right-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  gap: 2.2rem;
+}
+
+/* SIGNAL CARD - STRETCHES TO FILL MAXIMUM SPACE */
+.signal-card {
+  background: white;
+  border-radius: 3.5rem;
+  padding: 2.5rem 2.2rem;
+  box-shadow: 0 30px 38px -18px #1e4059;
+  border: 2px solid rgba(255,255,255,0.9);
+  width: 100%;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.analog-card {
+  border-top: 14px solid #f39c12;
+}
+.digital-card {
+  border-top: 14px solid #2c3e50;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+.card-header .icon {
+  font-size: 3.8rem;
+}
+.card-header h2 {
+  font-size: 3.2rem;
+  font-weight: 700;
+}
+.analog-card .card-header h2 {
+  color: #b85e00;
+}
+.digital-card .card-header h2 {
+  color: #1a2634;
+}
+
+/* GRAPH BOX - centers the canvas both vertically and horizontally */
+.graph-box {
+  background: #f6fafd;
+  border-radius: 3rem;
+  padding: 1.5rem;
+  border: 1px solid #c5d5e5;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;      /* vertical centering */
+  justify-content: center;  /* horizontal centering */
+  min-height: 0;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  background: white;
+  border-radius: 2.5rem;
+  border: 1px solid #b3c9dd;
+  object-fit: contain;
+}
+
+.feature-mini {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  margin-top: 1rem;
+}
+.chip {
+  background: #eef4f9;
+  border-radius: 50px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.digital-card .chip {
+  background: #e3eaf1;
+}
+
+/* EXAMPLES CARD */
+.examples-card {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  border-radius: 3rem;
+  padding: 2.2rem 2.2rem;
+  box-shadow: 0 18px 26px -14px #14303f;
+  border: 2px solid rgba(255,255,240,0.7);
+  flex-shrink: 0;
+}
+
+.examples-card h4 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #113946;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 12px solid #f39c12;
+  padding-left: 1.4rem;
+}
+.examples-card.digital-examples h4 {
+  border-left-color: #2c3e50;
+}
+
+.example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.example-item {
+  background: white;
+  border-radius: 70px;
+  padding: 1.1rem 1.8rem;
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: #1f4a5e;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 6px 12px rgba(0,30,40,0.1);
+  border-left: 10px solid;
+}
+.analog-ex-item {
+  border-left-color: #f39c12;
+}
+.digital-ex-item {
+  border-left-color: #2c3e50;
+}
+.example-item span:first-child {
+  font-size: 2.5rem;
+}
+.ex-tag {
+  background: #dae7f2;
+  color: #0e3d52;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 0.3rem 1.5rem;
+  border-radius: 40px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ===== MOBILE OPTIMIZATION ===== */
+@media (max-width: 700px) {
+  .app-row {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1.2rem;
+  }
+  .left-stacked {
+    flex: auto;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    padding-top: 0;
+    height: auto;
+    min-height: auto;
+  }
+  .big-toggle {
+    flex: 1 1 140px;
+    padding: 1rem 0.3rem;
+    font-size: 1.3rem;
+  }
+  .big-toggle span {
+    font-size: 1.8rem;
+  }
+  .left-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 0;
+    width: 100%;
+  }
+  .control-btn {
+    flex: 1 1 auto;
+    padding: 0.8rem 1rem;
+    font-size: 1.2rem;
+  }
+  .speed-ctrl-left {
+    flex: 2 1 auto;
+    padding: 0.5rem 1rem;
+  }
+  .speed-ctrl-left input {
+    width: 100px;
+  }
+  .right-content {
+    gap: 1.2rem;
+  }
+  .signal-card {
+    padding: 1.5rem 1.2rem;
+  }
+  .card-header h2 {
+    font-size: 1.9rem;
+  }
+  .graph-box {
+    padding: 1rem;
+  }
+  .feature-mini {
+    gap: 0.8rem;
+  }
+  .chip {
+    font-size: 1.1rem;
+    padding: 0.4rem 1rem;
+  }
+  .examples-card {
+    padding: 1.2rem;
+  }
+  .example-item {
+    font-size: 1.2rem;
+    padding: 0.7rem 1rem;
+  }
+}

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Digital Communication </title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0f2a38 0%, #1a3a4a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .game-container {
+      width: 100%;
+      height: 100%;
+      background: rgba(20, 35, 45, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 40px;
+      padding: 20px;
+      border: 3px solid #f39c12;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .header h1 span {
+      font-size: 2.2rem;
+    }
+
+    .subhead {
+      background: #f39c12;
+      color: #0a1a2a;
+      padding: 5px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-block;
+    }
+
+    /* Game area */
+    .game-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    /* Journey path */
+    .journey-track {
+      background: #0a2530;
+      border-radius: 60px;
+      padding: 15px;
+      border: 2px solid #f39c12;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .station {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 1;
+    }
+
+    .station-icon {
+      width: 50px;
+      height: 50px;
+      background: #1e3f50;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      border: 2px solid #f39c12;
+      margin-bottom: 4px;
+      transition: all 0.3s;
+    }
+
+    .station.active .station-icon {
+      background: #f39c12;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #f39c12;
+    }
+
+    .station-label {
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .station-desc {
+      color: #bcd3e6;
+      font-size: 0.6rem;
+    }
+
+    .track-line {
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #f39c12, #2ecc71);
+      margin: 0 5px;
+    }
+
+    /* Message traveler */
+    .traveler-area {
+      background: #1e3f50;
+      border-radius: 30px;
+      padding: 20px;
+      border: 2px solid #f39c12;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .traveler-title {
+      color: #f39c12;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .message-carrier {
+      background: #0a2530;
+      border-radius: 30px;
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .packet-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    .packet {
+      width: 70px;
+      height: 70px;
+      background: #f39c12;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: float 2s infinite;
+      box-shadow: 0 5px 0 #b85e00;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .packet .emoji {
+      font-size: 2rem;
+    }
+
+    .packet .bits {
+      font-size: 0.7rem;
+      background: #0a1a2a;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .path-visual {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #f39c12;
+      font-size: 1.2rem;
+    }
+
+    .current-location {
+      background: #2a4a60;
+      border-radius: 30px;
+      padding: 10px 15px;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .location-name {
+      color: #f39c12;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .location-desc {
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    /* Controls */
+    .controls-area {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .control-btn {
+      background: #2a3a4a;
+      border: 2px solid #f39c12;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      min-width: 140px;
+      justify-content: center;
+    }
+
+    .control-btn:hover {
+      background: #f39c12;
+      color: #0a1a2a;
+    }
+
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+
+    .control-btn.reset {
+      background: #c0392b;
+      border-color: #e74c3c;
+    }
+
+    .control-btn.reset:hover {
+      background: #e74c3c;
+    }
+
+    /* Status panel */
+    .status-panel {
+      background: #0a2530;
+      border-radius: 30px;
+      padding: 15px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 1px solid #f39c12;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+    }
+
+    .status-badge {
+      background: #f39c12;
+      color: #0a1a2a;
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-weight: bold;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 12px;
+      background: #0a1a2a;
+      border-radius: 6px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f39c12, #2ecc71);
+      transition: width 0.3s;
+      border-radius: 6px;
+    }
+
+    /* Fun facts */
+    .fact-box {
+      background: #2a4a60;
+      border-radius: 20px;
+      padding: 10px 15px;
+      margin-top: 10px;
+      border-left: 6px solid #f39c12;
+    }
+
+    .fact-box p {
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .fact-box strong {
+      color: #f39c12;
+    }
+
+    @media (max-width: 700px) {
+      .journey-track { flex-wrap: wrap; }
+      .station { margin: 5px; }
+      .control-btn { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <span>🎮</span> Message Journey Game
+      </h1>
+      <div class="subhead">Send a message through the digital system</div>
+    </div>
+
+    <!-- Game Area -->
+    <div class="game-area">
+      
+      <!-- Journey Track (Stations) -->
+      <div class="journey-track">
+        <div class="station" id="stationSource">
+          <div class="station-icon">📝</div>
+          <div class="station-label">SOURCE</div>
+          <div class="station-desc">Input</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationEncoder">
+          <div class="station-icon">🔲</div>
+          <div class="station-label">ENCODER</div>
+          <div class="station-desc">ADC</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationTransmitter">
+          <div class="station-icon">📡</div>
+          <div class="station-label">TRANSMIT</div>
+          <div class="station-desc">Sender</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationChannel">
+          <div class="station-icon">🛣️</div>
+          <div class="station-label">CHANNEL</div>
+          <div class="station-desc">Path</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationReceiver">
+          <div class="station-icon">📻</div>
+          <div class="station-label">RECEIVER</div>
+          <div class="station-desc">Catcher</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationDecoder">
+          <div class="station-icon">🔓</div>
+          <div class="station-label">DECODER</div>
+          <div class="station-desc">DAC</div>
+        </div>
+        <div class="track-line"></div>
+        <div class="station" id="stationOutput">
+          <div class="station-icon">🔊</div>
+          <div class="station-label">OUTPUT</div>
+          <div class="station-desc">Display</div>
+        </div>
+      </div>
+
+      <!-- Traveler Area (Message Packet) -->
+      <div class="traveler-area">
+        <div class="traveler-title">
+          <span>📦</span> Message Packet Journey
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <!-- Packet visual -->
+        <div class="message-carrier">
+          <div class="packet-visual">
+            <div class="packet" id="movingPacket">
+              <span class="emoji" id="packetEmoji">📝</span>
+              <span class="bits" id="packetBits">Hello</span>
+            </div>
+            <div class="path-visual" id="pathArrows">
+              <span>⬅️</span> <span>📍</span> <span>➡️</span>
+            </div>
+          </div>
+
+          <!-- Current location display -->
+          <div class="current-location" id="locationDisplay">
+            <div class="location-name" id="locationName">SOURCE</div>
+            <div class="location-desc" id="locationDesc">Message is being created</div>
+          </div>
+        </div>
+
+        <!-- Fun fact -->
+        <div class="fact-box" id="factBox">
+          <p><strong>📌 Fun Fact:</strong> Your voice is analog, but your phone converts it to 0s and 1s to send it!</p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-area">
+        <button class="control-btn" id="nextBtn">
+          <span>⏩</span> Next Station
+        </button>
+        <button class="control-btn" id="autoBtn">
+          <span>▶️</span> Auto Journey
+        </button>
+        <button class="control-btn reset" id="resetBtn">
+          <span>⟲</span> Start Over
+        </button>
+      </div>
+
+      <!-- Status Panel -->
+      <div class="status-panel">
+        <div class="status-item">
+          <span>📍</span>
+          <span>Current: <strong id="currentStation">Source</strong></span>
+        </div>
+        <div class="status-item">
+          <span>📦</span>
+          <span>Message: <strong id="messageStatus">Hello</strong></span>
+        </div>
+        <div class="status-badge" id="stepCounter">Step 1/7</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Station data
+    const stations = [
+      {
+        name: 'SOURCE',
+        fullName: 'Source / Input',
+        desc: 'Creating the message',
+        icon: '📝',
+        bits: 'Hello',
+        fact: 'Your voice, a photo, or text starts here!',
+        nextBits: 'Hello'
+      },
+      {
+        name: 'ENCODER',
+        fullName: 'Encoder / ADC',
+        desc: 'Converting to 0s and 1s',
+        icon: '🔲',
+        bits: '01001000 01100101 01101100 01101100 01101111',
+        fact: 'Analog to Digital Converter (ADC) turns your voice into binary!',
+        nextBits: '01001000 01100101 01101100 01101100 01101111'
+      },
+      {
+        name: 'TRANSMITTER',
+        fullName: 'Transmitter',
+        desc: 'Sending the signal',
+        icon: '📡',
+        bits: '📶 📡 📶',
+        fact: 'The transmitter boosts the signal so it can travel far!',
+        nextBits: '📶 📡 📶'
+      },
+      {
+        name: 'CHANNEL',
+        fullName: 'Channel',
+        desc: 'Traveling through the path',
+        icon: '🛣️',
+        bits: '🚗 💨 🚗',
+        fact: 'Fiber optic cables use light! Radio waves travel at speed of light!',
+        nextBits: '🚗 💨 🚗'
+      },
+      {
+        name: 'RECEIVER',
+        fullName: 'Receiver',
+        desc: 'Catching the signal',
+        icon: '📻',
+        bits: '📡 📶',
+        fact: 'Your phone has a tiny antenna that catches signals from towers!',
+        nextBits: '01001000 01100101 01101100 01101100 01101111'
+      },
+      {
+        name: 'DECODER',
+        fullName: 'Decoder / DAC',
+        desc: 'Converting back to analog',
+        icon: '🔓',
+        bits: '01001000 01100101 01101100 01101100 01101111',
+        fact: 'Digital to Analog Converter (DAC) turns 0s and 1s back into sound!',
+        nextBits: 'Hello'
+      },
+      {
+        name: 'OUTPUT',
+        fullName: 'Output',
+        desc: 'Message delivered!',
+        icon: '🔊',
+        bits: 'Hello! 👋',
+        fact: 'Speaker, screen, or printer - you finally see/hear the message!',
+        nextBits: 'Hello! 👋'
+      }
+    ];
+
+    // DOM elements
+    const stationElements = [
+      document.getElementById('stationSource'),
+      document.getElementById('stationEncoder'),
+      document.getElementById('stationTransmitter'),
+      document.getElementById('stationChannel'),
+      document.getElementById('stationReceiver'),
+      document.getElementById('stationDecoder'),
+      document.getElementById('stationOutput')
+    ];
+
+    const packetEmoji = document.getElementById('packetEmoji');
+    const packetBits = document.getElementById('packetBits');
+    const locationName = document.getElementById('locationName');
+    const locationDesc = document.getElementById('locationDesc');
+    const factBox = document.getElementById('factBox');
+    const progressBar = document.getElementById('progressBar');
+    const currentStationSpan = document.getElementById('currentStation');
+    const messageStatus = document.getElementById('messageStatus');
+    const stepCounter = document.getElementById('stepCounter');
+
+    const nextBtn = document.getElementById('nextBtn');
+    const autoBtn = document.getElementById('autoBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // State
+    let currentIndex = 0;
+    let autoInterval = null;
+    let isAuto = false;
+
+    // Update display based on current station
+    function updateDisplay() {
+      // Update active station
+      stationElements.forEach((el, idx) => {
+        if (idx === currentIndex) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+
+      // Update packet visual
+      const station = stations[currentIndex];
+      packetEmoji.textContent = station.icon;
+      packetBits.textContent = station.bits;
+      
+      // Update location info
+      locationName.textContent = station.fullName;
+      locationDesc.textContent = station.desc;
+      currentStationSpan.textContent = station.name;
+      messageStatus.textContent = station.name === 'OUTPUT' ? 'Delivered!' : 'In transit';
+      
+      // Update fact
+      factBox.innerHTML = `<p><strong>📌 Fun Fact:</strong> ${station.fact}</p>`;
+      
+      // Update progress bar
+      const progress = ((currentIndex + 1) / stations.length) * 100;
+      progressBar.style.width = progress + '%';
+      
+      // Update step counter
+      stepCounter.textContent = `Step ${currentIndex + 1}/${stations.length}`;
+      
+      // Change packet color based on station
+      const packet = document.querySelector('.packet');
+      if (currentIndex === 0) packet.style.background = '#f39c12';
+      else if (currentIndex === 1) packet.style.background = '#3498db';
+      else if (currentIndex === 2) packet.style.background = '#e67e22';
+      else if (currentIndex === 3) packet.style.background = '#2ecc71';
+      else if (currentIndex === 4) packet.style.background = '#9b59b6';
+      else if (currentIndex === 5) packet.style.background = '#e74c3c';
+      else if (currentIndex === 6) packet.style.background = '#f1c40f';
+    }
+
+    // Go to next station
+    function nextStation() {
+      if (currentIndex < stations.length - 1) {
+        currentIndex++;
+        updateDisplay();
+      } else {
+        // Already at the end
+        if (autoInterval) {
+          clearInterval(autoInterval);
+          autoInterval = null;
+          isAuto = false;
+          autoBtn.innerHTML = '<span>▶️</span> Auto Journey';
+        }
+      }
+    }
+
+    // Reset to beginning
+    function resetJourney() {
+      currentIndex = 0;
+      updateDisplay();
+      
+      // Stop auto if running
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        isAuto = false;
+        autoBtn.innerHTML = '<span>▶️</span> Auto Journey';
+      }
+    }
+
+    // Toggle auto journey
+    function toggleAuto() {
+      if (isAuto) {
+        // Stop auto
+        clearInterval(autoInterval);
+        autoInterval = null;
+        isAuto = false;
+        autoBtn.innerHTML = '<span>▶️</span> Auto Journey';
+      } else {
+        // Start auto
+        if (currentIndex === stations.length - 1) {
+          resetJourney();
+        }
+        isAuto = true;
+        autoBtn.innerHTML = '<span>⏸️</span> Pause Journey';
+        autoInterval = setInterval(() => {
+          if (currentIndex < stations.length - 1) {
+            nextStation();
+          } else {
+            // Reached the end
+            clearInterval(autoInterval);
+            autoInterval = null;
+            isAuto = false;
+            autoBtn.innerHTML = '<span>▶️</span> Auto Journey';
+          }
+        }, 2000);
+      }
+    }
+
+    // Event listeners
+    nextBtn.addEventListener('click', nextStation);
+    autoBtn.addEventListener('click', toggleAuto);
+    resetBtn.addEventListener('click', resetJourney);
+
+    // Initialize
+    updateDisplay();
+  </script>
+</body>
+</html>

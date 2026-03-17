@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Wellbeing </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 50%, #fdf2f8 100%);
+            min-height: 100vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-icon svg {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Navigation */
+        .desktop-nav {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+                gap: 0.25rem;
+            }
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            color: #4b5563;
+        }
+
+        .nav-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn-mobile {
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .nav-btn-mobile.active {
+            color: #3b82f6;
+        }
+
+        .nav-btn-mobile:not(.active) {
+            color: #6b7280;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-nav {
+                display: none;
+            }
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            padding-bottom: 6rem;
+        }
+
+        @media (min-width: 768px) {
+            .main {
+                padding-bottom: 2rem;
+            }
+        }
+
+        .section {
+            display: block;
+        }
+
+        .section.hidden {
+            display: none;
+        }
+
+        /* Cards */
+        .hero-card {
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            color: white;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-card {
+                padding: 3rem;
+            }
+        }
+
+        .hero-card h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-card h2 {
+                font-size: 3rem;
+            }
+        }
+
+        .hero-card p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            max-width: 768px;
+        }
+
+        @media (min-width: 768px) {
+            .hero-card p {
+                font-size: 1.25rem;
+            }
+        }
+
+        .hero-btn {
+            background: white;
+            color: #3b82f6;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-btn:hover {
+            background: #f3f4f6;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Grid Layouts */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-box {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .icon-box.blue {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .icon-box.purple {
+            background: #ede9fe;
+            color: #9333ea;
+        }
+
+        .icon-box.green {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+
+        /* Utility Classes */
+        .space-y-8 > * + * {
+            margin-top: 2rem;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        .space-x-3 > * + * {
+            margin-left: 0.75rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-start {
+            align-items: flex-start;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .flex-shrink-0 {
+            flex-shrink: 0;
+        }
+
+        .w-6 {
+            width: 1.5rem;
+        }
+
+        .h-6 {
+            height: 1.5rem;
+        }
+
+        .rounded-full {
+            border-radius: 9999px;
+        }
+
+        .bg-red-100 {
+            background: #fee2e2;
+        }
+
+        .bg-blue-100 {
+            background: #dbeafe;
+        }
+
+        .bg-green-100 {
+            background: #dcfce7;
+        }
+
+        .bg-purple-100 {
+            background: #f3e8ff;
+        }
+
+        .text-red-600 {
+            color: #dc2626;
+        }
+
+        .text-blue-600 {
+            color: #3b82f6;
+        }
+
+        .text-green-600 {
+            color: #22c55e;
+        }
+
+        .text-purple-600 {
+            color: #9333ea;
+        }
+
+        .text-gray-600 {
+            color: #4b5563;
+        }
+
+        .text-gray-700 {
+            color: #374151;
+        }
+
+        .text-gray-800 {
+            color: #1f2937;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+
+        .mt-8 {
+            margin-top: 2rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+
+        .p-8 {
+            padding: 2rem;
+        }
+
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .px-8 {
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .rounded-xl {
+            border-radius: 0.75rem;
+        }
+
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+
+        .border {
+            border: 1px solid #e5e7eb;
+        }
+
+        .border-l-4 {
+            border-left-width: 4px;
+        }
+
+        .border-blue-500 {
+            border-color: #3b82f6;
+        }
+
+        .border-yellow-500 {
+            border-color: #eab308;
+        }
+
+        .bg-white {
+            background: white;
+        }
+
+        .bg-gray-50 {
+            background: #f9fafb;
+        }
+
+        .bg-blue-50 {
+            background: #eff6ff;
+        }
+
+        .bg-purple-50 {
+            background: #faf5ff;
+        }
+
+        .bg-green-50 {
+            background: #f0fdf4;
+        }
+
+        .bg-yellow-50 {
+            background: #fefce8;
+        }
+
+        .bg-red-100 {
+            background: #fee2e2;
+        }
+
+        .bg-green-100 {
+            background: #dcfce7;
+        }
+
+        .bg-yellow-100 {
+            background: #fef9c3;
+        }
+
+        .bg-gradient-to-br {
+            background: linear-gradient(to bottom right, var(--tw-gradient-stops));
+        }
+
+        .from-blue-50 {
+            --tw-gradient-from: #eff6ff;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(239, 246, 255, 0));
+        }
+
+        .from-purple-50 {
+            --tw-gradient-from: #faf5ff;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 245, 255, 0));
+        }
+
+        .from-green-50 {
+            --tw-gradient-from: #f0fdf4;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(240, 253, 244, 0));
+        }
+
+        .to-purple-50 {
+            --tw-gradient-to: #faf5ff;
+        }
+
+        .to-pink-50 {
+            --tw-gradient-to: #fdf2f8;
+        }
+
+        .to-teal-50 {
+            --tw-gradient-to: #f0fdfa;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .hover\:shadow-xl:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Range Input */
+        input[type=range] {
+            width: 100%;
+            height: 0.5rem;
+            background: #e5e7eb;
+            border-radius: 0.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: #3b82f6;
+            border-radius: 9999px;
+            cursor: pointer;
+        }
+
+        /* Quiz Options */
+        .quiz-option-btn {
+            width: 100%;
+            text-align: left;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+
+        .quiz-option-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .quiz-option-btn.selected {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-option-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Habit Grid */
+        .habit-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .habit-btn {
+            aspect-ratio: 1;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .habit-btn.completed {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .habit-btn:hover:not(.completed) {
+            border-color: #86efac;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #22c55e;
+            border-radius: 9999px;
+            transition: width 0.3s;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 3rem;
+            padding-bottom: 5rem;
+        }
+
+        @media (min-width: 768px) {
+            .footer {
+                padding-bottom: 2rem;
+            }
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #4b5563;
+        }
+
+        .footer .small {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .h-24 {
+            height: 6rem;
+        }
+
+        .w-24 {
+            width: 6rem;
+        }
+
+        .inline-flex {
+            display: inline-flex;
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .sm\:flex-row {
+            flex-direction: row;
+        }
+
+        @media (min-width: 640px) {
+            .sm\:flex-row {
+                flex-direction: row;
+            }
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .opacity-50 {
+            opacity: 0.5;
+        }
+
+        .cursor-not-allowed {
+            cursor: not-allowed;
+        }
+
+        .scale-105 {
+            transform: scale(1.05);
+        }
+
+        .aspect-square {
+            aspect-ratio: 1 / 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Digital Wellbeing Cautions</h1>
+                </div>
+            </div>
+            <nav class="desktop-nav" id="desktop-nav">
+                <button onclick="setActiveSection('home')" data-section="home" class="nav-btn active">Home</button>
+                <button onclick="setActiveSection('learn')" data-section="learn" class="nav-btn">Learn</button>
+                <button onclick="setActiveSection('activity')" data-section="activity" class="nav-btn">Activity</button>
+                <button onclick="setActiveSection('quiz')" data-section="quiz" class="nav-btn">Quiz</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobile-nav">
+        <button onclick="setActiveSection('home')" data-section="home" class="nav-btn-mobile active">Home</button>
+        <button onclick="setActiveSection('learn')" data-section="learn" class="nav-btn-mobile">Learn</button>
+        <button onclick="setActiveSection('activity')" data-section="activity" class="nav-btn-mobile">Activity</button>
+        <button onclick="setActiveSection('quiz')" data-section="quiz" class="nav-btn-mobile">Quiz</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Section -->
+        <section id="section-home" class="section">
+            <div class="space-y-8">
+                <div class="hero-card">
+                    <h2>Master Your Digital Life</h2>
+                    <p>Learn how to maintain a healthy relationship with technology and develop digital wellbeing skills for a balanced lifestyle.</p>
+                    <button onclick="setActiveSection('learn')" class="hero-btn">Start Learning</button>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="icon-box blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Track Your Time</h3>
+                        <p style="color: #4b5563;">Monitor how much time you spend on digital devices daily</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon-box purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Set Limits</h3>
+                        <p style="color: #4b5563;">Establish healthy boundaries for app usage and screen time</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon-box green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Build Habits</h3>
+                        <p style="color: #4b5563;">Develop sustainable digital wellbeing habits for life</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 1.5rem;">Why Digital Wellbeing Matters</h3>
+                    <div class="grid-2">
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0" style="margin-top: 0.25rem;">
+                                    <span style="color: #dc2626; font-size: 0.875rem; font-weight: bold;">!</span>
+                                </div>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Addiction Impact</h4>
+                                    <p style="color: #4b5563; font-size: 0.875rem;">Digital technology addiction makes our lifestyle chaotic and affects mental health</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0" style="margin-top: 0.25rem;">
+                                    <span style="color: #3b82f6; font-size: 0.875rem; font-weight: bold;">✓</span>
+                                </div>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Awareness is Key</h4>
+                                    <p style="color: #4b5563; font-size: 0.875rem;">Understanding the effects of unnecessary technology use is the first step</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0" style="margin-top: 0.25rem;">
+                                    <span style="color: #22c55e; font-size: 0.875rem; font-weight: bold;">✓</span>
+                                </div>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Practical Solutions</h4>
+                                    <p style="color: #4b5563; font-size: 0.875rem;">Digital wellbeing apps help reduce screen time effectively</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0" style="margin-top: 0.25rem;">
+                                    <span style="color: #9333ea; font-size: 0.875rem; font-weight: bold;">✓</span>
+                                </div>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Long-term Benefits</h4>
+                                    <p style="color: #4b5563; font-size: 0.875rem;">Better sleep, improved focus, and healthier relationships</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learn Section -->
+        <section id="section-learn" class="section hidden">
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin-bottom: 1.5rem;">Understanding Digital Wellbeing</h2>
+                    <div>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-6" style="border-radius: 0 0.75rem 0.75rem 0; margin-bottom: 1.5rem;">
+                            <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e40af; margin-bottom: 0.75rem;">What is Digital Wellbeing?</h3>
+                            <p style="color: #374151; line-height: 1.625;">
+                                Digital wellbeing skills are necessary to have awareness of the possible effects of the unnecessary use of digital technology. 
+                                It helps maintain a balanced relationship with technology and prevents addiction.
+                            </p>
+                        </div>
+
+                        <div class="grid-2" style="margin-bottom: 2rem;">
+                            <div class="card" style="background: linear-gradient(135deg, #faf5ff, #fdf2f8);">
+                                <h4 style="font-weight: bold; color: #6b21a8; margin-bottom: 0.75rem; display: flex; align-items: center;">
+                                    <svg width="20" height="20" style="margin-right: 0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 16v-4M12 8h.01"/>
+                                    </svg>
+                                    Long-term Effects
+                                </h4>
+                                <ul class="space-y-2" style="color: #374151;">
+                                    <li class="flex items-start"><span style="color: #ef4444; margin-right: 0.5rem;">•</span> Chaotic lifestyle</li>
+                                    <li class="flex items-start"><span style="color: #ef4444; margin-right: 0.5rem;">•</span> Digital addiction</li>
+                                    <li class="flex items-start"><span style="color: #ef4444; margin-right: 0.5rem;">•</span> Reduced productivity</li>
+                                    <li class="flex items-start"><span style="color: #ef4444; margin-right: 0.5rem;">•</span> Sleep disturbances</li>
+                                </ul>
+                            </div>
+                            <div class="card" style="background: linear-gradient(135deg, #f0fdf4, #f0fdfa);">
+                                <h4 style="font-weight: bold; color: #166534; margin-bottom: 0.75rem; display: flex; align-items: center;">
+                                    <svg width="20" height="20" style="margin-right: 0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                    Solutions
+                                </h4>
+                                <ul class="space-y-2" style="color: #374151;">
+                                    <li class="flex items-start"><span style="color: #22c55e; margin-right: 0.5rem;">✓</span> Separate screen time</li>
+                                    <li class="flex items-start"><span style="color: #22c55e; margin-right: 0.5rem;">✓</span> Set time limits for social media</li>
+                                    <li class="flex items-start"><span style="color: #22c55e; margin-right: 0.5rem;">✓</span> Turn off mobile notifications at work</li>
+                                    <li class="flex items-start"><span style="color: #22c55e; margin-right: 0.5rem;">✓</span> Use digital wellbeing apps</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6" style="border-radius: 0 0.75rem 0.75rem 0;">
+                            <h3 style="font-size: 1.25rem; font-weight: bold; color: #854d0e; margin-bottom: 0.75rem;">Popular Digital Wellbeing Apps</h3>
+                            <div class="grid-4">
+                                <div class="card" style="text-align: center; padding: 1rem;">
+                                    <div style="width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); border-radius: 0.5rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: white; font-weight: bold; font-size: 0.875rem;">B</span>
+                                    </div>
+                                    <p style="font-size: 0.875rem; font-weight: 500; color: #374151;">Beta</p>
+                                </div>
+                                <div class="card" style="text-align: center; padding: 1rem;">
+                                    <div style="width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); border-radius: 0.5rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: white; font-weight: bold; font-size: 0.875rem;">A</span>
+                                    </div>
+                                    <p style="font-size: 0.875rem; font-weight: 500; color: #374151;">Action Dash</p>
+                                </div>
+                                <div class="card" style="text-align: center; padding: 1rem;">
+                                    <div style="width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); border-radius: 0.5rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: white; font-weight: bold; font-size: 0.875rem;">D</span>
+                                    </div>
+                                    <p style="font-size: 0.875rem; font-weight: 500; color: #374151;">Digital Detox</p>
+                                </div>
+                                <div class="card" style="text-align: center; padding: 1rem;">
+                                    <div style="width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #60a5fa, #a78bfa); border-radius: 0.5rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: white; font-weight: bold; font-size: 0.875rem;">M</span>
+                                    </div>
+                                    <p style="font-size: 0.875rem; font-weight: 500; color: #374151;">Microsoft Launcher</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="flex items-center justify-between" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Quick Tips</h3>
+                        <button id="toggle-tips-btn" onclick="toggleTips()" class="hero-btn" style="background: #3b82f6; color: white; padding: 0.5rem 1rem;">Show Tips</button>
+                    </div>
+                    <div id="quick-tips-container" class="hidden grid-3 animate-fadeIn">
+                        <!-- Tips will be inserted by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Section -->
+        <section id="section-activity" class="section hidden">
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Activity</h2>
+                    <p style="color: #4b5563; margin-bottom: 1.5rem;">Use of the Digital Wellbeing Application</p>
+
+                    <!-- Screen Time Tracker -->
+                    <div class="card" style="background: linear-gradient(135deg, #eff6ff, #faf5ff); margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center;">
+                            <svg width="24" height="24" style="margin-right: 0.5rem; color: #3b82f6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            Screen Time Tracker
+                        </h3>
+                        
+                        <div class="grid-2" style="gap: 1.5rem;">
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Your Daily Goal (hours)</label>
+                                <input type="range" id="goal-range" min="1" max="12" value="4" oninput="updateScreenTimeUI()" style="width: 100%;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #4b5563; margin-top: 0.25rem;">
+                                    <span>1h</span>
+                                    <span style="font-weight: bold; color: #3b82f6;" id="goal-val">4h</span>
+                                    <span>12h</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem;">Current Screen Time (hours)</label>
+                                <input type="range" id="current-range" min="0" max="16" step="0.5" value="6.5" oninput="updateScreenTimeUI()" style="width: 100%;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #4b5563; margin-top: 0.25rem;">
+                                    <span>0h</span>
+                                    <span style="font-weight: bold; color: #dc2626;" id="current-val">6.5h</span>
+                                    <span>16h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="status-box" class="mt-6 p-4 rounded-xl" style="background: #fee2e2;">
+                            <p id="status-message" style="font-weight: 600; color: #dc2626;">You're significantly over your goal!</p>
+                            <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #4b5563;">
+                                Difference: <span id="status-diff" style="color: #dc2626; font-weight: bold;">+2.5 hours</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- App Features -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem;">Key Features of Digital Wellbeing Apps</h3>
+                        <div class="grid-2" style="gap: 1rem;">
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">📊</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Screen Time Monitoring</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Track daily usage of each app</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">⌛</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">App Timers</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Set time limits for specific applications</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">🔕</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Notification Management</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Turn off or schedule notifications</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">🎯</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Focus Mode</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Block distracting apps during work/study</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">🌙</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Bedtime Mode</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Schedule phone downtime for better sleep</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3" style="background: #f9fafb; border-radius: 0.5rem; padding: 1rem;">
+                                <span style="font-size: 1.5rem;">📈</span>
+                                <div>
+                                    <h4 style="font-weight: 600; color: #1f2937;">Usage Reports</h4>
+                                    <p style="font-size: 0.875rem; color: #4b5563;">Weekly and monthly usage statistics</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Habit Tracker -->
+                    <div class="card" style="background: linear-gradient(135deg, #f0fdf4, #f0fdfa);">
+                        <h3 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center;">
+                            <svg width="24" height="24" style="margin-right: 0.5rem; color: #22c55e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            7-Day Digital Wellbeing Challenge
+                        </h3>
+                        <p style="color: #4b5563; margin-bottom: 1rem; font-size: 0.875rem;">Track your progress for one week!</p>
+                        <div class="habit-grid" id="habit-grid">
+                            <!-- Habit buttons will be inserted here -->
+                        </div>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <p style="font-size: 0.875rem; color: #4b5563;">Days completed: <span style="font-weight: bold; color: #22c55e;" id="habit-count">0/7</span></p>
+                            <div class="progress-bar">
+                                <div id="habit-progress" class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="section-quiz" class="section hidden">
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 style="font-size: 1.875rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">Knowledge Check</h2>
+                    <p style="color: #4b5563; margin-bottom: 1.5rem;">Test your understanding of digital wellbeing</p>
+
+                    <div id="quiz-content" class="space-y-6">
+                        <!-- Quiz questions will be inserted here -->
+                    </div>
+
+                    <div id="quiz-result" class="hidden text-center">
+                        <div id="result-score-container" class="inline-flex h-24 w-24 items-center justify-center rounded-full mb-6" style="background: #dcfce7; color: #22c55e;">
+                            <span id="result-score" style="font-size: 2rem; font-weight: bold;">0/5</span>
+                        </div>
+                        <h3 id="result-title" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #22c55e;">Good Job!</h3>
+                        <p id="result-text" style="color: #4b5563; margin-bottom: 1.5rem; max-width: 28rem; margin-left: auto; margin-right: auto;"></p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; justify-content: center;">
+                            <button onclick="resetQuiz()" class="hero-btn" style="background: #3b82f6; color: white;">Try Again</button>
+                            <button onclick="setActiveSection('learn')" class="hero-btn" style="background: #e5e7eb; color: #374151;">Review Material</button>
+                        </div>
+                        <div style="margin-top: 2rem; text-align: left; background: #f9fafb; border-radius: 0.75rem; padding: 1.5rem;">
+                            <h4 style="font-weight: bold; color: #1f2937; margin-bottom: 1rem;">Answer Key:</h4>
+                            <div id="answer-key" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 1rem;"></p>
+        </div>
+    </footer>
+
+    <script>
+        // State
+        let activeSection = 'home';
+        let screenTimeGoal = 4;
+        let currentScreenTime = 6.5;
+        let habitTracker = [false, false, false, false, false, false, false];
+        let selectedAnswers = {};
+        let showTips = false;
+
+        const quizQuestions = [
+            {
+                question: "What is digital wellbeing?",
+                options: ["Using digital devices all day", "Maintaining a healthy relationship with technology", "Installing as many apps as possible", "Never using smartphones"],
+                correct: 1
+            },
+            {
+                question: "Which of these is NOT a digital wellbeing app?",
+                options: ["Beta", "Action Dash", "Instagram", "Digital Detox"],
+                correct: 2
+            },
+            {
+                question: "What is a recommended habit for digital wellbeing?",
+                options: ["Keeping notifications on all the time", "Setting time limits for social media", "Using phones before sleep", "Checking phones every 5 minutes"],
+                correct: 1
+            },
+            {
+                question: "How can you reduce screen time effectively?",
+                options: ["Use digital wellbeing applications", "Delete all apps", "Buy a new phone", "Ignore the problem"],
+                correct: 0
+            },
+            {
+                question: "What are the long-term effects of excessive digital device use?",
+                options: ["Improved health", "Chaotic lifestyle and addiction", "Better sleep quality", "Increased productivity"],
+                correct: 1
+            }
+        ];
+
+        const tips = [
+            { icon: '📱', title: 'No Phone Zones', desc: 'Keep bedrooms phone-free for better sleep' },
+            { icon: '⏰', title: 'Time Blocks', desc: 'Schedule specific times for checking devices' },
+            { icon: '🔕', title: 'Notification Control', desc: 'Turn off non-essential notifications' },
+            { icon: '👨‍‍👧‍', title: 'Family Time', desc: 'Have device-free meals with family' },
+            { icon: '📚', title: 'Study Mode', desc: 'Use focus apps during study sessions' },
+            { icon: '🌙', title: 'Digital Sunset', desc: 'Stop using screens 1 hour before bed' }
+        ];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHabitGrid();
+            renderQuiz();
+            updateScreenTimeUI();
+            renderTips();
+        });
+
+        // UI Handlers
+        function setActiveSection(section) {
+            activeSection = section;
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+
+            // Update desktop nav buttons
+            document.querySelectorAll('.desktop-nav .nav-btn').forEach(btn => {
+                if (btn.dataset.section === section) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update mobile nav buttons
+            document.querySelectorAll('.mobile-nav .nav-btn-mobile').forEach(btn => {
+                if (btn.dataset.section === section) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Tips Toggle
+        function toggleTips() {
+            showTips = !showTips;
+            const container = document.getElementById('quick-tips-container');
+            const btn = document.getElementById('toggle-tips-btn');
+            
+            if (showTips) {
+                container.classList.remove('hidden');
+                btn.textContent = 'Hide Tips';
+            } else {
+                container.classList.add('hidden');
+                btn.textContent = 'Show Tips';
+            }
+        }
+
+        function renderTips() {
+            const container = document.getElementById('quick-tips-container');
+            container.innerHTML = tips.map(tip => `
+                <div class="card" style="background: linear-gradient(135deg, #f9fafb, white); padding: 1rem; border: 1px solid #e5e7eb;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">${tip.icon}</div>
+                    <h4 style="font-weight: bold; color: #1f2937; margin-bottom: 0.25rem;">${tip.title}</h4>
+                    <p style="font-size: 0.875rem; color: #4b5563;">${tip.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        // Screen Time Tracker
+        function updateScreenTimeUI() {
+            const goalRange = document.getElementById('goal-range');
+            const currentRange = document.getElementById('current-range');
+            const goalVal = document.getElementById('goal-val');
+            const currentVal = document.getElementById('current-val');
+            const statusBox = document.getElementById('status-box');
+            const statusMsg = document.getElementById('status-message');
+            const statusDiff = document.getElementById('status-diff');
+
+            if (!goalRange || !currentRange) return;
+
+            screenTimeGoal = parseFloat(goalRange.value);
+            currentScreenTime = parseFloat(currentRange.value);
+
+            goalVal.textContent = screenTimeGoal + 'h';
+            currentVal.textContent = currentScreenTime + 'h';
+
+            const diff = currentScreenTime - screenTimeGoal;
+            const diffText = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' hours';
+
+            if (currentScreenTime <= screenTimeGoal) {
+                statusBox.className = "mt-6 p-4 rounded-xl";
+                statusBox.style.background = "#dcfce7";
+                statusMsg.className = "font-semibold";
+                statusMsg.style.color = "#16a34a";
+                statusMsg.textContent = "Great job! You're within your goal.";
+                statusDiff.style.color = "#16a34a";
+                currentVal.style.color = "#16a34a";
+            } else if (currentScreenTime <= screenTimeGoal + 2) {
+                statusBox.className = "mt-6 p-4 rounded-xl";
+                statusBox.style.background = "#fef9c3";
+                statusMsg.className = "font-semibold";
+                statusMsg.style.color = "#ca8a04";
+                statusMsg.textContent = "You're slightly over. Try to reduce.";
+                statusDiff.style.color = "#ca8a04";
+                currentVal.style.color = "#ca8a04";
+            } else {
+                statusBox.className = "mt-6 p-4 rounded-xl";
+                statusBox.style.background = "#fee2e2";
+                statusMsg.className = "font-semibold";
+                statusMsg.style.color = "#dc2626";
+                statusMsg.textContent = "You're significantly over your goal!";
+                statusDiff.style.color = "#dc2626";
+                currentVal.style.color = "#dc2626";
+            }
+            statusDiff.textContent = diffText;
+        }
+
+        // Habit Tracker
+        function renderHabitGrid() {
+            const grid = document.getElementById('habit-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = habitTracker.map((completed, i) => `
+                <button onclick="toggleHabit(${i})" class="habit-btn ${completed ? 'completed' : ''}">
+                    ${completed ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>' : (i + 1)}
+                </button>
+            `).join('');
+
+            const completedCount = habitTracker.filter(Boolean).length;
+            document.getElementById('habit-count').textContent = `${completedCount}/7`;
+            document.getElementById('habit-progress').style.width = `${(completedCount/7)*100}%`;
+        }
+
+        function toggleHabit(index) {
+            habitTracker[index] = !habitTracker[index];
+            renderHabitGrid();
+        }
+
+        // Quiz Logic
+        function renderQuiz() {
+            const content = document.getElementById('quiz-content');
+            if (!content) return;
+            
+            content.innerHTML = quizQuestions.map((q, qIdx) => `
+                <div class="card" style="background: #f9fafb;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937; margin-bottom: 1rem;">Question ${qIdx + 1}: ${q.question}</h3>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, oIdx) => `
+                            <button onclick="handleQuizAnswer(${qIdx}, ${oIdx})" id="q${qIdx}-o${oIdx}" class="quiz-option-btn">
+                                <span style="font-weight: 500; margin-right: 0.5rem;">${String.fromCharCode(65 + oIdx)}.</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('') + `
+                <button id="submit-quiz-btn" onclick="submitQuiz()" disabled class="w-full" style="background: linear-gradient(135deg, #3b82f6, #9333ea); color: white; padding: 1rem; border-radius: 0.75rem; font-weight: 600; border: none; cursor: pointer; opacity: 0.5; transition: all 0.2s;">
+                    Submit Quiz (0/5 answered)
+                </button>
+            `;
+        }
+
+        function handleQuizAnswer(qIdx, oIdx) {
+            selectedAnswers[qIdx] = oIdx;
+            
+            // UI Update for options
+            document.querySelectorAll(`[id^="q${qIdx}-o"]`).forEach(btn => {
+                btn.className = "quiz-option-btn";
+            });
+            const selectedBtn = document.getElementById(`q${qIdx}-o${oIdx}`);
+            selectedBtn.className = "quiz-option-btn selected";
+
+            // Update submit button
+            const answeredCount = Object.keys(selectedAnswers).length;
+            const submitBtn = document.getElementById('submit-quiz-btn');
+            submitBtn.textContent = `Submit Quiz (${answeredCount}/5 answered)`;
+            if (answeredCount === 5) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            }
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            quizQuestions.forEach((q, i) => {
+                if (selectedAnswers[i] === q.correct) score++;
+            });
+
+            document.getElementById('quiz-content').classList.add('hidden');
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.classList.remove('hidden');
+
+            const scoreContainer = document.getElementById('result-score-container');
+            const scoreText = document.getElementById('result-score');
+            const title = document.getElementById('result-title');
+            const text = document.getElementById('result-text');
+
+            scoreText.textContent = `${score}/5`;
+            
+            if (score >= 4) {
+                scoreContainer.style.background = "#dcfce7";
+                scoreContainer.style.color = "#22c55e";
+                title.textContent = "Excellent! 🎉";
+                title.style.color = "#22c55e";
+                text.textContent = "You have a great understanding of digital wellbeing concepts!";
+            } else if (score >= 3) {
+                scoreContainer.style.background = "#fef9c3";
+                scoreContainer.style.color = "#ca8a04";
+                title.textContent = "Good Job! 👍";
+                title.style.color = "#ca8a04";
+                text.textContent = "You're on the right track! Review the learning materials to improve.";
+            } else {
+                scoreContainer.style.background = "#fee2e2";
+                scoreContainer.style.color = "#dc2626";
+                title.textContent = "Keep Learning! 📚";
+                title.style.color = "#dc2626";
+                text.textContent = "Don't worry! Go through the learning section and try again.";
+            }
+
+            // Render Answer Key
+            const key = document.getElementById('answer-key');
+            key.innerHTML = quizQuestions.map((q, i) => `
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <span style="font-weight: 600; color: #374151;">${i + 1}.</span>
+                    <div>
+                        <p style="color: #1f2937;">${q.question}</p>
+                        <p style="color: #22c55e; font-weight: 500; font-size: 0.875rem;">✓ ${q.options[q.correct]}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            selectedAnswers = {};
+            document.getElementById('quiz-content').classList.remove('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            renderQuiz();
+        }
+    </script>
+</body>
+</html>

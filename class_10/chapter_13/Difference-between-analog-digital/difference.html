@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>analog vs digital · perfect fit desktop + mobile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #c9dbe9 0%, #b0c9de 100%);
+      width: 100vw;
+      height: 100vh;                     /* strictly viewport, no scroll */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;                   /* kill all scrolling */
+      padding: 0;
+    }
+
+    /* FULL SCREEN CONTAINER - uses exact viewport dimensions */
+    .full-screen {
+      width: 100vw;
+      height: 100vh;                      /* exact fit */
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;                       /* reduced padding */
+      overflow: hidden;
+    }
+
+    /* COMPARISON CARD - DESKTOP VERSION (PERFECT FIT) */
+    .comparison-card {
+      background: white;
+      border-radius: 3rem;                  /* smaller radius to save space */
+      padding: 1.8rem 2rem;                  /* reduced padding */
+      box-shadow: 0 30px 40px -20px #1e4059;
+      border: 3px solid rgba(255,255,255,0.9);
+      width: 100%;
+      max-width: 1400px;                     /* limit width */
+      max-height: 95vh;                       /* never exceed viewport */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;                       /* no internal scroll */
+    }
+
+    .comparison-header {
+      text-align: center;
+      margin-bottom: 1.2rem;                  /* reduced */
+      flex-shrink: 0;
+    }
+    .comparison-header h2 {
+      font-size: 3rem;                         /* scaled down */
+      font-weight: 700;
+      color: #113946;
+      display: inline-block;
+      border-bottom: 5px solid #f39c12;
+      padding-bottom: 0.4rem;
+      line-height: 1.2;
+    }
+
+    .split-container {
+      display: flex;
+      gap: 1.5rem;                             /* reduced gap */
+      flex: 1;                                   /* take remaining height */
+      min-height: 0;                              /* flex overflow control */
+      overflow: hidden;
+    }
+
+    .signal-half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #f8fafc;
+      border-radius: 2.5rem;                     /* smaller radius */
+      padding: 1.5rem 1.5rem;                     /* reduced padding */
+      border: 4px solid;
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+    .signal-half:hover {
+      transform: translateY(-4px);
+    }
+
+    .analog-half {
+      border-color: #f39c12;
+    }
+    .digital-half {
+      border-color: #2c3e50;
+    }
+
+    .half-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;                       /* reduced */
+      flex-shrink: 0;
+    }
+    .half-header .icon {
+      font-size: 3rem;                            /* smaller */
+    }
+    .half-header h3 {
+      font-size: 2.4rem;                           /* scaled down */
+      font-weight: 700;
+    }
+    .analog-half .half-header h3 {
+      color: #b85e00;
+    }
+    .digital-half .half-header h3 {
+      color: #1a2634;
+    }
+
+    .graph-box-small {
+      background: white;
+      border-radius: 2.2rem;
+      padding: 1rem;                               /* reduced */
+      margin-bottom: 1rem;                          /* reduced */
+      border: 2px solid #c5d5e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+      flex-shrink: 0;
+    }
+    
+    .small-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 130px;                           /* cap height */
+      background: white;
+      border-radius: 2rem;
+      border: 1px solid #b3c9dd;
+    }
+
+    .diff-list {
+      list-style: none;
+      margin: 0.3rem 0 0.8rem;                     /* tighter */
+      flex: 1;                                        /* allow shrink */
+      overflow: hidden;                               /* no scroll */
+    }
+    .diff-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.6rem 0;                            /* reduced padding */
+      font-size: 1.4rem;                             /* smaller base */
+      border-bottom: 2px dashed #cbd6e4;
+    }
+    .diff-list li:last-child {
+      border-bottom: none;
+    }
+    .diff-list li span:first-child {
+      font-size: 2rem;                               /* smaller emoji */
+      min-width: 2.5rem;
+    }
+
+    .examples-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 0.4rem;
+      flex-shrink: 0;
+    }
+    .example-pill {
+      background: #eef4f9;
+      border-radius: 40px;
+      padding: 0.5rem 1.4rem;                        /* reduced */
+      font-size: 1.2rem;                              /* smaller */
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .digital-half .example-pill {
+      background: #e3eaf1;
+    }
+
+    /* ===== MOBILE OVERRIDES - ONLY WHEN SCREEN IS SMALL ===== */
+    @media (max-width: 800px) {
+      body {
+        overflow: hidden;                            /* still no scroll */
+      }
+      
+      .full-screen {
+        padding: 0.3rem;
+        align-items: center;
+      }
+      
+      .comparison-card {
+        border-radius: 2rem;
+        padding: 0.8rem 0.8rem;
+        max-height: 98vh;
+      }
+      
+      .comparison-header {
+        margin-bottom: 0.5rem;
+      }
+      
+      .comparison-header h2 {
+        font-size: 1.8rem;
+        border-bottom-width: 3px;
+        padding-bottom: 0.2rem;
+      }
+      
+      .split-container {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      
+      .signal-half {
+        padding: 0.8rem 0.8rem;
+        border-radius: 1.5rem;
+        border-width: 3px;
+      }
+      
+      .half-header {
+        gap: 6px;
+        margin-bottom: 0.4rem;
+      }
+      
+      .half-header .icon {
+        font-size: 1.8rem;
+      }
+      
+      .half-header h3 {
+        font-size: 1.3rem;
+      }
+      
+      .graph-box-small {
+        padding: 0.4rem;
+        border-radius: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .small-canvas {
+        max-height: 60px;
+        border-radius: 0.8rem;
+      }
+      
+      .diff-list {
+        margin: 0.1rem 0 0.3rem;
+      }
+      
+      .diff-list li {
+        gap: 6px;
+        padding: 0.2rem 0;
+        font-size: 0.8rem;
+      }
+      
+      .diff-list li span:first-child {
+        font-size: 1.1rem;
+        min-width: 1.5rem;
+      }
+      
+      .examples-mini {
+        gap: 0.3rem;
+        margin-top: 0.2rem;
+      }
+      
+      .example-pill {
+        padding: 0.2rem 0.7rem;
+        font-size: 0.7rem;
+        gap: 3px;
+      }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 400px) {
+      .comparison-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .half-header h3 {
+        font-size: 1.1rem;
+      }
+      
+      .small-canvas {
+        max-height: 50px;
+      }
+      
+      .diff-list li {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="full-screen">
+  <!-- MAIN COMPARISON CARD - PERFECT FIT ON ALL SCREENS -->
+  <div class="comparison-card">
+    <div class="comparison-header">
+      <h2>analog vs digital</h2>
+    </div>
+    
+    <div class="split-container">
+      <!-- ANALOG SIDE -->
+      <div class="signal-half analog-half">
+        <div class="half-header">
+          <span class="icon">🌊</span>
+          <h3>analog</h3>
+        </div>
+        <div class="graph-box-small">
+          <canvas id="analogCanvas" class="small-canvas" width="450" height="130"></canvas>
+        </div>
+        <ul class="diff-list">
+          <li><span>📈</span> Continuous signal</li>
+          <li><span>🎚️</span> Infinite possible values</li>
+          <li><span>🌊</span> Smooth, curvy wave</li>
+          <li><span>🔊</span> Human voice, old radio</li>
+          <li><span>🌡️</span> Mercury thermometer</li>
+        </ul>
+        <div class="examples-mini">
+          <span class="example-pill">🎤 microphone</span>
+          <span class="example-pill">📻 AM/FM</span>
+          <span class="example-pill">🎚️ volume dial</span>
+        </div>
+      </div>
+
+      <!-- DIGITAL SIDE -->
+      <div class="signal-half digital-half">
+        <div class="half-header">
+          <span class="icon">⚡</span>
+          <h3>digital</h3>
+        </div>
+        <div class="graph-box-small">
+          <canvas id="digitalCanvas" class="small-canvas" width="450" height="130"></canvas>
+        </div>
+        <ul class="diff-list">
+          <li><span>📊</span> Discrete signal</li>
+          <li><span>🎯</span> Only two values: 0 or 1</li>
+          <li><span>🔲</span> Square wave (on/off)</li>
+          <li><span>💻</span> Computers, smartphones</li>
+          <li><span>💡</span> LED (on/off)</li>
+        </ul>
+        <div class="examples-mini">
+          <span class="example-pill">💽 USB drive</span>
+          <span class="example-pill">⌨️ keyboard</span>
+          <span class="example-pill">📀 CD/DVD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // canvases - slightly shorter to fit perfectly
+    const analogCanvas = document.getElementById('analogCanvas');
+    const digitalCanvas = document.getElementById('digitalCanvas');
+    
+    analogCanvas.width = 450;
+    analogCanvas.height = 130;            // reduced from 140 to eliminate scroll
+    digitalCanvas.width = 450;
+    digitalCanvas.height = 130;
+
+    // animation
+    let phase = 0;
+    let speed = 1.0;
+
+    function drawAnalog(phaseRad) {
+      const ctx = analogCanvas.getContext('2d');
+      const w = analogCanvas.width, h = analogCanvas.height;
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+      
+      ctx.strokeStyle = '#d0deeb'; ctx.lineWidth = 1;
+      for (let i=0;i<=w;i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+      for (let j=0;j<=h;j+=30) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(w,j); ctx.stroke(); }
+      
+      ctx.beginPath(); ctx.strokeStyle = '#f39c12'; ctx.lineWidth = 4; ctx.shadowColor = '#f1c40f'; ctx.shadowBlur = 10;
+      const amp = 35, center = h/2;                // adjusted amplitude
+      for (let x=0; x<w; x++) {
+        let y = center + amp * Math.sin((x/w)*5*Math.PI + phaseRad);
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke(); ctx.shadowBlur = 0;
+      
+      ctx.fillStyle = '#d35400';
+      for (let x=25; x<w; x+=55) {
+        let y = center + amp * Math.sin((x/w)*5*Math.PI + phaseRad);
+        ctx.beginPath(); ctx.arc(x, y, 4, 0, 2*Math.PI); ctx.fill();
+      }
+    }
+
+    function drawDigital(phaseRad) {
+      const ctx = digitalCanvas.getContext('2d');
+      const w = digitalCanvas.width, h = digitalCanvas.height;
+      ctx.clearRect(0,0,w,h); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+      
+      ctx.strokeStyle = '#d0deeb'; ctx.lineWidth=1;
+      for (let i=0;i<=w;i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+      for (let j=0;j<=h;j+=30) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(w,j); ctx.stroke(); }
+      
+      const lowY = h-25, highY = 25, cycles = 2.8, cycleW = w/cycles;
+      ctx.beginPath(); ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 4; ctx.shadowColor = '#2d6a7f'; ctx.shadowBlur = 8;
+      for (let i=-2; i<=4; i++) {
+        let start = i*cycleW - (phaseRad*20)%cycleW;
+        let mid = start + cycleW/2, end = start + cycleW;
+        if (end < -30 || start > w+30) continue;
+        ctx.moveTo(start, lowY); ctx.lineTo(start, highY); ctx.lineTo(mid, highY); ctx.lineTo(mid, lowY); ctx.lineTo(end, lowY);
+      }
+      ctx.stroke(); ctx.shadowBlur = 0;
+      
+      ctx.fillStyle = '#1e3b4f';
+      for (let i=-2; i<=4; i++) {
+        let base = i*cycleW - (phaseRad*20)%cycleW;
+        if (base>=-20 && base<=w+20) { ctx.beginPath(); ctx.arc(base, lowY, 4, 0, 2*Math.PI); ctx.fill(); }
+        let high = base + cycleW/2;
+        if (high>=-20 && high<=w+20) { ctx.beginPath(); ctx.arc(high, highY, 4, 0, 2*Math.PI); ctx.fill(); }
+      }
+      
+      ctx.font = 'bold 12px Inter'; ctx.fillStyle = '#1e4a5f'; ctx.fillText('0', 15, h-15); ctx.fillText('1', 15, 30);
+    }
+
+    function animate() {
+      phase += 0.018 * speed;
+      drawAnalog(phase);
+      drawDigital(phase);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    drawAnalog(phase);
+    drawDigital(phase);
+  })();
+</script>
+</body>
+</html>

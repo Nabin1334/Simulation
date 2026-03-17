@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>analog · digital – separated files</title>
+  <link rel="stylesheet" href="signal.css">
+</head>
+<body>
+<div class="app-row">
+  <!-- LEFT: stacked buttons with controls below digital button -->
+  <div class="left-stacked">
+    <button class="big-toggle analog-btn active" id="btnAnalog">
+      <span>📡</span> analog
+    </button>
+    <button class="big-toggle digital-btn" id="btnDigital">
+      <span>💻</span> digital
+    </button>
+    
+    <!-- controls below the digital button -->
+    <div class="left-controls">
+      <button class="control-btn" id="playPauseBtn">⏸️ pause</button>
+      <div class="speed-ctrl-left">
+        <span>⚡</span>
+        <input type="range" id="speedSlider" min="0.2" max="3" value="1" step="0.1">
+      </div>
+      <button class="control-btn" id="resetPhaseBtn">⟲ reset</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: signal box with centered animation -->
+  <div class="right-content">
+    <!-- SIGNAL CARD - ANIMATION PERFECTLY CENTERED -->
+    <div id="analogSignalCard" class="signal-card analog-card">
+      <div class="card-header">
+        <span class="icon">🌊</span>
+        <h2>analog signal</h2>
+      </div>
+      <div class="graph-box">
+        <canvas id="analogCanvas" width="700" height="180"></canvas>
+      </div>
+      <div class="feature-mini">
+        <div class="chip"><span>📈</span> continuous</div>
+        <div class="chip"><span>🎚️</span> infinite values</div>
+        <div class="chip"><span>🌊</span> smooth wave</div>
+      </div>
+    </div>
+
+    <div id="digitalSignalCard" class="signal-card digital-card" style="display: none;">
+      <div class="card-header">
+        <span class="icon">⚡</span>
+        <h2>digital signal</h2>
+      </div>
+      <div class="graph-box">
+        <canvas id="digitalCanvas" width="700" height="180"></canvas>
+      </div>
+      <div class="feature-mini">
+        <div class="chip"><span>📊</span> discrete (0/1)</div>
+        <div class="chip"><span>🎯</span> square wave</div>
+        <div class="chip"><span>🛡️</span> noise resistant</div>
+      </div>
+    </div>
+
+    <!-- EXAMPLES CARD -->
+    <div class="examples-card" id="examplesCard">
+      <h4 id="examplesHeading">📌 analog examples</h4>
+      <div class="example-list" id="exampleList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="signal.js"></script>
+</body>
+</html>
