@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Machines</title>
+  <!-- Tailwind via CDN + fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* custom animations matching framer-motion */
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spin-slow-reverse {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+    @keyframes lever-swing {
+      0% { transform: rotate(-15deg); }
+      50% { transform: rotate(15deg); }
+      100% { transform: rotate(-15deg); }
+    }
+    @keyframes arrow-bounce {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(20px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes block-slide {
+      0% { transform: translate(0, 0) rotate(-31deg); }
+      50% { transform: translate(120px, -72px) rotate(-31deg); }
+      100% { transform: translate(0, 0) rotate(-31deg); }
+    }
+    @keyframes rope-left {
+      0% { height: 80px; }
+      50% { height: 20px; }
+      100% { height: 80px; }
+    }
+    @keyframes rope-right {
+      0% { height: 20px; }
+      50% { height: 80px; }
+      100% { height: 20px; }
+    }
+    @keyframes screw-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes screw-drive {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(48px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes wedge-drive {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(48px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes split-left {
+      0% { transform: translate(0, 0) rotate(0); }
+      50% { transform: translate(-12px, 0) rotate(-5deg); }
+      100% { transform: translate(0, 0) rotate(0); }
+    }
+    @keyframes split-right {
+      0% { transform: translate(0, 0) rotate(0); }
+      50% { transform: translate(12px, 0) rotate(5deg); }
+      100% { transform: translate(0, 0) rotate(0); }
+    }
+    @keyframes wheel-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .animate-lever { animation: lever-swing 4s infinite ease-in-out; }
+    .animate-arrow { animation: arrow-bounce 4s infinite ease-in-out; }
+    .animate-block { animation: block-slide 4s infinite ease-in-out; }
+    .animate-rope-left { animation: rope-left 4s infinite ease-in-out; }
+    .animate-rope-right { animation: rope-right 4s infinite ease-in-out; }
+    .animate-screw-rotate { animation: screw-rotate 3s infinite linear; }
+    .animate-screw-drive { animation: screw-drive 6s infinite ease-in-out; }
+    .animate-wedge-drive { animation: wedge-drive 2s infinite ease-in-out; }
+    .animate-split-left { animation: split-left 2s infinite ease-in-out; }
+    .animate-split-right { animation: split-right 2s infinite ease-in-out; }
+    .animate-wheel { animation: wheel-spin 6s infinite linear; }
+    .bg-mech-pattern {
+      background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 0%, transparent 30%);
+    }
+    /* make animation containers bigger and perfectly centered */
+    .animation-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;  /* ensure enough vertical space */
+    }
+    .animation-box {
+      transform: scale(1.4);  /* make 40% bigger */
+      transform-origin: center center;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+<div id="root" class="min-h-screen">
+  <!-- header -->
+  <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white py-12 px-4 sm:px-6 lg:px-8 shadow-lg relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
+      <svg class="absolute -top-20 -left-20 w-[300px] h-[300px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation: spin-slow 30s linear infinite;">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none"/>
+        <path d="M12 2 L12 7 M12 17 L12 22 M2 12 L7 12 M17 12 L22 12" stroke="currentColor" stroke-linecap="round"/>
+      </svg>
+      <svg class="absolute bottom-[-50px] right-[-50px] w-[200px] h-[200px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation: spin-slow-reverse 20s linear infinite;">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none"/>
+        <path d="M12 2 L12 7 M12 17 L12 22 M2 12 L7 12 M17 12 L22 12" stroke="currentColor" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="max-w-7xl mx-auto relative z-10 text-center">
+      <div class="flex items-center justify-center mb-4">
+        <div class="bg-white/20 p-3 rounded-full backdrop-blur-sm mr-4">
+          <svg class="w-8 h-8 text-blue-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">Simple Machines</h1>
+      </div>
+      <p class="mt-4 text-xl md:text-2xl max-w-3xl mx-auto text-blue-100 font-light">
+        Click on any machine to explore how it works!
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col lg:flex-row gap-8" id="app-container">
+      <!-- sidebar -->
+      <aside class="lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sticky top-4">
+          <h2 class="text-lg font-bold text-slate-700 mb-4 px-2">Explore Machines</h2>
+          <nav class="space-y-2" id="machine-nav">
+            <!-- filled by js -->
+          </nav>
+        </div>
+      </aside>
+
+      <!-- main content (dynamic) -->
+      <section class="flex-1" id="main-section">
+        <!-- machine detail injected by js -->
+      </section>
+    </div>
+
+    <!-- footer extra (already inside main-section? we put after) -->
+  </main>
+  <footer class="bg-slate-900 text-slate-400 py-8 text-center mt-12">
+    <p>Simple Machines Learning. Making physics fun and easy to understand.</p>
+  </footer>
+</div>
+
+<!-- templates (hidden) for animations & layout – now with wrapper to allow scaling & centering -->
+<div style="display: none;" id="animation-templates">
+  <!-- lever -->
+  <div id="lever-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex items-end justify-center pb-8 overflow-hidden bg-blue-50 rounded-lg border border-blue-100">
+      <div class="relative z-10 w-64 h-32 flex flex-col items-center justify-end">
+        <div class="relative w-full h-4 bg-amber-600 rounded-full animate-lever" style="transform-origin:50% 100%">
+          <div class="absolute left-2 -top-10 w-10 h-10 bg-slate-700 flex items-center justify-center text-white text-xs font-bold rounded shadow-lg">Load</div>
+          <div class="absolute right-2 -top-14 text-red-500 font-bold text-2xl animate-arrow">↓</div>
+        </div>
+        <div class="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[24px] border-b-gray-800 -mt-1"></div>
+      </div>
+    </div>
+  </div>
+  <!-- inclined plane -->
+  <div id="inclinedplane-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex items-end justify-center pb-8 overflow-hidden bg-orange-50 rounded-lg border border-orange-100">
+      <div class="relative z-10 w-64 h-32 flex items-end justify-start pl-8">
+        <div class="absolute left-8 bottom-0 w-0 h-0 border-b-[96px] border-b-amber-700 border-l-[160px] border-l-transparent"></div>
+        <div class="absolute left-8 bottom-0 w-10 h-10 bg-slate-700 rounded shadow-lg flex items-center justify-center text-white text-xs font-bold animate-block" style="transform-origin:0 100%;">Load<div class="absolute -right-6 top-1/2 -translate-y-1/2 text-red-500 font-bold text-2xl" style="transform:rotate(-31deg)">→</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- pulley -->
+  <div id="pulley-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex flex-col items-center justify-start pt-8 overflow-hidden bg-sky-50 rounded-lg border border-sky-100">
+      <div class="absolute top-0 w-full h-8 bg-gray-200 border-b border-gray-300"></div>
+      <div class="relative z-10 w-64 h-full flex flex-col items-center">
+        <div class="w-2 h-4 bg-gray-400"></div>
+        <div class="relative w-12 h-12 rounded-full border-[6px] border-slate-600 bg-slate-300 shadow-inner flex items-center justify-center z-20" style="animation: spin-slow 4s infinite ease-in-out;">
+          <div class="absolute w-full h-1 bg-slate-500/50 rounded"></div>
+          <div class="absolute w-1 h-full bg-slate-500/50 rounded"></div>
+          <div class="w-2 h-2 rounded-full bg-slate-800 z-10"></div>
+        </div>
+        <div class="absolute top-[28px] left-[100px] flex flex-col items-center z-10">
+          <div class="w-1 bg-amber-800 animate-rope-left"></div>
+          <div class="w-10 h-10 bg-slate-700 flex items-center justify-center text-white text-xs font-bold rounded shadow-lg">Load</div>
+        </div>
+        <div class="absolute top-[28px] right-[100px] flex flex-col items-center z-10">
+          <div class="w-1 bg-amber-800 animate-rope-right"></div>
+          <div class="text-red-500 font-bold text-2xl -mt-2">↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- wheel axle -->
+  <div id="wheelaxle-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex items-center justify-center overflow-hidden bg-purple-50 rounded-lg border border-purple-100">
+      <div class="relative z-10 w-full h-full flex items-center justify-center">
+        <div class="absolute bottom-0 w-8 h-24 bg-gray-400 rounded-t-lg shadow-md border-r-4 border-gray-500"></div>
+        <div class="relative flex items-center justify-center animate-wheel">
+          <div class="relative w-32 h-32 rounded-full border-[8px] border-slate-700 bg-slate-200 shadow-xl flex items-center justify-center z-10">
+            <div class="absolute w-full h-[6px] bg-slate-600 rounded"></div>
+            <div class="absolute w-[6px] h-full bg-slate-600 rounded"></div>
+            <div class="absolute w-full h-[6px] bg-slate-600 rounded rotate-45"></div>
+            <div class="absolute w-[6px] h-full bg-slate-600 rounded -rotate-45"></div>
+            <div class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 rounded-full shadow-lg border-2 border-red-700 z-30 flex items-center justify-center"></div>
+            <div class="w-14 h-14 rounded-full bg-slate-800 shadow-inner z-20 flex items-center justify-center">
+              <div class="w-4 h-4 rounded-full bg-gray-400"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- wedge -->
+  <div id="wedge-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex items-end justify-center pb-8 overflow-hidden bg-rose-50 rounded-lg border border-rose-100">
+      <div class="relative z-10 w-64 h-full flex flex-col items-center justify-end">
+        <div class="text-red-500 font-bold text-2xl absolute top-0 z-30 animate-wedge-drive">↓</div>
+        <div class="absolute z-20 top-8 flex flex-col items-center animate-wedge-drive">
+          <div class="w-4 h-16 bg-amber-800 rounded-sm"></div>
+          <div class="w-0 h-0 border-l-[24px] border-l-transparent border-r-[24px] border-r-transparent border-t-[40px] border-t-slate-700 mx-auto drop-shadow-md"></div>
+        </div>
+        <div class="relative flex justify-center w-32 h-24 z-10 top-4">
+          <div class="w-16 h-24 bg-amber-700 rounded-l-sm border-r border-amber-900 shadow-md animate-split-left" style="transform-origin:0 100%;"></div>
+          <div class="w-16 h-24 bg-amber-700 rounded-r-sm border-l border-amber-900 shadow-md animate-split-right" style="transform-origin:100% 100%;"></div>
+        </div>
+        <div class="w-48 h-8 bg-gray-500 rounded-sm shadow-xl mt-4 border-t-4 border-gray-600"></div>
+      </div>
+    </div>
+  </div>
+  <!-- screw -->
+  <div id="screw-animation" class="animation-box">
+    <div class="relative w-64 h-48 flex items-end justify-center pb-8 overflow-hidden bg-emerald-50 rounded-lg border border-emerald-100">
+      <div class="relative z-10 w-64 h-full flex flex-col items-center justify-end">
+        <div class="text-red-500 font-bold text-2xl absolute top-4 z-30 animate-screw-rotate">⟳</div>
+        <div class="relative z-20 flex flex-col items-center top-8 animate-screw-drive">
+          <div class="w-16 h-4 bg-gray-400 border-2 border-gray-600 rounded-sm relative flex items-center justify-center shadow-md z-30">
+            <div class="w-8 h-1 bg-gray-600 rounded-full"></div>
+            <div class="w-1 h-3 bg-gray-600 absolute rounded-full"></div>
+          </div>
+          <div class="w-8 h-24 bg-gray-300 border-x-2 border-gray-500 overflow-hidden relative shadow-inner flex flex-col items-center justify-between py-1">
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+            <div class="w-full h-2 bg-gray-400 rotate-12 -ml-2 border-b border-gray-500"></div>
+          </div>
+          <div class="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[16px] border-t-gray-500 drop-shadow-md relative -top-[2px]"></div>
+        </div>
+        <div class="w-32 h-20 bg-amber-700 border-t-4 border-amber-800 rounded-sm shadow-xl relative z-10">
+          <div class="w-8 h-full bg-amber-900 mx-auto opacity-30 shadow-inner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- machine data definition -->
+<script>
+  const machines = [
+    { id: 'lever', title: 'Lever', icon: '🔧', description: 'A stiff bar that rests on a support called a fulcrum. It makes it easier to lift or move heavy things by pushing down on one end.', examples: ['See-saw', 'Scissors', 'Crowbar', 'Bottle opener'] },
+    { id: 'inclined-plane', title: 'Inclined Plane', icon: '📐', description: 'A flat surface that is higher on one end, like a ramp. It lets you move heavy objects up or down without lifting them straight up.', examples: ['Ramps', 'Slides', 'Stairs', 'Sloping roads'] },
+    { id: 'pulley', title: 'Pulley', icon: '⚙️', description: 'A wheel with a groove around its edge for a rope to sit in. Pulling down on the rope makes it easier to lift a heavy load upwards.', examples: ['Flagpoles', 'Cranes', 'Window blinds', 'Elevators'] },
+    { id: 'wheel-axle', title: 'Wheel & Axle', icon: '🎡', description: 'A large wheel connected to a smaller rod (axle). When you turn the big wheel, the axle turns with more force.', examples: ['Steering wheels', 'Doorknobs', 'Ferris wheels', 'Screwdrivers'] },
+    { id: 'wedge', title: 'Wedge', icon: '🪓', description: 'An object with at least one slanting side ending in a sharp edge. It is pushed between things to split them apart or hold them in place.', examples: ['Axes', 'Knives', 'Doorstops', 'Teeth'] },
+    { id: 'screw', title: 'Screw', icon: '🔩', description: 'An inclined plane wrapped around a cylinder. It turns twisting motion into forward motion to hold things tightly together.', examples: ['Screws', 'Jar lids', 'Bottle caps', 'Spiral staircases'] }
+  ];
+
+  let selectedId = 'lever';
+
+  function renderSidebar() {
+    const nav = document.getElementById('machine-nav');
+    nav.innerHTML = '';
+    machines.forEach(m => {
+      const btn = document.createElement('button');
+      btn.className = `w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${selectedId === m.id ? 'bg-blue-600 text-white shadow-md scale-105' : 'bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700'}`;
+      btn.innerHTML = `<span class="text-xl">${m.icon}</span><span class="font-medium">${m.title}</span>${selectedId === m.id ? '<svg class="ml-auto w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' : ''}`;
+      btn.onclick = () => { selectedId = m.id; renderSidebar(); renderMain(); };
+      nav.appendChild(btn);
+    });
+  }
+
+  function getAnimationHtml(id) {
+    const template = document.getElementById(id + '-animation');
+    // return just the inner content (without the wrapper div) but preserve animation-box scaling
+    return template ? template.innerHTML : '<div class="bg-gray-200 p-8">animation missing</div>';
+  }
+
+  function renderMain() {
+    const machine = machines.find(m => m.id === selectedId) || machines[0];
+    const section = document.getElementById('main-section');
+    const animId = machine.id === 'inclined-plane' ? 'inclinedplane' : (machine.id === 'wheel-axle' ? 'wheelaxle' : machine.id);
+    const animInnerHtml = getAnimationHtml(animId);
+
+    section.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <div class="bg-gradient-to-br from-slate-100 to-slate-200 p-8 min-h-[400px] flex items-center justify-center">
+          <div class="animation-wrapper">
+            ${animInnerHtml}
+          </div>
+        </div>
+        <div class="p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-4xl">${machine.icon}</span>
+            <h2 class="text-3xl font-bold text-slate-800">${machine.title}</h2>
+          </div>
+          <p class="text-lg text-slate-600 leading-relaxed mb-6">${machine.description}</p>
+          <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+            <h3 class="font-bold text-blue-800 text-lg mb-3 flex items-center gap-2"><span class="text-xl">💡</span> Examples in Daily Life</h3>
+            <div class="flex flex-wrap gap-2">
+              ${machine.examples.map(ex => `<span class="bg-white px-4 py-2 rounded-full text-blue-700 font-medium shadow-sm border border-blue-200">${ex}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="mt-8 bg-indigo-50 rounded-2xl p-8 border border-indigo-100 shadow-sm">
+        <h2 class="text-2xl font-bold text-indigo-900 mb-6 text-center">Why do we use Simple Machines?</h2>
+        <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm flex-1 border border-indigo-50 w-full text-center">
+            <div class="text-3xl mb-2">🔄</div><h3 class="font-bold text-indigo-700 text-lg mb-2">Change Direction</h3><p class="text-slate-600 text-sm">Like using a pulley to pull down and lift a flag up.</p>
+          </div>
+          <svg class="hidden md:block text-indigo-300 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <div class="bg-white p-6 rounded-xl shadow-sm flex-1 border border-indigo-50 w-full text-center">
+            <div class="text-3xl mb-2">💪</div><h3 class="font-bold text-indigo-700 text-lg mb-2">Multiply Force</h3><p class="text-slate-600 text-sm">Like using a lever to lift a heavy rock with less effort.</p>
+          </div>
+          <svg class="hidden md:block text-indigo-300 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <div class="bg-white p-6 rounded-xl shadow-sm flex-1 border border-indigo-50 w-full text-center">
+            <div class="text-3xl mb-2">📏</div><h3 class="font-bold text-indigo-700 text-lg mb-2">Increase Distance</h3><p class="text-slate-600 text-sm">Like an inclined plane that makes the climb longer but easier.</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // initial render
+  renderSidebar();
+  renderMain();
+</script>
+
+<!-- ensure all animation divs are cloned without breaking ids (already hidden, fine) -->
+</body>
+</html>

@@ -27,6 +27,7 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         // --- Configuration (Matches your p5.js variables) ---
         const config = {
@@ -39,7 +40,7 @@
             numAngles: 16     // Lines per ring
         };
 
-        let scene, camera, renderer, controls;
+        let scene, camera, renderer, controls, labelRenderer;
 
         function init() {
             // 1. Scene Setup
@@ -53,6 +54,15 @@
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
+
+            // CSS2 renderer for text labels (always facing camera)
+            labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            labelRenderer.domElement.style.left = '0px';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            document.body.appendChild(labelRenderer.domElement);
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
@@ -93,6 +103,45 @@
             magnetGroup.add(northMesh);
             magnetGroup.add(southMesh);
             scene.add(magnetGroup);
+
+            // --- ADD N AND S LABELS (NO OTHER CHANGES) ---
+            // Create North Pole label "N"
+            const northDiv = document.createElement('div');
+            northDiv.textContent = 'N';
+            northDiv.style.color = '#ff6666';
+            northDiv.style.fontSize = '48px';
+            northDiv.style.fontWeight = 'bold';
+            northDiv.style.fontFamily = 'Arial, sans-serif';
+            northDiv.style.textShadow = '0 0 15px rgba(255,0,0,0.9)';
+            northDiv.style.background = 'rgba(0,0,0,0.65)';
+            northDiv.style.padding = '6px 18px';
+            northDiv.style.borderRadius = '50px';
+            northDiv.style.border = '2px solid #ff6666';
+            northDiv.style.backdropFilter = 'blur(4px)';
+            northDiv.style.letterSpacing = '1px';
+            
+            const northLabel = new CSS2DObject(northDiv);
+            northLabel.position.set(0, config.l / 2 + 12, 0);
+            scene.add(northLabel);
+            
+            // Create South Pole label "S"
+            const southDiv = document.createElement('div');
+            southDiv.textContent = 'S';
+            southDiv.style.color = '#88aaff';
+            southDiv.style.fontSize = '48px';
+            southDiv.style.fontWeight = 'bold';
+            southDiv.style.fontFamily = 'Arial, sans-serif';
+            southDiv.style.textShadow = '0 0 15px rgba(51,102,255,0.9)';
+            southDiv.style.background = 'rgba(0,0,0,0.65)';
+            southDiv.style.padding = '6px 18px';
+            southDiv.style.borderRadius = '50px';
+            southDiv.style.border = '2px solid #6688ff';
+            southDiv.style.backdropFilter = 'blur(4px)';
+            southDiv.style.letterSpacing = '1px';
+            
+            const southLabel = new CSS2DObject(southDiv);
+            southLabel.position.set(0, -config.l / 2 - 12, 0);
+            scene.add(southLabel);
         }
 
         // --- Physics Logic (Ported from your getB function) ---
@@ -186,12 +235,15 @@
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
+            // Render CSS2D labels (N and S)
+            labelRenderer.render(scene, camera);
         }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
         // Initialize

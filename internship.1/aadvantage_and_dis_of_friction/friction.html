@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>🔬 Friction Lab - Interactive Physics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        /* Simple header */
+        .header {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 1.2rem;
+            border-radius: 30px 30px 15px 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border: 2px solid #ecf0f1;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin: 5px 0;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        /* Game-like canvas area */
+        .game-area {
+            background: #2c3e50;
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+            border: 2px solid #3498db;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: white;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .score-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        #frictionCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 800/400;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            background: #bdc3c7;
+            touch-action: none; /* Prevents scrolling while interacting with canvas */
+        }
+
+        /* Control panel */
+        .control-panel {
+            background: #34495e;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+            border: 2px solid #3498db;
+            height: fit-content;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+        }
+
+        /* Surface selector */
+        .surface-compact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .surface-item {
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            padding: 8px 5px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #3498db;
+            transition: all 0.2s;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
+        }
+
+        .surface-item.active {
+            background: #3498db;
+            transform: scale(0.98);
+        }
+
+        .surface-item .emoji {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            display: block;
+        }
+
+        /* Slider */
+        .slider-compact {
+            background: #2c3e50;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: white;
+            margin-bottom: 5px;
+        }
+
+       .compact-slider {
+    width: 100%;
+    height: 8px;
+    /* Standard property first or last depending on your linter */
+    appearance: none; 
+    -webkit-appearance: none; /* For Chrome, Safari, newer Edge */
+    -moz-appearance: none;    /* For Firefox */
+    background: #3498db;
+    border-radius: 10px;
+    border: 2px solid white;
+}
+
+        .compact-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #3498db;
+            cursor: pointer;
+        }
+
+        /* Force row */
+        .force-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #2c3e50;
+            padding: 8px 12px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+        }
+
+        .force-btn-small {
+            width: clamp(35px, 8vw, 40px);
+            height: clamp(35px, 8vw, 40px);
+            border-radius: 50%;
+            border: none;
+            background: #3498db;
+            color: white;
+            font-size: clamp(1.2rem, 4vw, 1.3rem);
+            cursor: pointer;
+            box-shadow: 0 3px 0 #2980b9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .force-btn-small:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .force-input-small {
+            flex: 1;
+            min-width: 50px;
+            padding: 8px 5px;
+            text-align: center;
+            border: 2px solid #3498db;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            background: white;
+        }
+
+        /* Action buttons */
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn-small {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            transition: 0.1s;
+            color: white;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        .push-btn {
+            background: #27ae60;
+            box-shadow: 0 4px 0 #229954;
+        }
+
+        .reset-btn-small {
+            background: #e67e22;
+            box-shadow: 0 4px 0 #b85e0a;
+        }
+
+        .action-btn-small:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Live stats */
+        .stats-compact {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: #34495e;
+            border-radius: 12px 12px 12px 3px;
+            padding: 8px 2px;
+            text-align: center;
+            border: 2px solid #3498db;
+        }
+
+        .stat-number {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: bold;
+            color: #3498db;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+            color: white;
+            text-transform: uppercase;
+        }
+
+        /* Keyboard hint */
+        .hint-compact {
+            background: #2c3e50;
+            color: white;
+            padding: 8px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            gap: clamp(8px, 3vw, 12px);
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .key {
+            background: #34495e;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-family: monospace;
+            border: 1px solid #3498db;
+        }
+
+        /* Advantages & Disadvantages Section - Simplified */
+        .pros-cons-section {
+            margin-top: 20px;
+            background: #34495e;
+            border-radius: 20px;
+            padding: 15px;
+            border: 2px solid #3498db;
+        }
+
+        .section-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            color: white;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .pro-card, .con-card {
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid;
+        }
+
+        .pro-card { border-color: #27ae60; }
+        .con-card { border-color: #e74c3c; }
+
+        .card-header {
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            margin-bottom: 12px;
+            color: white;
+            text-align: center;
+        }
+
+        .friction-item {
+            color: white;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #3498db;
+            font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+            word-break: break-word;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            padding: 10px;
+        }
+
+        /* Mobile Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .game-area, .control-panel {
+                max-width: 100%;
+            }
+            
+            .force-btn-small {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .game-area, .control-panel {
+                padding: 10px;
+            }
+            
+            .surface-item {
+                padding: 6px 3px;
+            }
+            
+            .action-btn-small {
+                padding: 10px 5px;
+            }
+            
+            .force-row {
+                padding: 6px 10px;
+            }
+            
+            .force-input-small {
+                padding: 6px 3px;
+            }
+            
+            .stats-compact {
+                gap: 3px;
+            }
+            
+            .stat-item {
+                padding: 5px 1px;
+            }
+            
+            .comparison-grid {
+                gap: 10px;
+            }
+            
+            .pro-card, .con-card {
+                padding: 12px;
+            }
+            
+            .friction-item {
+                padding: 6px;
+                margin-bottom: 6px;
+            }
+        }
+
+        /* Landscape mode on mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            #frictionCanvas {
+                aspect-ratio: 800/350;
+            }
+            
+            .stats-compact {
+                margin-top: 8px;
+            }
+            
+            .pros-cons-section {
+                margin-top: 15px;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .surface-item, .force-btn-small, .action-btn-small {
+                cursor: default;
+            }
+            
+            .compact-slider::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ FRICTION LAB ⚡</h1>
+    </div>
+
+    <div class="main-container">
+        <!-- Left side - Game Area -->
+        <div class="game-area">
+            <div class="canvas-header">
+                <span>📐 INCLINE EXPERIMENT (20°)</span>
+                <span class="score-badge" id="distanceValue">0.0 m</span>
+            </div>
+            <canvas id="frictionCanvas" width="800" height="400"></canvas>
+            
+            <!-- Live stats under canvas -->
+            <div class="stats-compact">
+                <div class="stat-item">
+                    <div class="stat-number" id="velocityValue">0.00</div>
+                    <div class="stat-label">VELOCITY</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="frictionForceValue">0.0</div>
+                    <div class="stat-label">FRICTION</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="netForceValue">0.0</div>
+                    <div class="stat-label">NET FORCE</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="frictionValue">0.30</div>
+                    <div class="stat-label">μ VALUE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - Controls -->
+        <div>
+            <div class="control-panel">
+                <div class="panel-header">
+                    <span>🎮 CONTROLS</span>
+                </div>
+
+                <!-- Surface Selection -->
+                <div class="surface-compact">
+                    <div class="surface-item active" data-surface="wood" data-friction="30">
+                        <span class="emoji">🪵</span>
+                        <span>Wood</span>
+                        <small style="display:block; font-size:0.7rem;">μ=0.30</small>
+                    </div>
+                    <div class="surface-item" data-surface="ice" data-friction="10">
+                        <span class="emoji">❄️</span>
+                        <span>Ice</span>
+                        <small style="display:block; font-size:0.7rem;">μ=0.10</small>
+                    </div>
+                    <div class="surface-item" data-surface="concrete" data-friction="50">
+                        <span class="emoji">🏗️</span>
+                        <span>Concrete</span>
+                        <small style="display:block; font-size:0.7rem;">μ=0.50</small>
+                    </div>
+                    <div class="surface-item" data-surface="rubber" data-friction="80">
+                        <span class="emoji">🛞</span>
+                        <span>Rubber</span>
+                        <small style="display:block; font-size:0.7rem;">μ=0.80</small>
+                    </div>
+                </div>
+
+                <!-- Friction Slider -->
+                <div class="slider-compact">
+                    <div class="slider-label">
+                        <span>⚡ Friction Coefficient</span>
+                        <span id="frictionValueDisplay">0.30</span>
+                    </div>
+                    <input type="range" id="frictionSlider" class="compact-slider" min="0" max="150" value="30" step="1">
+                </div>
+
+                <!-- Force Control -->
+                <div class="force-row">
+                    <button class="force-btn-small" id="decreaseForceBtn">−</button>
+                    <input type="number" id="appliedForceInput" class="force-input-small" value="10" min="0" max="200" step="1">
+                    <button class="force-btn-small" id="increaseForceBtn">+</button>
+                    <span style="font-weight:bold; min-width:40px; color:white; text-align:center;" id="appliedForceValue">10</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-row">
+                    <button class="action-btn-small push-btn" id="applyForceBtn">
+                        <span>▶</span> APPLY
+                    </button>
+                    <button class="action-btn-small reset-btn-small" id="resetBtn">
+                        <span>↺</span> RESET
+                    </button>
+                </div>
+
+                <!-- Keyboard Hints -->
+                <div class="hint-compact">
+                    <span><span class="key">␣</span> Apply</span>
+                    <span><span class="key">↑↓</span> Force</span>
+                    <span><span class="key">R</span> Reset</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simplified Advantages & Disadvantages Section -->
+    <div class="pros-cons-section">
+        <div class="section-title">
+            📊 FRICTION: PROS & CONS
+        </div>
+
+        <div class="comparison-grid">
+            <!-- Advantages Column -->
+            <div class="pro-card">
+                <div class="card-header">✅ ADVANTAGES</div>
+                <div class="friction-item">• Walking & running - provides grip</div>
+                <div class="friction-item">• Brakes on vehicles - enables stopping</div>
+                <div class="friction-item">• Writing - pencils need friction</div>
+                <div class="friction-item">• Holding objects - prevents slipping</div>
+            </div>
+
+            <!-- Disadvantages Column -->
+            <div class="con-card">
+                <div class="card-header">❌ DISADVANTAGES</div>
+                <div class="friction-item">• Heat & wear in machines</div>
+                <div class="friction-item">• Wastes energy (20% in cars)</div>
+                <div class="friction-item">• Slows down moving objects</div>
+                <div class="friction-item">• Causes noise and vibrations</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        ⚡ Physics Simulation - Friction on an Incline ⚡
+    </footer>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById("frictionCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Physics constants
+        const g = 9.8;
+        const theta = (20 * Math.PI) / 180;
+        const mass = 5;
+        const dt = 0.016;
+
+        // Simulation variables
+        let frictionCoefficient = 0.3;
+        let surfaceType = "wood";
+        let boxPosition = 150;
+        let velocity = 0;
+        let isMoving = false;
+        let distanceTraveled = 0;
+        let lastPosition = 150;
+        let staticFrictionBroken = false;
+
+        // DOM elements
+        const frictionSlider = document.getElementById("frictionSlider");
+        const frictionValue = document.getElementById("frictionValue");
+        const frictionValueDisplay = document.getElementById("frictionValueDisplay");
+        const velocitySpan = document.getElementById("velocityValue");
+        const distanceSpan = document.getElementById("distanceValue");
+        const frictionForceSpan = document.getElementById("frictionForceValue");
+        const netForceSpan = document.getElementById("netForceValue");
+        const surfaceItems = document.querySelectorAll(".surface-item");
+
+        // Force controls
+        const appliedForceInput = document.getElementById("appliedForceInput");
+        const appliedForceSpan = document.getElementById("appliedForceValue");
+        const increaseForceBtn = document.getElementById("increaseForceBtn");
+        const decreaseForceBtn = document.getElementById("decreaseForceBtn");
+        const applyBtn = document.getElementById("applyForceBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        let appliedForce = 10;
+
+        // Track animation frame
+        let animationId = null;
+
+        // Physics calculations
+        function calculateForces() {
+            const normalForce = mass * g * Math.cos(theta);
+            const gravityParallel = mass * g * Math.sin(theta);
+            const maxStaticFriction = frictionCoefficient * normalForce;
+            const kineticFriction = frictionCoefficient * normalForce;
+
+            let staticFriction = 0;
+            if (!isMoving && !staticFrictionBroken) {
+                staticFriction = Math.min(gravityParallel, maxStaticFriction);
+            }
+
+            let netForce = 0;
+            if (!isMoving && !staticFrictionBroken) {
+                netForce = 0;
+            } else {
+                const frictionDirection = velocity > 0 ? -1 : 1;
+                netForce = gravityParallel + frictionDirection * kineticFriction;
+            }
+
+            return { normalForce, gravityParallel, maxStaticFriction, staticFriction, kineticFriction, netForce };
+        }
+
+        function applyExternalForce(force) {
+            // Don't apply force if it's zero
+            if (force <= 0) return;
+            
+            const forces = calculateForces();
+
+            if (!isMoving && !staticFrictionBroken) {
+                // Check if applied force breaks static friction
+                if (force > forces.maxStaticFriction - forces.gravityParallel) {
+                    staticFrictionBroken = true;
+                    isMoving = true;
+                    const excessForce = force + forces.gravityParallel - forces.maxStaticFriction;
+                    velocity += (excessForce / mass) * dt * 10;
+                }
+                // If force is not enough, object remains stationary (no change)
+            } else {
+                // Already moving, add force (only if force > 0)
+                velocity += (force / mass) * dt * 10;
+                isMoving = true;
+            }
+        }
+
+        function updatePhysics() {
+            const forces = calculateForces();
+
+            if (isMoving || staticFrictionBroken) {
+                const acceleration = forces.netForce / mass;
+                velocity += acceleration * dt;
+                boxPosition += velocity * 50;
+                distanceTraveled += Math.abs(boxPosition - lastPosition) / 50;
+                lastPosition = boxPosition;
+
+                // Stop if velocity becomes very small AND net force is small
+                if (Math.abs(velocity) < 0.01 && Math.abs(forces.netForce) < 0.1) {
+                    velocity = 0;
+                    isMoving = false;
+                    staticFrictionBroken = false;
+                }
+            }
+
+            // Boundary constraints with smooth bounce
+            if (boxPosition < 100) {
+                boxPosition = 100;
+                velocity = -velocity * 0.5;
+            }
+            if (boxPosition > canvas.width - 100) {
+                boxPosition = canvas.width - 100;
+                velocity = -velocity * 0.5;
+            }
+
+            // Update display
+            if (velocitySpan) velocitySpan.textContent = Math.abs(velocity).toFixed(2);
+            if (distanceSpan) distanceSpan.textContent = distanceTraveled.toFixed(2);
+            const fricForce = isMoving ? forces.kineticFriction : forces.staticFriction;
+            if (frictionForceSpan) frictionForceSpan.textContent = fricForce.toFixed(1);
+            if (netForceSpan) netForceSpan.textContent = forces.netForce.toFixed(1);
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "#87CEEB");
+            gradient.addColorStop(1, "#E0F6FF");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Incline plane
+            ctx.save();
+            const inclineHeight = canvas.height - 80;
+            const inclineEndY = inclineHeight - (canvas.width - 200) * Math.tan(theta);
+
+            // Draw incline surface
+            ctx.beginPath();
+            ctx.moveTo(100, inclineHeight);
+            ctx.lineTo(canvas.width - 100, inclineEndY);
+            ctx.lineTo(canvas.width - 100, canvas.height);
+            ctx.lineTo(100, canvas.height);
+            ctx.closePath();
+
+            let surfaceColor;
+            switch (surfaceType) {
+                case "ice": surfaceColor = "#a5d6f9"; break;
+                case "wood": surfaceColor = "#8d6e63"; break;
+                case "concrete": surfaceColor = "#9e9e9e"; break;
+                case "rubber": surfaceColor = "#424242"; break;
+                default: surfaceColor = "#8d6e63";
+            }
+            ctx.fillStyle = surfaceColor;
+            ctx.fill();
+
+            // Add subtle texture lines
+            ctx.strokeStyle = "rgba(0,0,0,0.1)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width - 200; i += 30) {
+                const x = 100 + i;
+                const y = inclineHeight - i * Math.tan(theta);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 15, y - 15 * Math.tan(theta));
+                ctx.stroke();
+            }
+
+            // Draw angle indicator
+            ctx.strokeStyle = "#2c3e50";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(150, inclineHeight - 40);
+            ctx.lineTo(150, inclineHeight);
+            ctx.lineTo(220, inclineHeight);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(150, inclineHeight, 30, 0, -theta, true);
+            ctx.stroke();
+            
+            ctx.fillStyle = "#2c3e50";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText("20°", 180, inclineHeight - 20);
+
+            ctx.restore();
+
+            // Draw box - simple rectangle
+            const boxX = boxPosition;
+            const boxY = inclineHeight - (boxPosition - 100) * Math.tan(theta) - 25;
+            
+            ctx.save();
+            ctx.translate(boxX, boxY);
+            ctx.rotate(-theta);
+            
+            // Simple box - color changes based on movement
+            ctx.fillStyle = isMoving ? "#e67e22" : "#3498db";
+            ctx.fillRect(-25, -25, 50, 50);
+            
+            // Border
+            ctx.strokeStyle = "#2c3e50";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-25, -25, 50, 50);
+            
+            ctx.restore();
+
+            // Mass label
+            ctx.save();
+            ctx.translate(boxX, boxY);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("5kg", 0, 0);
+            ctx.restore();
+
+            // Draw velocity vector when moving
+            if (isMoving && Math.abs(velocity) > 0.05) {
+                ctx.strokeStyle = "#e67e22";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(boxX, boxY);
+                ctx.lineTo(boxX + velocity * 20, boxY - 20);
+                ctx.stroke();
+            }
+        }
+
+        function animate() {
+            updatePhysics();
+            drawScene();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Event Listeners
+        frictionSlider.addEventListener("input", function() {
+            frictionCoefficient = parseInt(this.value) / 100;
+            frictionValue.textContent = frictionCoefficient.toFixed(2);
+            frictionValueDisplay.textContent = frictionCoefficient.toFixed(2);
+        });
+
+        surfaceItems.forEach((item) => {
+            item.addEventListener("click", function() {
+                surfaceItems.forEach((i) => i.classList.remove("active"));
+                this.classList.add("active");
+
+                surfaceType = this.dataset.surface;
+                const newFriction = parseInt(this.dataset.friction) / 100;
+                frictionCoefficient = newFriction;
+                frictionSlider.value = this.dataset.friction;
+                frictionValue.textContent = newFriction.toFixed(2);
+                frictionValueDisplay.textContent = newFriction.toFixed(2);
+            });
+        });
+
+        function updateAppliedForceDisplay() {
+            appliedForce = Math.max(0, Math.round(Number(appliedForceInput.value) || 0));
+            appliedForceInput.value = appliedForce;
+            appliedForceSpan.textContent = appliedForce;
+        }
+
+        increaseForceBtn.addEventListener("click", function() {
+            appliedForce = Math.min(200, appliedForce + 1);
+            appliedForceInput.value = appliedForce;
+            appliedForceSpan.textContent = appliedForce;
+        });
+
+        decreaseForceBtn.addEventListener("click", function() {
+            appliedForce = Math.max(0, appliedForce - 1);
+            appliedForceInput.value = appliedForce;
+            appliedForceSpan.textContent = appliedForce;
+        });
+
+        appliedForceInput.addEventListener("input", updateAppliedForceDisplay);
+        appliedForceInput.addEventListener("change", updateAppliedForceDisplay);
+
+        applyBtn.addEventListener("click", function() {
+            applyExternalForce(appliedForce);
+            this.style.transform = "scale(0.95)";
+            setTimeout(() => this.style.transform = "", 100);
+        });
+
+        resetBtn.addEventListener("click", function() {
+            boxPosition = 150;
+            velocity = 0;
+            isMoving = false;
+            staticFrictionBroken = false;
+            distanceTraveled = 0;
+            lastPosition = 150;
+            this.style.transform = "scale(0.95)";
+            setTimeout(() => this.style.transform = "", 100);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", function(e) {
+            if (e.key === " ") {
+                applyExternalForce(appliedForce);
+                e.preventDefault();
+                applyBtn.style.transform = "scale(0.95)";
+                setTimeout(() => applyBtn.style.transform = "", 100);
+            } else if (e.key === "r" || e.key === "R") {
+                boxPosition = 150;
+                velocity = 0;
+                isMoving = false;
+                staticFrictionBroken = false;
+                distanceTraveled = 0;
+                lastPosition = 150;
+                resetBtn.style.transform = "scale(0.95)";
+                setTimeout(() => resetBtn.style.transform = "", 100);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                appliedForce = Math.min(200, appliedForce + 1);
+                appliedForceInput.value = appliedForce;
+                appliedForceSpan.textContent = appliedForce;
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                appliedForce = Math.max(0, appliedForce - 1);
+                appliedForceInput.value = appliedForce;
+                appliedForceSpan.textContent = appliedForce;
+            }
+        });
+
+        // Handle window resize to maintain aspect ratio
+        window.addEventListener('resize', function() {
+            // Redraw on resize to ensure proper scaling
+            drawScene();
+        });
+
+        // Initialize display
+        updateAppliedForceDisplay();
+        frictionValue.textContent = "0.30";
+        frictionValueDisplay.textContent = "0.30";
+
+        // Clean up animation on page unload
+        window.addEventListener('beforeunload', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        });
+    </script>
+</body>
+</html>

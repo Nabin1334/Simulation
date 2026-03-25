@@ -3,10 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magnetic and non-Magnetic Materials </title>
-    <link rel="stylesheet" href="style.css">
-    
+    <title>Magnetic and non-Magnetic Materials</title>
+    <style>
+     * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 1.4rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+        }
+        
+        .info-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .info-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        #simulation {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03), transparent);
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            width: 280px;
+            max-height: calc(100vh - 120px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            z-index: 5;
+            transform: translateX(320px);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-panel.visible {
+            transform: translateX(0);
+        }
+        
+        .info-panel h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+        
+        .info-panel ul {
+            list-style: none;
+            font-size: 0.75rem;
+            margin-bottom: 15px;
+        }
+        
+        .info-panel li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+        
+        .info-panel li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+        
+        .magnetic-section li:before {
+            color: #ff6b6b;
+        }
+        
+        .non-magnetic-section li:before {
+            color: #4ecdc4;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        
+        .magnetic-color {
+            background: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+        }
+        
+        .non-magnetic-color {
+            background: #4ecdc4;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.6);
+        }
+        
+        .instructions {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            z-index: 5;
+        }
+        
+        .info-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .info-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .info-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <h1>🧲 Magnetic and 🚫non-Magnetic Materials Interactive Simulation</h1>
@@ -57,6 +233,503 @@
         </div>
     </div>
 
-  <script src="script.js"></script>
+    <script>
+// ============================================
+// SELF-CONTAINED MAGNET IMAGE (BASE64 SVG)
+// Works on any server without external files
+// ============================================
+const MAGNET_IMAGE_BASE64 = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIHJ4PSIxMCIgZmlsbD0iI0QzRDNEMyIgc3Ryb2tlPSIjODA4MDgwIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiByeD0iMTAiIGZpbGw9IiNFNjM5NDYiIG9wYWNpdHk9IjAuODUiLz48cmVjdCB4PSIxMDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIHJ4PSIxMCIgZmlsbD0iIzQ1N0I5RCIgb3BhY2l0eT0iMC44NSIvPjxyZWN0IHg9IjQwIiB5PSI4IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyIiByeD0iNCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjQpIi8+PHRleHQgeD0iNTAiIHk9IjM4IiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TjwvdGV4dD48dGV4dCB4PSIxNTAiIHk9IjM4IiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCI+UzwvdGV4dD48L3N2Zz4=";
+
+function toggleInfo() {
+    document.getElementById("infoPanel").classList.toggle("visible");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const simulation = document.getElementById("simulation");
+    // Ensure dimensions are valid even if container is hidden temporarily
+    const simWidth = Math.max(300, simulation.clientWidth);
+    const simHeight = Math.max(200, simulation.clientHeight);
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    svg.setAttribute("viewBox", `0 0 ${simWidth} ${simHeight}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    simulation.appendChild(svg);
+
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+    // Metallic gradient
+    const metallicGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    metallicGrad.setAttribute("id", "metallic");
+    metallicGrad.innerHTML = `<stop offset="0%" stop-color="#E8E8E8"/><stop offset="50%" stop-color="#A0A0A0"/><stop offset="100%" stop-color="#707070"/>`;
+    defs.appendChild(metallicGrad);
+
+    // Copper gradient
+    const copperGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    copperGrad.setAttribute("id", "copper");
+    copperGrad.innerHTML = `<stop offset="0%" stop-color="#E87722"/><stop offset="50%" stop-color="#B87333"/><stop offset="100%" stop-color="#9C5A2E"/>`;
+    defs.appendChild(copperGrad);
+
+    // Plastic gradient
+    const plasticGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    plasticGrad.setAttribute("id", "plastic");
+    plasticGrad.innerHTML = `<stop offset="0%" stop-color="#FF6B6B"/><stop offset="100%" stop-color="#C92A2A"/>`;
+    defs.appendChild(plasticGrad);
+
+    // Wood gradient
+    const woodGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    woodGrad.setAttribute("id", "wood");
+    woodGrad.innerHTML = `<stop offset="0%" stop-color="#8B4513"/><stop offset="100%" stop-color="#654321"/>`;
+    defs.appendChild(woodGrad);
+
+    // Aluminum gradient
+    const aluminumGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    aluminumGrad.setAttribute("id", "aluminum");
+    aluminumGrad.innerHTML = `<stop offset="0%" stop-color="#D3D3D3"/><stop offset="50%" stop-color="#A9A9A9"/><stop offset="100%" stop-color="#808080"/>`;
+    defs.appendChild(aluminumGrad);
+
+    svg.appendChild(defs);
+
+    // ============================================
+    // CREATE MAGNET (with embedded image)
+    // ============================================
+    const magnetGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    magnetGroup.setAttribute("cursor", "move");
+
+    const magnetShadow = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    magnetShadow.setAttribute("x", simWidth / 2 - 42);
+    magnetShadow.setAttribute("y", simHeight / 2 - 17);
+    magnetShadow.setAttribute("width", 84);
+    magnetShadow.setAttribute("height", 44);
+    magnetShadow.setAttribute("rx", 12);
+    magnetShadow.setAttribute("fill", "rgba(0, 0, 0, 0.3)");
+    magnetShadow.setAttribute("filter", "blur(4px)");
+    magnetGroup.appendChild(magnetShadow);
+
+    // Magnet body base
+    const magnetBody = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    magnetBody.setAttribute("x", simWidth / 2 - 70);
+    magnetBody.setAttribute("y", simHeight / 2 - 20);
+    magnetBody.setAttribute("width", 140);
+    magnetBody.setAttribute("height", 40);
+    magnetBody.setAttribute("rx", 10);
+    magnetBody.setAttribute("fill", "#D3D3D3");
+    magnetBody.setAttribute("stroke", "#808080");
+    magnetBody.setAttribute("stroke-width", "2");
+    magnetGroup.appendChild(magnetBody);
+
+    // Top highlight
+    const topHighlight = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    topHighlight.setAttribute("x", simWidth / 2 - 40);
+    topHighlight.setAttribute("y", simHeight / 2 - 15);
+    topHighlight.setAttribute("width", 80);
+    topHighlight.setAttribute("height", 8);
+    topHighlight.setAttribute("rx", 4);
+    topHighlight.setAttribute("fill", "rgba(255, 255, 255, 0.4)");
+    magnetGroup.appendChild(topHighlight);
+
+    // North Pole (Red side - left half)
+    const northPole = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    northPole.setAttribute("x", simWidth / 2 - 70);
+    northPole.setAttribute("y", simHeight / 2 - 20);
+    northPole.setAttribute("width", 70);
+    northPole.setAttribute("height", 40);
+    northPole.setAttribute("rx", 10);
+    northPole.setAttribute("fill", "#E63946");
+    northPole.setAttribute("opacity", "0.85");
+    magnetGroup.appendChild(northPole);
+
+    // South Pole (Blue side - right half)
+    const southPole = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    southPole.setAttribute("x", simWidth / 2);
+    southPole.setAttribute("y", simHeight / 2 - 20);
+    southPole.setAttribute("width", 70);
+    southPole.setAttribute("height", 40);
+    southPole.setAttribute("rx", 10);
+    southPole.setAttribute("fill", "#457B9D");
+    southPole.setAttribute("opacity", "0.85");
+    magnetGroup.appendChild(southPole);
+
+    // MAGNET IMAGE - EMBEDDED BASE64 (works offline & on any server)
+    const magnetImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    magnetImage.setAttribute("x", simWidth / 2 - 70);
+    magnetImage.setAttribute("y", simHeight / 2 - 20);
+    magnetImage.setAttribute("width", 140);
+    magnetImage.setAttribute("height", 40);
+    magnetImage.setAttribute("href", MAGNET_IMAGE_BASE64);
+    magnetImage.setAttribute("preserveAspectRatio", "none");
+    magnetImage.setAttribute("opacity", "0.9");
+    magnetGroup.appendChild(magnetImage);
+
+    // Empty text labels (preserved from original, but not needed due to image)
+    const northLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    northLabel.setAttribute("x", simWidth / 2 - 22.5);
+    northLabel.setAttribute("y", simHeight / 2 + 7);
+    northLabel.setAttribute("text-anchor", "middle");
+    northLabel.setAttribute("fill", "white");
+    northLabel.setAttribute("font-weight", "bold");
+    northLabel.setAttribute("font-size", "20");
+    northLabel.textContent = "";
+    magnetGroup.appendChild(northLabel);
+
+    const southLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    southLabel.setAttribute("x", simWidth / 2 + 22.5);
+    southLabel.setAttribute("y", simHeight / 2 + 7);
+    southLabel.setAttribute("text-anchor", "middle");
+    southLabel.setAttribute("fill", "white");
+    southLabel.setAttribute("font-weight", "bold");
+    southLabel.setAttribute("font-size", "20");
+    southLabel.textContent = "";
+    magnetGroup.appendChild(southLabel);
+
+    svg.appendChild(magnetGroup);
+
+    // Magnet data and field lines
+    let magnetData = { x: simWidth / 2, y: simHeight / 2 };
+
+    const fieldLines = [];
+    for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const fieldLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        fieldLine.setAttribute("fill", "none");
+        fieldLine.setAttribute("stroke", "rgba(255, 107, 107, 0.15)");
+        fieldLine.setAttribute("stroke-width", "2");
+        fieldLine.setAttribute("stroke-dasharray", "5,5");
+        svg.insertBefore(fieldLine, magnetGroup);
+        fieldLines.push(fieldLine);
+    }
+
+    function updateFieldLines() {
+        fieldLines.forEach((line, i) => {
+            const angle = (i / 16) * Math.PI * 2;
+            const startX = magnetData.x + Math.cos(angle) * 50;
+            const startY = magnetData.y + Math.sin(angle) * 50;
+            const endX = magnetData.x + Math.cos(angle) * 130;
+            const endY = magnetData.y + Math.sin(angle) * 130;
+            const pathData = `M ${startX} ${startY} Q ${(startX + endX) / 2 + Math.cos(angle + Math.PI / 2) * 20} ${(startY + endY) / 2 + Math.sin(angle + Math.PI / 2) * 20} ${endX} ${endY}`;
+            line.setAttribute("d", pathData);
+        });
+    }
+    updateFieldLines();
+
+    // ============================================
+    // MATERIAL CREATION FUNCTIONS (unchanged, but compact)
+    // ============================================
+    const materials = [];
+
+    function createMaterial(x, y, isMagnetic, renderFunc, label) {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("cursor", "grab");
+
+        const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        glow.setAttribute("cx", x);
+        glow.setAttribute("cy", y);
+        glow.setAttribute("r", 35);
+        glow.setAttribute("fill", "none");
+        glow.setAttribute("stroke", isMagnetic ? "#ff6b6b" : "#4ecdc4");
+        glow.setAttribute("stroke-width", "0");
+        glow.setAttribute("opacity", "0");
+        glow.classList.add("glow");
+        group.appendChild(glow);
+
+        renderFunc(group, x, y);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", x);
+        text.setAttribute("y", y + 45);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("fill", "white");
+        text.setAttribute("font-size", "10");
+        text.setAttribute("font-weight", "bold");
+        text.textContent = label;
+        group.appendChild(text);
+
+        group.materialData = { x, y, originalX: x, originalY: y, isMagnetic, attachedToMagnet: false, isDragging: false };
+        svg.appendChild(group);
+        materials.push(group);
+        makeDraggable(group);
+        return group;
+    }
+
+    function makeDraggable(material) {
+        material.addEventListener("mousedown", startHandler);
+        material.addEventListener("touchstart", startHandler, { passive: false });
+
+        function startHandler(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            startDrag(clientX, clientY);
+        }
+
+        function startDrag(clientX, clientY) {
+            material.materialData.isDragging = true;
+            material.style.cursor = "grabbing";
+
+            const rect = svg.getBoundingClientRect();
+            const offsetX = clientX - rect.left - material.materialData.x;
+            const offsetY = clientY - rect.top - material.materialData.y;
+
+            function dragMaterial(e) {
+                let x, y;
+                if (e.touches) {
+                    x = e.touches[0].clientX - rect.left - offsetX;
+                    y = e.touches[0].clientY - rect.top - offsetY;
+                } else {
+                    x = e.clientX - rect.left - offsetX;
+                    y = e.clientY - rect.top - offsetY;
+                }
+                x = Math.max(30, Math.min(x, simWidth - 30));
+                y = Math.max(30, Math.min(y, simHeight - 30));
+
+                material.materialData.x = x;
+                material.materialData.y = y;
+
+                if (material.materialData.attachedToMagnet) {
+                    const dx = material.materialData.x - magnetData.x;
+                    const dy = material.materialData.y - magnetData.y;
+                    if (Math.sqrt(dx*dx + dy*dy) > 90) {
+                        material.materialData.attachedToMagnet = false;
+                    }
+                }
+                updateTransform(material);
+            }
+
+            function stopDrag() {
+                material.materialData.isDragging = false;
+                material.style.cursor = "grab";
+                document.removeEventListener("mousemove", dragMaterial);
+                document.removeEventListener("mouseup", stopDrag);
+                document.removeEventListener("touchmove", dragMaterial);
+                document.removeEventListener("touchend", stopDrag);
+            }
+
+            document.addEventListener("mousemove", dragMaterial);
+            document.addEventListener("mouseup", stopDrag);
+            document.addEventListener("touchmove", dragMaterial, { passive: false });
+            document.addEventListener("touchend", stopDrag);
+        }
+    }
+
+    function updateTransform(material) {
+        const dx = material.materialData.x - material.materialData.originalX;
+        const dy = material.materialData.y - material.materialData.originalY;
+        material.setAttribute("transform", `translate(${dx}, ${dy})`);
+    }
+
+    // Render functions (minified for brevity, but full implementation)
+    function renderIronNail(g, x, y) {
+        g.appendChild(createEl('ellipse', {cx:x+2, cy:y+30, rx:6, ry:2, fill:'rgba(0,0,0,0.3)', filter:'blur(2px)'}));
+        g.appendChild(createEl('rect', {x:x-2, y:y-20, width:8, height:60, fill:'url(#metallic)', stroke:'#505050'}));
+        g.appendChild(createEl('path', {d:`M ${x-2} ${y+20} L ${x} ${y+25} L ${x+2} ${y+20} Z`, fill:'#808080'}));
+        g.appendChild(createEl('circle', {cx:x, cy:y-20, r:10, fill:'#A0A0A0', stroke:'#707070'}));
+    }
+    function renderSteelScrew(g, x, y) {
+        g.appendChild(createEl('rect', {x:x-2, y:y-10, width:8, height:25, fill:'url(#metallic)'}));
+        g.appendChild(createEl('circle', {cx:x, cy:y-10, r:10, fill:'#B0B0B0', stroke:'#606060'}));
+        g.appendChild(createEl('line', {x1:x-3, y1:y-10, x2:x+3, y2:y-10, stroke:'#404040', 'stroke-width':1}));
+    }
+    function renderSteelClip(g, x, y) {
+        g.appendChild(createEl('path', {d:`M ${x-10} ${y-15} Q ${x-10} ${y-20} ${x-5} ${y-20} L ${x+5} ${y-20} Q ${x+10} ${y-20} ${x+10} ${y-15} L ${x+10} ${y+10} Q ${x+10} ${y+15} ${x+5} ${y+15} L ${x-5} ${y+15} Q ${x-10} ${y+15} ${x-10} ${y+10} Z`, fill:'none', stroke:'url(#metallic)', 'stroke-width':3}));
+    }
+    function renderIronKey(g, x, y) {
+        g.appendChild(createEl('circle', {cx:x-15, cy:y, r:8, fill:'url(#metallic)', stroke:'#505050'}));
+        g.appendChild(createEl('circle', {cx:x-15, cy:y, r:3, fill:'#2c3e50'}));
+        g.appendChild(createEl('rect', {x:x-7, y:y-2, width:25, height:4, fill:'url(#metallic)'}));
+        g.appendChild(createEl('path', {d:`M ${x+18} ${y+2} L ${x+18} ${y+6} L ${x+15} ${y+6} L ${x+15} ${y+4} L ${x+12} ${y+4} L ${x+12} ${y+6} L ${x+10} ${y+6} L ${x+10} ${y+2} Z`, fill:'#909090'}));
+    }
+    function renderNickelCoin(g, x, y) {
+        g.appendChild(createEl('circle', {cx:x, cy:y, r:12, fill:'#C0C0C0', stroke:'#FFD700', 'stroke-width':2}));
+        g.appendChild(createEl('circle', {cx:x, cy:y, r:8, fill:'none', stroke:'#A0A0A0', 'stroke-width':1}));
+    }
+    function renderCobaltSphere(g, x, y) {
+        g.appendChild(createEl('circle', {cx:x, cy:y, r:10, fill:'#7B7B7B', stroke:'#505050', 'stroke-width':1.5}));
+        g.appendChild(createEl('circle', {cx:x-3, cy:y-3, r:3, fill:'rgba(255,255,255,0.5)'}));
+    }
+    function renderPlasticBottle(g, x, y) {
+        g.appendChild(createEl('path', {d:`M ${x-8} ${y-10} L ${x-10} ${y+15} Q ${x-10} ${y+20} ${x-5} ${y+20} L ${x+5} ${y+20} Q ${x+10} ${y+20} ${x+10} ${y+15} L ${x+8} ${y-10} Z`, fill:'url(#plastic)', stroke:'#A02020', opacity:0.9}));
+        g.appendChild(createEl('rect', {x:x-4, y:y-18, width:8, height:8, fill:'#FF8787'}));
+        g.appendChild(createEl('rect', {x:x-5, y:y-22, width:10, height:4, rx:1, fill:'#333'}));
+    }
+    function renderCopperWire(g, x, y) {
+        g.appendChild(createEl('path', {d:`M ${x-20} ${y} Q ${x-15} ${y-12} ${x-8} ${y-4} T ${x} ${y} T ${x+8} ${y-4} T ${x+20} ${y}`, fill:'none', stroke:'url(#copper)', 'stroke-width':5, 'stroke-linecap':'round'}));
+    }
+    function renderAluminumCan(g, x, y) {
+        g.appendChild(createEl('rect', {x:x-7, y:y-15, width:14, height:30, rx:3, fill:'url(#aluminum)', stroke:'#808080'}));
+        g.appendChild(createEl('ellipse', {cx:x, cy:y-15, rx:7, ry:2, fill:'#B0B0B0'}));
+        g.appendChild(createEl('rect', {x:x-2, y:y-18, width:4, height:3, fill:'#909090'}));
+    }
+    function renderWoodBlock(g, x, y) {
+        g.appendChild(createEl('rect', {x:x-12, y:y-8, width:24, height:16, rx:2, fill:'url(#wood)', stroke:'#5C3317'}));
+        g.appendChild(createEl('line', {x1:x-8, y1:y-4, x2:x-8, y2:y+4, stroke:'#654321', 'stroke-width':1, opacity:0.5}));
+        g.appendChild(createEl('line', {x1:x+4, y1:y-5, x2:x+4, y2:y+5, stroke:'#654321', 'stroke-width':1, opacity:0.5}));
+    }
+    function renderGlassPane(g, x, y) {
+        g.appendChild(createEl('rect', {x:x-10, y:y-10, width:20, height:20, rx:2, fill:'#87CEEB', stroke:'#4682B4', 'stroke-width':2, opacity:0.6}));
+        g.appendChild(createEl('rect', {x:x-7, y:y-7, width:6, height:6, fill:'rgba(255,255,255,0.6)'}));
+    }
+    function renderRubberBand(g, x, y) {
+        g.appendChild(createEl('ellipse', {cx:x, cy:y, rx:15, ry:10, fill:'none', stroke:'#2F4F4F', 'stroke-width':4}));
+        g.appendChild(createEl('ellipse', {cx:x, cy:y, rx:10, ry:6, fill:'none', stroke:'#1C2C2C', 'stroke-width':1}));
+    }
+    // Helper to create elements
+    function createEl(type, attrs) {
+        let el = document.createElementNS("http://www.w3.org/2000/svg", type);
+        for (let key in attrs) el.setAttribute(key, attrs[key]);
+        return el;
+    }
+
+    // Create all materials
+    const centerX = simWidth / 2, centerY = simHeight / 2;
+    const items = [
+        { mag: true, render: renderIronNail, label: "Iron Nail" },
+        { mag: true, render: renderSteelScrew, label: "Steel Screw" },
+        { mag: true, render: renderSteelClip, label: "Steel Clip" },
+        { mag: true, render: renderIronKey, label: "Iron Key" },
+        { mag: true, render: renderNickelCoin, label: "Nickel Coin" },
+        { mag: true, render: renderCobaltSphere, label: "Cobalt" },
+        { mag: false, render: renderPlasticBottle, label: "Plastic" },
+        { mag: false, render: renderCopperWire, label: "Copper Wire" },
+        { mag: false, render: renderAluminumCan, label: "Aluminum" },
+        { mag: false, render: renderWoodBlock, label: "Wood" },
+        { mag: false, render: renderGlassPane, label: "Glass" },
+        { mag: false, render: renderRubberBand, label: "Rubber" },
+    ];
+    items.forEach(item => {
+        let x, y, dist;
+        do {
+            x = 40 + Math.random() * (simWidth - 80);
+            y = 40 + Math.random() * (simHeight - 80);
+            dist = Math.hypot(x - centerX, y - centerY);
+        } while (dist < 180);
+        createMaterial(x, y, item.mag, item.render, item.label);
+    });
+
+    // Magnet dragging
+    let isDraggingMagnet = false, dragOffsetX, dragOffsetY;
+    magnetGroup.addEventListener("mousedown", function (e) {
+        isDraggingMagnet = true;
+        magnetGroup.style.cursor = "grabbing";
+        const rect = svg.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left - magnetData.x;
+        dragOffsetY = e.clientY - rect.top - magnetData.y;
+        e.preventDefault();
+    });
+    magnetGroup.addEventListener("touchstart", function (e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = svg.getBoundingClientRect();
+        isDraggingMagnet = true;
+        magnetGroup.style.cursor = "grabbing";
+        dragOffsetX = touch.clientX - rect.left - magnetData.x;
+        dragOffsetY = touch.clientY - rect.top - magnetData.y;
+    });
+
+    function onMouseMove(e) {
+        if (!isDraggingMagnet) return;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        const rect = svg.getBoundingClientRect();
+        let newX = clientX - rect.left - dragOffsetX;
+        let newY = clientY - rect.top - dragOffsetY;
+        newX = Math.max(50, Math.min(newX, simWidth - 50));
+        newY = Math.max(30, Math.min(newY, simHeight - 30));
+        magnetData.x = newX;
+        magnetData.y = newY;
+        updateMagnetPosition();
+        updateFieldLines();
+    }
+    function onMouseUp() {
+        if (isDraggingMagnet) {
+            isDraggingMagnet = false;
+            magnetGroup.style.cursor = "move";
+        }
+    }
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("touchmove", onMouseMove, { passive: false });
+    document.addEventListener("touchend", onMouseUp);
+
+    function updateMagnetPosition() {
+        magnetGroup.setAttribute("transform", `translate(${magnetData.x - simWidth/2}, ${magnetData.y - simHeight/2})`);
+    }
+
+    // Physics update
+    function updateMaterials() {
+        materials.forEach(m => {
+            const d = m.materialData;
+            if (d.isDragging) {
+                d.x = Math.max(30, Math.min(d.x, simWidth - 30));
+                d.y = Math.max(30, Math.min(d.y, simHeight - 30));
+                updateTransform(m);
+                return;
+            }
+            const dx = d.x - magnetData.x, dy = d.y - magnetData.y, dist = Math.hypot(dx, dy);
+            const glow = m.querySelector(".glow");
+            if (d.isMagnetic) {
+                const attractDist = 180, attachDist = 70;
+                if (dist < attachDist && !d.attachedToMagnet) {
+                    d.attachedToMagnet = true;
+                    d.attachOffsetX = d.x - magnetData.x;
+                    d.attachOffsetY = d.y - magnetData.y;
+                    if (glow) { glow.setAttribute("stroke-width", "4"); glow.setAttribute("opacity", "0.8"); }
+                }
+                if (d.attachedToMagnet) {
+                    d.x = magnetData.x + d.attachOffsetX;
+                    d.y = magnetData.y + d.attachOffsetY;
+                    updateTransform(m);
+                    if (Math.hypot(d.attachOffsetX, d.attachOffsetY) > attachDist*2) {
+                        d.attachedToMagnet = false;
+                        if (glow) { glow.setAttribute("stroke-width", "0"); glow.setAttribute("opacity", "0"); }
+                    }
+                } else if (dist < attractDist) {
+                    let intensity = 1 - dist/attractDist;
+                    if (glow) { glow.setAttribute("stroke-width", intensity*3); glow.setAttribute("opacity", intensity*0.6); }
+                    let force = Math.min(3500 / (dist*dist), 7);
+                    let angle = Math.atan2(dy, dx);
+                    d.x -= Math.cos(angle) * force;
+                    d.y -= Math.sin(angle) * force;
+                    updateTransform(m);
+                } else {
+                    if (glow) { glow.setAttribute("stroke-width", "0"); glow.setAttribute("opacity", "0"); }
+                    d.x += (d.originalX - d.x) * 0.05;
+                    d.y += (d.originalY - d.y) * 0.05;
+                    updateTransform(m);
+                }
+            } else {
+                if (dist < 80) {
+                    let angle = Math.atan2(dy, dx);
+                    d.x += Math.cos(angle) * 3;
+                    d.y += Math.sin(angle) * 3;
+                } else {
+                    d.x += (d.originalX - d.x) * 0.05;
+                    d.y += (d.originalY - d.y) * 0.05;
+                }
+                updateTransform(m);
+            }
+            d.x = Math.max(30, Math.min(d.x, simWidth - 30));
+            d.y = Math.max(30, Math.min(d.y, simHeight - 30));
+            updateTransform(m);
+        });
+    }
+
+    function animate() { updateMaterials(); requestAnimationFrame(animate); }
+    animate();
+});
+    </script>
 </body>
 </html>

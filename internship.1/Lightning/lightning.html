@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plasma Physics Laboratory</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        
+        #ui-panel {
+            position: absolute; top: 20px; left: 20px; width: 280px;
+            background: rgba(0, 0, 0, 0.9); color: white; padding: 20px;
+            border-radius: 12px; border: 1px solid #333;
+            backdrop-filter: blur(15px); z-index: 100;
+        }
+
+        h2 { margin: 0 0 20px 0; font-size: 18px; color: #4fc3f7; display: flex; align-items: center; gap: 8px; }
+
+        .control { margin-bottom: 18px; }
+        label { display: block; font-size: 12px; color: #eee; margin-bottom: 8px; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #4fc3f7; height: 4px; }
+
+        .stats-area { 
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid #222; 
+        }
+        .stat-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+        .stat-label { color: #888; }
+        .stat-value { color: #4fc3f7; font-family: monospace; }
+
+        button {
+            width: 100%; padding: 12px; margin-top: 10px;
+            background: #222; border: none; color: white;
+            border-radius: 6px; cursor: pointer; font-weight: bold;
+            transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        #strike-btn { background: #3498db; color: white; }
+        #mega-btn { background: #2980b9; color: white; }
+        #strike-btn:hover, #mega-btn:hover { filter: brightness(1.2); }
+        
+        .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .toggle-btn { background: #1a1a1a; padding: 8px; font-size: 12px; border: 1px solid #333; }
+        .toggle-btn.active { background: #4fc3f7; color: black; border-color: #4fc3f7; }
+    </style>
+</head>
+<body>
+    <div id="ui-panel">
+        <h2>⚡ Lightning</h2>
+        <div class="control">
+            <label>Flash Rate: <span id="v-rate">4.1</span>/s</label>
+            <input type="range" id="flashRate" min="0.1" max="8" step="0.1" value="4.1">
+        </div>
+        <div class="control">
+            <label>Intensity: <span id="v-int">12.5</span></label>
+            <input type="range" id="intensity" min="1" max="25" step="0.5" value="12.5">
+        </div>
+        <div class="control">
+            <label>Branches: <span id="v-branch">5</span></label>
+            <input type="range" id="branches" min="0" max="15" step="1" value="5">
+        </div>
+        <button id="strike-btn">⚡ Strike Now!</button>
+        <button id="mega-btn">💥 Mega Strike!</button>
+        <div class="toggle-row">
+            <button class="toggle-btn active" id="audio-toggle">🔊 Sound On</button>
+            <button class="toggle-btn" id="storm-toggle">🌧️ Rain Off</button>
+        </div>
+        <div class="stats-area">
+            <div class="stat-line"><span class="stat-label">Total Strikes:</span><span id="stat-count" class="stat-value">0</span></div>
+            <div class="stat-line"><span class="stat-label">Temperature:</span><span id="stat-temp" class="stat-value">0°C</span></div>
+            <div class="stat-line"><span class="stat-label">Voltage:</span><span id="stat-volt" class="stat-value">0 Billion V</span></div>
+            <div class="stat-line"><span class="stat-label">Current Flash:</span><span id="stat-status" class="stat-value">Idle</span></div>
+        </div>
+    </div>
+    <script src="lightning.js"></script>
+</body>
+</html>

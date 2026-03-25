@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Explorer </title>
+    <title>Forms of energys</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <style>
@@ -172,15 +172,16 @@
         </div>
         
         <div id="controls">
-            <button class="energy-btn" onclick="showEnergy('heat')">🔥 Heat Energy</button>
-            <button class="energy-btn" onclick="showEnergy('sound')">🔊 Sound Energy</button>
-            <button class="energy-btn" onclick="showEnergy('light')">💡 Light Energy</button>
-            <button class="energy-btn" onclick="showEnergy('electrical')">⚡ Electrical Energy</button>
-            <button class="energy-btn" onclick="resetScene()">🔄 Reset</button>
+            <!-- onclick removed: now using event listeners in JS -->
+            <button class="energy-btn" data-energy="heat">🔥 Heat Energy</button>
+            <button class="energy-btn" data-energy="sound">🔊 Sound Energy</button>
+            <button class="energy-btn" data-energy="light">💡 Light Energy</button>
+            <button class="energy-btn" data-energy="electrical">⚡ Electrical Energy</button>
+            <button class="energy-btn" id="resetBtn">🔄 Reset</button>
         </div>
     </div>
 
-    <!-- Pictures for energies denoted here -->
+    <!-- Pictures for energies denoted here (kept commented as original) -->
     <!-- <img id="background-image" src="6b386272ea4b3d1ea7d613a6836a5cb8.jpg" style="display: none;">
     <img id="heat-image" src="heatenergyyy.png" style="display: none;">
     <img id="electrical-image" src="electricenergy.png" style="display: none;">
@@ -275,6 +276,22 @@ function init() {
     }
   });
 
+  // --- FIX BUTTON ISSUE: remove onclick and add event listeners ---
+  // Select all energy buttons (those with data-energy attribute) and reset button by id
+  const energyButtons = document.querySelectorAll('.energy-btn[data-energy]');
+  const resetButton = document.getElementById('resetBtn');
+  
+  energyButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const energyType = this.getAttribute('data-energy');
+      showEnergy(energyType);
+    });
+  });
+  
+  resetButton.addEventListener('click', function(e) {
+    resetScene();
+  });
+
   // Start animation loop
   animate();
 }
@@ -345,17 +362,14 @@ function resetScene() {
 
 function rearrangeButtons() {
   const controls = document.getElementById("controls");
-  const buttons = Array.from(
-    controls.querySelectorAll('.energy-btn:not([onclick="resetScene()"])')
-  );
-  const resetButton = controls.querySelector(
-    '.energy-btn[onclick="resetScene()"]'
-  );
+  // Get all buttons except reset (using attribute presence)
+  const energyButtons = Array.from(controls.querySelectorAll('.energy-btn[data-energy]'));
+  const resetButton = document.getElementById('resetBtn');
 
   // Shuffle the energy buttons
-  for (let i = buttons.length - 1; i > 0; i--) {
+  for (let i = energyButtons.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [buttons[i], buttons[j]] = [buttons[j], buttons[i]];
+    [energyButtons[i], energyButtons[j]] = [energyButtons[j], energyButtons[i]];
   }
 
   // Clear controls and re-add shuffled buttons + reset
@@ -363,7 +377,7 @@ function rearrangeButtons() {
     controls.removeChild(controls.firstChild);
   }
 
-  buttons.forEach((btn) => controls.appendChild(btn));
+  energyButtons.forEach((btn) => controls.appendChild(btn));
   controls.appendChild(resetButton);
 }
 

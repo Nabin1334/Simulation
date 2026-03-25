@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -194,17 +194,17 @@
       }
 
       /* Responsive Design */
-      
+
       /* Tablet styles */
       @media (max-width: 1024px) {
         #info-panel {
           width: 280px;
         }
-        
+
         #controls-panel {
           width: 280px;
         }
-        
+
         #instructions {
           max-width: 220px;
           font-size: 13px;
@@ -217,12 +217,12 @@
           overflow: auto;
           height: auto;
         }
-        
+
         #container {
           height: 60vh;
           min-height: 400px;
         }
-        
+
         #ui-container {
           position: static;
           display: flex;
@@ -231,7 +231,7 @@
           gap: 15px;
           height: auto;
         }
-        
+
         .panel {
           position: static !important;
           width: 100% !important;
@@ -239,123 +239,123 @@
           margin: 0;
           padding: 15px;
         }
-        
+
         #info-panel {
           order: 2;
           margin-top: 0;
         }
-        
+
         #controls-panel {
           order: 1;
         }
-        
+
         #instructions {
           display: none;
         }
-        
+
         .section-title {
           font-size: 15px;
           margin: 12px 0 8px;
         }
-        
+
         .control-label {
           width: 80px;
           font-size: 13px;
         }
-        
+
         .control-value {
           width: 35px;
           font-size: 13px;
         }
-        
+
         .btn {
           padding: 12px 8px;
           font-size: 13px;
           min-height: 44px; /* Better touch target */
         }
-        
+
         .label {
           display: none; /* Hide labels on mobile for cleaner look */
         }
-        
+
         .arrow {
           display: none; /* Hide arrows on mobile for cleaner look */
         }
       }
-      
+
       /* Small mobile styles */
       @media (max-width: 480px) {
         #ui-container {
           padding: 8px;
         }
-        
+
         .panel {
           padding: 12px;
           border-radius: 8px;
         }
-        
+
         #container {
           height: 50vh;
           min-height: 350px;
         }
-        
+
         .section-title {
           font-size: 14px;
         }
-        
+
         .control-label {
           width: 70px;
           font-size: 12px;
         }
-        
+
         .control-row {
           flex-wrap: wrap;
         }
-        
+
         .control-slider {
           margin: 5px 0;
         }
-        
+
         .btn {
           font-size: 12px;
           padding: 10px 6px;
         }
       }
-      
+
       /* Large desktop styles */
       @media (min-width: 1200px) {
         #info-panel {
           width: 350px;
         }
-        
+
         #controls-panel {
           width: 350px;
         }
-        
+
         #instructions {
           max-width: 300px;
           font-size: 15px;
         }
       }
-      
+
       /* Touch device optimizations */
       @media (hover: none) {
         .btn:hover {
           transform: none;
         }
-        
+
         .control-slider::-webkit-slider-thumb {
           width: 24px;
           height: 24px;
         }
       }
-      
+
       /* Landscape mobile optimizations */
       @media (max-height: 500px) and (orientation: landscape) {
         #container {
           height: 100vh;
         }
-        
+
         #ui-container {
           position: absolute;
           right: 10px;
@@ -364,7 +364,7 @@
           width: 300px;
           display: block;
         }
-        
+
         .panel {
           margin-bottom: 10px;
         }
@@ -524,7 +524,7 @@
           60,
           window.innerWidth / window.innerHeight,
           0.1,
-          1000
+          1000,
         );
         camera.position.set(0, 0, 15);
 
@@ -674,18 +674,42 @@
         const description = document.createElement("p");
         description.style.marginTop = "15px";
         description.style.fontSize = "14px";
-       
 
         // Preload and set the image directly in code
-        // Using a base64 encoded simple diagram of sound waves
-        const imageData = "ear.webp"; // Replace with actual base64 data or URL of the image
 
-        imageDisplay.src = imageData;
+        // Use relative path for compatibility, fallback for accessibility
+        imageDisplay.src = "ear.webp";
         imageDisplay.alt = "Sound Wave Propagation Diagram";
+        imageDisplay.loading = "lazy";
+        imageDisplay.onerror = function () {
+          this.style.display = "none";
+          description.textContent =
+            "Image could not be loaded. Please check your connection or try a different device.";
+        };
 
         // Assemble the panel
         imagePanel.appendChild(imageDisplay);
         imagePanel.appendChild(description);
+
+        // Responsive: move image panel below on mobile
+        function moveImagePanel() {
+          const uiContainer = document.getElementById("ui-container");
+          if (window.innerWidth <= 768) {
+            imagePanel.style.position = "static";
+            imagePanel.style.width = "100%";
+            imagePanel.style.marginTop = "15px";
+            uiContainer.appendChild(imagePanel);
+          } else {
+            imagePanel.style.position = "absolute";
+            imagePanel.style.top = "120px";
+            imagePanel.style.right = "20px";
+            imagePanel.style.width = "300px";
+            imagePanel.style.marginTop = "0";
+            uiContainer.appendChild(imagePanel);
+          }
+        }
+        window.addEventListener("resize", moveImagePanel);
+        moveImagePanel();
 
         // Add to UI container
         document.getElementById("ui-container").appendChild(imagePanel);
@@ -713,7 +737,7 @@
           // Calculate wave propagation
           const wave =
             Math.sin(
-              time * 8 * waveParams.frequency - index * 0.5 + data.phase
+              time * 8 * waveParams.frequency - index * 0.5 + data.phase,
             ) *
             waveParams.amplitude *
             0.3;
@@ -777,10 +801,10 @@
 
       // Handle window resize
       function onWindowResize() {
-        const container = document.getElementById('container');
+        const container = document.getElementById("container");
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
-        
+
         camera.aspect = containerWidth / containerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(containerWidth, containerHeight);
@@ -788,22 +812,23 @@
 
       // Optimize for touch devices
       function optimizeForTouch() {
-        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isTouch =
+          "ontouchstart" in window || navigator.maxTouchPoints > 0;
         if (isTouch) {
-          document.body.classList.add('touch-device');
-          
+          document.body.classList.add("touch-device");
+
           // Improve touch controls
-          const sliders = document.querySelectorAll('.control-slider');
-          sliders.forEach(slider => {
-            slider.addEventListener('touchstart', function(e) {
+          const sliders = document.querySelectorAll(".control-slider");
+          sliders.forEach((slider) => {
+            slider.addEventListener("touchstart", function (e) {
               e.stopPropagation();
             });
           });
-          
+
           // Optimize button interactions
-          const buttons = document.querySelectorAll('.btn');
-          buttons.forEach(button => {
-            button.addEventListener('touchstart', function(e) {
+          const buttons = document.querySelectorAll(".btn");
+          buttons.forEach((button) => {
+            button.addEventListener("touchstart", function (e) {
               e.preventDefault();
               this.click();
             });
@@ -813,7 +838,7 @@
 
       // Better orientation handling
       function handleOrientation() {
-        window.addEventListener('orientationchange', function() {
+        window.addEventListener("orientationchange", function () {
           setTimeout(() => {
             onWindowResize();
           }, 100); // Small delay to ensure dimensions are updated
@@ -825,7 +850,7 @@
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
           // Reduce particle count for better performance on mobile
-          airLayers.forEach(layer => {
+          airLayers.forEach((layer) => {
             if (layer.children.length > 8) {
               // Reduce particle count for performance
               while (layer.children.length > 8) {

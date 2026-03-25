@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specific Heat Capacity – 4 simulations · revamped layout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideRight { 0% { transform: translateX(-20px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(20px); opacity: 0; } }
+    @keyframes slideLeft { 0% { transform: translateX(20px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(-20px); opacity: 0; } }
+    .animate-slideRight { animation: slideRight 1.5s infinite; }
+    .animate-slideLeft { animation: slideLeft 1.5s infinite; }
+    .sim-panel { min-height: 520px; }  /* give simulations more presence */
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen font-sans antialiased">
+<div id="app"></div>
+<script>
+(function(){
+  function cn(...classes) { return classes.filter(Boolean).join(' '); }
+
+  let activeSimulation = 'car'; 
+  const simulations = [
+    { id: 'car', icon: '🚗', title: 'Car Coolant', description: 'Water cooling system' },
+    { id: 'cloth', icon: '🤒', title: 'Wet Cloth', description: 'Fever reduction' },
+    { id: 'hotbag', icon: '🔥', title: 'Hot Water Bag', description: 'Pain relief therapy' },
+    { id: 'breeze', icon: '🌊', title: 'Land & Sea Breeze', description: 'Coastal winds' },
+  ];
+
+  function renderApp() {
+    const appEl = document.getElementById('app');
+    appEl.innerHTML = `
+      <header class="bg-white/10 backdrop-blur-lg border-b border-white/20">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+          <div class="flex items-center justify-center gap-4">
+            <div class="text-4xl">🌡️</div>
+            <div class="text-center">
+              <h1 class="text-3xl md:text-4xl font-bold text-white">Specific Heat Capacity</h1>
+              <p class="text-blue-200 mt-1">Interactive Simulations & Real-World Applications</p>
+            </div>
+            <div class="text-4xl">⚗️</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- INTERACTIVE LEARNING moved directly below header (full width) -->
+      <div class="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl p-5 text-white">
+          <h2 class="text-2xl font-bold mb-1 flex items-center gap-2"><span class="text-3xl">📚</span> Interactive Learning</h2>
+          <p class="text-indigo-100 text-lg">Explore the simulations to understand how specific heat capacity works in real-world applications.</p>
+        </div>
+      </div>
+
+      <!-- main row: tabs stacked left + simulation middle (bigger) + (right column hidden now) -->
+      <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row gap-6">
+          <!-- LEFT: vertical tabs (buttons stacked) -->
+          <div class="md:w-64 flex flex-col gap-3" id="tab-container-vertical">
+            ${simulations.map(sim => `
+              <button data-id="${sim.id}" class="tab-btn-vert flex items-center gap-3 px-5 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 w-full text-left ${activeSimulation === sim.id ? 'bg-white text-indigo-600 shadow-lg shadow-white/25' : 'bg-white/20 text-white hover:bg-white/30'}">
+                <span class="text-3xl">${sim.icon}</span>
+                <div><div class="font-bold text-lg">${sim.title}</div><div class="text-sm ${activeSimulation === sim.id ? 'text-indigo-400' : 'text-blue-200'}">${sim.description}</div></div>
+              </button>`).join('')}
+          </div>
+
+          <!-- MIDDLE: bigger simulation area (order-1 for mobile, but flex handles it) -->
+          <div class="flex-1 min-w-0 order-first md:order-none" id="simulation-container">
+            <!-- dynamic simulation will be injected here -->
+          </div>
+
+          <!-- right column removed (was duplicate learning card) – we moved it up -->
+        </div>
+      </main>
+
+      <!-- application cards (remain unchanged) -->
+      <div class="max-w-7xl mx-auto px-4 mt-8">
+        <h2 class="text-2xl font-bold text-white text-center mb-6">🔬 Why These Applications Work</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+            <div class="text-3xl mb-2">🚗</div><h3 class="font-bold text-white mb-2">Car Coolant</h3><p class="text-sm text-blue-200">Water absorbs heat from the engine without boiling quickly, then releases it at the radiator. Its high specific heat means more heat transfer with less fluid.</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+            <div class="text-3xl mb-2">🤒</div><h3 class="font-bold text-white mb-2">Wet Cloth</h3><p class="text-sm text-blue-200">The wet cloth absorbs body heat efficiently. As water evaporates, it takes additional heat (latent heat of vaporization), providing double cooling effect.</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+            <div class="text-3xl mb-2">🔥</div><h3 class="font-bold text-white mb-2">Hot Water Bag</h3><p class="text-sm text-blue-200">Hot water releases its stored thermal energy slowly over time, providing sustained warmth. This helps in muscle relaxation and pain relief for extended periods.</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20 hover:bg-white/20 transition-all">
+            <div class="text-3xl mb-2">🌊</div><h3 class="font-bold text-white mb-2">Land & Sea Breeze</h3><p class="text-sm text-blue-200">Land (low specific heat) heats/cools faster than sea (high specific heat). This temperature difference creates pressure gradients that drive coastal breezes.</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-12 bg-white/5 border-t border-white/10 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-blue-200 text-sm">🎓 Educational simulation – Specific Heat Capacity</div>
+      </footer>
+    `;
+
+    // attach vertical tab listeners
+    document.querySelectorAll('.tab-btn-vert').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeSimulation = btn.dataset.id;
+        renderApp();  // full re-render (clean)
+      });
+    });
+
+    const container = document.getElementById('simulation-container');
+    if (activeSimulation === 'car') container.innerHTML = renderCarCoolant();
+    else if (activeSimulation === 'cloth') container.innerHTML = renderWetCloth();
+    else if (activeSimulation === 'hotbag') container.innerHTML = renderHotWaterBag();
+    else if (activeSimulation === 'breeze') container.innerHTML = renderLandSeaBreeze();
+
+    // initialize the chosen simulation
+    if (activeSimulation === 'car') initCarCoolant();
+    else if (activeSimulation === 'cloth') initWetCloth();
+    else if (activeSimulation === 'hotbag') initHotWaterBag();
+    else if (activeSimulation === 'breeze') initLandSeaBreeze();
+  }
+
+  // ========== CAR COOLANT ==========
+  function renderCarCoolant() {
+    return `
+      <div class="bg-white rounded-2xl shadow-xl p-6 h-full sim-panel" id="car-sim">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">🚗 Water as Car Coolant</h2>
+        <div class="relative bg-gray-100 rounded-xl p-4 mb-4 h-80 overflow-hidden" id="car-visual">
+          <div class="absolute left-4 top-8 w-32 h-24 bg-gray-700 rounded-lg flex items-center justify-center">
+            <div class="engine-block w-20 h-16 bg-blue-500 rounded transition-colors duration-300 flex items-center justify-center" id="engineBlock"><span class="text-white font-bold text-sm" id="engineTempDisplay">25°C</span></div>
+            <div class="engine-sparks absolute -bottom-2 left-1/2 transform -translate-x-1/2 hidden" id="engineSparks">
+              <div class="absolute w-2 h-2 bg-orange-400 rounded-full animate-ping" style="left:-10px"></div>
+              <div class="absolute w-2 h-2 bg-orange-400 rounded-full animate-ping" style="left:0px; animation-delay:0.2s"></div>
+              <div class="absolute w-2 h-2 bg-orange-400 rounded-full animate-ping" style="left:10px; animation-delay:0.4s"></div>
+            </div>
+          </div>
+          <span class="absolute left-12 top-2 text-xs font-semibold text-gray-600">ENGINE</span>
+          <div class="absolute right-4 top-8 w-28 h-32 border-4 border-gray-400 rounded-lg bg-gradient-to-b from-gray-200 to-gray-300 flex flex-col items-center justify-center">
+            <div class="water-block w-20 h-20 bg-blue-400 rounded transition-colors duration-500 flex items-center justify-center relative overflow-hidden" id="waterBlock">
+              <span class="text-white font-bold text-sm z-10" id="waterTempDisplay">25°C</span>
+              <div class="absolute bottom-0 left-0 right-0 h-4 bg-blue-500/30 animate-pulse"></div>
+            </div>
+          </div>
+          <span class="absolute right-8 top-2 text-xs font-semibold text-gray-600">RADIATOR</span>
+          <svg class="absolute inset-0 w-full h-full pointer-events-none" id="carSvg">
+            <path d="M 140 50 Q 180 50 200 50 Q 220 50 220 70 L 220 70" fill="none" stroke="#9CA3AF" stroke-width="8" stroke-linecap="round" id="topPipe"/>
+            <path d="M 140 100 Q 180 100 200 120 Q 220 140 220 140" fill="none" stroke="#9CA3AF" stroke-width="8" stroke-linecap="round" id="bottomPipe"/>
+            <circle r="4" fill="#3B82F6" id="flowCircle1" style="display:none"><animateMotion dur="1s" repeatCount="indefinite"><mpath xlink:href="#topPath" /></animateMotion></circle>
+            <circle r="4" fill="#EF4444" id="flowCircle2" style="display:none"><animateMotion dur="1s" repeatCount="indefinite"><mpath xlink:href="#bottomPath" /></animateMotion></circle>
+            <path id="topPath" d="M 220 70 Q 220 50 200 50 Q 180 50 140 50" fill="none" />
+            <path id="bottomPath" d="M 140 100 Q 180 100 200 120 Q 220 140 220 140" fill="none" />
+          </svg>
+          <div class="absolute bottom-2 left-2 right-2 flex gap-2">
+            <div class="engine-status px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-500" id="engineStatus">Engine: Off</div>
+            <div class="pump-status px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-500" id="pumpStatus">Pump: Standby</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-4">
+          <button id="startStopBtn" class="flex-1 py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 hover:bg-green-600 text-white">Start Engine</button>
+          <button id="resetCarBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold text-gray-700 transition-all">Reset</button>
+        </div>
+      </div>
+    `;
+  }
+  function initCarCoolant() {
+    let isRunning = false, pumpActive = false, engineTemp = 25, waterTemp = 25;
+    let engineInterval, pumpInterval;
+    const engineBlock = document.getElementById('engineBlock');
+    const engineTempSpan = document.getElementById('engineTempDisplay');
+    const waterBlock = document.getElementById('waterBlock');
+    const waterTempSpan = document.getElementById('waterTempDisplay');
+    const engineStatus = document.getElementById('engineStatus');
+    const pumpStatus = document.getElementById('pumpStatus');
+    const startStopBtn = document.getElementById('startStopBtn');
+    const resetBtn = document.getElementById('resetCarBtn');
+    const engineSparks = document.getElementById('engineSparks');
+    const topPipe = document.getElementById('topPipe');
+    const bottomPipe = document.getElementById('bottomPipe');
+    const flowCircle1 = document.getElementById('flowCircle1');
+    const flowCircle2 = document.getElementById('flowCircle2');
+
+    function updateUI() {
+      engineBlock.className = `engine-block w-20 h-16 rounded transition-colors duration-300 flex items-center justify-center ${
+        engineTemp < 50 ? 'bg-blue-500' : engineTemp < 75 ? 'bg-yellow-500' : engineTemp < 90 ? 'bg-orange-500' : 'bg-red-500'
+      }`;
+      engineTempSpan.textContent = engineTemp.toFixed(0) + '°C';
+      waterBlock.className = `water-block w-20 h-20 rounded transition-colors duration-500 flex items-center justify-center relative overflow-hidden ${
+        waterTemp < 40 ? 'bg-blue-400' : waterTemp < 60 ? 'bg-blue-300' : waterTemp < 75 ? 'bg-cyan-400' : 'bg-cyan-300'
+      }`;
+      waterTempSpan.textContent = waterTemp.toFixed(0) + '°C';
+      engineStatus.textContent = `Engine: ${isRunning ? 'Running' : 'Off'}`;
+      engineStatus.className = `px-2 py-1 rounded text-xs font-semibold ${isRunning ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`;
+      pumpStatus.textContent = `Pump: ${pumpActive ? 'Active' : 'Standby'}`;
+      pumpStatus.className = `px-2 py-1 rounded text-xs font-semibold ${pumpActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`;
+      if (isRunning) engineSparks.classList.remove('hidden'); else engineSparks.classList.add('hidden');
+      if (pumpActive) {
+        topPipe.setAttribute('stroke', '#60A5FA'); bottomPipe.setAttribute('stroke', '#F87171');
+        flowCircle1.style.display = 'block'; flowCircle2.style.display = 'block';
+      } else {
+        topPipe.setAttribute('stroke', '#9CA3AF'); bottomPipe.setAttribute('stroke', '#9CA3AF');
+        flowCircle1.style.display = 'none'; flowCircle2.style.display = 'none';
+      }
+    }
+    function clearIntervals() { if (engineInterval) clearInterval(engineInterval); if (pumpInterval) clearInterval(pumpInterval); }
+    function resetSim() { clearIntervals(); isRunning = false; pumpActive = false; engineTemp = 25; waterTemp = 25; updateUI(); startStopBtn.textContent = 'Start Engine'; startStopBtn.className = 'flex-1 py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 hover:bg-green-600 text-white'; }
+    startStopBtn.addEventListener('click', () => {
+      if (!isRunning) {
+        isRunning = true; startStopBtn.textContent = 'Stop Engine'; startStopBtn.className = 'flex-1 py-2 px-4 rounded-lg font-semibold transition-all bg-red-500 hover:bg-red-600 text-white';
+        clearIntervals();
+        engineInterval = setInterval(() => { if (!isRunning) return; engineTemp = Math.min(engineTemp + 2, 110); if (engineTemp > 95 && !pumpActive) pumpActive = true; updateUI(); }, 100);
+        pumpInterval = setInterval(() => { if (!isRunning) return; if (pumpActive) { engineTemp = Math.max(engineTemp - 3, 75); waterTemp = Math.min(waterTemp + 0.5, 85); } updateUI(); }, 100);
+      } else { isRunning = false; pumpActive = false; clearIntervals(); updateUI(); startStopBtn.textContent = 'Start Engine'; startStopBtn.className = 'flex-1 py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 hover:bg-green-600 text-white'; }
+    });
+    resetBtn.addEventListener('click', resetSim);
+    updateUI();
+  }
+
+  // ========== WET CLOTH ==========
+  function renderWetCloth() {
+  return `
+    <div class="bg-white rounded-2xl shadow-xl p-6 h-full sim-panel" id="cloth-sim">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">🤒 Wet Cloth on Forehead</h2>
+      <p class="text-gray-600 mb-4 text-sm">Water's high specific heat capacity allows a wet cloth to absorb significant heat from the body, helping reduce fever.</p>
+      <div class="relative bg-gradient-to-b from-blue-50 to-purple-50 rounded-xl p-4 mb-4 h-80 flex items-center justify-center" id="clothVisual">
+        <div class="relative flex items-center gap-8">
+          <!-- Person on the left -->
+          <div class="relative">
+            <div class="face w-32 h-40 bg-gradient-to-b from-red-300 to-red-400 rounded-t-full rounded-b-3xl shadow-lg transition-colors duration-500" id="face"></div>
+            <div class="absolute top-16 left-6 w-4 h-2 bg-gray-700 rounded-full"></div>
+            <div class="absolute top-16 right-6 w-4 h-2 bg-gray-700 rounded-full"></div>
+            <div class="mouth absolute bottom-10 left-1/2 transform -translate-x-1/2 w-6 h-3 border-b-2 border-red-400 rotate-180 rounded-b-full" id="mouth"></div>
+            <div class="absolute top-20 left-2 w-6 h-4 bg-red-300 rounded-full opacity-50" id="cheekLeft"></div>
+            <div class="absolute top-20 right-2 w-6 h-4 bg-red-300 rounded-full opacity-50" id="cheekRight"></div>
+            <div class="absolute top-8 -right-1 w-2 h-3 bg-blue-300 rounded-full animate-bounce"></div>
+            <div class="absolute top-12 -left-1 w-2 h-3 bg-blue-300 rounded-full animate-bounce" style="animation-delay:0.5s"></div>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 w-36 h-12 bg-gray-800 rounded-t-full"></div>
+            
+            <!-- Cloth element positioned on forehead -->
+            <div id="clothElement" class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-28 h-8 rounded-lg shadow-md hidden items-center justify-center" style="background: linear-gradient(to right, rgba(59,130,246,1), rgba(96,165,250,1)); border:2px solid rgba(59,130,246,0.5);">
+              <span class="text-xs font-bold text-white drop-shadow" id="clothTempSpan">25°C</span>
+              <div class="absolute -bottom-4 left-1/4 w-1 h-3 bg-blue-400 rounded-full animate-ping" id="drip"></div>
+            </div>
+          </div>
+          
+          <!-- Body temperature display on the right side of person -->
+          <div class="bg-white rounded-lg shadow-lg p-3 text-center min-w-[100px]">
+            <div class="text-xs text-gray-500 mb-1">Body Temperature</div>
+            <div class="text-2xl font-bold text-red-500" id="bodyTempDisplay">103.0°F</div>
+            <div class="text-xs text-gray-400 mt-1">forehead</div>
+          </div>
+        </div>
+        
+        <!-- Wetness bar at bottom -->
+        <div class="absolute bottom-4 left-4 right-4" id="wetnessBarContainer">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-600">Wetness:</span>
+            <div class="flex-1 bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-500 h-2 rounded-full transition-all" id="wetnessBar" style="width:100%"></div>
+            </div>
+            <span class="text-xs text-gray-600" id="wetnessPercent">100%</span>
+          </div>
+        </div>
+        
+        <!-- Recovery message -->
+        <div id="recoveryMessage" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold animate-bounce hidden">✨ Fever Reduced!</div>
+      </div>
+      
+      <div class="flex gap-2 mb-4">
+        <button id="applyClothBtn" class="flex-1 py-2 px-4 rounded-lg font-semibold transition-all bg-blue-500 hover:bg-blue-600 text-white">Apply Wet Cloth</button>
+        <button id="rewetBtn" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-300 rounded-lg font-semibold text-white transition-all">Re-wet</button>
+        <button id="resetClothBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold text-gray-700 transition-all">Reset</button>
+      </div>
+      
+      <div class="bg-green-50 rounded-lg p-3 text-sm">
+        <p class="text-green-800"><strong>How it works:</strong> The wet cloth absorbs heat from the forehead. As water evaporates, it takes even more heat away, effectively reducing body temperature.</p>
+      </div>
+    </div>
+  `;
+}
+  function initWetCloth() {
+    let hasFever = true, clothApplied = false, bodyTemp = 103, clothTemp = 25, clothWetness = 100;
+    const face = document.getElementById('face');
+    const mouth = document.getElementById('mouth');
+    const cheekLeft = document.getElementById('cheekLeft'), cheekRight = document.getElementById('cheekRight');
+    const clothElement = document.getElementById('clothElement');
+    const clothTempSpan = document.getElementById('clothTempSpan');
+    const bodyTempDisplay = document.getElementById('bodyTempDisplay');
+    const wetnessBar = document.getElementById('wetnessBar');
+    const wetnessPercent = document.getElementById('wetnessPercent');
+    const recoveryMsg = document.getElementById('recoveryMessage');
+    const applyBtn = document.getElementById('applyClothBtn');
+    const rewetBtn = document.getElementById('rewetBtn');
+    const resetBtn = document.getElementById('resetClothBtn');
+    const drip = document.getElementById('drip');
+    let interval;
+    function updateUI() {
+      let color;
+      if (bodyTemp > 102) color = 'from-red-300 to-red-400';
+      else if (bodyTemp > 100) color = 'from-orange-200 to-orange-300';
+      else if (bodyTemp > 99) color = 'from-yellow-100 to-yellow-200';
+      else color = 'from-amber-100 to-amber-200';
+      face.className = `face w-32 h-40 bg-gradient-to-b ${color} rounded-t-full rounded-b-3xl shadow-lg transition-colors duration-500`;
+      mouth.className = `mouth absolute bottom-10 left-1/2 transform -translate-x-1/2 w-6 h-3 border-b-2 ${hasFever ? 'border-red-400 rotate-180' : 'border-gray-600'} rounded-b-full`;
+      if (!hasFever) { cheekLeft.classList.add('hidden'); cheekRight.classList.add('hidden'); } else { cheekLeft.classList.remove('hidden'); cheekRight.classList.remove('hidden'); }
+      bodyTempDisplay.textContent = bodyTemp.toFixed(1) + '°F';
+      bodyTempDisplay.className = `text-xl font-bold ${bodyTemp > 100 ? 'text-red-500' : 'text-green-500'}`;
+      if (clothApplied) {
+        clothElement.style.display = 'flex';
+        clothTempSpan.textContent = clothTemp.toFixed(0) + '°C';
+        wetnessBar.style.width = clothWetness + '%';
+        wetnessPercent.textContent = clothWetness.toFixed(0) + '%';
+        if (clothWetness > 50) drip.style.display = 'block'; else drip.style.display = 'none';
+      } else {
+        clothElement.style.display = 'none';
+      }
+      if (!hasFever) recoveryMsg.classList.remove('hidden'); else recoveryMsg.classList.add('hidden');
+      applyBtn.textContent = clothApplied ? 'Remove Cloth' : 'Apply Wet Cloth';
+      applyBtn.disabled = (clothWetness <= 0 || !hasFever);
+      rewetBtn.disabled = (clothWetness > 50);
+    }
+    function clearSimInterval() { if (interval) clearInterval(interval); }
+    applyBtn.addEventListener('click', () => {
+      if (!clothApplied && (clothWetness <= 0 || !hasFever)) return;
+      clothApplied = !clothApplied;
+      if (clothApplied) {
+        clearSimInterval();
+        interval = setInterval(() => {
+          if (!clothApplied) return;
+          if (bodyTemp <= 98.6) { hasFever = false; clothApplied = false; clearSimInterval(); }
+          else { bodyTemp = Math.max(bodyTemp - 0.15, 98.6); }
+          clothTemp = Math.min(clothTemp + 0.3, bodyTemp - 2);
+          clothWetness = Math.max(clothWetness - 1, 0);
+          if (clothWetness <= 0) clothApplied = false;
+          updateUI();
+        }, 100);
+      } else { clearSimInterval(); }
+      updateUI();
+    });
+    rewetBtn.addEventListener('click', () => {
+      clothTemp = 25; clothWetness = 100; updateUI();
+    });
+    resetBtn.addEventListener('click', () => {
+      clearSimInterval();
+      hasFever = true; clothApplied = false; bodyTemp = 103; clothTemp = 25; clothWetness = 100;
+      updateUI();
+    });
+    updateUI();
+  }
+
+  // ========== HOT WATER BAG ==========
+  function renderHotWaterBag() {
+    return `
+      <div class="bg-white rounded-2xl shadow-xl p-6 h-full sim-panel" id="hotbag-sim">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">🔥 Hot Water Bag</h2>
+        <p class="text-gray-600 mb-4 text-sm">Hot water bags retain heat because water's high specific heat means it releases heat slowly.</p>
+        <div class="relative bg-gradient-to-b from-amber-50 to-orange-50 rounded-xl p-4 mb-4 h-80" id="hotbagVisual">
+          <div class="absolute left-4 top-4 bottom-16 w-32 bg-gradient-to-b from-amber-200 to-amber-300 rounded-3xl shadow-inner flex flex-col items-center justify-center">
+            <span class="text-4xl mb-2" id="painEmoji">😣</span><span class="text-xs font-bold text-red-500" id="painText">Severe Pain</span>
+            <div class="absolute inset-0 flex items-center justify-center" id="painWaves"><div class="absolute w-full h-full border-2 border-red-400 rounded-3xl animate-ping opacity-20"></div><div class="absolute w-full h-full border-2 border-red-400 rounded-3xl animate-ping opacity-20" style="animation-duration:1.5s"></div></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-orange-300/50 to-transparent rounded-3xl animate-pulse" id="warmthEffect" style="display:none"></div>
+          </div>
+          <span class="absolute left-10 bottom-10 text-xs font-semibold text-gray-600">AFFECTED AREA</span>
+          <div class="absolute right-4 top-8 w-28 h-36 bg-gradient-to-b from-red-300 to-red-500 rounded-3xl shadow-lg transition-all duration-500 cursor-pointer hover:scale-105" id="bag" style="transform:rotate(0deg)">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-8 h-6 bg-gray-700 rounded-t-lg"></div>
+            <div class="flex flex-col items-center justify-center h-full"><span class="text-white font-bold text-xl" id="bagTempDisplay">25°C</span><span class="text-white/80 text-xs mt-1">Hot Bag</span></div>
+            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 flex gap-1" id="steam" style="display:none"><div class="w-1 h-4 bg-white/60 rounded-full animate-bounce"></div><div class="w-1 h-4 bg-white/60 rounded-full animate-bounce" style="animation-delay:0.2s"></div><div class="w-1 h-4 bg-white/60 rounded-full animate-bounce" style="animation-delay:0.4s"></div></div>
+            <div class="absolute -left-2 top-1/2 transform -translate-y-1/2" id="heatWaves" style="display:none"><div class="w-4 h-1 bg-orange-400 rounded-full animate-pulse mb-2"></div><div class="w-4 h-1 bg-orange-400 rounded-full animate-pulse mb-2" style="animation-delay:0.3s"></div></div>
+          </div>
+          <div class="absolute bottom-2 left-2 right-2 space-y-2">
+            <div class="flex items-center gap-2"><span class="text-xs text-gray-600 w-16">Pain:</span><div class="flex-1 bg-gray-200 rounded-full h-3"><div class="bg-gradient-to-r from-red-400 to-red-500 h-3 rounded-full transition-all" id="painBar" style="width:80%"></div></div><span class="text-xs text-gray-600 w-10" id="painPercent">80%</span></div>
+            <div class="flex items-center gap-2"><span class="text-xs text-gray-600 w-16">Comfort:</span><div class="flex-1 bg-gray-200 rounded-full h-3"><div class="bg-gradient-to-r from-green-400 to-green-500 h-3 rounded-full transition-all" id="comfortBar" style="width:20%"></div></div><span class="text-xs text-gray-600 w-10" id="comfortPercent">20%</span></div>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-4">
+          <button id="heatBtn" class="flex-1 py-2 px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 rounded-lg font-semibold text-white transition-all">Heat Water</button>
+          <button id="applyBagBtn" class="flex-1 py-2 px-4 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 rounded-lg font-semibold text-white transition-all">Apply Bag</button>
+          <button id="resetHotBagBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold text-gray-700">Reset</button>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-sm"><p class="text-orange-800"><strong>Therapeutic benefit:</strong> Water stores large amounts of thermal energy and releases it slowly, providing sustained warmth.</p></div>
+      </div>
+    `;
+  }
+  function initHotWaterBag() {
+    let bagTemp = 25, bodyPain = 80, comfort = 20, isApplied = false, isHeating = false;
+    const bagEl = document.getElementById('bag');
+    const bagTempSpan = document.getElementById('bagTempDisplay');
+    const painBar = document.getElementById('painBar'), painPercent = document.getElementById('painPercent');
+    const comfortBar = document.getElementById('comfortBar'), comfortPercent = document.getElementById('comfortPercent');
+    const painEmoji = document.getElementById('painEmoji'), painText = document.getElementById('painText');
+    const warmthEffect = document.getElementById('warmthEffect'), steam = document.getElementById('steam'), heatWaves = document.getElementById('heatWaves');
+    const heatBtn = document.getElementById('heatBtn'), applyBtn = document.getElementById('applyBagBtn'), resetBtn = document.getElementById('resetHotBagBtn');
+    function updateBagColor() {
+      let grad = 'from-red-300 to-red-500';
+      if (bagTemp < 35) grad = 'from-red-200 to-red-300';
+      else if (bagTemp < 45) grad = 'from-red-300 to-red-400';
+      else if (bagTemp < 55) grad = 'from-red-400 to-red-500';
+      else grad = 'from-red-500 to-red-600';
+      bagEl.className = `absolute right-4 top-8 w-28 h-36 bg-gradient-to-b ${grad} rounded-3xl shadow-lg transition-all duration-500 cursor-pointer hover:scale-105`;
+    }
+    function updateUI() {
+      bagTempSpan.textContent = bagTemp.toFixed(0) + '°C';
+      painBar.style.width = bodyPain + '%'; painPercent.textContent = bodyPain.toFixed(0) + '%';
+      comfortBar.style.width = comfort + '%'; comfortPercent.textContent = comfort.toFixed(0) + '%';
+      if (bodyPain > 60) { painEmoji.textContent = '😣'; painText.textContent = 'Severe Pain'; painText.className = 'text-xs font-bold text-red-500'; }
+      else if (bodyPain > 40) { painEmoji.textContent = '😕'; painText.textContent = 'Moderate Pain'; painText.className = 'text-xs font-bold text-orange-500'; }
+      else if (bodyPain > 20) { painEmoji.textContent = '🙂'; painText.textContent = 'Mild Pain'; painText.className = 'text-xs font-bold text-yellow-500'; }
+      else { painEmoji.textContent = '😊'; painText.textContent = 'Relieved!'; painText.className = 'text-xs font-bold text-green-500'; }
+      if (isApplied) bagEl.style.transform = 'translateX(-60px) rotate(-15deg)'; else bagEl.style.transform = 'rotate(0deg)';
+      warmthEffect.style.display = (isApplied && bagTemp > 40) ? 'block' : 'none';
+      steam.style.display = (bagTemp > 50 && !isApplied) ? 'flex' : 'none';
+      heatWaves.style.display = (isApplied && bagTemp > 40) ? 'block' : 'none';
+      applyBtn.disabled = (bagTemp < 40);
+      applyBtn.textContent = isApplied ? 'Remove Bag' : 'Apply Bag';
+      applyBtn.className = `flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${isApplied ? 'bg-blue-500 hover:bg-blue-600' : 'bg-green-500 hover:bg-green-600'} text-white disabled:bg-gray-300`;
+      heatBtn.disabled = (isHeating || bagTemp >= 65);
+      heatBtn.textContent = isHeating ? 'Heating...' : (bagTemp >= 65 ? 'Hot & Ready!' : 'Heat Water');
+      updateBagColor();
+    }
+    let heatInterval, therapyInterval;
+    heatBtn.addEventListener('click', () => {
+      if (isHeating || bagTemp >= 65) return;
+      isHeating = true;
+      heatInterval = setInterval(() => { if (bagTemp >= 65) { clearInterval(heatInterval); isHeating = false; updateUI(); return; } bagTemp = Math.min(bagTemp + 2, 65); updateUI(); }, 100);
+    });
+    applyBtn.addEventListener('click', () => {
+      if (!isApplied && bagTemp < 40) return;
+      isApplied = !isApplied;
+      if (isApplied) {
+        therapyInterval = setInterval(() => {
+          if (!isApplied) { clearInterval(therapyInterval); return; }
+          bagTemp = Math.max(bagTemp - 0.1, 30); bodyPain = Math.max(bodyPain - 0.5, 10); comfort = Math.min(comfort + 0.5, 100); updateUI();
+        }, 100);
+      } else { if (therapyInterval) clearInterval(therapyInterval); }
+      updateUI();
+    });
+    resetBtn.addEventListener('click', () => {
+      if (heatInterval) clearInterval(heatInterval); if (therapyInterval) clearInterval(therapyInterval);
+      bagTemp = 25; bodyPain = 80; comfort = 20; isApplied = false; isHeating = false; updateUI();
+    });
+    updateUI();
+  }
+
+  // ========== LAND & SEA BREEZE ==========
+  function renderLandSeaBreeze() {
+    return `
+      <div class="bg-white rounded-2xl shadow-xl p-6 h-full sim-panel" id="breeze-sim">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">🌊 Land & Sea Breeze</h2>
+        <p class="text-gray-600 mb-4 text-sm">Land has lower specific heat, so it heats/cools faster, driving coastal breezes.</p>
+        <div class="relative bg-gradient-to-b from-blue-400 via-blue-300 to-orange-200 rounded-xl mb-4 h-80 overflow-hidden transition-all duration-1000" id="sky">
+          <div class="absolute transition-all duration-500" id="sunMoon" style="left:50%; top:10%"><div class="w-12 h-12 bg-yellow-400 rounded-full shadow-lg flex items-center justify-center"><div class="w-8 h-8 bg-yellow-300 rounded-full"></div></div></div>
+          <div id="stars" class="hidden"></div>
+          <div class="absolute bottom-0 left-0 w-1/2 h-24 bg-gradient-to-b from-blue-500 to-blue-700 overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-4 flex">${Array(8).fill(0).map((_,i)=>`<div class="w-8 h-4 bg-blue-400 rounded-t-full animate-bounce" style="animation-delay:${i*0.2}s"></div>`).join('')}</div>
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur rounded-lg px-3 py-1"><span class="text-white font-bold" id="seaTemp">20°C</span></div>
+            <span class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 text-xs">SEA</span>
+          </div>
+          <div class="absolute bottom-0 right-0 w-1/2 h-24 bg-gradient-to-b from-amber-600 to-amber-800 overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-3 flex">${Array(12).fill(0).map((_,i)=>`<div class="w-3 h-3 bg-green-600" style="clip-path:polygon(50% 0%,0% 100%,100% 100%)"></div>`).join('')}</div>
+            <div class="absolute bottom-4 right-4"><div class="w-8 h-6 bg-red-400"></div><div class="absolute -top-4 left-0 w-8 h-4 bg-red-600" style="clip-path:polygon(50% 0%,0% 100%,100% 100%)"></div></div>
+            <div class="absolute bottom-4 right-16"><div class="w-2 h-4 bg-amber-900 mx-auto"></div><div class="w-6 h-6 bg-green-500 rounded-full -mt-2"></div></div>
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/20 backdrop-blur rounded-lg px-3 py-1"><span class="text-white font-bold" id="landTemp">25°C</span></div>
+            <span class="absolute top-6 left-1/2 transform -translate-x-1/2 text-white/80 text-xs">LAND</span>
+            <div id="heatWavesLand" class="absolute top-0 left-0 right-0 hidden">${Array(5).fill(0).map((_,i)=>`<div class="absolute w-full h-1 bg-orange-300/30" style="top:-${i*8}px; animation:pulse 1s infinite; animation-delay:${i*0.2}s"></div>`).join('')}</div>
+          </div>
+          <div id="breezeContainer" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 hidden">
+            ${Array(5).fill(0).map((_,i)=>`<div class="w-8 h-1 bg-white/60 rounded-full animate-slideRight" style="animation-delay:${i*0.2}s"></div>`).join('')}
+            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white/90 rounded-lg px-3 py-1 whitespace-nowrap"><span class="text-sm font-bold text-blue-600" id="breezeLabel">🌊 Sea Breeze →</span></div>
+          </div>
+          <div class="absolute top-2 right-2 bg-white/20 backdrop-blur rounded-lg px-3 py-1"><span class="text-white font-semibold text-sm" id="timeLabel">☀️ Daytime</span></div>
+        </div>
+        <div class="flex gap-2 mb-4">
+          <button id="animateBreezeBtn" class="flex-1 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold">Start Day/Night Cycle</button>
+          <button id="toggleTimeBtn" class="flex-1 py-2 px-4 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-lg font-semibold">Toggle Night</button>
+          <button id="resetBreezeBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold">Reset</button>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-3 text-sm"><p class="text-purple-800"><strong>Sea Breeze (Day):</strong> Land heats faster → hot air rises → cooler air from sea rushes in.<br><strong>Land Breeze (Night):</strong> Land cools faster → sea stays warmer → air flows from land to sea.</p></div>
+      </div>
+    `;
+  }
+  function initLandSeaBreeze() {
+  let timeOfDay = 'day', isAnimating = false, landTemp = 25, seaTemp = 20, sunPos = 50;
+  const sky = document.getElementById('sky');
+  const sunMoon = document.getElementById('sunMoon');
+  const stars = document.getElementById('stars');
+  const landTempSpan = document.getElementById('landTemp'), seaTempSpan = document.getElementById('seaTemp');
+  const timeLabel = document.getElementById('timeLabel');
+  const breezeContainer = document.getElementById('breezeContainer'), breezeLabel = document.getElementById('breezeLabel');
+  const heatWavesLand = document.getElementById('heatWavesLand');
+  const animateBtn = document.getElementById('animateBreezeBtn'), toggleBtn = document.getElementById('toggleTimeBtn'), resetBtn = document.getElementById('resetBreezeBtn');
+  
+  function updateSky() {
+    if (timeOfDay === 'day') {
+      sky.className = 'relative bg-gradient-to-b from-blue-400 via-blue-300 to-orange-200 rounded-xl mb-4 h-80 overflow-hidden transition-all duration-1000';
+      sunMoon.innerHTML = '<div class="w-12 h-12 bg-yellow-400 rounded-full shadow-lg flex items-center justify-center"><div class="w-8 h-8 bg-yellow-300 rounded-full"></div></div>';
+      stars.classList.add('hidden'); 
+      timeLabel.innerHTML = '☀️ Daytime';
+    } else {
+      sky.className = 'relative bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 rounded-xl mb-4 h-80 overflow-hidden transition-all duration-1000';
+      sunMoon.innerHTML = '<div class="w-10 h-10 bg-gray-200 rounded-full shadow-lg relative"><div class="absolute top-1 left-2 w-2 h-2 bg-gray-300 rounded-full"></div><div class="absolute bottom-2 right-1 w-3 h-3 bg-gray-300 rounded-full"></div></div>';
+      stars.classList.remove('hidden'); 
+      timeLabel.innerHTML = '🌙 Nighttime';
+    }
+  }
+  
+  function updateTempsAndBreeze() {
+    landTempSpan.textContent = landTemp.toFixed(0) + '°C';
+    seaTempSpan.textContent = seaTemp.toFixed(0) + '°C';
+    const isSeaBreeze = (timeOfDay === 'day' && landTemp > seaTemp + 5);
+    const isLandBreeze = (timeOfDay === 'night' && seaTemp > landTemp + 2);
+    if (isSeaBreeze || isLandBreeze) {
+      breezeContainer.classList.remove('hidden');
+      if (isSeaBreeze) { 
+        breezeLabel.innerHTML = '🌊 Sea Breeze →'; 
+        breezeContainer.querySelectorAll('div[class*="bg-white/60"]').forEach(el => el.style.animation = 'slideRight 1.5s infinite'); 
+      } else { 
+        breezeLabel.innerHTML = '← Land Breeze 🏠'; 
+        breezeContainer.querySelectorAll('div[class*="bg-white/60"]').forEach(el => el.style.animation = 'slideLeft 1.5s infinite'); 
+      }
+    } else breezeContainer.classList.add('hidden');
+    heatWavesLand.style.display = (timeOfDay === 'day' && landTemp > 35) ? 'block' : 'none';
+  }
+  
+  let cycleInterval;
+  function startCycle() {
+    if (cycleInterval) clearInterval(cycleInterval);
+    cycleInterval = setInterval(() => {
+      if (!isAnimating) return;
+      if (timeOfDay === 'day') {
+        landTemp = Math.min(landTemp + 0.5, 45); 
+        seaTemp = Math.min(seaTemp + 0.1, 25); 
+        sunPos = Math.min(sunPos + 0.5, 80);
+        if (sunPos >= 80) { 
+          timeOfDay = 'night'; 
+          toggleBtn.textContent = 'Toggle Day'; // Update button when auto-switching
+          updateSky(); 
+        }
+      } else {
+        landTemp = Math.max(landTemp - 0.5, 15); 
+        seaTemp = Math.max(seaTemp - 0.1, 18); 
+        sunPos = Math.max(sunPos - 0.5, 20);
+        if (sunPos <= 20) { 
+          timeOfDay = 'day'; 
+          toggleBtn.textContent = 'Toggle Night'; // Update button when auto-switching
+          updateSky(); 
+        }
+      }
+      sunMoon.style.left = sunPos + '%';
+      updateTempsAndBreeze();
+    }, 100);
+  }
+  
+  animateBtn.addEventListener('click', () => {
+    isAnimating = !isAnimating;
+    animateBtn.textContent = isAnimating ? 'Stop Animation' : 'Start Day/Night Cycle';
+    animateBtn.className = `flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${isAnimating ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white`;
+    toggleBtn.disabled = isAnimating;
+    if (isAnimating) startCycle(); else if (cycleInterval) clearInterval(cycleInterval);
+  });
+  
+  toggleBtn.addEventListener('click', () => {
+    if (isAnimating) return;
+    timeOfDay = timeOfDay === 'day' ? 'night' : 'day';
+    
+    // Set appropriate temperatures and sun position based on time
+    if (timeOfDay === 'day') { 
+      landTemp = 25; 
+      seaTemp = 20; 
+      sunPos = 50;
+      toggleBtn.textContent = 'Toggle Night'; // Update button text for day mode
+    } else { 
+      landTemp = 40; 
+      seaTemp = 24; 
+      sunPos = 80;
+      toggleBtn.textContent = 'Toggle Day'; // Update button text for night mode
+    }
+    
+    sunMoon.style.left = sunPos + '%';
+    updateSky(); 
+    updateTempsAndBreeze();
+  });
+  
+  resetBtn.addEventListener('click', () => {
+    if (cycleInterval) clearInterval(cycleInterval);
+    isAnimating = false; 
+    timeOfDay = 'day'; 
+    landTemp = 25; 
+    seaTemp = 20; 
+    sunPos = 50;
+    sunMoon.style.left = '50%'; 
+    updateSky(); 
+    updateTempsAndBreeze();
+    animateBtn.textContent = 'Start Day/Night Cycle'; 
+    animateBtn.className = 'flex-1 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold';
+    toggleBtn.disabled = false;
+    toggleBtn.textContent = 'Toggle Night'; // Reset button text
+  });
+  
+  updateSky(); 
+  updateTempsAndBreeze();
+}
+
+  renderApp();
+})();
+</script>
+</body>
+</html>
