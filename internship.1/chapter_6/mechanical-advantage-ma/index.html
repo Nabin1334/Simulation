@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mechanical Advantage - Real Lever Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1976d2, #0d47a1);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .simulation-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .canvas-container {
+            background: linear-gradient(180deg, #e3f2fd 30%, #bbdefb 70%);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #1976d2;
+            margin-bottom: 25px;
+            height: 400px;
+            position: relative;
+        }
+
+        #leverCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .control-group {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        .control-group h3 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1976d2;
+        }
+
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-header label {
+            font-weight: 600;
+            color: #424242;
+            font-size: 1.1em;
+        }
+
+        .slider-value {
+            background: #1976d2;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .slider-value.load {
+            background: #d32f2f;
+        }
+        .slider-value.effort {
+            background: #388e3c;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #e0e0e0, #bdbdbd);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 3px solid;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #loadWeight::-webkit-slider-thumb {
+            border-color: #d32f2f;
+        }
+        #effortForce::-webkit-slider-thumb {
+            border-color: #388e3c;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #1976d2;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .action-btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.reset {
+            background: #d32f2f;
+        }
+
+        .action-btn.reset:hover {
+            background: #b71c1c;
+        }
+
+        .action-btn.balance {
+            background: #388e3c;
+        }
+
+        .action-btn.balance:hover {
+            background: #2e7d32;
+        }
+
+        .physics-display {
+            background: #1976d2;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .physics-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .physics-label {
+            color: #bbdefb;
+        }
+
+        .physics-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-display {
+            background: rgba(25, 118, 210, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #1565c0;
+            margin-top: 20px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .legend-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .legend-f {
+            background: #1976d2;
+        }
+        .legend-l {
+            background: #d32f2f;
+        }
+        .legend-e {
+            background: #388e3c;
+        }
+
+        .info-box {
+            background: #f3e5f5;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px solid #e1bee7;
+        }
+
+        .info-box h3 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .info-box p {
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .formula-box {
+            background: #e8f5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #388e3c;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5em;
+            color: #1b5e20;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mechanical Advantage Simulator</h1>
+            <p class="subtitle">Simple tool to understand how levers make work easier</p>
+        </div>
+
+        <div class="main-content">
+            <div class="simulation-area">
+                <div class="canvas-container">
+                    <canvas id="leverCanvas"></canvas>
+                </div>
+
+                <div class="physics-display">
+                    <div class="physics-row">
+                        <span class="physics-label">Mechanical Advantage (MA):</span>
+                        <span class="physics-value" id="maValue">2.00</span>
+                    </div>
+                    <div class="physics-row">
+                        <span class="physics-label">Load Torque:</span>
+                        <span class="physics-value" id="loadTorque">100.0 N·m</span>
+                    </div>
+                    <div class="physics-row">
+                        <span class="physics-label">Effort Torque:</span>
+                        <span class="physics-value" id="effortTorque">100.0 N·m</span>
+                    </div>
+                    <div class="physics-row">
+                        <span class="physics-label">Lever State:</span>
+                        <span class="physics-value" id="leverState">Balanced ⚖️</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot legend-f"></div>
+                        <span>Fulcrum (Fixed Point)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot legend-l"></div>
+                        <span>Load (Weight to Lift)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot legend-e"></div>
+                        <span>Effort (Pushing Force)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>Adjust Forces</h3>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Load Weight (N)</label>
+                            <span class="slider-value load" id="loadWeightValue">100 N</span>
+                        </div>
+                        <input
+                            type="range"
+                            id="loadWeight"
+                            min="10"
+                            max="500"
+                            value="100"
+                            step="10"
+                        />
+                        <div style="font-size: 0.9em; color: #666; margin-top: 5px">
+                            How heavy the object is
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Effort Force (N)</label>
+                            <span class="slider-value effort" id="effortForceValue">50 N</span>
+                        </div>
+                        <input
+                            type="range"
+                            id="effortForce"
+                            min="5"
+                            max="250"
+                            value="50"
+                            step="5"
+                        />
+                        <div style="font-size: 0.9em; color: #666; margin-top: 5px">
+                            How hard you push
+                        </div>
+                    </div>
+
+                    <div class="formula-box">
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
+                            Mechanical Advantage Formula
+                        </div>
+                        <div class="formula">MA = Load ÷ Effort</div>
+                        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                            Tells how many times easier the lever makes your work
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="action-btn reset" id="resetBtn">
+                            Reset All
+                        </button>
+                        <button class="action-btn balance" id="balanceBtn">
+                            Auto Balance
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>What is Mechanical Advantage?</h3>
+                    <p><strong>Mechanical Advantage (MA)</strong> tells you how many times a lever multiplies your force.</p>
+                    <p><strong>MA = Load ÷ Effort</strong></p>
+                    <p>• <strong>MA > 1:</strong> Makes work easier (force multiplier)</p>
+                    <p>• <strong>MA = 1:</strong> No advantage</p>
+                    <p>• <strong>MA < 1:</strong> Makes work harder (but may increase speed)</p>
+                    <p><strong>Example:</strong> If MA = 2, you need half the force!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+    </script>
+</body>
+</html>

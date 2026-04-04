@@ -1,1085 +1,1084 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linear Motion Equations - Physics Simulation</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>Linear Motion Lab | Looping Bus | SUVAT Physics Simulator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
+      body {
+        font-family:
+          "Segoe UI",
+          "Poppins",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: linear-gradient(145deg, #fef9e6 0%, #fff3e0 100%);
+        min-height: 100vh;
+        padding: 16px;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      /* Header - bright and warm */
+      .header {
+        background: linear-gradient(135deg, #f9a826, #ff6b35);
+        border-radius: 1.5rem;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 200, 0.5);
+      }
+      .header h1 {
+        font-size: clamp(1.4rem, 5vw, 2rem);
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .header p {
+        color: #fff9e6;
+        font-weight: 600;
+        font-size: clamp(0.8rem, 3vw, 1rem);
+      }
+
+      /* Main dashboard - responsive flex */
+      .main-dashboard {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      /* LEFT PANEL - Controls & Results */
+      .left-controls {
+        flex: 1.1;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      /* RIGHT PANEL - Simulation area */
+      .right-simulation {
+        flex: 2.4;
+        min-width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* Cards - bright & glassmorphic */
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(4px);
+        border-radius: 1.5rem;
+        padding: 1rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 200, 100, 0.6);
+        transition: all 0.2s;
+      }
+      .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f97316, #f59e0b);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border-left: 4px solid #f97316;
+        padding-left: 10px;
+      }
+
+      /* Simulation canvas area - bright nature */
+      .simulation-canvas-box {
+        background: #fff5e6;
+        border-radius: 1.5rem;
+        padding: 5px;
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+        border: 2px solid #ffd966;
+      }
+      .simulation-container {
+        width: 100%;
+        height: clamp(320px, 45vh, 480px);
+        background: #87ceeb;
+        border-radius: 1.2rem;
+        overflow: hidden;
+        position: relative;
+      }
+      #simulationCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Control buttons - responsive grid */
+      .control-buttons-row {
+        display: flex;
+        gap: 12px;
+        margin: 10px 0;
+        flex-wrap: wrap;
+      }
+      .ctrl-btn {
+        flex: 1;
+        min-width: 90px;
+        border: none;
+        padding: 10px 8px;
+        border-radius: 60px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: 0.2s;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: monospace;
+      }
+      .ctrl-btn:active {
+        transform: scale(0.97);
+      }
+      .play-btn {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+      }
+      .pause-btn {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+      }
+      .reset-btn {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+      }
+
+      /* Speed control row */
+      .speed-row {
+        display: flex;
+        gap: 15px;
+        margin: 10px 0;
+        flex-wrap: wrap;
+      }
+      .speed-control-item {
+        flex: 1;
+        background: #fff8ef;
+        padding: 8px 12px;
+        border-radius: 1rem;
+        border: 1px solid #ffe0b5;
+      }
+      .speed-control-item label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #c2410c;
+        display: block;
+        margin-bottom: 5px;
+      }
+      .speed-slider {
+        width: 100%;
+        margin: 5px 0;
+        accent-color: #f97316;
+      }
+      .speed-value {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #f97316;
+        text-align: center;
+        margin-top: 4px;
+      }
+
+      /* Parameter groups */
+      .param-group {
+        margin-bottom: 1rem;
+        background: #fff8ef;
+        padding: 10px;
+        border-radius: 1rem;
+        border: 1px solid #ffe0b5;
+      }
+      .param-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        color: #c2410c;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+      }
+      .slider {
+        width: 100%;
+        margin: 6px 0;
+        accent-color: #f97316;
+      }
+      .param-value {
+        background: #ffedd5;
+        padding: 2px 10px;
+        border-radius: 40px;
+        color: #c2410c;
+        font-weight: bold;
+        font-size: 0.8rem;
+      }
+      .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: #9a3412;
+        margin-top: 4px;
+      }
+
+      /* result cards */
+      .result-dual {
+        display: flex;
+        gap: 12px;
+        margin: 12px 0;
+        flex-wrap: wrap;
+      }
+      .result-card {
+        background: linear-gradient(135deg, #fff7ed, #fffbeb);
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        border-radius: 1rem;
+        border-bottom: 3px solid #f97316;
+        min-width: 120px;
+      }
+      .result-card div:first-child {
+        font-size: 0.75rem;
+        color: #7c2d12;
+      }
+      .big-number {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #ea580c;
+        font-family: "Courier New", monospace;
+      }
+
+      .verif-item {
+        background: #fff3e0;
+        margin: 8px 0;
+        padding: 8px 10px;
+        border-radius: 40px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border-left: 3px solid #f97316;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .real-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .real-card {
+        background: #fff7e8;
+        border-radius: 1rem;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.1s linear;
+        border: 1px solid #ffdd99;
+        font-weight: 600;
+        color: #9a3412;
+        font-size: 0.8rem;
+      }
+      .real-card:hover {
+        transform: scale(0.98);
+        background: #ffefd6;
+      }
+
+      .status-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        background: #fff3e0;
+        padding: 10px;
+        border-radius: 1.5rem;
+        text-align: center;
+        margin-top: 10px;
+        font-weight: bold;
+        color: #7c2d12;
+      }
+      .status-item {
+        font-size: 0.8rem;
+      }
+      .status-item span:first-child {
+        font-weight: 600;
+      }
+
+      .unit-toggle {
+        background: #f97316;
+        border: none;
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        font-size: 0.7rem;
+        margin-left: 5px;
+      }
+
+      .live-info-bar {
+        background: #fff8ef;
+        border-radius: 1rem;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        border: 1px solid #ffdd99;
+      }
+      .live-info-item {
+        background: #fff0e0;
+        padding: 6px 12px;
+        border-radius: 2rem;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      .loop-badge {
+        background: #7c3aed;
+        color: white;
+        padding: 4px 14px;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      .time-set-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .time-set-input {
+        flex: 2;
+        min-width: 100px;
+        padding: 8px;
+        border-radius: 40px;
+        border: 2px solid #f97316;
+        background: white;
+        font-weight: bold;
+        text-align: center;
+      }
+      .time-set-btn {
+        background: #f97316;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 40px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      @media (max-width: 700px) {
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 100%);
-            color: #333;
-            line-height: 1.6;
-            padding: 15px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1565C0, #0D47A1);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2);
-            border: 2px solid #1976D2;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .header p {
-            font-size: 0.95rem;
-            opacity: 0.95;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.4;
-        }
-
-        /* Main Content Layout */
-        .main-content {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        /* LEFT Panel - SIMULATION */
-        .simulation-panel {
-            flex: 2.2;
-            min-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* RIGHT Panel - CONTROLS & THEORY */
-        .controls-panel {
-            flex: 0.8;
-            min-width: 280px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
-            border: 1px solid #E3F2FD;
-        }
-
-        .card-title {
-            color: #1565C0;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #E3F2FD;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-        }
-
-        /* SIMULATION AREA */
-        .simulation-area {
-            background: white;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        }
-
-        .simulation-container {
-            width: 100%;
-            height: 400px;
-            background: linear-gradient(135deg, #87CEEB, #B3E5FC);
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid #64B5F6;
-        }
-
-        #simulationCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* 🎮 SIMULATION CONTROLS */
-        .simulation-controls {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #E3F2FD;
-            margin-top: 10px;
-        }
-
-        .simulation-controls .card-title {
-            color: #FF5722;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            padding-bottom: 6px;
-        }
-
-        /* Control Buttons Grid */
-        .control-buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .control-button {
-            padding: 12px 8px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            transition: all 0.2s ease;
-            min-height: 70px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .control-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .control-button:active {
-            transform: translateY(0);
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-        }
-
-        .btn-pause {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-            color: white;
-        }
-
-        .btn-reset {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            color: white;
-        }
-
-        .btn-icon {
-            font-size: 1.3rem;
-        }
-
-        .btn-text {
-            font-size: 0.8rem;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .btn-shortcut {
-            font-size: 0.65rem;
-            opacity: 0.8;
-            margin-top: 2px;
-            font-family: monospace;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        /* Speed Controls */
-        .speed-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .speed-control {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #E3F2FD;
-        }
-
-        .speed-label {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .speed-value {
-            font-weight: bold;
-            color: #2196F3;
-            font-size: 0.9rem;
-        }
-
-        .speed-slider {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            background: #E0E0E0;
-            border-radius: 3px;
-            outline: none;
-            margin: 4px 0;
-        }
-
-        .speed-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #2196F3;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
-        }
-
-        /* Speed Display */
-        .speed-display {
-            padding: 10px;
-            background: linear-gradient(135deg, #1565C0, #0D47A1);
-            color: white;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-        }
-
-        .speed-display-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .speed-unit-toggle {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .speed-unit-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .speed-display-value {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            color: #FFEB3B;
-            font-weight: bold;
-        }
-
-        /* Time Display */
-        .time-display {
-            padding: 10px;
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .time-label {
-            opacity: 0.9;
-            font-size: 0.8rem;
-        }
-
-        .time-value {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            color: #FFEB3B;
-            font-weight: bold;
-        }
-
-        /* REAL-WORLD EXAMPLES */
-        .real-world-panel {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .real-world-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 3px solid #4CAF50;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .real-world-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-left-color: #2E7D32;
-        }
-
-        .real-world-icon {
-            font-size: 1.3rem;
-            color: #1565C0;
-            min-width: 36px;
-            text-align: center;
-            background: #E3F2FD;
-            padding: 8px;
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-
-        .real-world-content h4 {
-            color: #1565C0;
-            margin-bottom: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .real-world-content p {
-            font-size: 0.75rem;
-            color: #666;
-            line-height: 1.3;
-        }
-
-        /* SIMULATION INFO - Updated to remove arrow references */
-        .simulation-info {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            z-index: 10;
-            border-left: 2px solid #1565C0;
-            max-width: 220px;
-        }
-
-        .simulation-info h3 {
-            color: #1565C0;
-            margin-bottom: 4px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .simulation-info p {
-            margin: 3px 0;
-            font-size: 0.65rem;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* EQUATIONS PANEL */
-        .equations-panel {
-            background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 12px;
-            border: 2px solid #4CAF50;
-        }
-
-        .equations-panel .card-title {
-            color: #2E7D32;
-        }
-
-        .equation-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .equation-item {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #4CAF50;
-        }
-
-        .equation-formula {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2E7D32;
-            text-align: center;
-            margin: 5px 0;
-            font-family: 'Cambria Math', 'Times New Roman', serif;
-        }
-
-        .equation-explanation {
-            font-size: 0.75rem;
-            color: #666;
-            line-height: 1.3;
-        }
-
-        /* RIGHT PANEL - Parameters */
-        .parameters-section {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Parameter Controls */
-        .parameter-control {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        }
-
-        .parameter-group {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: linear-gradient(135deg, #F8FAFF, #FFFFFF);
-            border-radius: 6px;
-            border: 1px solid #E3F2FD;
-        }
-
-        .parameter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .parameter-label {
-            font-weight: 600;
-            color: #1565C0;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .parameter-icon {
-            font-size: 0.9rem;
-        }
-
-        .parameter-value {
-            background: linear-gradient(135deg, #1565C0, #1976D2);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            min-width: 60px;
-            text-align: center;
-            box-shadow: 0 1px 4px rgba(21, 101, 192, 0.2);
-        }
-
-        .slider-container {
-            position: relative;
-            margin: 10px 0;
-            padding: 6px 0;
-        }
-
-        .slider-track {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #E0E0E0;
-            border-radius: 2px;
-            transform: translateY(-50%);
-        }
-
-        .slider-fill {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #1976D2, #2196F3);
-            border-radius: 2px;
-            transform: translateY(-50%);
-        }
-
-        .slider {
-            position: relative;
-            width: 100%;
-            height: 16px;
-            background: transparent;
-            outline: none;
-            -webkit-appearance: none;
-            z-index: 2;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            border: 2px solid #1976D2;
-            cursor: pointer;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-        }
-
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 6px;
-            font-size: 0.7rem;
-            color: #666;
-        }
-
-        /* Results Display */
-        .results-container {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 12px 0;
-        }
-
-        .result-box {
-            background: linear-gradient(135deg, #F3F9FF, white);
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            border-top: 3px solid #2196F3;
-        }
-
-        .result-label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .result-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #1565C0;
-            font-family: 'Courier New', monospace;
-            margin: 8px 0;
-        }
-
-        .result-unit {
-            font-size: 0.75rem;
-            color: #777;
-        }
-
-        /* Unit Toggle */
-        .unit-toggle {
-            display: inline-block;
-            margin-left: 5px;
-            padding: 2px 6px;
-            background: #E3F2FD;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #1565C0;
-            cursor: pointer;
-            border: 1px solid #BBDEFB;
-        }
-
-        .unit-toggle:hover {
-            background: #BBDEFB;
-        }
-
-        /* Equation Verification */
-        .verification-panel {
-            background: linear-gradient(135deg, #FFF8E1, #FFF3E0);
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #FFB74D;
-            margin-top: 12px;
-        }
-
-        .verification-title {
-            color: #FF9800;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .verification-item {
-            margin: 6px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            border: 1px solid #FFE0B2;
-        }
-
-        .verification-equation {
-            color: #333;
-            font-weight: 500;
-        }
-
-        .verification-result {
-            color: #1565C0;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
-        /* Status Bar */
-        .status-bar {
-            background: linear-gradient(135deg, #0D47A1, #1565C0);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            text-align: center;
-            margin-top: 12px;
-            box-shadow: 0 2px 6px rgba(13, 71, 161, 0.2);
-        }
-
-        .status-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .status-value {
-            font-size: 1rem;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 3px;
-            color: #FFEB3B;
-        }
-
-        .status-label {
-            font-size: 0.65rem;
-            opacity: 0.9;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 12px;
-            color: #666;
-            font-size: 0.8rem;
-            margin-top: 15px;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .simulation-panel, .controls-panel {
-                min-width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .real-world-panel {
-                grid-template-columns: 1fr;
-            }
-            
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .status-bar {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .control-buttons-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .speed-controls {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.4rem;
-            }
-            
-            .simulation-container {
-                height: 280px;
-            }
-            
-            .control-buttons-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Animations */
-        @keyframes valueUpdate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-
-        .value-updated {
-            animation: valueUpdate 0.2s ease;
-        }
-
-        @keyframes highlightEquation {
-            0% { box-shadow: 0 0 0 rgba(76, 175, 80, 0); }
-            50% { box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
-            100% { box-shadow: 0 0 0 rgba(76, 175, 80, 0); }
-        }
-
-        .equation-highlight {
-            animation: highlightEquation 1s ease;
-        }
+          padding: 12px;
+        }
+        .control-buttons-row .ctrl-btn {
+          font-size: 0.75rem;
+          padding: 8px 4px;
+        }
+        .big-number {
+          font-size: 1.3rem;
+        }
+        .verif-item {
+          font-size: 0.7rem;
+        }
+      }
+      .equation-highlight {
+        background: #fed7aa;
+        box-shadow: 0 0 0 2px #f97316;
+        transition: 0.2s;
+      }
+      footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #7c2d12;
+        font-weight: 500;
+        font-size: 0.75rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+    <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🚀 Linear Motion Equations </h1>
-            <p>Interactive Simulation of SUVAT Equations • Real Physics Applications</p>
-        </div>
+      <div class="header">
+        <h1>🚌 LINEAR MOTION  SIMULATOR</h1>
+        <p>
+          SUVAT equations | Infinite loop mode (auto-reset at 15s) | Real
+          physics | Responsive design
+        </p>
+      </div>
 
-        <div class="main-content">
-            <!-- LEFT Panel - SIMULATION WITH CONTROLS -->
-            <div class="simulation-panel">
-                <!-- Simulation Area -->
-                <div class="simulation-area">
-                    <!-- Main Simulation Canvas -->
-                    <div class="simulation-container">
-                        <div class="simulation-info">
-                            <h3>🏎️ Physics Simulation</h3>
-                            <p>• Green trail shows motion path</p>
-                            <p>• Distance markers every 20m</p>
-                            <p>• Realistic bus motion</p>
-                            <p>• Physics calculations in real-time</p>
-                        </div>
-                        <canvas id="simulationCanvas"></canvas>
-                    </div>
-
-                    <!-- 🎮 SIMULATION CONTROLS -->
-                    <div class="simulation-controls">
-                        <div class="card-title">🎮 Control Panel</div>
-                        
-                        <!-- Main Control Buttons -->
-                        <div class="control-buttons-grid">
-                            <button class="control-button btn-play" id="playBtn" title="Start simulation">
-                                <span class="btn-icon">▶</span>
-                                <span class="btn-text">Play</span>
-                                <span class="btn-shortcut">Space</span>
-                            </button>
-                            
-                            <button class="control-button btn-pause" id="pauseBtn" title="Pause simulation">
-                                <span class="btn-icon">⏸</span>
-                                <span class="btn-text">Pause</span>
-                                <span class="btn-shortcut">Space</span>
-                            </button>
-                            
-                            <button class="control-button btn-reset" id="resetBtn" title="Reset simulation">
-                                <span class="btn-icon">↻</span>
-                                <span class="btn-text">Reset</span>
-                                <span class="btn-shortcut">R</span>
-                            </button>
-                        </div>
-
-                        <!-- Speed Controls -->
-                        <div class="speed-controls">
-                            <div class="speed-control">
-                                <div class="speed-label">
-                                    <span>Simulation Speed:</span>
-                                    <span class="speed-value" id="speedValue">1.0x</span>
-                                </div>
-                                <input type="range" class="speed-slider" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
-                            </div>
-                            
-                            <div class="speed-control">
-                                <div class="speed-label">
-                                    <span>Time Step:</span>
-                                    <span class="speed-value" id="timeStepValue">0.5s</span>
-                                </div>
-                                <input type="range" class="speed-slider" id="timeStepSlider" min="0.1" max="2" step="0.1" value="0.5">
-                            </div>
-                        </div>
-
-                        <!-- Speed Display -->
-                        <div class="speed-display">
-                            <div class="speed-display-label">
-                                <span>Current Speed:</span>
-                                <button class="speed-unit-toggle" id="unitToggle" title="Click to toggle between m/s and km/h">
-                                    km/h
-                                </button>
-                            </div>
-                            <div class="speed-display-value" id="currentSpeedDisplay">0.0</div>
-                        </div>
-
-                        <!-- Time Display -->
-                        <div class="time-display">
-                            <div class="time-label">Simulation Time:</div>
-                            <div class="time-value" id="simulationTime">0.0 s</div>
-                        </div>
-                    </div>
-
-                    <!-- Equations of Linear Motion -->
-                    <div class="equations-panel">
-                        <div class="card-title">📐 Equations of Linear Motion (SUVAT)</div>
-                        <div class="equation-list">
-                            <div class="equation-item" id="eq1">
-                                <div class="equation-formula">v = u + at</div>
-                                <div class="equation-explanation">
-                                    <strong>Final velocity</strong> = Initial velocity + (Acceleration × Time)
-                                </div>
-                            </div>
-                            <div class="equation-item" id="eq2">
-                                <div class="equation-formula">s = ut + ½at²</div>
-                                <div class="equation-explanation">
-                                    <strong>Displacement</strong> = (Initial velocity × Time) + (½ × Acceleration × Time²)
-                                </div>
-                            </div>
-                            <div class="equation-item" id="eq3">
-                                <div class="equation-formula">v² = u² + 2as</div>
-                                <div class="equation-explanation">
-                                    <strong>Velocity squared</strong> = Initial velocity² + (2 × Acceleration × Displacement)
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Real-World Examples -->
-                    <div class="real-world-panel">
-                        <div class="real-world-item" onclick="setExample(10, 2, 5)" title="Click to set parameters">
-                            <div class="real-world-icon">🚗</div>
-                            <div class="real-world-content">
-                                <h4>Car Acceleration</h4>
-                                <p>36 km/h at 2 m/s² for 5s</p>
-                            </div>
-                        </div>
-                        <div class="real-world-item" onclick="setExample(15, -3, 4)" title="Click to set parameters">
-                            <div class="real-world-icon">🏀</div>
-                            <div class="real-world-content">
-                                <h4>Ball Throw</h4>
-                                <p>54 km/h with gravity</p>
-                            </div>
-                        </div>
-                        <div class="real-world-item" onclick="setExample(20, -4, 5)" title="Click to set parameters">
-                            <div class="real-world-icon">🚂</div>
-                            <div class="real-world-content">
-                                <h4>Train Braking</h4>
-                                <p>72 km/h at -4 m/s²</p>
-                            </div>
-                        </div>
-                        <div class="real-world-item" onclick="setExample(0, 3, 8)" title="Click to set parameters">
-                            <div class="real-world-icon">🎢</div>
-                            <div class="real-world-content">
-                                <h4>Roller Coaster</h4>
-                                <p>Starts from rest, 3 m/s²</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div class="main-dashboard">
+        <!-- LEFT SIDE: Controls, Parameters & Results -->
+        <div class="left-controls">
+          <div class="card">
+            <div class="card-title">🎮 CONTROL PANEL</div>
+            <div class="control-buttons-row">
+              <button class="ctrl-btn play-btn" id="playBtn">▶ PLAY</button>
+              <button class="ctrl-btn pause-btn" id="pauseBtn">⏸ PAUSE</button>
+              <button class="ctrl-btn reset-btn" id="resetBtn">⟳ RESET</button>
             </div>
 
-            <!-- RIGHT Panel - PARAMETERS & RESULTS -->
-            <div class="controls-panel">
-                <!-- Parameters Section -->
-                <div class="parameters-section">
-                    <!-- Motion Parameters -->
-                    <div class="parameter-control">
-                        <div class="card-title">⚙️ Motion Parameters</div>
-                        
-                        <div class="parameter-group">
-                            <div class="parameter-header">
-                                <div class="parameter-label">
-                                    <span class="parameter-icon">🚀</span>
-                                    <span>Initial Velocity (u)</span>
-                                </div>
-                                <span class="parameter-value" id="initialVelocityValue">36 km/h</span>
-                            </div>
-                            <div class="slider-container">
-                                <div class="slider-track"></div>
-                                <div class="slider-fill" id="initialVelocityFill"></div>
-                                <input type="range" class="slider" id="initialVelocitySlider" 
-                                       min="0" max="180" step="5" value="36">
-                            </div>
-                            <div class="slider-labels">
-                                <span>0</span>
-                                <span>90</span>
-                                <span>180 km/h</span>
-                            </div>
-                        </div>
-
-                        <div class="parameter-group">
-                            <div class="parameter-header">
-                                <div class="parameter-label">
-                                    <span class="parameter-icon">📈</span>
-                                    <span>Acceleration (a)</span>
-                                </div>
-                                <span class="parameter-value" id="accelerationValue">2 m/s²</span>
-                            </div>
-                            <div class="slider-container">
-                                <div class="slider-track"></div>
-                                <div class="slider-fill" id="accelerationFill"></div>
-                                <input type="range" class="slider" id="accelerationSlider" 
-                                       min="-10" max="15" step="0.5" value="2">
-                            </div>
-                            <div class="slider-labels">
-                                <span>-10</span>
-                                <span>2.5</span>
-                                <span>15 m/s²</span>
-                            </div>
-                        </div>
-
-                        <div class="parameter-group">
-                            <div class="parameter-header">
-                                <div class="parameter-label">
-                                    <span class="parameter-icon">⏱️</span>
-                                    <span>Time (t)</span>
-                                </div>
-                                <span class="parameter-value" id="timeValue">0.0 s</span>
-                            </div>
-                            <div class="slider-container">
-                                <div class="slider-track"></div>
-                                <div class="slider-fill" id="timeFill"></div>
-                                <input type="range" class="slider" id="timeSlider" 
-                                       min="0" max="15" step="0.1" value="0">
-                            </div>
-                            <div class="slider-labels">
-                                <span>0</span>
-                                <span>7.5</span>
-                                <span>15 s</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Live Results -->
-                    <div class="results-container">
-                        <div class="card-title">📊 Results</div>
-                        <div class="results-grid">
-                            <div class="result-box">
-                                <div class="result-label">Final Velocity (v) 
-                                    <span class="unit-toggle" id="speedUnitToggle" title="Click to toggle units">km/h</span>
-                                </div>
-                                <div class="result-value" id="finalVelocityValue">36.0</div>
-                                <div class="result-unit" id="speedUnitDisplay">km/h</div>
-                            </div>
-                            <div class="result-box">
-                                <div class="result-label">Displacement (s)</div>
-                                <div class="result-value" id="displacementValue">0.0</div>
-                                <div class="result-unit">meters</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Equation Verification -->
-                        <div class="verification-panel">
-                            <div class="verification-title">
-                                <span>✓ Equation Verification</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-equation">v = u + at</span>
-                                <span class="verification-result" id="eq1Result">36.0 km/h</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-equation">s = ut + ½at²</span>
-                                <span class="verification-result" id="eq2Result">0.0 m</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-equation">v² = u² + 2as</span>
-                                <span class="verification-result" id="eq3Result">36.0 km/h</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Status Bar -->
-                    <div class="status-bar">
-                        <div class="status-item">
-                            <div class="status-value" id="statusTime">0.0</div>
-                            <div class="status-label">Time (s)</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-value" id="statusSpeed">36.0</div>
-                            <div class="status-label">Speed <span id="statusSpeedUnit">km/h</span></div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-value" id="statusDistance">0.0</div>
-                            <div class="status-label">Distance (m)</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-value" id="statusMode">READY</div>
-                            <div class="status-label">Status</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Time Step control only -->
+            <div class="speed-row">
+              <div class="speed-control-item">
+                <label>⏲️ Time Step</label>
+                <input
+                  type="range"
+                  id="timeStepSlider"
+                  class="speed-slider"
+                  min="0.2"
+                  max="1.2"
+                  step="0.05"
+                  value="0.5"
+                />
+                <div class="speed-value" id="stepLabel">0.5s</div>
+              </div>
             </div>
+
+            <!-- Custom Time Set -->
+            <div class="time-set-row">
+              <input
+                type="number"
+                id="customTimeInput"
+                class="time-set-input"
+                step="0.1"
+                min="0"
+                max="15"
+                value="0"
+                placeholder="Set time (s)"
+              />
+              <button id="setTimeBtn" class="time-set-btn">⏱️ SET TIME</button>
+            </div>
+
+            <div class="param-group">
+              <div class="param-header">
+                <span>🚀 Initial Velocity (u)</span
+                ><span class="param-value" id="uDisplayVal">36 km/h</span>
+              </div>
+              <input
+                type="range"
+                id="uSlider"
+                class="slider"
+                min="0"
+                max="180"
+                step="5"
+                value="36"
+              />
+              <div class="slider-labels">
+                <span>0</span><span>90</span><span>180 km/h</span>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-header">
+                <span>📈 Acceleration (a) [m/s²]</span
+                ><span class="param-value" id="aDisplayVal">2.0 m/s²</span>
+              </div>
+              <input
+                type="range"
+                id="aSlider"
+                class="slider"
+                min="-10"
+                max="12"
+                step="0.5"
+                value="2"
+              />
+              <div class="slider-labels">
+                <span>-10</span><span>1</span><span>12 m/s²</span>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-header">
+                <span>⏱️ Simulation Time (t)</span>
+                <span class="param-value" id="tDisplayVal">0.0 s</span>
+                <span
+                  class="param-value"
+                  id="loopInfo"
+                  style="margin-left: 8px; font-size: 0.75em; color: #7c3aed"
+                ></span>
+              </div>
+              <input
+                type="range"
+                id="tSlider"
+                class="slider"
+                min="0"
+                max="15"
+                step="0.1"
+                value="0"
+              />
+            </div>
+          </div>
+
+          <!-- RESULTS + VERIFICATION -->
+          <div class="card">
+            <div class="card-title">📊 RESULTS & VERIFICATION</div>
+            <div class="result-dual">
+              <div class="result-card">
+                <div>🏁 Final Velocity</div>
+                <div class="big-number" id="finalV">36.0</div>
+                <div>
+                  <span id="speedUnitLabel">km/h</span>
+                  <button id="unitToggleBtn" class="unit-toggle">↺</button>
+                </div>
+              </div>
+              <div class="result-card">
+                <div>📏 Displacement</div>
+                <div class="big-number" id="displacementVal">0.0</div>
+                <div>meters</div>
+              </div>
+            </div>
+            <div class="verif-item" id="eq1Verif">
+              <span>🔹 v = u + at</span><strong id="eq1Val">36.0 km/h</strong>
+            </div>
+            <div class="verif-item" id="eq2Verif">
+              <span>🔹 s = ut + ½at²</span><strong id="eq2Val">0.0 m</strong>
+            </div>
+            <div class="verif-item" id="eq3Verif">
+              <span>🔹 v² = u² + 2as</span
+              ><strong id="eq3Val">36.0 km/h</strong>
+            </div>
+          </div>
+
+          <!-- REAL WORLD SCENARIOS -->
+          <div class="card">
+            <div class="card-title">🌍 REAL-WORLD SCENARIOS</div>
+            <div class="real-grid">
+              <div class="real-card" data-u="10" data-a="2.5" data-t="4.5">
+                <span>🚗 Sports car</span><br />10 m/s → +2.5 m/s²
+              </div>
+              <div class="real-card" data-u="15" data-a="-3.2" data-t="3.8">
+                <span>🚦 Emergency brake</span><br />54 km/h → -3.2 m/s²
+              </div>
+              <div class="real-card" data-u="5" data-a="3" data-t="6">
+                <span>🏎️ Drag race</span><br />18 km/h accel 3 m/s²
+              </div>
+              <div class="real-card" data-u="0" data-a="4.2" data-t="5">
+                <span>🎢 Roller coaster</span><br />from rest, 4.2 m/s²
+              </div>
+            </div>
+          </div>
+
+          <div class="status-bar">
+            <div class="status-item">⏱️ <span id="statTime">0.0</span> s</div>
+            <div class="status-item">
+              ⚡ <span id="statSpeed">36.0</span>
+              <span id="statUnit">km/h</span>
+            </div>
+            <div class="status-item">📌 <span id="statDist">0.0</span> m</div>
+          </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>🔬 Physics Learning Tool • SUVAT Equations of Linear Motion</p>
-            <p style="margin-top: 5px; font-size: 0.7rem; color: #888;">Click examples to load scenarios • Use Spacebar to play/pause • R to reset</p>
+        <!-- RIGHT SIDE: BRIGHT SIMULATION WITH LOOPING BUS (DEFAULT) -->
+        <div class="right-simulation">
+          <div class="simulation-canvas-box">
+            <div class="simulation-container">
+              <canvas id="simulationCanvas"></canvas>
+            </div>
+          </div>
+          <div class="live-info-bar">
+            <div class="live-info-item">
+              🚌 Speed: <strong id="liveSpeedDisplay">0.0</strong>
+              <span id="liveUnit">km/h</span>
+            </div>
+            <div class="live-info-item">
+              🕒 Time: <strong id="liveTimeDisplay">0.0 s</strong>
+            </div>
+            <div class="loop-badge">🔄 LOOP MODE (auto-reset)</div>
+            <div class="live-info-item">
+              📐 Eq: <strong id="activeEqLabel">v = u+at</strong>
+            </div>
+          </div>
         </div>
+      </div>
+      <footer>
+        🔄 INFINITE LOOP: Bus automatically resets position every 15 seconds •
+        Speed scale default = 1x • Fully responsive
+      </footer>
     </div>
 
-    <script src="index.js">
-       
+    <script>
+      (function () {
+        // DOM elements
+        const canvas = document.getElementById("simulationCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Physics state (SI)
+        let u_ms = 10; // 36 km/h
+        let a = 2.0; // m/s²
+        let currentTime = 0; // seconds
+        let displacement = 0;
+        let currentV = 10;
+
+        // simulation flags - LOOP IS DEFAULT TRUE (always on)
+        let isRunning = false;
+        let lastTimestamp = 0;
+        let timeScale = 1.0; // Speed scale default = 1
+        const loopEnabled = true; // ALWAYS LOOPING - no toggle button
+
+        // units toggle
+        let useKmh = true;
+
+        // trail & visuals
+        let trailPoints = [];
+        let busX = 80;
+        const startX_px = 80;
+        let pixelsPerMeter = 6.2;
+        let maxDistanceLimit = 210;
+
+        // canvas dimensions
+        let canvasWidth = 800,
+          canvasHeight = 460;
+
+        // Helper: recompute physics based on currentTime (loop mode always wraps visually)
+        function recomputePhysics() {
+          // Loop mode: time can exceed 15, but we wrap for physics calculations
+          let effectiveTime = currentTime;
+          if (loopEnabled && effectiveTime > 15) {
+            // wrap time for physics calculations to keep values consistent
+            effectiveTime = effectiveTime % 15;
+          }
+          if (!loopEnabled && effectiveTime > 15) effectiveTime = 15;
+          if (effectiveTime < 0) effectiveTime = 0;
+
+          // Compute physics using effective time (continuous motion)
+          currentV = u_ms + a * effectiveTime;
+          displacement =
+            u_ms * effectiveTime + 0.5 * a * effectiveTime * effectiveTime;
+          if (displacement < 0) displacement = 0;
+
+          // For visual bus position with wrap-around effect (infinite loop)
+          let rawX = startX_px + displacement * pixelsPerMeter;
+          const roadLengthPx = canvasWidth - startX_px - 50;
+          if (loopEnabled && roadLengthPx > 0) {
+            // Wrap the bus position visually for infinite loop effect
+            let wrapDistance = roadLengthPx / pixelsPerMeter;
+            if (wrapDistance > 0) {
+              let wrappedDisp = displacement % wrapDistance;
+              busX = startX_px + wrappedDisp * pixelsPerMeter;
+            } else {
+              busX = rawX;
+            }
+          } else {
+            busX = rawX;
+          }
+
+          // keep bus within reasonable visual bounds
+          if (busX > canvasWidth - 90) busX = startX_px - 40;
+          if (busX < startX_px - 60) busX = startX_px - 60;
+
+          updateAllDisplays(effectiveTime);
+        }
+
+        // Update UI panels
+        function updateAllDisplays(effectiveTime) {
+          const u_kmh = u_ms * 3.6;
+          document.getElementById("uDisplayVal").innerText = useKmh
+            ? `${Math.round(u_kmh)} km/h`
+            : `${u_ms.toFixed(1)} m/s`;
+          document.getElementById("aDisplayVal").innerText =
+            `${a.toFixed(1)} m/s²`;
+          document.getElementById("tDisplayVal").innerText =
+            `${effectiveTime.toFixed(1)} s`;
+          document.getElementById("tSlider").value = effectiveTime;
+          // Show total time and loop count
+          if (loopEnabled) {
+            const totalTime = currentTime;
+            const loopCount = Math.floor(totalTime / 15) + 1;
+            document.getElementById("loopInfo").innerText =
+              `Loop: ${loopCount}`;
+          } else {
+            document.getElementById("loopInfo").innerText = "";
+          }
+
+          let finalV_display = useKmh ? currentV * 3.6 : currentV;
+          document.getElementById("finalV").innerHTML =
+            finalV_display.toFixed(1);
+          document.getElementById("displacementVal").innerHTML =
+            displacement.toFixed(1);
+
+          // equation verification using effective time
+          let v1 = u_ms + a * effectiveTime;
+          let s_eq =
+            u_ms * effectiveTime + 0.5 * a * effectiveTime * effectiveTime;
+          let v3 = Math.sqrt(Math.max(0, u_ms * u_ms + 2 * a * displacement));
+          let dispV1 = useKmh ? v1 * 3.6 : v1;
+          let dispV3 = useKmh ? v3 * 3.6 : v3;
+          document.getElementById("eq1Val").innerHTML =
+            `${dispV1.toFixed(1)} ${useKmh ? "km/h" : "m/s"}`;
+          document.getElementById("eq2Val").innerHTML = `${s_eq.toFixed(1)} m`;
+          document.getElementById("eq3Val").innerHTML =
+            `${dispV3.toFixed(1)} ${useKmh ? "km/h" : "m/s"}`;
+
+          let liveSpd = useKmh ? currentV * 3.6 : currentV;
+          document.getElementById("liveSpeedDisplay").innerHTML =
+            liveSpd.toFixed(1);
+          document.getElementById("liveTimeDisplay").innerHTML =
+            `${effectiveTime.toFixed(1)} s`;
+          document.getElementById("statTime").innerHTML =
+            effectiveTime.toFixed(1);
+          document.getElementById("statSpeed").innerHTML = liveSpd.toFixed(1);
+          document.getElementById("statDist").innerHTML =
+            displacement.toFixed(1);
+          document.getElementById("statUnit").innerHTML = useKmh
+            ? "km/h"
+            : "m/s";
+          document.getElementById("liveUnit").innerHTML = useKmh
+            ? "km/h"
+            : "m/s";
+
+          // active eq highlight based on effective time
+          let eqLabel = "";
+          if (effectiveTime < 4) eqLabel = "v = u + at";
+          else if (effectiveTime < 9) eqLabel = "s = ut + ½at²";
+          else eqLabel = "v² = u² + 2as";
+          document.getElementById("activeEqLabel").innerHTML = eqLabel;
+          highlightActiveEquation(effectiveTime);
+        }
+
+        function highlightActiveEquation(effectiveTime) {
+          let idx = 1;
+          if (effectiveTime >= 4 && effectiveTime < 9) idx = 2;
+          else if (effectiveTime >= 9) idx = 3;
+          const eqDivs = ["eq1Verif", "eq2Verif", "eq3Verif"];
+          eqDivs.forEach((id, i) => {
+            const el = document.getElementById(id);
+            if (i + 1 === idx) el.classList.add("equation-highlight");
+            else el.classList.remove("equation-highlight");
+          });
+        }
+
+        // Update physics time with LOOP always on (auto wrap at 15s)
+        function updateSimulation(deltaRealSec) {
+          if (!isRunning) return;
+          let dt = deltaRealSec * timeScale;
+          let newTime = currentTime + dt;
+
+          // LOOP MODE: time increases indefinitely, but physics wraps visually (infinite loop)
+          currentTime = newTime;
+          // no upper bound, keeps looping forever
+          recomputePhysics();
+
+          // add trail point
+          const busCenterX = busX + 85;
+          const groundY = canvasHeight * 0.72 + 28;
+          trailPoints.push({ x: busCenterX, y: groundY - 10 });
+          if (trailPoints.length > 50) trailPoints.shift();
+          drawCanvas();
+        }
+
+        // DRAW bright environment with sunny road
+        function drawCanvas() {
+          if (!ctx) return;
+          const w = canvas.width,
+            h = canvas.height;
+          canvasWidth = w;
+          canvasHeight = h;
+          ctx.clearRect(0, 0, w, h);
+
+          // Bright sunny sky
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+          skyGrad.addColorStop(0, "#ffde9e");
+          skyGrad.addColorStop(1, "#f9d56e");
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, w, h * 0.65);
+          // Sun
+          ctx.fillStyle = "#fff3b0";
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
+          ctx.arc(w - 50, 55, 32, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#ffe27a";
+          ctx.beginPath();
+          ctx.arc(w - 50, 55, 25, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Green grass
+          ctx.fillStyle = "#b8e086";
+          ctx.fillRect(0, h * 0.6, w, h * 0.4);
+          ctx.fillStyle = "#8bc34a";
+          for (let i = 0; i < 40; i++) {
+            ctx.fillRect(i * 45, h * 0.62, 15, 20);
+          }
+
+          // asphalt road
+          const roadY = h * 0.6 + 20;
+          ctx.fillStyle = "#4a4e5c";
+          ctx.fillRect(0, roadY, w, 70);
+          ctx.fillStyle = "#ffd966";
+          for (let i = 0; i < w + 60; i += 60) {
+            ctx.fillRect(i, roadY + 32, 40, 5);
+          }
+          // distance markers
+          ctx.font = "bold 11px 'Segoe UI'";
+          ctx.fillStyle = "#2d3e2b";
+          for (let d = 0; d <= maxDistanceLimit; d += 20) {
+            let xPos = startX_px + d * pixelsPerMeter;
+            if (xPos > w - 40) break;
+            ctx.beginPath();
+            ctx.moveTo(xPos, roadY + 8);
+            ctx.lineTo(xPos, roadY + 22);
+            ctx.strokeStyle = "#f39c12";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = "#5e3a1c";
+            ctx.fillText(`${d}m`, xPos - 12, roadY - 5);
+          }
+
+          // green trail
+          for (let i = 0; i < trailPoints.length - 1; i++) {
+            ctx.beginPath();
+            ctx.moveTo(trailPoints[i].x, trailPoints[i].y);
+            ctx.lineTo(trailPoints[i + 1].x, trailPoints[i + 1].y);
+            ctx.strokeStyle = `rgba(46, 125, 50, ${0.25 + (i / trailPoints.length) * 0.45})`;
+            ctx.lineWidth = 6;
+            ctx.stroke();
+          }
+
+          // draw bus
+          drawRealisticBus(busX, roadY + 48);
+
+          // info panel
+          ctx.fillStyle = "rgba(255,245,210,0.9)";
+          ctx.fillRect(w - 150, 12, 140, 92);
+          ctx.fillStyle = "#c2410c";
+          ctx.font = "bold 11px monospace";
+          let effTime = loopEnabled
+            ? (currentTime % 15).toFixed(1)
+            : currentTime.toFixed(1);
+          let loopCount = loopEnabled ? Math.floor(currentTime / 15) + 1 : 1;
+          ctx.fillText(`⏱️ ${effTime} s`, w - 145, 30);
+          ctx.fillText(`Loop: ${loopCount}`, w - 145, 44);
+          ctx.fillText(
+            `📐 v = ${(useKmh ? currentV * 3.6 : currentV).toFixed(1)} ${useKmh ? "km/h" : "m/s"}`,
+            w - 145,
+            50,
+          );
+          ctx.fillText(`📍 s = ${displacement.toFixed(1)} m`, w - 145, 70);
+          ctx.fillText(`⚡ a = ${a.toFixed(1)} m/s²`, w - 145, 90);
+          ctx.fillStyle = "#7c3aed";
+          ctx.fillRect(w - 90, 95, 70, 14);
+          ctx.fillStyle = "white";
+          ctx.font = "bold 9px monospace";
+          ctx.fillText("LOOP ON", w - 84, 106);
+        }
+
+        function drawRealisticBus(x, yGround) {
+          const busTop = yGround - 68;
+          const busW = 165;
+          const busH = 58;
+          ctx.fillStyle = "rgba(0,0,0,0.15)";
+          ctx.fillRect(x + 3, busTop + 3, busW, busH);
+          const grad = ctx.createLinearGradient(
+            x,
+            busTop,
+            x + busW,
+            busTop + 15,
+          );
+          grad.addColorStop(0, "#FFB347");
+          grad.addColorStop(1, "#f57c00");
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, busTop, busW, busH);
+          ctx.fillStyle = "#e65100";
+          ctx.fillRect(x, busTop, busW, 12);
+          // windows
+          ctx.fillStyle = "#b3e5fc";
+          for (let i = 0; i < 3; i++) {
+            ctx.fillRect(x + 18 + i * 40, busTop + 12, 28, 22);
+            ctx.fillStyle = "#81d4fa";
+          }
+          ctx.fillStyle = "#b71c1c";
+          ctx.fillRect(x + busW - 28, busTop + 25, 18, 28);
+          // wheels
+          ctx.fillStyle = "#1e1e1e";
+          ctx.beginPath();
+          ctx.arc(x + 25, busTop + busH - 6, 13, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(x + busW - 25, busTop + busH - 6, 13, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#6b6e6f";
+          ctx.beginPath();
+          ctx.arc(x + 25, busTop + busH - 6, 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(x + busW - 25, busTop + busH - 6, 7, 0, Math.PI * 2);
+          ctx.fill();
+          // school sign
+          ctx.fillStyle = "#fbc02d";
+          ctx.fillRect(x + busW / 2 - 28, busTop - 18, 56, 16);
+          ctx.fillStyle = "#d84315";
+          ctx.font = "bold 9px Arial";
+          ctx.fillText("SCHOOL", x + busW / 2 - 18, busTop - 7);
+        }
+
+        function setCustomTime(value) {
+          let tVal = parseFloat(value);
+          if (isNaN(tVal)) tVal = 0;
+          tVal = Math.min(15, Math.max(0, tVal));
+          // In loop mode, we keep the modulo concept but set base time
+          currentTime = tVal;
+          recomputePhysics();
+          drawCanvas();
+          document.getElementById("tSlider").value = tVal;
+          if (!isRunning) updateAllDisplays(currentTime % 15);
+        }
+
+        // Event listeners
+        function initEvents() {
+          document.getElementById("playBtn").onclick = () => {
+            if (!isRunning) {
+              isRunning = true;
+              lastTimestamp = performance.now();
+            }
+          };
+          document.getElementById("pauseBtn").onclick = () => {
+            isRunning = false;
+          };
+          document.getElementById("resetBtn").onclick = () => {
+            isRunning = false;
+            currentTime = 0;
+            trailPoints = [];
+            recomputePhysics();
+            drawCanvas();
+            updateAllDisplays(0);
+            document.getElementById("tSlider").value = 0;
+            document.getElementById("customTimeInput").value = 0;
+          };
+
+          document.getElementById("uSlider").oninput = (e) => {
+            let val = parseFloat(e.target.value);
+            u_ms = useKmh ? val / 3.6 : val;
+            recomputePhysics();
+            updateAllDisplays(currentTime % 15);
+            drawCanvas();
+          };
+          document.getElementById("aSlider").oninput = (e) => {
+            a = parseFloat(e.target.value);
+            recomputePhysics();
+            updateAllDisplays(currentTime % 15);
+            drawCanvas();
+          };
+          document.getElementById("tSlider").oninput = (e) => {
+            if (!isRunning) {
+              currentTime = parseFloat(e.target.value);
+              recomputePhysics();
+              drawCanvas();
+            }
+          };
+          // Speed scale removed: always 1x
+          timeScale = 1.0;
+          document.getElementById("timeStepSlider").oninput = (e) => {
+            document.getElementById("stepLabel").innerText =
+              parseFloat(e.target.value).toFixed(2) + "s";
+          };
+          document.getElementById("unitToggleBtn").onclick = () => {
+            useKmh = !useKmh;
+            const unitSym = useKmh ? "km/h" : "m/s";
+            document.getElementById("speedUnitLabel").innerHTML = unitSym;
+            document.getElementById("liveUnit").innerHTML = unitSym;
+            document.getElementById("statUnit").innerHTML = unitSym;
+            updateAllDisplays(currentTime % 15);
+            drawCanvas();
+          };
+          document.getElementById("setTimeBtn").onclick = () => {
+            let inp = document.getElementById("customTimeInput").value;
+            setCustomTime(inp);
+          };
+
+          document.querySelectorAll(".real-card").forEach((card) => {
+            card.addEventListener("click", () => {
+              let u_val = parseFloat(card.getAttribute("data-u"));
+              let a_val = parseFloat(card.getAttribute("data-a"));
+              let t_val = parseFloat(card.getAttribute("data-t"));
+              u_ms = u_val;
+              a = a_val;
+              currentTime = Math.min(15, t_val);
+              recomputePhysics();
+              document.getElementById("uSlider").value = useKmh
+                ? Math.round(u_ms * 3.6)
+                : u_ms;
+              document.getElementById("aSlider").value = a;
+              document.getElementById("tSlider").value = currentTime;
+              document.getElementById("customTimeInput").value = currentTime;
+              drawCanvas();
+            });
+          });
+
+          window.addEventListener("keydown", (e) => {
+            if (e.code === "Space") {
+              e.preventDefault();
+              isRunning ? (isRunning = false) : (isRunning = true);
+            }
+            if (e.code === "KeyR") {
+              isRunning = false;
+              currentTime = 0;
+              trailPoints = [];
+              recomputePhysics();
+              drawCanvas();
+              updateAllDisplays(0);
+              document.getElementById("tSlider").value = 0;
+              document.getElementById("customTimeInput").value = 0;
+            }
+          });
+        }
+
+        function resizeCanvas() {
+          const container = document.querySelector(".simulation-container");
+          canvas.width = container.clientWidth;
+          canvas.height = container.clientHeight;
+          canvasWidth = canvas.width;
+          canvasHeight = canvas.height;
+          pixelsPerMeter = Math.min(6.5, (canvasWidth - 150) / 210);
+          drawCanvas();
+        }
+
+        let lastFrame = 0;
+        function animate(now) {
+          requestAnimationFrame(animate);
+          if (!lastFrame) {
+            lastFrame = now;
+            return;
+          }
+          let delta = Math.min(0.033, (now - lastFrame) / 1000);
+          if (delta > 0.001 && isRunning) updateSimulation(delta);
+          lastFrame = now;
+          drawCanvas();
+        }
+
+        function init() {
+          resizeCanvas();
+          window.addEventListener("resize", () => {
+            resizeCanvas();
+            drawCanvas();
+          });
+          initEvents();
+          recomputePhysics();
+          drawCanvas();
+          animate(0);
+        }
+        init();
+      })();
     </script>
-</body>
+  </body>
 </html>

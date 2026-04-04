@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relative Velocity</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Nirmala UI', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f7ff;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .textbook-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 30px rgba(0, 0, 100, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        /* Nepal Curriculum Header */
+        .nepal-header {
+            background: linear-gradient(to right, #c00, #f00, #c00);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 5px solid #ffcc00;
+        }
+        
+        .header-left h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .header-left h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+        
+        .nepal-flag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .flag-symbol {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .flag-text {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        /* Main content layout */
+        .main-content {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .simulation-section {
+            flex: 2;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #bdc3c7;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .simulation-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e74c3c;
+            display: flex;
+            align-items: center;
+        }
+        
+        .simulation-title i {
+            margin-right: 10px;
+        }
+        
+        .simulation-canvas-container {
+            width: 100%;
+            height: 350px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .simulation-info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+        
+        /* Controls Panel */
+        .controls-panel {
+            flex: 1;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 2px solid #bdc3c7;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .control-title i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .slider-label span {
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        .slider-value {
+            font-weight: bold;
+            color: #2980b9;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #bdc3c7;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2980b9;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2980b9;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        /* Buttons */
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .sim-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .sim-button i {
+            margin-right: 8px;
+        }
+        
+        .start-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .start-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .pause-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .pause-btn:hover {
+            background-color: #d68910;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .reset-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .example-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .example-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Velocity Display */
+        .velocity-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .velocity-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid;
+        }
+        
+        .velocity-card h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .velocity-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .velocity-card.ab {
+            border-top-color: #2ecc71;
+        }
+        
+        .velocity-card.ba {
+            border-top-color: #9b59b6;
+        }
+        
+        /* Formula Box */
+        .formula-box {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #2ecc71;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .formula {
+            font-size: 1.5rem;
+            text-align: center;
+            font-family: 'Cambria', 'Times New Roman', serif;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        
+        /* Status Indicator */
+        .status-indicator {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 5px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* Examples */
+        .examples-container {
+            margin-top: 25px;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .example-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+        }
+        
+        .example-card:hover {
+            background-color: #e8f4fc;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+        
+        .example-title i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+        
+        .example-description {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 5px solid #3498db;
+        }
+        
+        @media (max-width: 1000px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nepal-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .header-left h1 {
+                font-size: 1.6rem;
+            }
+            
+            .simulation-canvas-container {
+                height: 300px;
+            }
+            
+            .velocity-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="textbook-container">
+        <!-- Nepal Curriculum Header -->
+        <header class="nepal-header">
+            <div class="header-left">
+                <!-- <h1><i class="fas fa-book-open"></i> Class 8 Science</h1>
+                <h2>Chapter 6: Rest and Motion are Relative - Relative Velocity</h2>
+                <p>Government of Nepal - Curriculum Development Centre</p> -->
+            </div>
+            <!-- <div class="nepal-flag">
+                <div class="flag-symbol">🇳🇵</div>
+                <div class="flag-text">Nepal</div>
+            </div> -->
+        </header>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Simulation Section -->
+            <section class="simulation-section">
+                <h3 class="simulation-title"><i class="fas fa-road"></i> Relative Velocity Simulation</h3>
+                
+                <div class="status-indicator" id="statusIndicator">
+                    <i class="fas fa-pause-circle"></i> Simulation is Paused - Cars are at Rest Position
+                </div>
+                
+                <div class="simulation-canvas-container">
+                    <canvas id="simulationCanvas"></canvas>
+                </div>
+                
+                <div class="simulation-info">
+                    <p><strong></strong> Car A and Car B moving in opposite directions with different speeds. The line MN is the reference line and 'P' is the reference point.</p>
+                    <p><strong>Formula:</strong> Relative Velocity V<sub>AB</sub> = V<sub>A</sub> - V<sub>B</sub></p>
+                </div>
+                
+                <div class="velocity-display">
+                    <div class="velocity-card ab">
+                        <h4>V<sub>AB</sub> (Car A relative to Car B)</h4>
+                        <div class="velocity-value" id="relABValue">0.0 m/s</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;" id="relABDirection">(At Rest)</div>
+                    </div>
+                    <div class="velocity-card ba">
+                        <h4>V<sub>BA</sub> (Car B relative to Car A)</h4>
+                        <div class="velocity-value" id="relBAValue">0.0 m/s</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px;" id="relBADirection">(At Rest)</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Controls Panel -->
+            <section class="controls-panel">
+                <h3 class="simulation-title"><i class="fas fa-sliders-h"></i> Simulation Controls</h3>
+                
+                <div class="control-group">
+                    <h4 class="control-title"><i class="fas fa-car"></i> Car A (Blue - Moving West)</h4>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Velocity of Car A:</span>
+                            <span class="slider-value" id="carAValue">-10.0 m/s</span>
+                        </div>
+                        <input type="range" id="carAVelocity" min="-20" max="0" step="0.5" value="-10">
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem;">
+                            <span>20 m/s West</span>
+                            <span>0 m/s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h4 class="control-title"><i class="fas fa-car"></i> Car B (Red - Moving East)</h4>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Velocity of Car B:</span>
+                            <span class="slider-value" id="carBValue">15.0 m/s</span>
+                        </div>
+                        <input type="range" id="carBVelocity" min="0" max="20" step="0.5" value="15">
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem;">
+                            <span>0 m/s</span>
+                            <span>20 m/s East</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h4 class="control-title"><i class="fas fa-cogs"></i> Simulation Settings</h4>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Time Scale:</span>
+                            <span class="slider-value" id="timeScaleValue">1.0x</span>
+                        </div>
+                        <input type="range" id="timeScale" min="0.1" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+                
+                <div class="buttons-container">
+                    <button class="sim-button start-btn" id="startBtn">
+                        <i class="fas fa-play"></i> Start Simulation
+                    </button>
+                    <button class="sim-button reset-btn" id="resetBtn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="sim-button example-btn" id="stepBtn">
+                        <i class="fas fa-step-forward"></i> Step
+                    </button>
+                </div>
+                
+                <div class="formula-box">
+                    <div class="formula">V<sub>AB</sub> = V<sub>A</sub> - V<sub>B</sub></div>
+                    <p style="text-align: center; margin-top: 10px;">Relative Velocity = Velocity of A - Velocity of B</p>
+                    <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        When both cars are at rest: V<sub>AB</sub> = 0 - 0 = 0 m/s
+                    </p>
+                </div>
+                
+                <div class="examples-container">
+                    <h4 class="control-title"><i class="fas fa-lightbulb"></i> Example Scenarios</h4>
+                    <div class="examples-grid">
+                        <div class="example-card" data-va="-10" data-vb="15">
+                            <div class="example-title"><i class="fas fa-book"></i> Textbook Example</div>
+                            <div class="example-description">Car A: 10 m/s West<br>Car B: 15 m/s East</div>
+                        </div>
+                        <div class="example-card" data-va="-5" data-vb="5">
+                            <div class="example-title"><i class="fas fa-balance-scale"></i> Equal Speeds</div>
+                            <div class="example-description">Both cars at 5 m/s in opposite directions</div>
+                        </div>
+                        <div class="example-card" data-va="-15" data-vb="5">
+                            <div class="example-title"><i class="fas fa-tachometer-alt"></i> Fast vs Slow</div>
+                            <div class="example-description">Car A: 15 m/s West<br>Car B: 5 m/s East</div>
+                        </div>
+                        <div class="example-card" data-va="-8" data-vb="0">
+                            <div class="example-title"><i class="fas fa-parking"></i> One Stationary</div>
+                            <div class="example-description">Car A: 8 m/s West<br>Car B: Stationary</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+        
+        </footer>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

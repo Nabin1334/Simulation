@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speed & Velocity - Accurate Physics Simulator</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", "Poppins", "Arial", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0a0f2a, #0a1a3a);
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(100, 150, 255, 0.3);
+        border-radius: 50%;
+        animation: floatParticle 15s linear infinite;
+      }
+
+      @keyframes floatParticle {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.5;
+        }
+        90% {
+          opacity: 0.5;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 32px;
+        padding: 25px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 1;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding: 30px;
+        background: linear-gradient(135deg, #1a237e, #0d47a1);
+        border-radius: 24px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        animation: rotate 20s linear infinite;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        position: relative;
+        z-index: 1;
+      }
+
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 25px;
+      }
+
+      .explanation-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #1a237e #e0e0e0;
+        padding-right: 8px;
+      }
+
+      .explanation-column::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .explanation-column::-webkit-scrollbar-track {
+        background: #e0e0e0;
+        border-radius: 10px;
+      }
+
+      .explanation-column::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #1a237e, #0d47a1);
+        border-radius: 10px;
+      }
+
+      .physics-card {
+        background: linear-gradient(135deg, #f8f9ff, #ffffff);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(26, 35, 126, 0.2);
+        transition: transform 0.3s;
+      }
+
+      .physics-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 12px;
+      }
+
+      .speed-card .card-title {
+        color: #4caf50;
+      }
+      .velocity-card .card-title {
+        color: #ff9800;
+      }
+
+      .formula {
+        background: linear-gradient(135deg, #1a237e, #283593);
+        padding: 15px;
+        border-radius: 12px;
+        color: white;
+        text-align: center;
+        margin: 15px 0;
+        font-size: 1.1rem;
+        font-family: monospace;
+      }
+
+      .example-box {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 12px;
+        border-left: 4px solid;
+        margin-top: 12px;
+        font-size: 0.9rem;
+      }
+
+      .speed-card .example-box {
+        border-left-color: #4caf50;
+      }
+      .velocity-card .example-box {
+        border-left-color: #ff9800;
+      }
+
+      .speed-controls-card {
+        background: linear-gradient(135deg, #f8f9ff, #ffffff);
+        border-radius: 20px;
+        padding: 20px;
+        border: 2px solid #ffd700;
+        transition: transform 0.3s;
+      }
+
+      .speed-controls-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .controls-title {
+        font-size: 1.2rem;
+        color: #1a237e;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid #ffd700;
+        padding-bottom: 10px;
+      }
+
+      .left-car-control {
+        margin-bottom: 20px;
+        padding: 12px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .left-car-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .left-car-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+      }
+
+      .left-green-icon {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+      }
+      .left-orange-icon {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+      }
+
+      .left-car-name {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .left-speed-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+        padding: 6px;
+        border-radius: 8px;
+        background: #f5f5f5;
+        margin: 8px 0;
+      }
+
+      .left-green-value {
+        color: #4caf50;
+      }
+      .left-orange-value {
+        color: #ff9800;
+      }
+
+      .left-speed-slider {
+        width: 100%;
+        height: 5px;
+        -webkit-appearance: none;
+        background: #e0e0e0;
+        border-radius: 5px;
+        outline: none;
+        margin: 10px 0;
+      }
+
+      .left-speed-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid white;
+      }
+
+      .left-green-slider::-webkit-slider-thumb {
+        background: #4caf50;
+      }
+      .left-orange-slider::-webkit-slider-thumb {
+        background: #ff9800;
+      }
+
+      .speed-precision {
+        font-size: 0.7rem;
+        text-align: center;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .comparison-table th {
+        background: #f0f0f0;
+        color: #1a237e;
+      }
+
+      .fun-fact-card {
+        background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+        border-radius: 20px;
+        padding: 20px;
+      }
+
+      .simulation-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .track-container {
+        background: linear-gradient(135deg, #1a472a, #0a2a1a);
+        border-radius: 24px;
+        border: 3px solid #ffd700;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        cursor: pointer;
+      }
+
+      .control-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        border-radius: 60px;
+      }
+
+      .control-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .control-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      #start-btn {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+      }
+      #pause-btn {
+        background: linear-gradient(135deg, #ff9800, #fb8c00);
+        color: white;
+      }
+      #reset-btn {
+        background: linear-gradient(135deg, #f44336, #e53935);
+        color: white;
+      }
+
+      .live-data-panel {
+        background: linear-gradient(135deg, #1a237e, #283593);
+        border-radius: 24px;
+        padding: 20px;
+        color: white;
+      }
+
+      .data-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 15px 0;
+      }
+
+      .data-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        padding: 12px;
+        text-align: center;
+      }
+
+      .data-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.8;
+        margin-bottom: 6px;
+      }
+      .data-value {
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+      .data-unit {
+        font-size: 0.7rem;
+        opacity: 0.7;
+      }
+
+      .physics-insight {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 14px;
+        padding: 12px;
+        margin-top: 12px;
+        text-align: center;
+      }
+
+      .insight-text {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .insight-detail {
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+
+      .scenario-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      .scenario-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        color: #1976d2;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+      }
+
+      .scenario-btn:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #bbdefb, #90caf9);
+      }
+
+      .footer {
+        margin-top: 20px;
+        text-align: center;
+        padding: 12px;
+        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+        border-radius: 20px;
+        color: #666;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 1024px) {
+        .main-layout {
+          grid-template-columns: 1fr;
+        }
+        .explanation-column {
+          max-height: 450px;
+        }
+        .data-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .control-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+        .control-btn {
+          min-width: auto;
+          width: 100%;
+        }
+        .header h1 {
+          font-size: 1.8rem;
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+      <header class="header">
+        <h1>
+          <i class="fas fa-tachometer-alt"></i>
+          Speed & Velocity
+          <i class="fas fa-compass"></i>
+        </h1>
+        <p class="subtitle">
+          Accurate Physics Simulation - Speed measured in meters per second
+          (m/s)
+        </p>
+      </header>
+
+      <div class="main-layout">
+        <!-- LEFT COLUMN -->
+        <div class="explanation-column">
+          <!-- Speed Controls Card -->
+          <div class="speed-controls-card">
+            <div class="controls-title">
+              <i class="fas fa-sliders-h"></i>
+              Adjust Car Speeds (m/s)
+            </div>
+
+            <div class="left-car-control">
+              <div class="left-car-header">
+                <div class="left-car-icon left-green-icon">
+                  <i class="fas fa-car"></i>
+                </div>
+                <div class="left-car-name">Car A (Green)</div>
+              </div>
+              <div
+                class="left-speed-value left-green-value"
+                id="left-car1-speed"
+              >
+                8.0 m/s
+              </div>
+              <input
+                type="range"
+                id="left-car1-slider"
+                class="left-speed-slider left-green-slider"
+                min="2"
+                max="20"
+                step="0.5"
+                value="8"
+              />
+              <div class="speed-precision">
+                Speed = 8.0 meters per second → 8.0 m/s East
+              </div>
+            </div>
+
+            <div class="left-car-control">
+              <div class="left-car-header">
+                <div class="left-car-icon left-orange-icon">
+                  <i class="fas fa-car-side"></i>
+                </div>
+                <div class="left-car-name">Car B (Orange)</div>
+              </div>
+              <div
+                class="left-speed-value left-orange-value"
+                id="left-car2-speed"
+              >
+                5.0 m/s
+              </div>
+              <input
+                type="range"
+                id="left-car2-slider"
+                class="left-speed-slider left-orange-slider"
+                min="2"
+                max="20"
+                step="0.5"
+                value="5"
+              />
+              <div class="speed-precision">
+                Speed = 5.0 meters per second → 5.0 m/s East
+              </div>
+            </div>
+
+            <div class="scenario-buttons">
+              <button class="scenario-btn" onclick="setScenario('equal')">
+                ⚖️ Equal Speed
+              </button>
+              <button class="scenario-btn" onclick="setScenario('catchup')">
+                🏎️ Faster vs Slower
+              </button>
+              <button class="scenario-btn" onclick="setScenario('fast')">
+                ⚡ Speed Demo
+              </button>
+              <button class="scenario-btn" onclick="setScenario('close')">
+                🎯 Close Race
+              </button>
+            </div>
+          </div>
+
+          <div class="physics-card speed-card">
+            <div class="card-title">
+              <i class="fas fa-gauge-high"></i> Speed (Scalar)
+            </div>
+            <p>
+              <strong>Speed</strong> is a scalar quantity that measures
+              <strong>how fast</strong> an object is moving.
+            </p>
+            <div class="formula">Speed = Distance ÷ Time</div>
+            <div class="example-box">
+              📏 "The car is moving at 8 meters per second"
+            </div>
+          </div>
+
+          <div class="physics-card velocity-card">
+            <div class="card-title">
+              <i class="fas fa-location-arrow"></i> Velocity (Vector)
+            </div>
+            <p>
+              <strong>Velocity</strong> is a vector quantity that measures
+              <strong>how fast</strong> AND
+              <strong>in which direction</strong> an object is moving.
+            </p>
+            <div class="formula">Velocity = Displacement ÷ Time</div>
+            <div class="example-box">
+              🧭 "The car is moving at 8 m/s <strong>EAST</strong>"
+            </div>
+          </div>
+
+          <div class="physics-card">
+            <div class="card-title">
+              <i class="fas fa-balance-scale"></i> Key Differences
+            </div>
+            <table class="comparison-table">
+              <tr>
+                <th>Property</th>
+                <th>Speed</th>
+                <th>Velocity</th>
+              </tr>
+              <tr>
+                <td>Type</td>
+                <td>Scalar</td>
+                <td>Vector</td>
+              </tr>
+              <tr>
+                <td>Has Direction?</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+              </tr>
+              <tr>
+                <td>Formula</td>
+                <td>Distance / Time</td>
+                <td>Displacement / Time</td>
+              </tr>
+            </table>
+            <div
+              class="formula"
+              style="background: linear-gradient(135deg, #667eea, #764ba2)"
+            >
+              Speed = |Velocity|
+            </div>
+          </div>
+
+          <div class="fun-fact-card">
+            <div class="card-title" style="color: #1a237e">
+              <i class="fas fa-lightbulb"></i> Did You Know?
+            </div>
+            <p>✦ Cheetah: 29 m/s (fastest land animal)</p>
+            <p>✦ Sound: 343 m/s (changes with wind direction)</p>
+            <p>✦ Light: 299,792,458 m/s — universal speed limit!</p>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="simulation-column">
+          <div class="track-container">
+            <canvas id="race-canvas" width="1000" height="500"></canvas>
+          </div>
+
+          <div class="control-buttons">
+            <button class="control-btn" id="start-btn">
+              <i class="fas fa-play"></i> Start
+            </button>
+            <button class="control-btn" id="pause-btn">
+              <i class="fas fa-pause"></i> Pause
+            </button>
+            <button class="control-btn" id="reset-btn">
+              <i class="fas fa-redo-alt"></i> Reset
+            </button>
+          </div>
+
+          <div class="live-data-panel">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+              "
+            >
+              <i class="fas fa-chart-line"></i>
+              <span style="font-weight: bold">REAL-TIME PHYSICS DATA</span>
+            </div>
+            <div class="data-grid">
+              <div class="data-card">
+                <div class="data-title">Car A Speed</div>
+                <div class="data-value" id="live-speed1">8.0</div>
+                <div class="data-unit">m/s</div>
+              </div>
+              <div class="data-card">
+                <div class="data-title">Car A Velocity</div>
+                <div class="data-value" id="live-vel1">8.0 →</div>
+                <div class="data-unit">EAST</div>
+              </div>
+              <div class="data-card">
+                <div class="data-title">Car B Speed</div>
+                <div class="data-value" id="live-speed2">5.0</div>
+                <div class="data-unit">m/s</div>
+              </div>
+              <div class="data-card">
+                <div class="data-title">Car B Velocity</div>
+                <div class="data-value" id="live-vel2">5.0 →</div>
+                <div class="data-unit">EAST</div>
+              </div>
+            </div>
+            <div class="physics-insight">
+              <div class="insight-text" id="insight-text">
+                📚 Both cars move EAST
+              </div>
+              <div class="insight-detail" id="insight-detail">
+                Speed = |Velocity| when direction is constant
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>
+          <i class="fas fa-graduation-cap"></i>
+          <strong>Accurate Physics:</strong> Speed in m/s | Distance = Speed ×
+          Time | <kbd>SPACE</kbd> start/pause | <kbd>R</kbd> reset
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("race-canvas");
+      const ctx = canvas.getContext("2d");
+
+      let width = 1000,
+        height = 500;
+      canvas.width = width;
+      canvas.height = height;
+
+      // Track dimensions (in meters)
+      const PIXELS_PER_METER = 28;
+      const TRACK_LENGTH_METERS = 30;
+      const START_PX = 60;
+      const FINISH_PX = width - 100;
+
+      // Car positions in meters (starting at 0 meters)
+      let car1 = {
+        x_m: 0,
+        y: 160,
+        speed: 8,
+        finished: false,
+        color: "#4CAF50",
+        darkColor: "#2E7D32",
+      };
+      let car2 = {
+        x_m: 0,
+        y: 320,
+        speed: 5,
+        finished: false,
+        color: "#FF9800",
+        darkColor: "#E65100",
+      };
+
+      let isRunning = false;
+      let raceStarted = false;
+      let raceComplete = false;
+      let animationId = null;
+      let lastTimestamp = 0;
+
+      function metersToPixels(meters) {
+        return START_PX + meters * PIXELS_PER_METER;
+      }
+
+      // Generate particles
+      for (let i = 0; i < 40; i++) createParticle();
+
+      function createParticle() {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        const size = Math.random() * 3 + 2;
+        particle.style.width = size + "px";
+        particle.style.height = size + "px";
+        particle.style.left = Math.random() * 100 + "%";
+        particle.style.animationDuration = Math.random() * 10 + 10 + "s";
+        particle.style.animationDelay = Math.random() * 15 + "s";
+        document.getElementById("particles").appendChild(particle);
+      }
+
+      function drawTopDownCar(x_m, y, color, darkColor) {
+        const x = metersToPixels(x_m);
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.3)";
+        ctx.shadowBlur = 6;
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, 50, 28, 8);
+        ctx.fill();
+
+        ctx.fillStyle = darkColor;
+        ctx.beginPath();
+        ctx.roundRect(x + 10, y - 6, 30, 14, 6);
+        ctx.fill();
+
+        ctx.fillStyle = "#7CB9E8";
+        ctx.beginPath();
+        ctx.roundRect(x + 12, y - 4, 10, 10, 4);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(x + 28, y - 4, 10, 10, 4);
+        ctx.fill();
+
+        ctx.fillStyle = "#FFE55C";
+        ctx.beginPath();
+        ctx.arc(x + 48, y + 8, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 48, y + 20, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#FF4444";
+        ctx.fillRect(x - 3, y + 8, 5, 7);
+        ctx.fillRect(x - 3, y + 16, 5, 6);
+
+        ctx.fillStyle = "#111";
+        ctx.beginPath();
+        ctx.arc(x + 10, y + 26, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 40, y + 26, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#AAA";
+        ctx.beginPath();
+        ctx.arc(x + 10, y + 26, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 40, y + 26, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawTopDownTrack() {
+        ctx.fillStyle = "#1a4a1a";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = "#2c2c2c";
+        ctx.fillRect(0, 100, width, 300);
+
+        ctx.fillStyle = "#FFD966";
+        ctx.fillRect(0, 100, width, 5);
+        ctx.fillRect(0, 395, width, 5);
+
+        ctx.fillStyle = "#FFD700";
+        for (let x = 40; x < width; x += 60) {
+          ctx.fillRect(x, 247, 35, 6);
+        }
+
+        ctx.font = "bold 14px 'Segoe UI'";
+        ctx.fillStyle = "white";
+        ctx.fillText("🚗 CAR A (Green)", 15, 170);
+        ctx.fillText("🚙 CAR B (Orange)", 15, 330);
+
+        // Start line
+        ctx.fillStyle = "#FFF";
+        ctx.fillRect(START_PX, 100, 12, 300);
+        ctx.fillStyle = "#000";
+        ctx.fillRect(START_PX + 12, 100, 12, 300);
+        ctx.fillStyle = "#FFD966";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("START", START_PX - 25, 240);
+
+        // Finish line
+        for (let i = 0; i < 12; i++) {
+          ctx.fillStyle = i % 2 === 0 ? "#000" : "#FFF";
+          ctx.fillRect(FINISH_PX + i * 12, 100, 12, 300);
+        }
+        ctx.fillStyle = "#FFD966";
+        ctx.fillText("FINISH", FINISH_PX + 30, 240);
+
+        // Distance markers in meters
+        ctx.fillStyle = "rgba(255,255,200,0.9)";
+        ctx.font = "10px monospace";
+        for (let m = 0; m <= TRACK_LENGTH_METERS; m += 5) {
+          let x = metersToPixels(m);
+          ctx.fillText(m + "m", x - 8, 90);
+        }
+
+        ctx.fillStyle = "rgba(255,255,200,0.9)";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText(
+          `Track Length: ${TRACK_LENGTH_METERS} meters`,
+          width - 200,
+          70,
+        );
+        ctx.fillText(
+          `1 pixel = ${(1 / PIXELS_PER_METER).toFixed(3)} m`,
+          width - 200,
+          95,
+        );
+
+        ctx.fillStyle = "#FFDD88";
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(width - 50, 45, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFEEAA";
+        ctx.beginPath();
+        ctx.arc(width - 50, 45, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      function update(deltaTime) {
+        if (!isRunning) return;
+
+        let distanceMeters = deltaTime;
+
+        if (!car1.finished) {
+          let newPos = car1.x_m + car1.speed * distanceMeters;
+          if (newPos >= TRACK_LENGTH_METERS) {
+            car1.x_m = TRACK_LENGTH_METERS;
+            car1.finished = true;
+          } else {
+            car1.x_m = newPos;
+          }
+        }
+
+        if (!car2.finished) {
+          let newPos = car2.x_m + car2.speed * distanceMeters;
+          if (newPos >= TRACK_LENGTH_METERS) {
+            car2.x_m = TRACK_LENGTH_METERS;
+            car2.finished = true;
+          } else {
+            car2.x_m = newPos;
+          }
+        }
+
+        // Update displays
+        document.getElementById("live-speed1").innerText =
+          car1.speed.toFixed(1);
+        document.getElementById("live-vel1").innerHTML =
+          car1.speed.toFixed(1) + " →";
+        document.getElementById("live-speed2").innerText =
+          car2.speed.toFixed(1);
+        document.getElementById("live-vel2").innerHTML =
+          car2.speed.toFixed(1) + " →";
+
+        const bothFinished = car1.finished && car2.finished;
+
+        if (bothFinished && !raceComplete) {
+          raceComplete = true;
+          isRunning = false;
+
+          let insightMsg = "";
+          if (car1.speed > car2.speed) {
+            insightMsg = `🏆 Car A wins! ${car1.speed.toFixed(1)} m/s > ${car2.speed.toFixed(1)} m/s`;
+          } else if (car2.speed > car1.speed) {
+            insightMsg = `🏆 Car B wins! ${car2.speed.toFixed(1)} m/s > ${car1.speed.toFixed(1)} m/s`;
+          } else {
+            insightMsg = `🏁 Perfect tie! Both at ${car1.speed.toFixed(1)} m/s`;
+          }
+          document.getElementById("insight-text").innerHTML =
+            "🏁 RACE COMPLETE!";
+          document.getElementById("insight-detail").innerHTML = insightMsg;
+        } else if (!bothFinished) {
+          raceComplete = false;
+          let distance1 = (TRACK_LENGTH_METERS - car1.x_m).toFixed(1);
+          let distance2 = (TRACK_LENGTH_METERS - car2.x_m).toFixed(1);
+          let eta1 = (distance1 / car1.speed).toFixed(1);
+          let eta2 = (distance2 / car2.speed).toFixed(1);
+          document.getElementById("insight-text").innerHTML =
+            "🏎️ PHYSICS IN ACTION";
+          document.getElementById("insight-detail").innerHTML =
+            `Speed = |Velocity| (East) | Car A: ${car1.speed.toFixed(1)} m/s, Car B: ${car2.speed.toFixed(1)} m/s | ETA: ${eta1}s / ${eta2}s`;
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        drawTopDownTrack();
+        drawTopDownCar(car1.x_m, car1.y, car1.color, car1.darkColor);
+        drawTopDownCar(car2.x_m, car2.y, car2.color, car2.darkColor);
+        // No confetti/balls - removed completely
+      }
+
+      function animate(currentTime) {
+        if (!lastTimestamp) {
+          lastTimestamp = currentTime;
+          requestAnimationFrame(animate);
+          return;
+        }
+
+        let delta = Math.min(0.033, (currentTime - lastTimestamp) / 1000);
+        lastTimestamp = currentTime;
+
+        if (delta > 0 && delta < 0.1) {
+          update(delta);
+        }
+        draw();
+        animationId = requestAnimationFrame(animate);
+      }
+
+      function resetRace() {
+        car1.x_m = 0;
+        car2.x_m = 0;
+        car1.finished = false;
+        car2.finished = false;
+        isRunning = false;
+        raceStarted = false;
+        raceComplete = false;
+        lastTimestamp = 0;
+        document.getElementById("insight-text").innerHTML =
+          "📚 Both cars move EAST";
+        document.getElementById("insight-detail").innerHTML =
+          "Speed = |Velocity| when direction is constant";
+        draw();
+      }
+
+      function startRace() {
+        if (isRunning) return;
+        if (raceComplete) resetRace();
+        isRunning = true;
+        raceStarted = true;
+        lastTimestamp = performance.now();
+      }
+
+      function pauseRace() {
+        isRunning = false;
+        if (raceStarted && !raceComplete) {
+          document.getElementById("insight-text").innerHTML =
+            "⏸️ SIMULATION PAUSED";
+        }
+      }
+
+      // Event listeners
+      document.getElementById("start-btn").onclick = startRace;
+      document.getElementById("pause-btn").onclick = pauseRace;
+      document.getElementById("reset-btn").onclick = resetRace;
+
+      document.getElementById("left-car1-slider").oninput = function () {
+        car1.speed = parseFloat(this.value);
+        document.getElementById("left-car1-speed").innerText =
+          car1.speed.toFixed(1) + " m/s";
+      };
+      document.getElementById("left-car2-slider").oninput = function () {
+        car2.speed = parseFloat(this.value);
+        document.getElementById("left-car2-speed").innerText =
+          car2.speed.toFixed(1) + " m/s";
+      };
+
+      window.setScenario = function (scene) {
+        if (scene === "equal") {
+          car1.speed = 8;
+          car2.speed = 8;
+          document.getElementById("left-car1-slider").value = 8;
+          document.getElementById("left-car2-slider").value = 8;
+          document.getElementById("left-car1-speed").innerText = "8.0 m/s";
+          document.getElementById("left-car2-speed").innerText = "8.0 m/s";
+        } else if (scene === "catchup") {
+          car1.speed = 12;
+          car2.speed = 7;
+          document.getElementById("left-car1-slider").value = 12;
+          document.getElementById("left-car2-slider").value = 7;
+          document.getElementById("left-car1-speed").innerText = "12.0 m/s";
+          document.getElementById("left-car2-speed").innerText = "7.0 m/s";
+        } else if (scene === "fast") {
+          car1.speed = 15;
+          car2.speed = 5;
+          document.getElementById("left-car1-slider").value = 15;
+          document.getElementById("left-car2-slider").value = 5;
+          document.getElementById("left-car1-speed").innerText = "15.0 m/s";
+          document.getElementById("left-car2-speed").innerText = "5.0 m/s";
+        } else if (scene === "close") {
+          car1.speed = 9.2;
+          car2.speed = 8.8;
+          document.getElementById("left-car1-slider").value = 9.2;
+          document.getElementById("left-car2-slider").value = 8.8;
+          document.getElementById("left-car1-speed").innerText = "9.2 m/s";
+          document.getElementById("left-car2-speed").innerText = "8.8 m/s";
+        }
+        resetRace();
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (isRunning) pauseRace();
+          else startRace();
+        }
+        if (e.code === "KeyR") {
+          e.preventDefault();
+          resetRace();
+        }
+      });
+
+      if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (
+          x,
+          y,
+          w,
+          h,
+          r,
+        ) {
+          if (w < 2 * r) r = w / 2;
+          if (h < 2 * r) r = h / 2;
+          this.moveTo(x + r, y);
+          this.lineTo(x + w - r, y);
+          this.quadraticCurveTo(x + w, y, x + w, y + r);
+          this.lineTo(x + w, y + h - r);
+          this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          this.lineTo(x + r, y + h);
+          this.quadraticCurveTo(x, y + h, x, y + h - r);
+          this.lineTo(x, y + r);
+          this.quadraticCurveTo(x, y, x + r, y);
+          return this;
+        };
+      }
+
+      resetRace();
+      animate(performance.now());
+
+      function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+      }
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceleration - Smooth Stop</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --road: #4b5563;
+        --sky: #dbeafe;
+        --grass: #16a34a;
+      }
+
+      body {
+        background: linear-gradient(180deg, var(--sky) 0%, #ffffff 100%);
+        color: var(--dark);
+        min-height: 100vh;
+        overflow-x: hidden;
+        padding: 15px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .title i {
+        font-size: 1.8rem;
+        color: var(--secondary);
+      }
+
+      .subtitle {
+        font-size: 0.95rem;
+        color: var(--gray);
+      }
+
+      .simulation-section {
+        background: white;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .simulation-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        color: var(--primary);
+        margin-bottom: 12px;
+      }
+
+      .simulation-container {
+        height: 280px;
+        background: var(--sky);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid var(--primary);
+        margin-bottom: 15px;
+      }
+
+      #roadCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .controls-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      @media (max-width: 768px) {
+        .controls-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .control-panel {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 15px;
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        color: var(--primary);
+        margin-bottom: 12px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid rgba(37, 99, 235, 0.1);
+      }
+
+      .speed-control {
+        text-align: center;
+        margin: 10px 0;
+      }
+
+      .control-value-display {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 5px 0;
+      }
+
+      .control-label {
+        font-size: 0.9rem;
+        color: var(--gray);
+        font-weight: 600;
+      }
+
+      .control-unit {
+        font-size: 0.9rem;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .slider-container {
+        margin: 15px 0;
+      }
+
+      .slider {
+        width: 100%;
+        height: 12px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: linear-gradient(90deg, #10b981, #2563eb);
+        border-radius: 6px;
+        outline: none;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        border: 3px solid var(--primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 0.75rem;
+        color: var(--gray);
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 15px;
+      }
+
+      .btn {
+        padding: 12px 8px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .btn:active {
+        transform: translateY(2px);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, var(--secondary), #059669);
+        color: white;
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: white;
+      }
+
+      .speedometer-container {
+        text-align: center;
+        padding: 12px;
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+
+      .speed-display {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 5px 0;
+      }
+
+      .speed-label {
+        font-size: 0.85rem;
+        color: var(--gray);
+        font-weight: 600;
+      }
+
+      .data-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      @media (max-width: 768px) {
+        .data-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .data-card {
+        background: white;
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+
+      .data-card i {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin-bottom: 5px;
+      }
+
+      .data-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 3px 0;
+      }
+
+      .data-label {
+        font-size: 0.8rem;
+        color: var(--gray);
+      }
+
+      .data-unit {
+        font-size: 0.75rem;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .acceleration-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 3px;
+      }
+
+      .positive-acc {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .negative-acc {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .zero-acc {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+
+      .status-indicator {
+        text-align: center;
+        padding: 8px;
+        margin-top: 5px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        font-size: 0.8rem;
+      }
+
+      .physics-explanation {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+      }
+
+      .explanation-title {
+        font-size: 1.3rem;
+        color: var(--primary);
+        margin-bottom: 12px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .concepts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .concept-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 8px;
+        padding: 12px;
+        border-left: 4px solid var(--primary);
+      }
+
+      .concept-card h3 {
+        color: var(--primary);
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+      }
+
+      .concept-card p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+
+      .formula-box {
+        background: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: var(--primary);
+      }
+
+      .stop-info {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(239, 68, 68, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--danger);
+      }
+
+      .stop-info h4 {
+        color: var(--danger);
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+      }
+
+      .stop-info p {
+        font-size: 0.8rem;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 class="title">
+          <i class="fas fa-bus"></i>
+          Acceleration
+        </h1>
+        <p class="subtitle">
+          Stop button now slows down gradually - no sudden stops!
+        </p>
+      </header>
+
+      <div class="simulation-section">
+        <div class="simulation-title">
+          <i class="fas fa-road"></i>
+          <span>Smooth Stop Simulator</span>
+        </div>
+
+        <div class="simulation-container">
+          <canvas id="roadCanvas"></canvas>
+        </div>
+
+        <div class="controls-section">
+          <div class="control-panel">
+            <div class="panel-title">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Speed Control</span>
+            </div>
+
+            <div class="speed-control">
+              <div class="control-label">TARGET SPEED</div>
+              <div class="control-value-display" id="targetSpeedValue">30</div>
+              <div class="control-unit">km/h</div>
+            </div>
+
+            <div class="slider-container">
+              <input
+                type="range"
+                min="0"
+                max="80"
+                step="1"
+                value="30"
+                class="slider"
+                id="speedSlider"
+              />
+              <div class="slider-labels">
+                <span>0 km/h</span>
+                <span>40</span>
+                <span>80 km/h</span>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button class="btn btn-success" id="startBtn">
+                <i class="fas fa-play"></i> Start
+              </button>
+              <button class="btn btn-danger" id="stopBtn">
+                <i class="fas fa-stop"></i> Stop (Slow)
+              </button>
+              <button class="btn btn-primary" id="resetBtn">
+                <i class="fas fa-redo"></i> Reset
+              </button>
+            </div>
+
+            <div class="stop-info">
+              <h4><i class="fas fa-circle-down"></i> Smooth Stop Feature</h4>
+              <p>
+                The <strong>Stop button</strong> now gradually decreases speed
+                at 2.5 m/s². From 60 km/h, it takes about 6.7 seconds to stop
+                completely!
+              </p>
+            </div>
+          </div>
+
+          <div class="control-panel">
+            <div class="panel-title">
+              <i class="fas fa-dashboard"></i>
+              <span>Current Status</span>
+            </div>
+
+            <div class="speedometer-container">
+              <div class="speed-label">CURRENT SPEED</div>
+              <div class="speed-display" id="currentSpeedValue">0.0</div>
+              <div class="control-unit">m/s</div>
+              <div
+                style="
+                  margin-top: 3px;
+                  font-size: 0.9rem;
+                  font-weight: bold;
+                  color: var(--primary);
+                "
+              >
+                <span id="currentSpeedKmh">0.0 km/h</span>
+              </div>
+            </div>
+
+            <div class="speedometer-container">
+              <div class="speed-label">ACCELERATION</div>
+              <div class="speed-display" id="accelerationValue">0.00</div>
+              <div class="control-unit">m/s²</div>
+
+              <div class="status-indicator">
+                <div id="accelerationStatus">Bus stopped</div>
+                <div id="accelerationType" class="acceleration-status zero-acc">
+                  STOPPED
+                </div>
+              </div>
+            </div>
+
+            <div class="speedometer-container">
+              <div class="speed-label">TIME TO STOP</div>
+              <div class="speed-display" id="timeToStop">0.0</div>
+              <div class="control-unit">seconds</div>
+              <div
+                style="margin-top: 3px; font-size: 0.8rem; color: var(--gray)"
+              >
+                at current speed
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-cards">
+        <div class="data-card">
+          <i class="fas fa-road"></i>
+          <div class="data-value" id="distanceValue">0.0</div>
+          <div class="data-label">
+            Distance <span class="data-unit">m</span>
+          </div>
+        </div>
+
+        <div class="data-card">
+          <i class="fas fa-clock"></i>
+          <div class="data-value" id="timeValue">0.0</div>
+          <div class="data-label">Time <span class="data-unit">s</span></div>
+        </div>
+
+        <div class="data-card">
+          <i class="fas fa-weight-hanging"></i>
+          <div class="data-value" id="forceValue">0</div>
+          <div class="data-label">Force <span class="data-unit">N</span></div>
+        </div>
+
+        <div class="data-card">
+          <i class="fas fa-bolt"></i>
+          <div class="data-value" id="accelerationData">0.00</div>
+          <div class="data-label">
+            Accel <span class="data-unit">m/s²</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="physics-explanation">
+        <h2 class="explanation-title">
+          <i class="fas fa-graduation-cap"></i>
+          Smooth Deceleration
+        </h2>
+
+        <div class="concepts-grid">
+          <div class="concept-card">
+            <h3><i class="fas fa-arrow-down"></i> Gradual Stopping</h3>
+            <p>
+              The Stop button sets target speed to 0, but the bus slows down
+              gradually at 2.5 m/s² - just like a real bus!
+            </p>
+            <div class="formula-box">Stopping time = Speed ÷ 2.5</div>
+          </div>
+
+          <div class="concept-card">
+            <h3><i class="fas fa-car-side"></i> Example</h3>
+            <p>
+              At 60 km/h (16.7 m/s):<br />Stop time = 16.7 ÷ 2.5 = 6.7
+              seconds<br />Stop distance = 56 meters
+            </p>
+          </div>
+
+          <div class="concept-card">
+            <h3><i class="fas fa-sliders-h"></i> Try This</h3>
+            <p>
+              Set speed to 60 km/h, click Stop, and watch the speed decrease
+              smoothly over 6-7 seconds!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      class BusSimulation {
+        constructor() {
+          this.canvas = document.getElementById("roadCanvas");
+          this.ctx = this.canvas.getContext("2d");
+
+          // Physics parameters
+          this.maxAcceleration = 2.0; // m/s²
+          this.maxDeceleration = 2.5; // m/s² (smooth deceleration)
+          this.busMass = 8000; // kg
+
+          // Simulation state
+          this.currentSpeed = 0; // m/s
+          this.targetSpeed = 30; // km/h
+          this.position = 0;
+          this.time = 0;
+          this.distance = 0;
+          this.animationId = null;
+          this.isRunning = false;
+          this.lastTimestamp = null;
+
+          // Visual scale
+          this.pixelsPerMeter = 15;
+
+          // DOM elements
+          this.speedSlider = document.getElementById("speedSlider");
+          this.targetSpeedValue = document.getElementById("targetSpeedValue");
+          this.currentSpeedValue = document.getElementById("currentSpeedValue");
+          this.currentSpeedKmh = document.getElementById("currentSpeedKmh");
+          this.accelerationValue = document.getElementById("accelerationValue");
+          this.distanceValue = document.getElementById("distanceValue");
+          this.timeValue = document.getElementById("timeValue");
+          this.forceValue = document.getElementById("forceValue");
+          this.accelerationData = document.getElementById("accelerationData");
+          this.accelerationStatus =
+            document.getElementById("accelerationStatus");
+          this.accelerationType = document.getElementById("accelerationType");
+          this.timeToStop = document.getElementById("timeToStop");
+
+          // Buttons
+          document
+            .getElementById("startBtn")
+            .addEventListener("click", () => this.start());
+          document
+            .getElementById("stopBtn")
+            .addEventListener("click", () => this.smoothStop());
+          document
+            .getElementById("resetBtn")
+            .addEventListener("click", () => this.reset());
+
+          // Slider
+          this.speedSlider.addEventListener("input", (e) => {
+            this.targetSpeed = parseInt(e.target.value);
+            this.targetSpeedValue.textContent = this.targetSpeed;
+          });
+
+          // Initialize
+          this.resizeCanvas();
+          window.addEventListener("resize", () => this.resizeCanvas());
+          this.draw();
+        }
+
+        resizeCanvas() {
+          const container = this.canvas.parentElement;
+          this.canvas.width = container.clientWidth;
+          this.canvas.height = container.clientHeight;
+          this.draw();
+        }
+
+        start() {
+          if (!this.isRunning) {
+            this.isRunning = true;
+            this.lastTimestamp = null;
+            this.animationId = requestAnimationFrame((t) => this.update(t));
+          }
+        }
+
+        smoothStop() {
+          // Set target speed to 0 for smooth deceleration
+          this.targetSpeed = 0;
+          this.speedSlider.value = 0;
+          this.targetSpeedValue.textContent = 0;
+
+          // Make sure simulation is running
+          if (!this.isRunning) {
+            this.start();
+          }
+
+          // Log the stop time
+          const stopTime = this.currentSpeed / this.maxDeceleration;
+          console.log(
+            `Smooth stop initiated from ${(this.currentSpeed * 3.6).toFixed(1)} km/h`,
+          );
+          console.log(
+            `Will take ${stopTime.toFixed(1)} seconds to stop completely`,
+          );
+        }
+
+        reset() {
+          this.stop();
+          this.currentSpeed = 0;
+          this.position = 0;
+          this.time = 0;
+          this.distance = 0;
+          this.targetSpeed = 30;
+          this.speedSlider.value = 30;
+          this.targetSpeedValue.textContent = 30;
+          this.updateDisplay(0, 0);
+          this.draw();
+        }
+
+        stop() {
+          if (this.isRunning) {
+            this.isRunning = false;
+            cancelAnimationFrame(this.animationId);
+          }
+        }
+
+        update(timestamp) {
+          if (!this.isRunning) return;
+
+          if (this.lastTimestamp) {
+            const deltaTime = Math.min(
+              (timestamp - this.lastTimestamp) / 1000,
+              0.05,
+            );
+
+            // Convert target speed from km/h to m/s
+            const targetSpeedMS = this.targetSpeed * (1000 / 3600);
+
+            // Calculate speed difference
+            const speedDiff = targetSpeedMS - this.currentSpeed;
+
+            // Calculate acceleration with smooth deceleration
+            let acceleration = 0;
+            let force = 0;
+
+            if (Math.abs(speedDiff) < 0.01) {
+              acceleration = 0;
+            } else {
+              if (speedDiff > 0) {
+                // Accelerating
+                acceleration = Math.min(
+                  speedDiff / deltaTime,
+                  this.maxAcceleration,
+                );
+              } else {
+                // DECELERATING - smooth and gradual
+                acceleration = Math.max(
+                  speedDiff / deltaTime,
+                  -this.maxDeceleration,
+                );
+              }
+
+              // Prevent overshooting the target
+              if (Math.abs(acceleration * deltaTime) > Math.abs(speedDiff)) {
+                acceleration = speedDiff / deltaTime;
+              }
+            }
+
+            // Update current speed
+            this.currentSpeed += acceleration * deltaTime;
+            this.currentSpeed = Math.max(0, this.currentSpeed);
+
+            // Calculate force
+            force = acceleration * this.busMass;
+
+            // Update distance (actual meters traveled)
+            this.distance += this.currentSpeed * deltaTime;
+
+            // Update position for visual movement
+            this.position +=
+              this.currentSpeed * this.pixelsPerMeter * deltaTime;
+
+            // Wrap position for infinite road effect
+            if (this.position > this.canvas.width) {
+              this.position -= this.canvas.width;
+            }
+
+            // Update time
+            this.time += deltaTime;
+
+            // Update displays
+            this.updateDisplay(acceleration, force);
+          }
+
+          this.lastTimestamp = timestamp;
+          this.draw();
+          this.animationId = requestAnimationFrame((t) => this.update(t));
+        }
+
+        updateDisplay(acceleration = 0, force = 0) {
+          // Current speed in m/s
+          this.currentSpeedValue.textContent = this.currentSpeed.toFixed(1);
+
+          // Convert to km/h for display
+          const speedKmh = this.currentSpeed * 3.6;
+          this.currentSpeedKmh.textContent = `${speedKmh.toFixed(1)} km/h`;
+
+          // Acceleration
+          this.accelerationValue.textContent = acceleration.toFixed(2);
+          this.accelerationData.textContent = acceleration.toFixed(2);
+
+          // Force (rounded)
+          this.forceValue.textContent = Math.round(force / 100) * 100;
+
+          // Distance and time
+          this.distanceValue.textContent = this.distance.toFixed(1);
+          this.timeValue.textContent = this.time.toFixed(1);
+
+          // Calculate time to stop at current speed
+          const timeToStopValue = this.currentSpeed / this.maxDeceleration;
+          this.timeToStop.textContent = timeToStopValue.toFixed(1);
+
+          // Status with deceleration info
+          const targetKmh = this.targetSpeed;
+          const currentKmh = speedKmh;
+
+          if (this.currentSpeed < 0.1 && targetKmh === 0) {
+            this.accelerationStatus.textContent =
+              "Bus stopped (smooth stop completed)";
+            this.accelerationType.textContent = "STOPPED";
+            this.accelerationType.className = "acceleration-status zero-acc";
+          } else if (Math.abs(currentKmh - targetKmh) < 0.5) {
+            this.accelerationStatus.textContent = `Constant speed at ${targetKmh.toFixed(1)} km/h`;
+            this.accelerationType.textContent = "CONSTANT";
+            this.accelerationType.className = "acceleration-status zero-acc";
+          } else if (currentKmh < targetKmh) {
+            this.accelerationStatus.textContent = `Accelerating to ${targetKmh.toFixed(1)} km/h`;
+            this.accelerationType.textContent = "ACCELERATING";
+            this.accelerationType.className =
+              "acceleration-status positive-acc";
+          } else {
+            // DECELERATING - show time to stop
+            if (targetKmh === 0) {
+              this.accelerationStatus.textContent = `Smooth deceleration to 0 km/h (stops in ${timeToStopValue.toFixed(1)}s)`;
+            } else {
+              this.accelerationStatus.textContent = `Decelerating to ${targetKmh.toFixed(1)} km/h`;
+            }
+            this.accelerationType.textContent = "DECELERATING";
+            this.accelerationType.className =
+              "acceleration-status negative-acc";
+          }
+        }
+
+        draw() {
+          const ctx = this.ctx;
+          const w = this.canvas.width;
+          const h = this.canvas.height;
+
+          ctx.clearRect(0, 0, w, h);
+
+          // Sky
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+          skyGrad.addColorStop(0, "#87CEEB");
+          skyGrad.addColorStop(1, "#E0F6FF");
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, w, h * 0.7);
+
+          // Sun
+          ctx.beginPath();
+          ctx.arc(w - 60, 50, 30, 0, Math.PI * 2);
+          ctx.fillStyle = "#FFD700";
+          ctx.shadowColor = "#FFA500";
+          ctx.shadowBlur = 15;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Ground
+          const groundGrad = ctx.createLinearGradient(0, h * 0.7, 0, h);
+          groundGrad.addColorStop(0, "#90EE90");
+          groundGrad.addColorStop(1, "#32CD32");
+          ctx.fillStyle = groundGrad;
+          ctx.fillRect(0, h * 0.7, w, h * 0.3);
+
+          // Road
+          ctx.fillStyle = "#2C3E50";
+          ctx.fillRect(0, h * 0.8 - 15, w, 50);
+
+          // MOVING ROAD LINES
+          const dashLength = 40;
+          const gapLength = 30;
+          const totalLength = dashLength + gapLength;
+          const offset = this.position % totalLength;
+
+          // Center line
+          ctx.strokeStyle = "#F1C40F";
+          ctx.lineWidth = 4;
+          ctx.setLineDash([dashLength, gapLength]);
+          ctx.beginPath();
+          ctx.moveTo(-offset, h * 0.8);
+          ctx.lineTo(w, h * 0.8);
+          ctx.stroke();
+
+          // Side lines
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 2;
+          ctx.setLineDash([]);
+
+          ctx.beginPath();
+          ctx.moveTo(0, h * 0.8 - 15);
+          ctx.lineTo(w, h * 0.8 - 15);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(0, h * 0.8 + 15);
+          ctx.lineTo(w, h * 0.8 + 15);
+          ctx.stroke();
+
+          // Draw bus
+          const busY = h * 0.7 - 15;
+
+          ctx.fillStyle = "#FFD700";
+          ctx.shadowColor = "#000000";
+          ctx.shadowBlur = 8;
+          ctx.fillRect(80, busY, 130, 45);
+
+          ctx.fillStyle = "#87CEEB";
+          ctx.fillRect(100, busY + 8, 20, 20);
+          ctx.fillRect(130, busY + 8, 20, 20);
+          ctx.fillRect(160, busY + 8, 20, 20);
+
+          ctx.fillStyle = "#333333";
+          ctx.beginPath();
+          ctx.arc(110, busY + 50, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(180, busY + 50, 10, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#CCCCCC";
+          ctx.beginPath();
+          ctx.arc(110, busY + 50, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(180, busY + 50, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#000000";
+          ctx.font = "bold 14px Arial";
+          ctx.fillText("BUS", 120, busY + 32);
+
+          ctx.shadowBlur = 0;
+
+          // Speed display
+          const speedKmh = (this.currentSpeed * 3.6).toFixed(1);
+          ctx.font = "bold 14px Arial";
+          ctx.fillStyle = "#000000";
+          ctx.fillText(`${speedKmh} km/h`, 100, busY - 10);
+
+          // Show "SMOOTH STOP" indicator when decelerating to 0
+          if (this.targetSpeed === 0 && this.currentSpeed > 0.1) {
+            ctx.font = "bold 12px Arial";
+            ctx.fillStyle = "#ef4444";
+            ctx.fillText("SLOWING DOWN GRADUALLY", 170, busY - 15);
+          }
+        }
+      }
+
+      // Start simulation
+      window.addEventListener("load", () => {
+        new BusSimulation();
+      });
+    </script>
+  </body>
+</html>

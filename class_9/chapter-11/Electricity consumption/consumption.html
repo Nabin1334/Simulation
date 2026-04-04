@@ -1,545 +1,1197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Electric Circuit & Power Meter</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <title>⚡ Smart Circuit Simulator | 3-Bulb Complete Power Control</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI",
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
 
-        body {
-            background: linear-gradient(135deg, #0a1929 0%, #1a2b3a 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
-        }
+      body {
+        background: radial-gradient(circle at 20% 30%, #070e1a, #010308);
+        min-height: 100vh;
+        padding: 20px;
+      }
 
+      .app-container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        padding: 15px 15px 25px;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        font-size: clamp(1.4rem, 6vw, 2.3rem);
+        background: linear-gradient(135deg, #6fd4ff, #b8eaff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .header p {
+        color: #8aaec0;
+        margin-top: 8px;
+        font-size: clamp(0.7rem, 3vw, 0.9rem);
+      }
+
+      .dashboard {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .simulation-card {
+        flex: 2.2;
+        min-width: 320px;
+        background: linear-gradient(
+          145deg,
+          rgba(4, 14, 24, 0.88),
+          rgba(1, 6, 12, 0.96)
+        );
+        backdrop-filter: blur(4px);
+        border-radius: 32px;
+        padding: 18px;
+        border: 1px solid rgba(46, 255, 170, 0.3);
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+      }
+
+      .canvas-container {
+        position: relative;
+        border-radius: 24px;
+        overflow: auto;
+        background: #030914;
+        border: 2px solid #2a6f9e;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+
+      #circuit-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #030914;
+        cursor: pointer;
+      }
+
+      .touch-hint {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        padding: 5px 12px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        color: #8affc0;
+        pointer-events: none;
+        font-weight: 500;
+        border: 1px solid #2effaa80;
+        z-index: 10;
+        font-family: monospace;
+      }
+
+      .control-bar {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+
+      .main-switch-btn {
+        background: linear-gradient(145deg, #1e2f3c, #0a111f);
+        border: none;
+        border-radius: 80px;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+      .switch-inner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #283b4a, #101b28);
+        padding: 10px 28px;
+        border-radius: 80px;
+        border: 1px solid rgba(80, 180, 255, 0.5);
+      }
+      .main-switch-btn.active .switch-inner {
+        background: linear-gradient(135deg, #11875a, #0a5538);
+        border-color: #4effb0;
+        box-shadow: 0 0 18px rgba(78, 255, 176, 0.6);
+      }
+      .switch-icon {
+        font-size: 1.4rem;
+      }
+      .switch-text {
+        font-size: clamp(0.9rem, 4vw, 1.1rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #f0f9ff, #b3dbff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .reset-btn {
+        background: linear-gradient(135deg, #2a4055, #182433);
+        border: none;
+        border-radius: 80px;
+        padding: 10px 26px;
+        font-weight: 600;
+        font-size: clamp(0.8rem, 3.5vw, 0.95rem);
+        color: #ffdf8c;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #ffb34770;
+      }
+      .reset-btn:hover {
+        background: linear-gradient(135deg, #3e5a74, #253b4b);
+        transform: scale(0.97);
+      }
+
+      .info-panel {
+        flex: 1.2;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+      .info-panel::-webkit-scrollbar {
+        width: 4px;
+      }
+      .info-panel::-webkit-scrollbar-track {
+        background: #07121e;
+        border-radius: 8px;
+      }
+      .info-panel::-webkit-scrollbar-thumb {
+        background: #2c86b0;
+      }
+
+      .meter-card {
+        background: linear-gradient(145deg, #0c172b, #030915);
+        border-radius: 28px;
+        padding: 18px;
+        border: 1px solid #2e7ea6;
+      }
+      .meter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-bottom: 2px solid #2c7fb0;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+      }
+      .meter-title {
+        font-size: clamp(0.9rem, 4vw, 1.1rem);
+        font-weight: 700;
+        background: linear-gradient(90deg, #6fd4ff, #b8eaff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .kwh-giant {
+        font-size: clamp(1.8rem, 7vw, 3.2rem);
+        font-weight: 800;
+        font-family: "Courier New", monospace;
+        color: #c3ffcf;
+        text-shadow: 0 0 10px #2effaa;
+        text-align: center;
+        background: #00000055;
+        border-radius: 24px;
+        padding: 12px;
+        margin: 10px 0;
+        word-break: break-word;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+        gap: 10px;
+        margin: 12px 0;
+      }
+      .stat-tile {
+        background: rgba(0, 32, 48, 0.6);
+        border-radius: 18px;
+        padding: 8px;
+        text-align: center;
+        border-left: 3px solid;
+      }
+      .stat-tile.volt {
+        border-left-color: #3b82f6;
+      }
+      .stat-tile.amp {
+        border-left-color: #10b981;
+      }
+      .stat-tile.watt {
+        border-left-color: #f97316;
+      }
+      .stat-tile.cost {
+        border-left-color: #facc15;
+      }
+      .stat-value {
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        font-weight: bold;
+        font-family: monospace;
+        color: #f0fcff;
+      }
+      .stat-tile div:last-child {
+        font-size: 0.7rem;
+        color: #aac9ec;
+      }
+      .runtime-chip {
+        background: #00000070;
+        border-radius: 40px;
+        padding: 8px 12px;
+        text-align: center;
+        font-family: monospace;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+
+      .loads-panel {
+        background: rgba(4, 14, 24, 0.85);
+        backdrop-filter: blur(8px);
+        border-radius: 24px;
+        padding: 16px;
+        border: 1px solid #2c7093;
+      }
+      .loads-panel h3 {
+        font-size: clamp(0.9rem, 4vw, 1rem);
+        margin-bottom: 12px;
+        color: #98c9ff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .load-item {
+        background: #0e1c2c;
+        margin: 10px 0;
+        border-radius: 60px;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        transition: all 0.2s;
+        border: 1px solid #2a6180;
+      }
+      .load-item.active-load {
+        background: linear-gradient(95deg, #145f3a, #0a381f);
+        border-color: #2effaa;
+        box-shadow: 0 0 10px #2effaa40;
+      }
+      .load-icon-big {
+        font-size: 1.6rem;
+      }
+      .load-info {
+        flex: 2;
+        min-width: 110px;
+      }
+      .load-name {
+        font-weight: bold;
+        font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        color: #eef5ff;
+      }
+      .load-watt {
+        font-size: 0.7rem;
+        color: #aac9ec;
+      }
+      .load-kwh {
+        font-family: monospace;
+        font-size: 0.7rem;
+        color: #8affb3;
+      }
+      .load-toggle-switch {
+        width: 50px;
+        height: 26px;
+        background: #2a4058;
+        border-radius: 40px;
+        position: relative;
+        cursor: pointer;
+        transition: 0.2s;
+        flex-shrink: 0;
+      }
+      .load-toggle-switch.on {
+        background: #1c9e5a;
+        box-shadow: 0 0 8px #2effaa;
+      }
+      .toggle-knob {
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 3px;
+        transition: transform 0.2s ease;
+      }
+      .load-toggle-switch.on .toggle-knob {
+        transform: translateX(24px);
+      }
+
+      .settings-card {
+        background: #051524cc;
+        border-radius: 24px;
+        padding: 16px;
+        border: 1px solid #2c6990;
+      }
+      .slider-control {
+        margin: 12px 0;
+      }
+      .slider-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+        color: #bbd9ff;
+      }
+      input[type="range"] {
+        width: 100%;
+        height: 5px;
+        border-radius: 5px;
+        background: #1f4460;
+        -webkit-appearance: none;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #2effaa;
+        cursor: pointer;
+      }
+      .peak-avg {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        background: #00000044;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+      }
+      .led-status {
+        display: inline-block;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #f44;
+        box-shadow: 0 0 6px red;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+      .led-status.active-led {
+        background: #2eff8c;
+        box-shadow: 0 0 10px #2eff8c;
+        animation: pulse 0.9s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+      }
+
+      @media (max-width: 850px) {
         .dashboard {
-            max-width: 1800px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 450px 1fr;
-            gap: 25px;
-            height: calc(100vh - 40px);
+          flex-direction: column;
         }
-
-        header {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(26, 35, 126, 0.7), rgba(13, 71, 161, 0.7));
-            border-radius: 20px;
-            border: 2px solid rgba(33, 150, 243, 0.3);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
+        .info-panel {
+          max-height: none;
         }
+      }
 
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(90deg, #00bcd4, #2196f3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+      .master-layout {
+        max-width: 2000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        gap: 28px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 1100px) {
+        .master-layout {
+          flex-direction: column;
+          gap: 18px;
         }
-
-        .circuit-section {
-            background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 43, 58, 0.8));
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(33, 150, 243, 0.2);
-            backdrop-filter: blur(10px);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+        .simulation-area {
+          min-width: 0;
+          width: 100%;
+          border-radius: 28px;
+          padding: 12px;
         }
-
-        #circuit-canvas {
-            background: #0a1929;
-            border-radius: 15px;
-            width: 100%;
-            flex-grow: 1;
-            border: 3px solid #1e88e5;
-            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
-            cursor: crosshair;
+        .info-panel {
+          min-width: 0;
+          width: 100%;
+          max-height: none;
+          padding-right: 0;
         }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            flex-shrink: 0;
-        }
-
-        button {
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #2196f3, #1976d2);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
-        }
-
-        .meter-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
-            max-height: 100%;
-            padding-right: 5px;
-        }
-
-        .meter-panel::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .meter-panel::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-
-        .meter-panel::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #2196f3, #1976d2);
-            border-radius: 4px;
-        }
-
-        .meter-panel::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #1976d2, #1565c0);
-        }
-
-        .smart-meter {
-            background: linear-gradient(135deg, #1a237e, #283593);
-            border-radius: 20px;
-            padding: 25px;
-            border: 3px solid #00bcd4;
-            box-shadow: 0 0 40px rgba(0, 188, 212, 0.3);
-            flex-shrink: 0;
-        }
-
-        .meter-display {
-            background: #000;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            border: 2px solid #00bcd4;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .meter-brand {
-            display: flex;
-            justify-content: space-between;
-            color: #00bcd4;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .reading-value {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
-            margin: 20px 0;
-        }
-
-        .reading-label {
-            color: #00ffff;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-        }
-
-        .meter-readings {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .reading-card {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 18px;
-            border-radius: 10px;
-            border-left: 4px solid;
-        }
-
-        .reading-card.voltage { border-left-color: #2196f3; }
-        .reading-card.current { border-left-color: #4caf50; }
-        .reading-card.power { border-left-color: #ff9800; }
-        .reading-card.energy { border-left-color: #9c27b0; }
-
-        .card-label {
-            color: #b0bec5;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
-        .card-value {
-            font-size: 2rem;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: white;
-        }
-
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-        }
-
-        .status-led {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #f44;
-            box-shadow: 0 0 10px #f44;
-        }
-
-        .status-led.active {
-            background: #0f0;
-            box-shadow: 0 0 20px #0f0;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .stats-panel {
-            background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 43, 58, 0.8));
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(33, 150, 243, 0.2);
-            flex-shrink: 0;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border-left: 4px solid;
-        }
-
-        .stat-row.cost { border-left-color: #ffd700; }
-        .stat-row.time { border-left-color: #00bcd4; }
-
-        .chart-panel {
-            background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 43, 58, 0.8));
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(33, 150, 243, 0.2);
-            flex-shrink: 0;
-        }
-
-        .chart-title {
-            font-size: 1.3rem;
-            color: #00bcd4;
-            margin-bottom: 15px;
-        }
-
-        #power-chart {
-            width: 100%;
-            height: 180px;
-            border-radius: 10px;
-        }
-
-        .loads-panel {
-            background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 43, 58, 0.8));
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(33, 150, 243, 0.2);
-            flex-shrink: 0;
-        }
-
-        .load-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 18px;
-            margin: 12px 0;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .load-item.active {
-            background: rgba(0, 188, 212, 0.1);
-            border: 1px solid #00bcd4;
-        }
-
-        .load-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .load-icon {
-            font-size: 2rem;
-        }
-
-        .load-toggle {
-            width: 60px;
-            height: 30px;
-            background: #666;
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .load-toggle.on {
-            background: #00ff88;
-        }
-
-        .load-toggle-slider {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            top: 3px;
-            left: 3px;
-            transition: all 0.3s;
-        }
-
-        .load-toggle.on .load-toggle-slider {
-            transform: translateX(30px);
-        }
-
-        .settings-panel {
-            background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 43, 58, 0.8));
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid rgba(33, 150, 243, 0.2);
-            flex-shrink: 0;
-        }
-
-        .setting-group {
-            margin: 20px 0;
-        }
-
-        .setting-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            color: #90caf9;
-        }
-
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #1565c0, #2196f3);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #00bcd4;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 188, 212, 0.8);
-        }
-
-        @media (max-width: 1400px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-            
-            .meter-panel {
-                max-height: 600px;
-                order: 2;
-            }
-            
-            .circuit-section {
-                order: 1;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-    <div class="dashboard">
-        <header>
-            <h1><i class="fas fa-bolt"></i> Professional Electric Circuit & Power Meter</h1>
-            <p style="margin-top: 10px; opacity: 0.9;">Real-time electricity consumption monitoring with advanced metering</p>
-        </header>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="header">
+        <h1>
+          <i class="fas fa-microchip"></i> Smart Circuit Simulator | 3-Bulb
+          System
+        </h1>
+        <p>
+          ⚡ Click/Tap the MAIN SWITCH on the circuit • Control each bulb
+          individually • Real-time power monitoring
+        </p>
+      </div>
 
-        <div class="meter-panel">
-            <div class="smart-meter">
-                <div class="meter-display">
-                    <div class="meter-brand">
-                        <span>SMARTPOWER™</span>
-                        <span style="font-size: 0.8rem;">SM-2025</span>
-                    </div>
-                    <div class="reading-label">TOTAL CONSUMPTION</div>
-                    <div class="reading-value" id="kwh-display">0.000000</div>
-                    <div class="reading-label">kWh (Kilowatt-hours)</div>
-                    
-                    <div class="status-bar">
-                        <div class="status-led" id="status-led"></div>
-                        <span id="status-text">SYSTEM STANDBY</span>
-                    </div>
-                </div>
-
-                <div class="meter-readings">
-                    <div class="reading-card voltage">
-                        <div class="card-label"><i class="fas fa-bolt"></i> Voltage</div>
-                        <div class="card-value" id="voltage-display">220 V</div>
-                    </div>
-                    <div class="reading-card current">
-                        <div class="card-label"><i class="fas fa-wave-square"></i> Current</div>
-                        <div class="card-value" id="current-display">0.00 A</div>
-                    </div>
-                    <div class="reading-card power">
-                        <div class="card-label"><i class="fas fa-fire"></i> Power</div>
-                        <div class="card-value" id="power-display">0.0 W</div>
-                    </div>
-                    <div class="reading-card energy">
-                        <div class="card-label"><i class="fas fa-clock"></i> Runtime</div>
-                        <div class="card-value" id="runtime-display">00:00:00</div>
-                    </div>
-                </div>
+      <div class="dashboard">
+        <!-- Simulation Canvas Area - ALL 3 BULBS VISIBLE -->
+        <div class="simulation-card">
+          <div class="canvas-container">
+            <canvas
+              id="circuit-canvas"
+              width="1500"
+              height="850"
+              style="
+                width: 100%;
+                height: auto;
+                border-radius: 22px;
+                display: block;
+              "
+            ></canvas>
+            <div class="touch-hint">
+              <i class="fas fa-fingerprint"></i> TAP THE MAIN SWITCH ON CIRCUIT
             </div>
-
-            <div class="stats-panel">
-                <div class="stat-row cost">
-                    <div>
-                        <div style="font-size: 0.9rem; color: #b0bec5;">Total Cost</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #ffd700;" id="cost-display">$0.0000</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.9rem; color: #b0bec5;">Rate</div>
-                        <div style="font-size: 1.2rem; color: #ffd700;" id="rate-display">$0.12/kWh</div>
-                    </div>
-                </div>
-                <div class="stat-row time">
-                    <div>
-                        <div style="font-size: 0.9rem; color: #b0bec5;">Peak Power</div>
-                        <div style="font-size: 1.5rem; font-weight: bold;" id="peak-display">0.0 W</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.9rem; color: #b0bec5;">Avg Power</div>
-                        <div style="font-size: 1.5rem; font-weight: bold;" id="avg-display">0.0 W</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-panel">
-                <div class="chart-title"><i class="fas fa-chart-line"></i> Power Consumption</div>
-                <canvas id="power-chart"></canvas>
-            </div>
-
-            <div class="loads-panel">
-                <h3 style="color: #00bcd4; margin-bottom: 15px;"><i class="fas fa-plug"></i> Connected Loads</h3>
-                
-                <div class="load-item" data-load="bulb1">
-                    <div class="load-info">
-                        <div class="load-icon">💡</div>
-                        <div>
-                            <div style="font-weight: bold;">LED Bulb 1</div>
-                            <div style="font-size: 0.85rem; color: #b0bec5;">60W • 220V</div>
-                            <div style="font-size: 0.8rem; color: #00ff88;" id="bulb1-consumption">0.000 kWh</div>
-                        </div>
-                    </div>
-                    <div class="load-toggle" data-load="bulb1">
-                        <div class="load-toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="load-item" data-load="bulb2">
-                    <div class="load-info">
-                        <div class="load-icon">💡</div>
-                        <div>
-                            <div style="font-weight: bold;">LED Bulb 2</div>
-                            <div style="font-size: 0.85rem; color: #b0bec5;">60W • 220V</div>
-                            <div style="font-size: 0.8rem; color: #00ff88;" id="bulb2-consumption">0.000 kWh</div>
-                        </div>
-                    </div>
-                    <div class="load-toggle" data-load="bulb2">
-                        <div class="load-toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="load-item" data-load="bulb3">
-                    <div class="load-info">
-                        <div class="load-icon">💡</div>
-                        <div>
-                            <div style="font-weight: bold;">LED Bulb 3</div>
-                            <div style="font-size: 0.85rem; color: #b0bec5;">40W • 220V</div>
-                            <div style="font-size: 0.8rem; color: #00ff88;" id="bulb3-consumption">0.000 kWh</div>
-                        </div>
-                    </div>
-                    <div class="load-toggle" data-load="bulb3">
-                        <div class="load-toggle-slider"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-panel">
-                <h3 style="color: #00bcd4; margin-bottom: 15px;"><i class="fas fa-cog"></i> Settings</h3>
-                
-                <div class="setting-group">
-                    <div class="setting-label">
-                        <span>Supply Voltage</span>
-                        <span style="color: #00ff88; font-weight: bold;" id="voltage-value">220 V</span>
-                    </div>
-                    <input type="range" class="slider" id="voltage-slider" min="200" max="240" value="220">
-                </div>
-
-                <div class="setting-group">
-                    <div class="setting-label">
-                        <span>Electricity Rate</span>
-                        <span style="color: #00ff88; font-weight: bold;" id="rate-value">$0.12 /kWh</span>
-                    </div>
-                    <input type="range" class="slider" id="rate-slider" min="5" max="50" value="12">
-                </div>
-            </div>
+          </div>
+          <div class="control-bar">
+            <button id="main-power-switch" class="main-switch-btn">
+              <div class="switch-inner">
+                <i class="fas fa-power-off switch-icon"></i>
+                <span class="switch-text">MAIN SWITCH</span>
+              </div>
+            </button>
+            <button id="reset-meter-btn" class="reset-btn">
+              <i class="fas fa-sync-alt"></i> RESET METER
+            </button>
+          </div>
         </div>
 
-        <div class="circuit-section">
-            <canvas id="circuit-canvas"></canvas>
-            <div class="controls">
-                <button id="main-switch"><i class="fas fa-power-off"></i> Main Switch</button>
-                <button id="reset-meter"><i class="fas fa-redo"></i> Reset Meter</button>
+        <!-- Right Panel -->
+        <div class="info-panel">
+          <div class="meter-card">
+            <div class="meter-header">
+              <span class="meter-title"
+                ><i class="fas fa-charging-station"></i> ENERGY METER</span
+              >
+              <div>
+                <span id="status-led-indicator" class="led-status"></span>
+                <span id="system-status-text" style="font-size: 0.75rem"
+                  >OFFLINE</span
+                >
+              </div>
             </div>
+            <div class="kwh-giant" id="total-kwh-display">0.000000</div>
+            <div class="stats-grid">
+              <div class="stat-tile volt">
+                <div class="stat-value" id="voltage-val">220 V</div>
+                <div>VOLTAGE</div>
+              </div>
+              <div class="stat-tile amp">
+                <div class="stat-value" id="current-val">0.00 A</div>
+                <div>CURRENT</div>
+              </div>
+              <div class="stat-tile watt">
+                <div class="stat-value" id="power-val">0 W</div>
+                <div>POWER</div>
+              </div>
+              <div class="stat-tile cost">
+                <div class="stat-value" id="cost-val">$0.0000</div>
+                <div>COST</div>
+              </div>
+            </div>
+            <div class="runtime-chip">
+              <i class="far fa-clock"></i> RUN TIME:
+              <span id="runtime-clock">00:00:00</span>
+            </div>
+          </div>
+
+          <!-- 3 Bulb Controls - Each device fully interactive -->
+          <div class="loads-panel">
+            <h3><i class="fas fa-lightbulb"></i> THREE BULB CONTROLS</h3>
+            <div id="loads-container"></div>
+            <div
+              style="
+                margin-top: 12px;
+                font-size: 0.7rem;
+                color: #7f9fbf;
+                text-align: center;
+              "
+            >
+              <i class="fas fa-hand-pointer"></i> Click each toggle to control
+              bulbs
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="slider-control">
+              <div class="slider-label">
+                <span><i class="fas fa-bolt"></i> Supply Voltage</span
+                ><span id="voltage-slider-val">220 V</span>
+              </div>
+              <input
+                type="range"
+                id="voltage-ctrl"
+                min="200"
+                max="245"
+                step="1"
+                value="220"
+              />
+            </div>
+            <div class="slider-control">
+              <div class="slider-label">
+                <span><i class="fas fa-coins"></i> Electricity Rate</span
+                ><span id="rate-val-display">$0.12/kWh</span>
+              </div>
+              <input
+                type="range"
+                id="rate-ctrl"
+                min="5"
+                max="45"
+                step="1"
+                value="12"
+              />
+            </div>
+            <div class="peak-avg">
+              <span
+                >🏆 Peak Power: <strong id="peak-power-label">0 W</strong></span
+              >
+              <span
+                >📊 Avg Power: <strong id="avg-power-label">0 W</strong></span
+              >
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <script src="index.js">
+    <script>
+      (function () {
+        // ========== SYSTEM STATE WITH 3 BULBS ==========
+        let mainSwitchOn = false;
+        let voltage = 220;
+        let rate = 0.12;
+
+        const loadsDef = {
+          bulb1: {
+            name: "LED Bulb 1",
+            power: 60,
+            on: false,
+            consumption: 0,
+            startTime: null,
+            icon: "💡",
+            color: "#ffde9e",
+            posX: 1060,
+            posY: 210,
+          },
+          bulb2: {
+            name: "LED Bulb 2",
+            power: 60,
+            on: false,
+            consumption: 0,
+            startTime: null,
+            icon: "💡",
+            color: "#ffeaac",
+            posX: 1240,
+            posY: 210,
+          },
+          bulb3: {
+            name: "LED Bulb 3",
+            power: 40,
+            on: false,
+            consumption: 0,
+            startTime: null,
+            icon: "💡",
+            color: "#fff0bc",
+            posX: 1420,
+            posY: 210,
+          },
+        };
+
+        let totalConsumption = 0;
+        let runtimeSeconds = 0;
+        let lastTimestamp = null;
+        let powerReadings = [];
+        let peakPowerEver = 0;
+
+        const canvas = document.getElementById("circuit-canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 1500;
+        canvas.height = 850;
+
+        let wireSegments = [];
+        let electrons = [];
+        let breakerRect = { x: 380, y: 440, w: 140, h: 72 };
+
+        function getTotalPower() {
+          if (!mainSwitchOn) return 0;
+          let total = 0;
+          for (let id in loadsDef)
+            if (loadsDef[id].on) total += loadsDef[id].power;
+          return total;
+        }
+
+        function updateConsumptionRuntime(nowSec) {
+          if (!mainSwitchOn || lastTimestamp === null) {
+            if (mainSwitchOn && lastTimestamp === null) lastTimestamp = nowSec;
+            return;
+          }
+          let delta = Math.min(0.5, nowSec - lastTimestamp);
+          if (delta <= 0) return;
+          for (let id in loadsDef) {
+            const ld = loadsDef[id];
+            if (ld.on) {
+              const energyInc = (ld.power / 1000) * (delta / 3600);
+              ld.consumption += energyInc;
+              totalConsumption += energyInc;
+            }
+          }
+          runtimeSeconds += delta;
+          lastTimestamp = nowSec;
+        }
+
+        function refreshAllUI() {
+          const totalP = getTotalPower();
+          const current = (totalP / voltage).toFixed(2);
+          const costVal = totalConsumption * rate;
+          document.getElementById("total-kwh-display").innerText =
+            totalConsumption.toFixed(6);
+          document.getElementById("voltage-val").innerText = voltage + " V";
+          document.getElementById("current-val").innerText = current + " A";
+          document.getElementById("power-val").innerText =
+            totalP.toFixed(1) + " W";
+          document.getElementById("cost-val").innerText =
+            "$" + costVal.toFixed(4);
+          document.getElementById("voltage-slider-val").innerText =
+            voltage + " V";
+          document.getElementById("rate-val-display").innerText =
+            "$" + rate.toFixed(2) + "/kWh";
+
+          const hrs = Math.floor(runtimeSeconds / 3600);
+          const mins = Math.floor((runtimeSeconds % 3600) / 60);
+          const secs = Math.floor(runtimeSeconds % 60);
+          document.getElementById("runtime-clock").innerText =
+            `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+          if (totalP > peakPowerEver) peakPowerEver = totalP;
+          powerReadings.push(totalP);
+          if (powerReadings.length > 60) powerReadings.shift();
+          const avg =
+            powerReadings.reduce((a, b) => a + b, 0) /
+            (powerReadings.length || 1);
+          document.getElementById("peak-power-label").innerHTML =
+            peakPowerEver.toFixed(1) + " W";
+          document.getElementById("avg-power-label").innerHTML =
+            avg.toFixed(1) + " W";
+
+          const ledSpan = document.getElementById("status-led-indicator");
+          const statusText = document.getElementById("system-status-text");
+          if (mainSwitchOn && totalP > 0) {
+            ledSpan.classList.add("active-led");
+            statusText.innerText = "● ACTIVE";
+          } else if (mainSwitchOn && totalP === 0) {
+            ledSpan.classList.add("active-led");
+            statusText.innerText = "● STANDBY";
+          } else {
+            ledSpan.classList.remove("active-led");
+            statusText.innerText = "○ OFF";
+          }
+
+          for (let id in loadsDef) {
+            const ld = loadsDef[id];
+            const consSpan = document.getElementById(`load-cons-${id}`);
+            if (consSpan)
+              consSpan.innerText = ld.consumption.toFixed(5) + " kWh";
+            const loadDiv = document.getElementById(`load-item-${id}`);
+            if (loadDiv) {
+              if (ld.on && mainSwitchOn) loadDiv.classList.add("active-load");
+              else loadDiv.classList.remove("active-load");
+            }
+            const toggleEl = document.getElementById(`toggle-${id}`);
+            if (toggleEl) {
+              if (ld.on && mainSwitchOn) toggleEl.classList.add("on");
+              else toggleEl.classList.remove("on");
+            }
+          }
+        }
+
+        function toggleLoad(loadId) {
+          if (!mainSwitchOn && !loadsDef[loadId].on) return;
+          const ld = loadsDef[loadId];
+          ld.on = !ld.on;
+          if (ld.on && mainSwitchOn) ld.startTime = performance.now() / 1000;
+          else ld.startTime = null;
+          refreshAllUI();
+          buildWireSegments();
+          spawnElectrons();
+        }
+
+        function toggleMainSwitch() {
+          mainSwitchOn = !mainSwitchOn;
+          const mainBtn = document.getElementById("main-power-switch");
+          if (mainSwitchOn) {
+            mainBtn.classList.add("active");
+            lastTimestamp = performance.now() / 1000;
+            for (let id in loadsDef) {
+              if (loadsDef[id].on)
+                loadsDef[id].startTime = performance.now() / 1000;
+            }
+          } else {
+            mainBtn.classList.remove("active");
+            for (let id in loadsDef) {
+              loadsDef[id].startTime = null;
+            }
+          }
+          refreshAllUI();
+          buildWireSegments();
+          spawnElectrons();
+        }
+
+        function resetMeter() {
+          for (let id in loadsDef) {
+            loadsDef[id].consumption = 0;
+            if (loadsDef[id].on && mainSwitchOn)
+              loadsDef[id].startTime = performance.now() / 1000;
+            else loadsDef[id].startTime = null;
+          }
+          totalConsumption = 0;
+          runtimeSeconds = 0;
+          peakPowerEver = 0;
+          powerReadings = [];
+          if (mainSwitchOn) lastTimestamp = performance.now() / 1000;
+          refreshAllUI();
+        }
+
+        function buildWireSegments() {
+          const segs = [];
+          const activeMain = mainSwitchOn;
+          // Main power lines
+          segs.push({ x1: 120, y1: 480, x2: 360, y2: 480, active: activeMain });
+          segs.push({ x1: 360, y1: 480, x2: 600, y2: 480, active: activeMain });
+          segs.push({ x1: 600, y1: 480, x2: 780, y2: 480, active: activeMain });
+          segs.push({ x1: 780, y1: 480, x2: 780, y2: 330, active: activeMain });
+          segs.push({ x1: 780, y1: 330, x2: 980, y2: 330, active: activeMain });
+
+          // Three bulbs connections
+          const bulbPos = [
+            { id: "bulb1", x: 1060, y: 210 },
+            { id: "bulb2", x: 1240, y: 210 },
+            { id: "bulb3", x: 1420, y: 210 },
+          ];
+          bulbPos.forEach((b) => {
+            const loadOn = loadsDef[b.id].on && activeMain;
+            segs.push({
+              x1: 980,
+              y1: 330,
+              x2: b.x,
+              y2: 330,
+              active: activeMain,
+            });
+            segs.push({ x1: b.x, y1: 330, x2: b.x, y2: 180, active: loadOn });
+            segs.push({ x1: b.x, y1: 350, x2: b.x, y2: 420, active: loadOn });
+            segs.push({ x1: b.x, y1: 420, x2: b.x, y2: 640, active: loadOn });
+          });
+          // Return path
+          segs.push({
+            x1: 1060,
+            y1: 640,
+            x2: 860,
+            y2: 640,
+            active: activeMain,
+          });
+          segs.push({
+            x1: 1240,
+            y1: 640,
+            x2: 1060,
+            y2: 640,
+            active: activeMain,
+          });
+          segs.push({
+            x1: 1420,
+            y1: 640,
+            x2: 1240,
+            y2: 640,
+            active: activeMain,
+          });
+          segs.push({ x1: 860, y1: 640, x2: 860, y2: 780, active: activeMain });
+          segs.push({ x1: 860, y1: 780, x2: 120, y2: 780, active: activeMain });
+          segs.push({ x1: 120, y1: 780, x2: 120, y2: 550, active: activeMain });
+          wireSegments = segs;
+        }
+
+        function spawnElectrons() {
+          electrons = [];
+          if (!mainSwitchOn) return;
+          wireSegments.forEach((seg, idx) => {
+            if (!seg.active) return;
+            const len = Math.hypot(seg.x2 - seg.x1, seg.y2 - seg.y1);
+            let count = Math.floor(len / 38);
+            count = Math.min(count, 5);
+            for (let i = 0; i < count; i++) {
+              electrons.push({
+                segIdx: idx,
+                t: Math.random(),
+                speed: 0.007 + Math.random() * 0.008,
+                rad: 2.2 + Math.random() * 1.6,
+              });
+            }
+          });
+        }
+
+        // DRAWING FUNCTIONS - ALL 3 BULBS PROMINENTLY DISPLAYED
+        function drawPowerSource(x, y) {
+          ctx.fillStyle = "#b32d2d";
+          ctx.fillRect(x, y, 95, 145);
+          ctx.fillStyle = "#ffdd88";
+          ctx.font = "bold 30px monospace";
+          ctx.fillText("~", x + 35, y + 62);
+          ctx.fillText("~", x + 35, y + 112);
+          ctx.fillStyle = "#fff0c0";
+          ctx.font = "bold 13px sans-serif";
+          ctx.fillText(`${voltage}V AC`, x + 12, y + 165);
+        }
+
+        function drawBreakerInteractive(x, y) {
+          breakerRect = { x: x, y: y, w: 140, h: 72 };
+          ctx.fillStyle = "#2d4d6e";
+          ctx.fillRect(x, y, 140, 72);
+          ctx.fillStyle = "#f4b942";
+          ctx.beginPath();
+          ctx.arc(x + 38, y + 36, 15, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(x + 102, y + 36, 15, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(x + 38, y + 36);
+          if (mainSwitchOn) ctx.lineTo(x + 102, y + 36);
+          else ctx.lineTo(x + 70, y + 14);
+          ctx.lineWidth = 8;
+          ctx.strokeStyle = mainSwitchOn ? "#2effaa" : "#e6533c";
+          ctx.stroke();
+          ctx.fillStyle = "#eef5ff";
+          ctx.font = "bold 11px 'Segoe UI'";
+          ctx.fillText("MAIN SWITCH", x + 40, y + 66);
+          if (mainSwitchOn) {
+            ctx.strokeStyle = "#2effaa";
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(x, y, 140, 72);
+          }
+        }
+
+        function drawMeterComp(x, y) {
+          ctx.fillStyle = "#1c3b4f";
+          ctx.fillRect(x, y, 125, 132);
+          ctx.fillStyle = "#010a12";
+          ctx.fillRect(x + 15, y + 15, 95, 42);
+          ctx.fillStyle = "#7effc0";
+          ctx.font = "bold 14px monospace";
+          ctx.fillText(`${getTotalPower()}W`, x + 25, y + 45);
+          ctx.fillStyle = "#bbdeff";
+          ctx.font = "bold 11px";
+          ctx.fillText("ENERGY METER", x + 27, y + 100);
+        }
+
+        function drawRealisticBulb(x, y, watt, lit, icon, bulbId) {
+          ctx.beginPath();
+          ctx.ellipse(x, y + 48, 34, 44, 0, 0, Math.PI * 2);
+          if (lit) {
+            const gradient = ctx.createRadialGradient(
+              x - 10,
+              y + 28,
+              8,
+              x,
+              y + 48,
+              44,
+            );
+            gradient.addColorStop(0, "#fffac2");
+            gradient.addColorStop(0.5, "#ffdd77");
+            gradient.addColorStop(1, "#ffaa33");
+            ctx.fillStyle = gradient;
+            ctx.shadowBlur = 38;
+            ctx.shadowColor = "#ffaa44";
+            // Add extra glow for lit bulbs
+            ctx.beginPath();
+            ctx.ellipse(x, y + 48, 38, 48, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255, 200, 100, 0.3)";
+            ctx.fill();
+          } else {
+            ctx.fillStyle = "#5e7c96";
+            ctx.shadowBlur = 2;
+          }
+          ctx.fill();
+          // Bulb base
+          ctx.fillStyle = "#c9b87a";
+          ctx.fillRect(x - 18, y + 80, 36, 16);
+          ctx.fillStyle = lit ? "#ffdd99" : "#b0c4de";
+          ctx.font = "36px 'Segoe UI'";
+          ctx.fillText(icon, x - 15, y + 54);
+          ctx.font = "bold 12px monospace";
+          ctx.fillStyle = lit ? "#ffffe6" : "#cbdae9";
+          ctx.fillText(`${watt}W`, x - 13, y + 112);
+
+          // Add bulb label
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillStyle = lit ? "#ffdd99" : "#8aaec0";
+          ctx.fillText(
+            bulbId === "bulb1"
+              ? "BULB 1"
+              : bulbId === "bulb2"
+                ? "BULB 2"
+                : "BULB 3",
+            x - 14,
+            y + 132,
+          );
+          ctx.shadowBlur = 0;
+        }
+
+        function drawCircuit() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Grid background
+          ctx.strokeStyle = "#1a6088";
+          ctx.lineWidth = 0.5;
+          for (let i = 0; i < canvas.width; i += 65) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, canvas.height);
+            ctx.stroke();
+          }
+          for (let i = 0; i < canvas.height; i += 65) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(canvas.width, i);
+            ctx.stroke();
+          }
+
+          // Draw wires
+          wireSegments.forEach((seg) => {
+            ctx.beginPath();
+            ctx.moveTo(seg.x1, seg.y1);
+            ctx.lineTo(seg.x2, seg.y2);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = seg.active ? "#2effaa" : "#4e7896";
+            ctx.shadowBlur = seg.active ? 7 : 0;
+            ctx.shadowColor = "#2effaa";
+            ctx.stroke();
+          });
+          ctx.shadowBlur = 0;
+
+          // Draw components
+          drawPowerSource(120, 435);
+          drawBreakerInteractive(380, 440);
+          drawMeterComp(780, 440);
+
+          // DRAW ALL 3 BULBS - PROMINENTLY DISPLAYED
+          const bulbs = [
+            { id: "bulb1", x: 1060, y: 210, power: 60, label: "BULB 1" },
+            { id: "bulb2", x: 1240, y: 210, power: 60, label: "BULB 2" },
+            { id: "bulb3", x: 1420, y: 210, power: 40, label: "BULB 3" },
+          ];
+          bulbs.forEach((b) => {
+            const lit = loadsDef[b.id].on && mainSwitchOn;
+            drawRealisticBulb(
+              b.x,
+              b.y,
+              b.power,
+              lit,
+              loadsDef[b.id].icon,
+              b.id,
+            );
+          });
+
+          // Draw electron flow
+          if (mainSwitchOn && getTotalPower() > 0 && electrons.length) {
+            electrons.forEach((e) => {
+              const seg = wireSegments[e.segIdx];
+              if (!seg || !seg.active) return;
+              e.t += e.speed * (getTotalPower() / 160);
+              if (e.t > 1) e.t -= 1;
+              const x = seg.x1 + (seg.x2 - seg.x1) * e.t;
+              const y = seg.y1 + (seg.y2 - seg.y1) * e.t;
+              ctx.beginPath();
+              ctx.arc(x, y, e.rad * 1.3, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(100, 255, 180, 0.9)`;
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x, y, e.rad * 0.8, 0, Math.PI * 2);
+              ctx.fillStyle = `#ffffaa`;
+              ctx.fill();
+            });
+          }
+
+          // Circuit labels
+          ctx.fillStyle = "#9acdff";
+          ctx.font = "bold 12px monospace";
+          ctx.fillText("⚡ POWER SOURCE", 135, 610);
+          ctx.fillStyle = "#ffcc88";
+          ctx.fillText("🔘 MAIN BREAKER", 410, 535);
+          ctx.fillStyle = "#88ffaa";
+          ctx.fillText("📊 SMART METER", 815, 585);
+          ctx.fillStyle = "#ffaa66";
+          ctx.font = "bold 11px";
+          ctx.fillText("BULB 1 (60W)", 1015, 360);
+          ctx.fillText("BULB 2 (60W)", 1195, 360);
+          ctx.fillText("BULB 3 (40W)", 1375, 360);
+        }
+
+        function handleCanvasInteraction(e) {
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+          let clientX, clientY;
+          if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+          } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+          }
+          const canvasX = (clientX - rect.left) * scaleX;
+          const canvasY = (clientY - rect.top) * scaleY;
+          if (
+            canvasX >= breakerRect.x &&
+            canvasX <= breakerRect.x + breakerRect.w &&
+            canvasY >= breakerRect.y &&
+            canvasY <= breakerRect.y + breakerRect.h
+          ) {
+            toggleMainSwitch();
+          }
+        }
+
+        function buildLoadsUI() {
+          const container = document.getElementById("loads-container");
+          container.innerHTML = "";
+          const bulbNames = {
+            bulb1: "💡 LED Bulb 1 (60W)",
+            bulb2: "💡 LED Bulb 2 (60W)",
+            bulb3: "💡 Eco Bulb 3 (40W)",
+          };
+          for (let [id, load] of Object.entries(loadsDef)) {
+            const div = document.createElement("div");
+            div.className = "load-item";
+            div.id = `load-item-${id}`;
+            div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span class="load-icon-big">${load.icon}</span>
+                        <div class="load-info">
+                            <div class="load-name">${bulbNames[id]}</div>
+                            <div class="load-watt">${load.power}W · ${voltage}V</div>
+                            <div class="load-kwh" id="load-cons-${id}">0.00000 kWh</div>
+                        </div>
+                    </div>
+                    <div id="toggle-${id}" class="load-toggle-switch"><div class="toggle-knob"></div></div>
+                `;
+            container.appendChild(div);
+          }
+          for (let id in loadsDef) {
+            document
+              .getElementById(`toggle-${id}`)
+              .addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleLoad(id);
+              });
+          }
+        }
+
+        function bindEvents() {
+          document
+            .getElementById("main-power-switch")
+            .addEventListener("click", toggleMainSwitch);
+          document
+            .getElementById("reset-meter-btn")
+            .addEventListener("click", resetMeter);
+          document
+            .getElementById("voltage-ctrl")
+            .addEventListener("input", (e) => {
+              voltage = parseInt(e.target.value);
+              refreshAllUI();
+            });
+          document
+            .getElementById("rate-ctrl")
+            .addEventListener("input", (e) => {
+              rate = parseInt(e.target.value) / 100;
+              refreshAllUI();
+            });
+          canvas.addEventListener("click", handleCanvasInteraction);
+          canvas.addEventListener(
+            "touchstart",
+            (e) => {
+              e.preventDefault();
+              handleCanvasInteraction(e);
+            },
+            { passive: false },
+          );
+        }
+
+        function animationLoop() {
+          const now = performance.now() / 1000;
+          if (mainSwitchOn && lastTimestamp !== null)
+            updateConsumptionRuntime(now);
+          else if (mainSwitchOn && lastTimestamp === null) lastTimestamp = now;
+          else if (!mainSwitchOn) lastTimestamp = null;
+          refreshAllUI();
+          buildWireSegments();
+          if (electrons.length === 0 && mainSwitchOn && getTotalPower() > 0)
+            spawnElectrons();
+          drawCircuit();
+          requestAnimationFrame(animationLoop);
+        }
+
+        function init() {
+          buildLoadsUI();
+          bindEvents();
+          buildWireSegments();
+          spawnElectrons();
+          lastTimestamp = null;
+          refreshAllUI();
+          animationLoop();
+        }
+        init();
+      })();
     </script>
-</body>
+  </body>
 </html>

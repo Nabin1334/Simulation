@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Wire Information - 2 Pictures</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e6ef;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.8rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .tagline {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        
+        .wire-icon {
+            color: #f1c40f;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .wire-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.3rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            min-width: 220px;
+        }
+        
+        .wire-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .wire-btn:active {
+            transform: translateY(0);
+        }
+        
+        .wire-btn.neutral {
+            background-color: #2ecc71;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .wire-btn.neutral:hover {
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        .wire-btn.earth {
+            background-color: #e74c3c;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .wire-btn.earth:hover {
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+        
+        .info-display {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: none;
+            animation: fadeIn 0.5s ease;
+            border-left: 6px solid #3498db;
+        }
+        
+        .info-display.active {
+            display: block;
+        }
+        
+        .info-display.neutral {
+            border-left-color: #2ecc71;
+        }
+        
+        .info-display.earth {
+            border-left-color: #e74c3c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .wire-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .wire-description {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .two-picture-container {
+            max-width: 900px;
+            margin: 30px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .picture-frame {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            background-color: white;
+        }
+        
+        .picture-frame:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .picture-frame img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .neutral-picture img {
+            border-bottom-color: #2ecc71;
+        }
+        
+        .earth-picture img {
+            border-bottom-color: #e74c3c;
+        }
+        
+        .picture-caption {
+            padding: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #444;
+            font-size: 1.1rem;
+            background-color: #f8f9fa;
+        }
+        
+        .picture-number {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .neutral-picture .picture-number {
+            background-color: #2ecc71;
+        }
+        
+        .earth-picture .picture-number {
+            background-color: #e74c3c;
+        }
+        
+        .color-code {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .color-sample {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            transition: transform 0.3s ease;
+        }
+        
+        .color-sample:hover {
+            transform: scale(1.3);
+        }
+        
+        .neutral-color {
+            background-color: #2ecc71;
+        }
+        
+        .earth-color {
+            background-color: #e74c3c;
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 1.05rem;
+        }
+        
+        .picture-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .picture-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .picture-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .neutral-picture-btn {
+            background-color: #2ecc71;
+        }
+        
+        .neutral-picture-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .earth-picture-btn {
+            background-color: #e74c3c;
+        }
+        
+        .earth-picture-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .current-picture-indicator {
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .wire-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .two-picture-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .picture-frame {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .picture-frame img {
+                height: 200px;
+            }
+            
+            .picture-caption {
+                padding: 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="wire-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <h1>Electrical Wire Information</h1>
+           
+        </header>
+        
+        <div class="content">
+            <div class="button-container">
+                <button class="wire-btn neutral" id="neutralBtn">
+                    <i class="fas fa-minus-circle btn-icon"></i>
+                    Show Neutral Wire
+                </button>
+                
+                <button class="wire-btn earth" id="earthBtn">
+                    <i class="fas fa-shield-alt btn-icon"></i>
+                    Show Earth Wire
+                </button>
+            </div>
+            
+            <div class="instructions">
+                
+               
+            </div>
+            
+            <div class="info-display" id="neutralInfo">
+                <h2 class="wire-title">
+                    <i class="fas fa-minus-circle"></i>
+                    Neutral Wire
+                </h2>
+                
+                <p class="wire-description">
+                    The neutral wire is a current-carrying conductor that completes the electrical circuit by providing a return path for current back to the power source. In electrical systems, it's typically connected to ground at the main electrical panel. The neutral wire is essential for the operation of most AC electrical circuits and helps balance the electrical load in a system.
+                </p>
+                
+                <div class="color-code">
+                    <div class="color-sample neutral-color"></div>
+                    <div>Neutral wires are typically identified by <strong>blue</strong> insulation in Europe and <strong>white or gray</strong> insulation in North America.</div>
+                </div>
+                
+                <!-- Two Picture Display for Neutral Wire -->
+                <div class="two-picture-container" id="neutralPictures"></div>
+                
+                <div class="current-picture-indicator" id="neutralIndicator">
+                    Showing picture 1 of 2
+                </div>
+                
+                <div class="picture-controls">
+                    <button class="picture-btn neutral-picture-btn" id="neutralPrevBtn">
+                        <i class="fas fa-chevron-left"></i> Previous Picture
+                    </button>
+                    <button class="picture-btn neutral-picture-btn" id="neutralNextBtn">
+                        Next Picture <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-display" id="earthInfo">
+                <h2 class="wire-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Earth Wire (Ground Wire)
+                </h2>
+                
+                <p class="wire-description">
+                    The earth wire (also called ground wire) is a safety conductor that provides a path for electrical current to flow to the ground in case of a fault. It protects people from electric shock by ensuring that any exposed conductive parts do not reach a dangerous voltage. The earth wire connects electrical equipment to the earth electrode buried in the ground.
+                </p>
+                
+                <div class="color-code">
+                    <div class="color-sample earth-color"></div>
+                    <div>Earth wires are typically identified by <strong>green with yellow stripe</strong> insulation internationally, or <strong>bare copper</strong> in some applications.</div>
+                </div>
+                
+                <!-- Two Picture Display for Earth Wire -->
+                <div class="two-picture-container" id="earthPictures"></div>
+                
+                <div class="current-picture-indicator" id="earthIndicator">
+                    Showing picture 1 of 2
+                </div>
+                
+                <div class="picture-controls">
+                    <button class="picture-btn earth-picture-btn" id="earthPrevBtn">
+                        <i class="fas fa-chevron-left"></i> Previous Picture
+                    </button>
+                    <button class="picture-btn earth-picture-btn" id="earthNextBtn">
+                        Next Picture <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js">
+    </script>
+</body>
+</html>

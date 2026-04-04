@@ -2,572 +2,414 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Displacement-time graph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Physics Lab | Bus Simulator + Displacement-Time Graph</title>
     <style>
-        :root {
-            --bus-yellow: #ffcc00;
-            --bus-orange: #f97316;
-            --road-grey: #334155;
-            --sky-blue: #bae6fd;
-            --grass-green: #16a34a;
-            --graph-blue: #3b82f6;
-            --graph-grid: #e2e8f0;
-        }
-
         * {
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #eef2ff 0%, #dce5f5 100%);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             min-height: 100vh;
             margin: 0;
-            color: #1e293b;
         }
 
-        /* --- THE LAB MONITOR --- */
-        .lab-container {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: clamp(15px, 3vw, 30px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: min(1000px, 95vw);
+        /* MAIN CARD — fully responsive */
+        .lab-card {
+            max-width: 1100px;
             width: 100%;
-            margin-bottom: 20px;
+            background: rgba(255,255,255,0.98);
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25);
+            padding: clamp(16px, 3vw, 28px);
+            transition: all 0.2s;
         }
 
-        .header { 
-            text-align: center; 
-            margin-bottom: clamp(20px, 4vw, 30px);
-            padding-bottom: clamp(15px, 3vw, 20px);
-            border-bottom: 2px solid #f1f5f9;
+        /* header */
+        .hero {
+            text-align: center;
+            margin-bottom: clamp(18px, 3vh, 24px);
         }
-        .header h1 { 
-            color: #0f172a; 
-            margin: 0 0 10px 0;
-            font-size: clamp(1.8rem, 4vw, 2.2rem);
-            background: linear-gradient(90deg, #3b82f6, #10b981);
+        .hero h1 {
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            background: linear-gradient(135deg, #0c4a6e, #1e40af, #10b981);
+            background-clip: text;
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1.2;
+            color: transparent;
+            margin: 0 0 6px 0;
+            font-weight: 800;
         }
-        .header p { 
-            color: #64748b; 
-            font-size: clamp(1rem, 2vw, 1.1rem);
-            max-width: 600px;
+        .hero p {
+            color: #2c3e66;
+            font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+            max-width: 650px;
             margin: 0 auto;
-            line-height: 1.6;
+            font-weight: 500;
         }
 
-        /* --- THE GRAPH --- */
-        .graph-container {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: clamp(15px, 3vw, 20px);
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin-bottom: clamp(20px, 4vw, 30px);
-            overflow: hidden;
-        }
-        
-        .graph-header {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        
-        @media (min-width: 640px) {
-            .graph-header {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-        
-        .graph-header h3 {
-            margin: 0;
-            color: #0f172a;
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-        }
-
-        #graphCanvas {
-            background: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 16/9;
-            display: block;
-        }
-
-        /* --- THE ANIMATION SCENE --- */
+        /* SIMULATION SCENE (TOP) */
         .scene-container {
-            position: relative;
-            margin-bottom: clamp(20px, 4vw, 30px);
+            margin-bottom: 20px;
+            border-radius: 1.6rem;
+            overflow: hidden;
+            box-shadow: 0 10px 24px -8px rgba(0,0,0,0.2);
         }
-        
         .scene {
             position: relative;
-            height: clamp(150px, 25vw, 220px);
-            background: linear-gradient(to bottom, var(--sky-blue) 65%, var(--grass-green) 65%);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 3px solid #cbd5e1;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+            height: clamp(160px, 26vw, 210px);
+            background: linear-gradient(180deg, #b9e2ff 0%, #b9e2ff 68%, #3c9e3c 68%);
+            border-bottom: 3px solid #2b6e2b;
         }
-
         .road {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: clamp(50px, 10vw, 70px);
-            background: var(--road-grey);
-            border-top: 6px solid #fbbf24;
+            height: clamp(50px, 11vw, 68px);
+            background: #2c3e4e;
+            border-top: 3px solid #ffcd7e;
         }
-
         .lane-line {
             position: absolute;
             top: 50%;
             width: 100%;
-            height: 4px;
-            background: repeating-linear-gradient(90deg, #fff, #fff 30px, transparent 30px, transparent 60px);
+            height: 3px;
+            background: repeating-linear-gradient(90deg, #FFE484, #FFE484 30px, transparent 30px, transparent 60px);
             transform: translateY(-50%);
         }
 
-        /* --- REALISTIC BUS DESIGN --- */
+        /* BUS DESIGN */
         #bus {
             position: absolute;
-            bottom: clamp(15px, 4vw, 25px);
+            bottom: clamp(10px, 3vw, 20px);
             left: 0;
-            width: clamp(120px, 20vw, 160px);
-            height: clamp(60px, 12vw, 80px);
-            z-index: 10;
-            transition: left 0.1s linear;
+            width: clamp(120px, 22vw, 165px);
+            height: clamp(58px, 11vw, 75px);
+            z-index: 25;
+            transition: left 0.05s linear;
+            filter: drop-shadow(3px 6px 10px rgba(0,0,0,0.25));
         }
-
         .bus-body {
             position: relative;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, var(--bus-yellow) 70%, var(--bus-orange) 70%);
-            border-radius: 10px 20px 5px 5px;
-            border: 3px solid #b45309;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            background: linear-gradient(145deg, #f7d44a, #e6b422);
+            border-radius: 16px 24px 12px 12px;
+            border: 2px solid #b45f06;
+            overflow: hidden;
         }
-
         .bus-roof {
             position: absolute;
-            top: 0;
+            top: -6px;
             left: 10px;
             width: calc(100% - 20px);
-            height: 12px;
-            background: #d97706;
-            border-radius: 10px 10px 0 0;
+            height: 10px;
+            background: #d48d1a;
+            border-radius: 16px 16px 0 0;
         }
-
-        .bus-window-row {
+        .windows-row {
             display: flex;
-            gap: 4px;
-            padding: 10px 12px 5px 12px;
+            gap: 6px;
+            padding: 8px 12px 5px 12px;
         }
-
-        .bus-win {
+        .win {
             flex: 1;
-            height: clamp(15px, 3vw, 20px);
-            background: linear-gradient(160deg, #7dd3fc 0%, #0ea5e9 100%);
-            border: 2px solid #1e293b;
-            border-radius: 4px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            height: clamp(14px, 3.5vw, 20px);
+            background: linear-gradient(145deg, #7bc5f0, #2c7cb6);
+            border-radius: 6px;
+            border: 1px solid #1f4e6e;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
         }
-
-        .bus-door {
+        .door {
             position: absolute;
-            right: 20px;
+            right: 14px;
             bottom: 0;
-            width: 15px;
-            height: clamp(30px, 8vw, 40px);
-            background: #dc2626;
-            border: 2px solid #991b1b;
-            border-bottom: none;
+            width: 14px;
+            height: clamp(26px, 7vw, 38px);
+            background: #c2410c;
+            border: 2px solid #7c2d12;
             border-radius: 3px 3px 0 0;
         }
-
-        .bus-headlight {
+        .headlight {
             position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #fef3c7;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            border: 1px solid #f59e0b;
-            box-shadow: 0 0 10px #fbbf24;
+            top: 18px;
         }
-        
-        .headlight-front {
-            right: 5px;
-            top: 20px;
-        }
-        
-        .headlight-back {
-            left: 5px;
-            top: 20px;
-            background: #dc2626;
-            border: 1px solid #991b1b;
-            box-shadow: 0 0 10px #ef4444;
-        }
+        .front-light { right: 7px; background: #fff2b5; box-shadow: 0 0 5px #ffd966; }
+        .back-light { left: 7px; background: #ef4444; box-shadow: 0 0 5px #ff8c8c; }
 
         .wheel {
             position: absolute;
-            bottom: -10px;
-            width: clamp(22px, 5vw, 28px);
-            height: clamp(22px, 5vw, 28px);
-            background: #0f172a;
-            border: 4px solid #475569;
+            bottom: -7px;
+            width: clamp(20px, 4.5vw, 28px);
+            height: clamp(20px, 4.5vw, 28px);
+            background: #0a0c10;
             border-radius: 50%;
+            border: 3px solid #4b5563;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
         .wheel::after {
             content: '';
             width: 8px;
             height: 8px;
-            background: #94a3b8;
+            background: #9ca3af;
             border-radius: 50%;
         }
-
-        .w-front { right: 15px; }
-        .w-back { left: 15px; }
+        .wheel-front { right: 12px; }
+        .wheel-back { left: 12px; }
 
         @keyframes wheelSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* --- DASHBOARD CONTROLS --- */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: clamp(15px, 3vw, 25px);
-            margin: clamp(20px, 4vw, 30px) 0;
-            align-items: center;
-            background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: clamp(15px, 3vw, 25px);
-            border-radius: 15px;
+        /* DASHBOARD (buttons + throttle + stats) */
+        .dashboard {
+            background: #f8fafd;
+            border-radius: 1.5rem;
+            padding: clamp(14px, 2vw, 22px);
+            margin: 14px 0 20px 0;
             border: 1px solid #e2e8f0;
-        }
-        
-        @media (min-width: 768px) {
-            .controls {
-                grid-template-columns: 1fr 2fr 1fr;
-            }
-        }
-
-        .stat-box {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            color: #10b981;
-            padding: clamp(12px, 2vw, 15px);
-            border-radius: 12px;
-            text-align: center;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            min-height: 100px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
-        
-        .stat-box .value {
-            font-size: clamp(1.5rem, 4vw, 1.8rem);
-            margin: 5px 0;
-            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+        .stats-group {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            flex-wrap: wrap;
         }
-        
-        .stat-box .label {
-            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
-            color: #94a3b8;
+        .stat-card {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 1rem;
+            padding: 8px 14px;
+            min-width: 95px;
+            text-align: center;
+            color: #a7f3d0;
+            box-shadow: 0 6px 12px -4px rgba(0,0,0,0.2);
+            flex: 1;
+        }
+        .stat-card .digit {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
             letter-spacing: 1px;
         }
-
-        .main-btn {
-            width: 100%;
-            padding: clamp(15px, 3vw, 18px);
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: white;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+        .stat-card .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #9ca3af;
         }
-        
-        .main-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(255,255,255,0.1), transparent);
-            pointer-events: none;
+        .throttle-box {
+            flex: 1.8;
+            min-width: 180px;
         }
-
-        #startBtn { 
-            background: linear-gradient(to bottom, #10b981, #059669);
-            box-shadow: 0 6px #047857; 
-        }
-        #startBtn:hover { background: linear-gradient(to bottom, #34d399, #10b981); }
-        #startBtn:active { transform: translateY(4px); box-shadow: 0 2px #047857; }
-        #startBtn.running { 
-            background: linear-gradient(to bottom, #ef4444, #dc2626);
-            box-shadow: 0 6px #b91c1c;
-        }
-        #startBtn.running:hover { background: linear-gradient(to bottom, #f87171, #ef4444); }
-
-        .slider-group {
-            text-align: center;
-        }
-        
-        .slider-group label {
-            display: block;
+        .throttle-box label {
             font-weight: 700;
-            margin-bottom: clamp(10px, 2vw, 15px);
-            font-size: clamp(0.9rem, 1.8vw, 1rem);
-            color: #475569;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            color: #1e3a5f;
         }
-
-        input[type=range] {
+        input[type="range"] {
             width: 100%;
-            margin: clamp(10px, 2vw, 15px) 0;
-            cursor: pointer;
+            height: 6px;
             -webkit-appearance: none;
-            height: 10px;
-            border-radius: 5px;
-            background: linear-gradient(to right, #dc2626, #fbbf24, #10b981);
+            background: linear-gradient(90deg, #dc2626, #facc15, #10b981);
+            border-radius: 10px;
+        }
+        input[type="range"]:focus {
             outline: none;
         }
-        
-        input[type=range]::-webkit-slider-thumb {
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: clamp(20px, 4vw, 25px);
-            height: clamp(20px, 4vw, 25px);
+            width: 22px;
+            height: 22px;
+            background: #1e3a8a;
             border-radius: 50%;
-            background: #3b82f6;
-            border: 3px solid #ffffff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             cursor: pointer;
         }
-
         .speed-labels {
             display: flex;
             justify-content: space-between;
-            font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-            color: #64748b;
+            font-size: 0.65rem;
             margin-top: 5px;
-        }
-
-        /* --- RESET BUTTON --- */
-        .reset-btn {
-            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
-            border: 2px solid #cbd5e1;
-            padding: clamp(10px, 2vw, 12px) clamp(20px, 4vw, 30px);
-            border-radius: 8px;
-            cursor: pointer;
-            color: #475569;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-size: clamp(0.9rem, 1.8vw, 1rem);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 0 auto;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .reset-btn:hover {
-            background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
+            font-weight: 500;
             color: #334155;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .engine-btn {
+            background: linear-gradient(to bottom, #10b981, #059669);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            color: white;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 4px 0 #047857;
+            width: 135px;
+        }
+        .engine-btn.running {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            box-shadow: 0 4px 0 #991b1b;
+        }
+        .reset-btn {
+            background: #eef2ff;
+            border: 2px solid #cbd5e6;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .reset-btn:active { transform: scale(0.97); }
+
+        /* GRAPH SECTION — COMPACT HEIGHT & SUITABLE WIDTH */
+        .graph-wrapper {
+            background: #ffffff;
+            border-radius: 1.3rem;
+            padding: clamp(12px, 2vw, 18px);
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e9edf4;
+        }
+        .graph-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #eef2ff;
+        }
+        .graph-header h3 {
+            margin: 0;
+            font-size: clamp(1rem, 3.5vw, 1.25rem);
+            font-weight: 700;
+            color: #0f3b5c;
+        }
+        .live-badge {
+            background: #eef2ff;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            color: #0c4a6e;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            background: #fefefe;
+            border-radius: 16px;
+            display: block;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
+            /* compact height controlled via aspect ratio */
         }
 
-        /* --- PHYSICS INFO --- */
-        .physics-info {
-            background: #f0f9ff;
-            border-radius: 12px;
-            padding: clamp(15px, 3vw, 20px);
-            margin-top: clamp(20px, 4vw, 30px);
+        /* info panel */
+        .theory {
+            background: #eef6ff;
+            border-radius: 1.2rem;
+            padding: 14px 18px;
+            margin-top: 18px;
             border-left: 5px solid #3b82f6;
         }
-        
-        .physics-info h3 {
-            margin-top: 0;
-            color: #1e40af;
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        .theory h4 {
+            margin: 0 0 6px 0;
+            font-size: 0.95rem;
+            color: #0f3b5c;
         }
-        
-        .physics-info p {
-            margin: 10px 0;
-            color: #475569;
-            line-height: 1.6;
-            font-size: clamp(0.9rem, 1.8vw, 1rem);
+        .theory p {
+            font-size: 0.85rem;
+            margin: 5px 0;
+            color: #2d3a4b;
         }
-        
-        .physics-info ul {
-            padding-left: 20px;
-            margin: 15px 0;
-        }
-        
-        .physics-info li {
-            margin: 8px 0;
-            color: #475569;
-            font-size: clamp(0.9rem, 1.8vw, 1rem);
-        }
-        
-        .formula {
-            font-family: 'Courier New', Courier, monospace;
+        .formula-badge {
             background: #1e293b;
-            color: #10b981;
-            padding: clamp(8px, 2vw, 10px) clamp(12px, 2vw, 15px);
-            border-radius: 8px;
-            margin: clamp(10px, 2vw, 15px) 0;
-            text-align: center;
-            font-size: clamp(1rem, 2vw, 1.1rem);
-            overflow-x: auto;
+            color: #86efac;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 24px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            margin-top: 6px;
         }
 
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            .main-btn, .reset-btn {
-                min-height: 44px; /* Apple recommended minimum touch target size */
+        @media (max-width: 680px) {
+            .dashboard {
+                flex-direction: column;
+                align-items: stretch;
             }
-            
-            input[type=range]::-webkit-slider-thumb {
-                width: 28px;
-                height: 28px;
+            .action-buttons {
+                justify-content: center;
             }
-            
-            .bus-win {
-                min-height: 20px;
+            .engine-btn {
+                width: 100%;
             }
         }
-
-        /* Very small screens (phones in portrait) */
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
+            .lab-card {
+                padding: 12px;
             }
-            
-            .lab-container {
-                padding: 15px;
-                border-radius: 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.6rem;
-            }
-            
-            .graph-header h3 {
-                font-size: 1.1rem;
-            }
-            
-            .controls {
-                padding: 15px;
-            }
-            
-            .stat-box {
-                min-height: 85px;
-            }
-        }
-
-        /* Large screens */
-        @media (min-width: 1200px) {
-            .lab-container {
-                max-width: 1100px;
-            }
-            
-            #graphCanvas {
-                height: 400px;
-            }
-        }
-
-        /* Landscape orientation for mobile */
-        @media (max-height: 600px) and (orientation: landscape) {
-            body {
-                padding: 10px;
-            }
-            
-            .lab-container {
-                max-width: 100%;
-            }
-            
-            .scene {
-                height: 120px;
-            }
-            
-            #bus {
-                width: 100px;
-                height: 50px;
-            }
-            
-            .graph-container {
-                margin-bottom: 15px;
+            .stat-card {
+                min-width: 80px;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="lab-container">
-    <div class="header">
-        <h1>Physics Motion Lab</h1>
-        <p>Investigate how <b>velocity</b> affects the <b>Displacement-time graph</b> of a moving object. Adjust the throttle to control the bus speed and observe real-time graphing.</p>
+<div class="lab-card">
+    <div class="hero">
+        <h1>🚌 Motion Lab: Bus Simulator</h1>
+        <p>Control velocity → watch real-time animation & compact displacement-time graph below. Slope = velocity!</p>
     </div>
 
-    <!-- Graph placed ABOVE the simulation -->
-    <div class="graph-container">
-        <div class="graph-header">
-            <h3>Displacement-Time Graph</h3>
-            <div style="font-size: clamp(0.8rem, 1.8vw, 0.9rem); color: #64748b;">
-                Velocity: <span id="currentVelocity">0.0</span> m/s
-            </div>
-        </div>
-        <canvas id="graphCanvas"></canvas>
-    </div>
-
-    <!-- Simulation placed BELOW the graph -->
+    <!-- ========= SIMULATION (TOP) ========= -->
     <div class="scene-container">
         <div class="scene">
             <div id="bus">
                 <div class="bus-body">
                     <div class="bus-roof"></div>
-                    <div class="bus-window-row">
-                        <div class="bus-win"></div>
-                        <div class="bus-win"></div>
-                        <div class="bus-win"></div>
-                        <div class="bus-win"></div>
+                    <div class="windows-row">
+                        <div class="win"></div><div class="win"></div>
+                        <div class="win"></div><div class="win"></div>
                     </div>
-                    <div class="bus-door"></div>
-                    <div class="bus-headlight headlight-front"></div>
-                    <div class="bus-headlight headlight-back"></div>
+                    <div class="door"></div>
+                    <div class="headlight front-light"></div>
+                    <div class="headlight back-light"></div>
                 </div>
-                <div class="wheel w-back" id="wb"></div>
-                <div class="wheel w-front" id="wf"></div>
+                <div class="wheel wheel-back" id="wheelL"></div>
+                <div class="wheel wheel-front" id="wheelR"></div>
             </div>
             <div class="road">
                 <div class="lane-line"></div>
@@ -575,60 +417,407 @@
         </div>
     </div>
 
-    <div class="controls">
-        <div class="stat-box">
-            <div class="label">TIME ELAPSED</div>
-            <div class="value" id="timeVal">0.0</div>
-            <div class="label">seconds</div>
-        </div>
-
-        <div class="slider-group">
-            <label for="throttle">THROTTLE (SPEED CONTROL)</label>
-            <input type="range" id="throttle" min="-8" max="8" value="0" step="0.5">
-            <div class="speed-labels">
-                <span>REVERSE</span>
-                <span>NEUTRAL</span>
-                <span>FORWARD</span>
+    <!-- DASHBOARD: STATS + THROTTLE + BUTTONS -->
+    <div class="dashboard">
+        <div class="stats-group">
+            <div class="stat-card">
+                <div class="label">⏱️ TIME</div>
+                <div class="digit" id="timeDisplay">0.0</div>
+                <div class="label">seconds</div>
             </div>
-            <button id="startBtn" class="main-btn" onclick="toggleSim()">START ENGINE</button>
+            <div class="stat-card">
+                <div class="label">📍 DISPLACEMENT</div>
+                <div class="digit" id="dispDisplay">0.0</div>
+                <div class="label">meters</div>
+            </div>
+        </div>
+        
+        <div class="throttle-box">
+            <label>🎛️ THROTTLE (velocity: -9 to +9 m/s)</label>
+            <input type="range" id="speedSlider" min="-9" max="9" value="0" step="0.5">
+            <div class="speed-labels">
+                <span>⬅️ REVERSE</span><span>⚪ NEUTRAL</span><span>FORWARD ➡️</span>
+            </div>
         </div>
 
-        <div class="stat-box">
-            <div class="label">DISPLACEMENT</div>
-            <div class="value" id="distVal">0.0</div>
-            <div class="label">meters</div>
+        <div class="action-buttons">
+            <button id="engineBtn" class="engine-btn">▶ START ENGINE</button>
+            <button id="resetBtn" class="reset-btn">⟳ RESET</button>
         </div>
     </div>
-    
-    <div style="text-align: center; margin-top: clamp(15px, 3vw, 20px);">
-        <button class="reset-btn" onclick="resetLab()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                <path d="M3 3v5h5"/>
-            </svg>
-            Clear Data & Reset Simulation
-        </button>
+
+    <!-- ========= GRAPH (UNDER SIMULATION + BUTTONS) - COMPACT & SUITABLE ========= -->
+    <div class="graph-wrapper">
+        <div class="graph-header">
+            <h3>📈 Displacement vs Time Graph</h3>
+            <div class="live-badge">⚡ Velocity: <span id="velIndicator">0.0</span> m/s</div>
+        </div>
+        <canvas id="motionCanvas" width="800" height="280" style="width:100%; height:auto; aspect-ratio:800/280; max-height:280px;"></canvas>
     </div>
-    
-    <div class="physics-info">
-        <h3>Physics Concepts</h3>
-        <p>The displacement-time graph shows how far the bus has moved from its starting point over time.</p>
-        <p><b>Slope of the graph = Velocity</b></p>
-        <ul>
-            <li><b>Positive slope</b>: Bus moving forward (positive velocity)</li>
-            <li><b>Negative slope</b>: Bus moving backward (negative velocity)</li>
-            <li><b>Zero slope</b>: Bus is stationary (zero velocity)</li>
-            <li><b>Steeper slope</b>: Higher speed</li>
-        </ul>
-        <div class="formula">Displacement = Velocity × Time</div>
-        <p>Adjust the throttle to change velocity and observe how it affects the graph's shape.</p>
+
+    <div class="theory">
+        <h4>📐 Physics insight: Slope = Instantaneous Velocity</h4>
+        <p>✔ Positive slope → forward motion &nbsp;|&nbsp; Negative slope → backward<br>
+        ✔ Steeper slope = higher speed &nbsp;|&nbsp; Flat line = stationary<br>
+        ✔ Real-time plotting: each point shows (time, displacement). Graph size is optimized for clarity.</p>
+        <div class="formula-badge">📐 Displacement = Velocity × Time</div>
     </div>
 </div>
 
-<script src="index.js">
+<script>
+    (function(){
+        // ---------- DOM elements ----------
+        const canvas = document.getElementById('motionCanvas');
+        const ctx = canvas.getContext('2d');
+        const busElement = document.getElementById('bus');
+        const wheelLeft = document.getElementById('wheelL');
+        const wheelRight = document.getElementById('wheelR');
+        const timeSpan = document.getElementById('timeDisplay');
+        const dispSpan = document.getElementById('dispDisplay');
+        const velSpan = document.getElementById('velIndicator');
+        const speedSlider = document.getElementById('speedSlider');
+        const engineBtn = document.getElementById('engineBtn');
+        const resetButton = document.getElementById('resetBtn');
 
-    
+        // ---------- SIMULATION STATE ----------
+        let isEngineOn = false;
+        let currentTime = 0;            // seconds (max 32s)
+        let displacement = 0;           // meters (max 130m)
+        let currentVelocity = 0;         // m/s (smoothed)
+        
+        // graph data
+        let graphData = [];              // {t, d}
+        
+        // constraints
+        const MAX_TIME = 32.0;
+        const MAX_DISP = 130.0;
+        const ACC_FACTOR = 1.4;          // smooth acceleration
+        
+        // bus positioning
+        let roadWidthForBus = 0;
+        
+        let animFrame = null;
+        
+        // ---------- Helper: update road width ----------
+        function updateRoadConstraints() {
+            const sceneEl = document.querySelector('.scene');
+            if(!sceneEl) return;
+            const busRect = busElement.getBoundingClientRect();
+            const sceneRect = sceneEl.getBoundingClientRect();
+            if(sceneRect.width > 0 && busRect.width > 0) {
+                roadWidthForBus = Math.max(0, sceneRect.width - busRect.width);
+            } else {
+                roadWidthForBus = 500;
+            }
+        }
+        
+        // update bus X position based on displacement ratio
+        function updateBusPosition() {
+            if(roadWidthForBus <= 0) updateRoadConstraints();
+            let ratio = displacement / MAX_DISP;
+            ratio = Math.min(1, Math.max(0, ratio));
+            let leftPos = ratio * roadWidthForBus;
+            busElement.style.left = `${leftPos}px`;
+            
+            if(currentVelocity > 0.2) {
+                busElement.style.transform = "scaleX(1)";
+            } else if(currentVelocity < -0.2) {
+                busElement.style.transform = "scaleX(-1)";
+            }
+            
+            let speedAbs = Math.abs(currentVelocity);
+            if(isEngineOn && speedAbs > 0.25) {
+                let duration = Math.max(0.2, 1.3 / (speedAbs * 0.7));
+                let spinAnim = `wheelSpin ${duration}s linear infinite`;
+                if(currentVelocity < -0.25) {
+                    wheelLeft.style.animation = spinAnim;
+                    wheelRight.style.animation = spinAnim;
+                    wheelLeft.style.animationDirection = "reverse";
+                    wheelRight.style.animationDirection = "reverse";
+                } else {
+                    wheelLeft.style.animation = spinAnim;
+                    wheelRight.style.animation = spinAnim;
+                    wheelLeft.style.animationDirection = "normal";
+                    wheelRight.style.animationDirection = "normal";
+                }
+            } else {
+                wheelLeft.style.animation = "none";
+                wheelRight.style.animation = "none";
+            }
+        }
+        
+        // ---------- GRAPH DRAWING (compact but clear) ----------
+        let canvasWidth = 800, canvasHeight = 280;
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const w = container.clientWidth - 20;
+            // maintain compact height: fixed ratio around 280px max, but responsive
+            let h = Math.min(280, Math.max(200, w * 0.35));
+            canvas.width = w;
+            canvas.height = h;
+            canvasWidth = w;
+            canvasHeight = h;
+            drawGraph();
+        }
+        
+        function drawGraph() {
+            if(!ctx) return;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            ctx.save();
+            ctx.strokeStyle = "#e2edf7";
+            ctx.lineWidth = 1;
+            // Time grid
+            for(let t = 0; t <= MAX_TIME; t += 2) {
+                let x = (t / MAX_TIME) * canvasWidth;
+                if(t % 5 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvasHeight);
+                    ctx.strokeStyle = "#cbd5e6";
+                    ctx.stroke();
+                    ctx.fillStyle = "#475569";
+                    ctx.font = `10px 'Segoe UI'`;
+                    ctx.fillText(`${t}s`, x + 3, canvasHeight - 6);
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvasHeight);
+                    ctx.strokeStyle = "#eff3fc";
+                    ctx.stroke();
+                }
+            }
+            // Displacement grid
+            for(let d = 0; d <= MAX_DISP; d += 10) {
+                let y = canvasHeight - (d / MAX_DISP) * canvasHeight;
+                if(d % 20 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvasWidth, y);
+                    ctx.strokeStyle = "#cbd5e6";
+                    ctx.stroke();
+                    ctx.fillStyle = "#2d3e5f";
+                    ctx.font = `9px monospace`;
+                    ctx.fillText(`${d}m`, 4, y - 3);
+                } else if(d % 10 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvasWidth, y);
+                    ctx.strokeStyle = "#f0f4fe";
+                    ctx.stroke();
+                }
+            }
+            
+            // axes labels (small)
+            ctx.fillStyle = "#1e3a5f";
+            ctx.font = `bold ${Math.max(10, canvasWidth/55)}px 'Segoe UI'`;
+            ctx.fillText("Time (s)", canvasWidth/2, canvasHeight - 4);
+            ctx.save();
+            ctx.translate(22, canvasHeight/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText("Displacement (m)", 0, 0);
+            ctx.restore();
+            
+            // plot line
+            if(graphData.length >= 2) {
+                ctx.beginPath();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = "#3b82f6";
+                ctx.lineJoin = "round";
+                let first = graphData[0];
+                let startX = (first.t / MAX_TIME) * canvasWidth;
+                let startY = canvasHeight - (first.d / MAX_DISP) * canvasHeight;
+                ctx.moveTo(startX, startY);
+                for(let i=1; i<graphData.length; i++) {
+                    let p = graphData[i];
+                    let x = (p.t / MAX_TIME) * canvasWidth;
+                    let y = canvasHeight - (p.d / MAX_DISP) * canvasHeight;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                if(graphData.length > 0) {
+                    let last = graphData[graphData.length-1];
+                    let lastX = (last.t / MAX_TIME) * canvasWidth;
+                    let lastY = canvasHeight - (last.d / MAX_DISP) * canvasHeight;
+                    ctx.beginPath();
+                    ctx.arc(lastX, lastY, 5, 0, 2*Math.PI);
+                    ctx.fillStyle = "#3b82f6";
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = "#3b82f6";
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.arc(lastX, lastY, 2.5, 0, 2*Math.PI);
+                    ctx.fillStyle = "white";
+                    ctx.fill();
+                }
+            } else if(graphData.length === 1) {
+                let p = graphData[0];
+                let x = (p.t / MAX_TIME) * canvasWidth;
+                let y = canvasHeight - (p.d / MAX_DISP) * canvasHeight;
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2*Math.PI);
+                ctx.fillStyle = "#3b82f6";
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+        
+        let lastRecordTime = -100;
+        function addDataPoint(now, disp) {
+            if(!graphData.length || (now - lastRecordTime) > 0.065) {
+                graphData.push({t: now, d: disp});
+                lastRecordTime = now;
+                if(graphData.length > 450) graphData.shift();
+            } else if(graphData.length) {
+                graphData[graphData.length-1] = {t: now, d: disp};
+            } else {
+                graphData.push({t: now, d: disp});
+            }
+            drawGraph();
+        }
+        
+        function updateUI() {
+            timeSpan.innerText = currentTime.toFixed(1);
+            dispSpan.innerText = displacement.toFixed(1);
+            velSpan.innerText = currentVelocity.toFixed(1);
+        }
+        
+        // Physics step
+        function simulationStep() {
+            if(!isEngineOn) {
+                updateBusPosition();
+                drawGraph();
+                return;
+            }
+            
+            let targetVel = parseFloat(speedSlider.value);
+            if(currentVelocity < targetVel) {
+                currentVelocity = Math.min(currentVelocity + ACC_FACTOR * (1/60), targetVel);
+            } else if(currentVelocity > targetVel) {
+                currentVelocity = Math.max(currentVelocity - ACC_FACTOR * (1/60), targetVel);
+            }
+            
+            let delta = 1/60;
+            currentTime += delta;
+            displacement += currentVelocity * delta;
+            
+            if(displacement > MAX_DISP) {
+                displacement = MAX_DISP;
+                if(currentVelocity > 0) currentVelocity = 0;
+                speedSlider.value = 0;
+            }
+            if(displacement < 0) {
+                displacement = 0;
+                if(currentVelocity < 0) currentVelocity = 0;
+                speedSlider.value = 0;
+            }
+            
+            if(currentTime >= MAX_TIME) {
+                isEngineOn = false;
+                engineBtn.innerText = "▶ START ENGINE";
+                engineBtn.classList.remove('running');
+                currentVelocity = 0;
+                if(animFrame) cancelAnimationFrame(animFrame);
+                animFrame = null;
+                updateUI();
+                addDataPoint(currentTime, displacement);
+                updateBusPosition();
+                drawGraph();
+                return;
+            }
+            
+            updateUI();
+            addDataPoint(currentTime, displacement);
+            updateRoadConstraints();
+            updateBusPosition();
+            
+            if(isEngineOn) {
+                animFrame = requestAnimationFrame(simulationStep);
+            }
+        }
+        
+        function toggleEngine() {
+            if(isEngineOn) {
+                isEngineOn = false;
+                if(animFrame) cancelAnimationFrame(animFrame);
+                animFrame = null;
+                engineBtn.innerText = "▶ START ENGINE";
+                engineBtn.classList.remove('running');
+            } else {
+                if(currentTime >= MAX_TIME) fullReset();
+                isEngineOn = true;
+                engineBtn.innerText = "⏹️ STOP ENGINE";
+                engineBtn.classList.add('running');
+                if(animFrame) cancelAnimationFrame(animFrame);
+                animFrame = requestAnimationFrame(simulationStep);
+            }
+        }
+        
+        function fullReset() {
+            const wasRunning = isEngineOn;
+            if(wasRunning) {
+                isEngineOn = false;
+                if(animFrame) cancelAnimationFrame(animFrame);
+                animFrame = null;
+            }
+            currentTime = 0;
+            displacement = 0;
+            currentVelocity = 0;
+            graphData = [];
+            speedSlider.value = 0;
+            graphData.push({t: 0, d: 0});
+            lastRecordTime = 0;
+            updateUI();
+            drawGraph();
+            updateRoadConstraints();
+            updateBusPosition();
+            engineBtn.innerText = "▶ START ENGINE";
+            engineBtn.classList.remove('running');
+            wheelLeft.style.animation = "none";
+            wheelRight.style.animation = "none";
+            busElement.style.left = "0px";
+            busElement.style.transform = "scaleX(1)";
+            if(animFrame) cancelAnimationFrame(animFrame);
+            animFrame = null;
+        }
+        
+        let resizeTimeout;
+        function onWindowResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updateRoadConstraints();
+                resizeCanvas();
+                updateBusPosition();
+                drawGraph();
+            }, 100);
+        }
+        
+        function init() {
+            resizeCanvas();
+            graphData.push({t: 0, d: 0});
+            lastRecordTime = 0;
+            updateUI();
+            updateRoadConstraints();
+            updateBusPosition();
+            drawGraph();
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        engineBtn.addEventListener('click', toggleEngine);
+        resetButton.addEventListener('click', fullReset);
+        init();
+        
+        setInterval(() => {
+            if(!isEngineOn) {
+                updateRoadConstraints();
+                updateBusPosition();
+                drawGraph();
+            }
+        }, 200);
+    })();
 </script>
-
 </body>
 </html>

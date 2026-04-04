@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Measurement of Pressure in Liquid</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #ffffff;
+        font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      }
+
+      #ui-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 340px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 22px;
+        border-radius: 16px;
+        border: 2px solid rgba(0, 102, 204, 0.2);
+        color: #333;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        z-index: 100;
+      }
+
+      h2 {
+        margin: 0 0 8px 0;
+        font-size: 1.5rem;
+        color: #0066cc;
+        font-weight: 700;
+      }
+
+      p {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 18px;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      button {
+        flex: 1;
+        padding: 14px 16px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      #btn-start {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      #btn-start:hover {
+        background: linear-gradient(135deg, #f87171, #ef4444);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+      }
+
+      #btn-reset {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        display: none;
+      }
+
+      #btn-reset:hover {
+        background: linear-gradient(135deg, #34d399, #10b981);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+      }
+
+      .stats {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 12px;
+        padding: 18px;
+        border: 1px solid rgba(0, 102, 204, 0.15);
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .stat-row:last-child {
+        border: none;
+        margin: 0;
+        padding-bottom: 0;
+      }
+
+      .label {
+        color: #475569;
+        font-weight: 600;
+      }
+
+      .val {
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+        font-size: 1.15rem;
+      }
+
+      .val.w-level {
+        color: #0066cc;
+      }
+
+      .val#val-top {
+        color: #ef4444;
+      }
+      .val#val-mid {
+        color: #f59e0b;
+      }
+      .val#val-bot {
+        color: #10b981;
+      }
+      .val#val-floor {
+        color: #3b82f6;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid #3b82f6;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: pulse 2s infinite;
+      }
+
+      .status-dot.active {
+        background: #ef4444;
+        animation: pulse 0.8s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.7;
+        }
+      }
+
+      .status-text {
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        #ui-container {
+          top: 10px;
+          left: 10px;
+          width: calc(100vw - 40px);
+          max-width: 400px;
+          padding: 16px;
+        }
+
+        .btn-row {
+          flex-direction: column;
+        }
+
+        button {
+          padding: 16px;
+        }
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="ui-container">
+      <h2>💧 Measurement of Pressure in Liquid</h2>
+      <p>
+        Observe how water jet <strong>distance increases with depth</strong>.
+        Higher pressure at bottom = longer range!
+      </p>
+
+      <div class="status-indicator">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">Ready to Start</span>
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-start">REMOVE TAPES</button>
+        <button id="btn-reset">REFILL BOTTLE</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-row">
+          <span class="label">Water Level:</span>
+          <span class="val w-level" id="val-level">100%</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Top Jet (16cm):</span>
+          <span class="val" id="val-top">0 cm</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Middle Jet (10cm):</span>
+          <span class="val" id="val-mid">0 cm</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Bottom Jet (4cm):</span>
+          <span class="val" id="val-bot">0 cm</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Floor Water:</span>
+          <span class="val" id="val-floor">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

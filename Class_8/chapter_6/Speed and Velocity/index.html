@@ -1,764 +1,1317 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Speed and Velocity - Physics Simulator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a237e, #283593);
-            color: #333;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            border-radius: 12px;
-            color: white;
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .subtitle {
-            font-size: 1.1rem;
-            color: #e3f2fd;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-        
-        /* Main Layout */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a237e, #283593);
+        color: #333;
+        min-height: 100vh;
+        padding: 15px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        border-radius: 12px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        color: #e3f2fd;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      /* Main Layout */
+      .main-layout {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+      }
+
+      /* Simulation Column */
+      .simulation-column {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Simulation Area - Reduced Height */
+      .simulation-area {
+        background: linear-gradient(135deg, #0a1a2f, #1a237e);
+        border-radius: 12px;
+        border: 3px solid #2196f3;
+        position: relative;
+        height: 350px; /* Fixed smaller height */
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Control Buttons ABOVE Simulation */
+      .simulation-controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 12px;
+        justify-content: center;
+      }
+
+      .control-btn {
+        padding: 15px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+        min-width: 140px;
+        justify-content: center;
+      }
+
+      .control-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      #start-btn {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: white;
+      }
+
+      #pause-btn {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+      }
+
+      #reset-btn {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+      }
+
+      /* Controls Column */
+      .controls-column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-width: 340px;
+        max-width: 380px;
+        width: 100%;
+        height: 90vh;
+        overflow-y: auto;
+        position: sticky;
+        top: 20px;
+        left: 0;
+        background: #f4f7ff;
+        box-shadow: 2px 0 12px rgba(33, 150, 243, 0.07);
+      }
+
+      /* Info Panel */
+      .info-panel {
+        background: #f8f9ff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid #2196f3;
+      }
+
+      .info-title {
+        color: #1a237e;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #4caf50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .info-content {
+        color: #555;
+        line-height: 1.6;
+        font-size: 1rem;
+      }
+
+      .highlight {
+        background: #e3f2fd;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 12px 0;
+        border-left: 4px solid #2196f3;
+        font-size: 0.95rem;
+      }
+
+      /* Car Controls */
+      .car-controls-panel {
+        background: #f8f9ff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid #2196f3;
+      }
+
+      .car-control {
+        margin-bottom: 20px;
+      }
+
+      .car-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 8px;
+        border-radius: 8px;
+      }
+
+      .car1-header {
+        background: rgba(76, 175, 80, 0.1);
+        border-left: 4px solid #4caf50;
+      }
+
+      .car2-header {
+        background: rgba(255, 152, 0, 0.1);
+        border-left: 4px solid #ff9800;
+      }
+
+      .car-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: white;
+      }
+
+      .car1-icon {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+      }
+
+      .car2-icon {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+      }
+
+      .car-name {
+        font-size: 1.2rem;
+        color: #1a237e;
+        font-weight: bold;
+      }
+
+      /* Speed Controls */
+      .speed-control {
+        margin: 12px 0;
+      }
+
+      .speed-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .speed-label {
+        font-size: 1rem;
+        color: #555;
+        font-weight: 600;
+      }
+
+      .speed-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        padding: 6px 12px;
+        background: white;
+        border-radius: 6px;
+        min-width: 70px;
+        text-align: center;
+      }
+
+      .car1-speed {
+        color: #4caf50;
+        border: 2px solid rgba(76, 175, 80, 0.3);
+      }
+
+      .car2-speed {
+        color: #ff9800;
+        border: 2px solid rgba(255, 152, 0, 0.3);
+      }
+
+      /* Simple Sliders */
+      .simple-slider {
+        width: 100%;
+        height: 20px;
+        -webkit-appearance: none;
+        background: #e0e0e0;
+        border-radius: 10px;
+        outline: none;
+        margin: 8px 0;
+      }
+
+      .simple-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        border: 3px solid;
+      }
+
+      #car1-slider::-webkit-slider-thumb {
+        border-color: #4caf50;
+      }
+
+      #car2-slider::-webkit-slider-thumb {
+        border-color: #ff9800;
+      }
+
+      /* Time Controls */
+      .time-controls {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      .time-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #e3f2fd;
+        color: #1976d2;
+        font-weight: bold;
+        cursor: pointer;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.9rem;
+      }
+
+      .time-btn:hover {
+        background: #bbdefb;
+        transform: translateY(-2px);
+      }
+
+      .time-display {
+        font-size: 1.1rem;
+        color: #1a237e;
+        font-weight: bold;
+        text-align: center;
+        padding: 8px;
+        background: white;
+        border-radius: 6px;
+        margin: 8px 0;
+        border: 2px solid #e0e0e0;
+      }
+
+      /* Live Data */
+      .live-data {
+        background: #f8f9ff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid #2196f3;
+      }
+
+      .data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 15px;
+      }
+
+      .data-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        border-top: 4px solid;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .data-title {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .data-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .data-unit {
+        font-size: 0.9rem;
+        color: #888;
+        font-weight: 600;
+      }
+
+      .car1-data {
+        border-top-color: #4caf50;
+      }
+
+      .car2-data {
+        border-top-color: #ff9800;
+      }
+
+      /* Race Status */
+      .race-status {
+        margin-top: 15px;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid #9c27b0;
+      }
+
+      .status-text {
+        font-weight: bold;
+        color: #555;
+        min-height: 24px;
+      }
+
+      .leader-info {
+        margin-top: 8px;
+        color: #666;
+        font-size: 0.85rem;
+      }
+
+      /* Quick Scenarios */
+      .scenarios {
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 2px solid #e0e0e0;
+      }
+
+      .scenario-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .scenario-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #e3f2fd;
+        color: #1976d2;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .scenario-btn:hover {
+        background: #bbdefb;
+        transform: translateY(-2px);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
         .main-layout {
-            display: grid;
-            grid-template-columns: 2.2fr 1fr;
-            gap: 20px;
+          grid-template-columns: 1fr;
+          gap: 15px;
         }
-        
-        /* Simulation Column */
-        .simulation-column {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Simulation Area - Reduced Height */
+
         .simulation-area {
-            background: linear-gradient(135deg, #0a1a2f, #1a237e);
-            border-radius: 12px;
-            border: 3px solid #2196F3;
-            position: relative;
-            height: 350px; /* Fixed smaller height */
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+          height: 300px;
         }
-        
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 15px;
         }
-        
-        /* Control Buttons ABOVE Simulation */
+
+        .header h1 {
+          font-size: 1.6rem;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+        }
+
         .simulation-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 12px;
-            justify-content: center;
+          flex-direction: column;
         }
-        
+
         .control-btn {
-            padding: 15px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            min-width: 140px;
-            justify-content: center;
+          min-width: auto;
         }
-        
-        .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+
+        .simulation-area {
+          height: 250px;
         }
-        
-        #start-btn {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            color: white;
-        }
-        
-        #pause-btn {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-            color: white;
-        }
-        
-        #reset-btn {
-            background: linear-gradient(135deg, #F44336, #D32F2F);
-            color: white;
-        }
-        
-        /* Controls Column */
-        .controls-column {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        /* Info Panel */
-        .info-panel {
-            background: #f8f9ff;
-            border-radius: 12px;
-            padding: 20px;
-            border: 2px solid #2196F3;
-        }
-        
-        .info-title {
-            color: #1a237e;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #4CAF50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .info-content {
-            color: #555;
-            line-height: 1.6;
-            font-size: 1rem;
-        }
-        
-        .highlight {
-            background: #e3f2fd;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 12px 0;
-            border-left: 4px solid #2196F3;
-            font-size: 0.95rem;
-        }
-        
-        /* Car Controls */
-        .car-controls-panel {
-            background: #f8f9ff;
-            border-radius: 12px;
-            padding: 20px;
-            border: 2px solid #2196F3;
-        }
-        
-        .car-control {
-            margin-bottom: 20px;
-        }
-        
-        .car-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding: 8px;
-            border-radius: 8px;
-        }
-        
-        .car1-header {
-            background: rgba(76, 175, 80, 0.1);
-            border-left: 4px solid #4CAF50;
-        }
-        
-        .car2-header {
-            background: rgba(255, 152, 0, 0.1);
-            border-left: 4px solid #FF9800;
-        }
-        
-        .car-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            color: white;
-        }
-        
-        .car1-icon {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-        }
-        
-        .car2-icon {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-        }
-        
-        .car-name {
-            font-size: 1.2rem;
-            color: #1a237e;
-            font-weight: bold;
-        }
-        
-        /* Speed Controls */
-        .speed-control {
-            margin: 12px 0;
-        }
-        
-        .speed-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .speed-label {
-            font-size: 1rem;
-            color: #555;
-            font-weight: 600;
-        }
-        
-        .speed-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 6px 12px;
-            background: white;
-            border-radius: 6px;
-            min-width: 70px;
-            text-align: center;
-        }
-        
-        .car1-speed {
-            color: #4CAF50;
-            border: 2px solid rgba(76, 175, 80, 0.3);
-        }
-        
-        .car2-speed {
-            color: #FF9800;
-            border: 2px solid rgba(255, 152, 0, 0.3);
-        }
-        
-        /* Simple Sliders */
-        .simple-slider {
-            width: 100%;
-            height: 20px;
-            -webkit-appearance: none;
-            background: #e0e0e0;
-            border-radius: 10px;
-            outline: none;
-            margin: 8px 0;
-        }
-        
-        .simple-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-            border: 3px solid;
-        }
-        
-        #car1-slider::-webkit-slider-thumb {
-            border-color: #4CAF50;
-        }
-        
-        #car2-slider::-webkit-slider-thumb {
-            border-color: #FF9800;
-        }
-        
-        /* Time Controls */
-        .time-controls {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        
-        .time-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            background: #e3f2fd;
-            color: #1976D2;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.9rem;
-        }
-        
-        .time-btn:hover {
-            background: #bbdefb;
-            transform: translateY(-2px);
-        }
-        
-        .time-display {
-            font-size: 1.1rem;
-            color: #1a237e;
-            font-weight: bold;
-            text-align: center;
-            padding: 8px;
-            background: white;
-            border-radius: 6px;
-            margin: 8px 0;
-            border: 2px solid #e0e0e0;
-        }
-        
-        /* Live Data */
-        .live-data {
-            background: #f8f9ff;
-            border-radius: 12px;
-            padding: 20px;
-            border: 2px solid #2196F3;
-        }
-        
+
         .data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
+          grid-template-columns: 1fr;
         }
-        
-        .data-card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border-top: 4px solid;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 10px;
         }
-        
-        .data-title {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 600;
+
+        .header {
+          padding: 15px;
         }
-        
-        .data-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
+
+        .simulation-area {
+          height: 220px;
         }
-        
-        .data-unit {
-            font-size: 0.9rem;
-            color: #888;
-            font-weight: 600;
+
+        .control-btn {
+          padding: 12px;
+          font-size: 1rem;
         }
-        
-        .car1-data {
-            border-top-color: #4CAF50;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 20px;
+        text-align: center;
+        color: #666;
+        padding-top: 15px;
+        border-top: 2px solid #e0e0e0;
+        font-size: 0.9rem;
+      }
+
+      /* Message Box */
+      .message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        max-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideIn 0.3s ease;
+      }
+
+      .message.info {
+        background: #2196f3;
+        color: white;
+      }
+
+      .message.warning {
+        background: #ff9800;
+        color: white;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
         }
-        
-        .car2-data {
-            border-top-color: #FF9800;
+        to {
+          transform: translateX(0);
+          opacity: 1;
         }
-        
-        /* Race Status */
-        .race-status {
-            margin-top: 15px;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #9C27B0;
-        }
-        
-        .status-text {
-            font-weight: bold;
-            color: #555;
-            min-height: 24px;
-        }
-        
-        .leader-info {
-            margin-top: 8px;
-            color: #666;
-            font-size: 0.85rem;
-        }
-        
-        /* Quick Scenarios */
-        .scenarios {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 2px solid #e0e0e0;
-        }
-        
-        .scenario-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .scenario-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            background: #e3f2fd;
-            color: #1976D2;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .scenario-btn:hover {
-            background: #bbdefb;
-            transform: translateY(-2px);
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .simulation-area {
-                height: 300px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.6rem;
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .simulation-controls {
-                flex-direction: column;
-            }
-            
-            .control-btn {
-                min-width: auto;
-            }
-            
-            .simulation-area {
-                height: 250px;
-            }
-            
-            .data-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 15px;
-            }
-            
-            .simulation-area {
-                height: 220px;
-            }
-            
-            .control-btn {
-                padding: 12px;
-                font-size: 1rem;
-            }
-        }
-        
-        /* Footer */
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #666;
-            padding-top: 15px;
-            border-top: 2px solid #e0e0e0;
-            font-size: 0.9rem;
-        }
-        
-        /* Message Box */
-        .message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            max-width: 300px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        .message.info {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .message.warning {
-            background: #FF9800;
-            color: white;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1>
-                <i class="fas fa-tachometer-alt"></i>
-                Speed and Velocity Simulator
-                <i class="fas fa-compass"></i>
-            </h1>
-            <p class="subtitle">
-                Simple physics simulator showing the difference between speed and velocity
-            </p>
-        </header>
-        
-        <!-- Main Content -->
-        <div class="main-layout">
-            <!-- Left Column: Simulation -->
-            <div class="simulation-column">
-                <!-- Control Buttons -->
-                <div class="simulation-controls">
-                    <button class="control-btn" id="start-btn">
-                        <i class="fas fa-play"></i> Start Race
-                    </button>
-                    <button class="control-btn" id="pause-btn">
-                        <i class="fas fa-pause"></i> Pause
-                    </button>
-                    <button class="control-btn" id="reset-btn">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                </div>
-                
-                <!-- Simulation Area (Smaller Height) -->
-                <div class="simulation-area">
-                    <canvas id="race-canvas"></canvas>
-                </div>
+      <!-- Header -->
+      <header class="header">
+        <h1>
+          <i class="fas fa-tachometer-alt"></i>
+          Speed and Velocity Simulator
+          <i class="fas fa-compass"></i>
+        </h1>
+        <p class="subtitle">
+          Simple physics simulator showing the difference between speed and
+          velocity
+        </p>
+      </header>
+
+      <!-- Main Content -->
+      <div class="main-layout">
+        <div class="controls-column">
+          <!-- Info Panel -->
+          <div class="info-panel">
+            <h2 class="info-title">
+              <i class="fas fa-book"></i>
+              Physics Made Simple
+            </h2>
+            <div class="info-content">
+              <p><strong>Speed</strong> = How fast something moves</p>
+              <p><strong>Velocity</strong> = Speed + Direction</p>
+              <div class="highlight">
+                <p>
+                  <i class="fas fa-car"></i> <strong>Speedometer</strong>: Shows
+                  60 mph (speed only)
+                </p>
+                <p>
+                  <i class="fas fa-map-marker-alt"></i> <strong>GPS</strong>:
+                  Shows 60 mph North (velocity)
+                </p>
+              </div>
+              <p><strong>In this race:</strong></p>
+              <ul
+                style="margin-left: 20px; margin-top: 5px; font-size: 0.95rem"
+              >
+                <li>Both cars move EAST (same direction)</li>
+                <li>Green car starts immediately</li>
+                <li>Orange car starts 3 seconds later</li>
+              </ul>
             </div>
-            
-            <!-- Right Column: Controls & Info -->
-            <div class="controls-column">
-                <!-- Info Panel -->
-                <div class="info-panel">
-                    <h2 class="info-title">
-                        <i class="fas fa-book"></i>
-                        Physics Made Simple
-                    </h2>
-                    <div class="info-content">
-                        <p><strong>Speed</strong> = How fast something moves</p>
-                        <p><strong>Velocity</strong> = Speed + Direction</p>
-                        
-                        <div class="highlight">
-                            <p><i class="fas fa-car"></i> <strong>Speedometer</strong>: Shows 60 mph (speed only)</p>
-                            <p><i class="fas fa-map-marker-alt"></i> <strong>GPS</strong>: Shows 60 mph North (velocity)</p>
-                        </div>
-                        
-                        <p><strong>In this race:</strong></p>
-                        <ul style="margin-left: 20px; margin-top: 5px; font-size: 0.95rem;">
-                            <li>Both cars move EAST (same direction)</li>
-                            <li>Green car starts immediately</li>
-                            <li>Orange car starts 3 seconds later</li>
-                        </ul>
-                    </div>
+          </div>
+          <!-- Car Controls -->
+          <div class="car-controls-panel">
+            <h2 class="info-title">
+              <i class="fas fa-sliders-h"></i>
+              Adjust Cars
+            </h2>
+            <!-- Green Car -->
+            <div class="car-control">
+              <div class="car-header car1-header">
+                <div class="car-icon car1-icon">
+                  <i class="fas fa-car"></i>
                 </div>
-                
-                <!-- Car Controls -->
-                <div class="car-controls-panel">
-                    <h2 class="info-title">
-                        <i class="fas fa-sliders-h"></i>
-                        Adjust Cars
-                    </h2>
-                    
-                    <!-- Green Car -->
-                    <div class="car-control">
-                        <div class="car-header car1-header">
-                            <div class="car-icon car1-icon">
-                                <i class="fas fa-car"></i>
-                            </div>
-                            <div class="car-name">Green Car</div>
-                        </div>
-                        
-                        <div class="speed-control">
-                            <div class="speed-display">
-                                <span class="speed-label">Speed:</span>
-                                <span id="car1-display" class="speed-value car1-speed">6 m/s</span>
-                            </div>
-                            <input type="range" class="simple-slider" id="car1-slider" 
-                                   min="1" max="15" step="0.5" value="6">
-                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.85rem;">
-                                <span>Slow</span>
-                                <span>Fast</span>
-                            </div>
-                        </div>
-                        
-                        <div class="speed-control">
-                            <div class="speed-display">
-                                <span class="speed-label">Start Time:</span>
-                                <span id="car1-time" class="speed-value">0 s</span>
-                            </div>
-                            <div class="time-controls">
-                                <button class="time-btn" onclick="adjustStart('car1', -1)">
-                                    <i class="fas fa-minus"></i> 1s
-                                </button>
-                                <button class="time-btn" onclick="adjustStart('car1', 1)">
-                                    <i class="fas fa-plus"></i> 1s
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Orange Car -->
-                    <div class="car-control">
-                        <div class="car-header car2-header">
-                            <div class="car-icon car2-icon">
-                                <i class="fas fa-car-side"></i>
-                            </div>
-                            <div class="car-name">Orange Car</div>
-                        </div>
-                        
-                        <div class="speed-control">
-                            <div class="speed-display">
-                                <span class="speed-label">Speed:</span>
-                                <span id="car2-display" class="speed-value car2-speed">4 m/s</span>
-                            </div>
-                            <input type="range" class="simple-slider" id="car2-slider" 
-                                   min="1" max="15" step="0.5" value="4">
-                            <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.85rem;">
-                                <span>Slow</span>
-                                <span>Fast</span>
-                            </div>
-                        </div>
-                        
-                        <div class="speed-control">
-                            <div class="speed-display">
-                                <span class="speed-label">Start Time:</span>
-                                <span id="car2-time" class="speed-value">3 s</span>
-                            </div>
-                            <div class="time-controls">
-                                <button class="time-btn" onclick="adjustStart('car2', -1)">
-                                    <i class="fas fa-minus"></i> 1s
-                                </button>
-                                <button class="time-btn" onclick="adjustStart('car2', 1)">
-                                    <i class="fas fa-plus"></i> 1s
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Quick Scenarios -->
-                    <div class="scenarios">
-                        <h3 style="color: #1a237e; margin-bottom: 10px; font-size: 1rem;">Try These:</h3>
-                        <div class="scenario-buttons">
-                            <button class="scenario-btn" onclick="setScenario('equal')">
-                                Equal Race
-                            </button>
-                            <button class="scenario-btn" onclick="setScenario('catchup')">
-                                Catch Up
-                            </button>
-                        </div>
-                    </div>
+                <div class="car-name">Green Car</div>
+              </div>
+              <div class="speed-control">
+                <div class="speed-display">
+                  <span class="speed-label">Speed:</span>
+                  <span id="car1-display" class="speed-value car1-speed"
+                    >6 m/s</span
+                  >
                 </div>
-                
-                <!-- Live Data -->
-                <div class="live-data">
-                    <h2 class="info-title">
-                        <i class="fas fa-chart-line"></i>
-                        Live Data
-                    </h2>
-                    
-                    <div class="data-grid">
-                        <div class="data-card car1-data">
-                            <div class="data-title">Green Car Speed</div>
-                            <div id="live-car1-speed" class="data-value">6.0</div>
-                            <div class="data-unit">m/s</div>
-                        </div>
-                        
-                        <div class="data-card car1-data">
-                            <div class="data-title">Green Car Velocity</div>
-                            <div id="live-car1-velocity" class="data-value">6.0 m/s</div>
-                            <div class="data-unit">Direction: EAST</div>
-                        </div>
-                        
-                        <div class="data-card car2-data">
-                            <div class="data-title">Orange Car Speed</div>
-                            <div id="live-car2-speed" class="data-value">4.0</div>
-                            <div class="data-unit">m/s</div>
-                        </div>
-                        
-                        <div class="data-card car2-data">
-                            <div class="data-title">Orange Car Velocity</div>
-                            <div id="live-car2-velocity" class="data-value">4.0 m/s</div>
-                            <div class="data-unit">Direction: EAST</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Race Status -->
-                    <div class="race-status">
-                        <div class="status-text" id="race-status">Ready to start!</div>
-                        <div class="leader-info" id="leader-info">
-                            Adjust speeds and click Start Race
-                        </div>
-                    </div>
+                <input
+                  type="range"
+                  class="simple-slider"
+                  id="car1-slider"
+                  min="1"
+                  max="15"
+                  step="0.5"
+                  value="6"
+                />
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    color: #666;
+                    font-size: 0.85rem;
+                  "
+                >
+                  <span>Slow</span>
+                  <span>Fast</span>
                 </div>
+              </div>
+              <div class="speed-control">
+                <div class="speed-display">
+                  <span class="speed-label">Start Time:</span>
+                  <span id="car1-time" class="speed-value">0 s</span>
+                </div>
+                <div class="time-controls">
+                  <button class="time-btn" onclick="adjustStart('car1', -1)">
+                    <i class="fas fa-minus"></i> 1s
+                  </button>
+                  <button class="time-btn" onclick="adjustStart('car1', 1)">
+                    <i class="fas fa-plus"></i> 1s
+                  </button>
+                </div>
+              </div>
             </div>
+            <!-- Orange Car -->
+            <div class="car-control">
+              <div class="car-header car2-header">
+                <div class="car-icon car2-icon">
+                  <i class="fas fa-car-side"></i>
+                </div>
+                <div class="car-name">Orange Car</div>
+              </div>
+              <div class="speed-control">
+                <div class="speed-display">
+                  <span class="speed-label">Speed:</span>
+                  <span id="car2-display" class="speed-value car2-speed"
+                    >4 m/s</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  class="simple-slider"
+                  id="car2-slider"
+                  min="1"
+                  max="15"
+                  step="0.5"
+                  value="4"
+                />
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    color: #666;
+                    font-size: 0.85rem;
+                  "
+                >
+                  <span>Slow</span>
+                  <span>Fast</span>
+                </div>
+              </div>
+              <div class="speed-control">
+                <div class="speed-display">
+                  <span class="speed-label">Start Time:</span>
+                  <span id="car2-time" class="speed-value">3 s</span>
+                </div>
+                <div class="time-controls">
+                  <button class="time-btn" onclick="adjustStart('car2', -1)">
+                    <i class="fas fa-minus"></i> 1s
+                  </button>
+                  <button class="time-btn" onclick="adjustStart('car2', 1)">
+                    <i class="fas fa-plus"></i> 1s
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Quick Scenarios -->
+            <div class="scenarios">
+              <h3 style="color: #1a237e; margin-bottom: 10px; font-size: 1rem">
+                Try These:
+              </h3>
+              <div class="scenario-buttons">
+                <button class="scenario-btn" onclick="setScenario('equal')">
+                  Equal Race
+                </button>
+                <button class="scenario-btn" onclick="setScenario('catchup')">
+                  Catch Up
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Live Data -->
+          <div class="live-data">
+            <h2 class="info-title">
+              <i class="fas fa-chart-line"></i>
+              Live Data
+            </h2>
+            <div class="data-grid">
+              <div class="data-card car1-data">
+                <div class="data-title">Green Car Speed</div>
+                <div id="live-car1-speed" class="data-value">6.0</div>
+                <div class="data-unit">m/s</div>
+              </div>
+              <div class="data-card car1-data">
+                <div class="data-title">Green Car Velocity</div>
+                <div id="live-car1-velocity" class="data-value">6.0 m/s</div>
+                <div class="data-unit">Direction: EAST</div>
+              </div>
+              <div class="data-card car2-data">
+                <div class="data-title">Orange Car Speed</div>
+                <div id="live-car2-speed" class="data-value">4.0</div>
+                <div class="data-unit">m/s</div>
+              </div>
+              <div class="data-card car2-data">
+                <div class="data-title">Orange Car Velocity</div>
+                <div id="live-car2-velocity" class="data-value">4.0 m/s</div>
+                <div class="data-unit">Direction: EAST</div>
+              </div>
+            </div>
+            <!-- Race Status -->
+            <div class="race-status">
+              <div class="status-text" id="race-status">Ready to start!</div>
+              <div class="leader-info" id="leader-info">
+                Adjust speeds and click Start Race
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <p style="margin-bottom: 8px; font-weight: bold;">
-                <i class="fas fa-lightbulb"></i>
-                Remember: Speed (how fast) ≠ Velocity (speed + direction)
-            </p>
-            <p>Use SPACE to pause/play | R to reset | Made for easy learning</p>
+        <!-- Right: Simulation -->
+        <div class="simulation-column" style="flex: 1; min-width: 0">
+          <!-- Control Buttons -->
+          <div class="simulation-controls">
+            <button class="control-btn" id="start-btn">
+              <i class="fas fa-play"></i> Start Race
+            </button>
+            <button class="control-btn" id="pause-btn">
+              <i class="fas fa-pause"></i> Pause
+            </button>
+            <button class="control-btn" id="reset-btn">
+              <i class="fas fa-redo"></i> Reset
+            </button>
+          </div>
+          <!-- Simulation Area (Smaller Height) -->
+          <div class="simulation-area">
+            <canvas id="race-canvas"></canvas>
+          </div>
         </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p style="margin-bottom: 8px; font-weight: bold">
+          <i class="fas fa-lightbulb"></i>
+          Remember: Speed (how fast) ≠ Velocity (speed + direction)
+        </p>
+        <p>Use SPACE to pause/play | R to reset | Made for easy learning</p>
+      </div>
     </div>
 
-    <script src="index.js">
-        
+    <script>
+      // ============================================
+      // SIMPLE PHYSICS SIMULATION
+      // ============================================
+
+      // Get canvas
+      const canvas = document.getElementById("race-canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size
+      function resizeCanvas() {
+        const container = document.querySelector(".simulation-area");
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+      }
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // ============================================
+      // RACE SIMULATION
+      // ============================================
+      const race = {
+        // Car 1 (Green)
+        car1: {
+          x: 100,
+          y: 0,
+          speed: 6,
+          startDelay: 0,
+          distance: 0,
+          isMoving: false,
+          hasStarted: false,
+          color: "#4CAF50",
+          name: "Green Car",
+          width: 60,
+          height: 30,
+        },
+
+        // Car 2 (Orange)
+        car2: {
+          x: 100,
+          y: 0,
+          speed: 4,
+          startDelay: 3,
+          distance: 0,
+          isMoving: false,
+          hasStarted: false,
+          color: "#FF9800",
+          name: "Orange Car",
+          width: 60,
+          height: 30,
+        },
+
+        // Race state
+        isRunning: false,
+        startTime: null,
+        elapsedTime: 0,
+        raceLength: 800,
+
+        // Initialize
+        init: function () {
+          // Set car positions
+          const middle = canvas.height / 2;
+          this.car1.y = middle - 40;
+          this.car2.y = middle + 40;
+
+          // Reset cars
+          this.resetCar(this.car1);
+          this.resetCar(this.car2);
+
+          this.isRunning = false;
+          this.startTime = null;
+          this.elapsedTime = 0;
+
+          // Update displays
+          this.updateDisplays();
+
+          // Draw initial scene
+          drawRace();
+        },
+
+        // Reset car
+        resetCar: function (car) {
+          car.x = 100;
+          car.distance = 0;
+          car.isMoving = false;
+          car.hasStarted = false;
+        },
+
+        // Update race
+        update: function () {
+          if (!this.isRunning) return;
+
+          // Update elapsed time
+          if (this.startTime) {
+            this.elapsedTime = (Date.now() - this.startTime) / 1000;
+          }
+
+          // Update both cars
+          this.updateCar(this.car1);
+          this.updateCar(this.car2);
+
+          // Update displays
+          this.updateDisplays();
+        },
+
+        // Update individual car
+        updateCar: function (car) {
+          // Check if car should start
+          if (!car.hasStarted && this.elapsedTime >= car.startDelay) {
+            car.hasStarted = true;
+            car.isMoving = true;
+            showMessage(`${car.name} has started!`, "info");
+          }
+
+          if (!car.isMoving) return;
+
+          // Calculate movement
+          const pixelsPerMeter = (canvas.width - 200) / this.raceLength;
+          const moveDistance = car.speed * pixelsPerMeter * 0.05;
+
+          // Move car
+          car.x += moveDistance;
+          car.distance += car.speed * 0.05;
+
+          // Reset if car reaches end
+          if (car.x > canvas.width - 50) {
+            this.resetCar(car);
+            car.x = 100;
+            showMessage(`${car.name} finished lap!`, "info");
+          }
+        },
+
+        // Update all displays
+        updateDisplays: function () {
+          // Update speed displays
+          document.getElementById("car1-display").textContent =
+            `${this.car1.speed.toFixed(1)} m/s`;
+          document.getElementById("car2-display").textContent =
+            `${this.car2.speed.toFixed(1)} m/s`;
+
+          document.getElementById("car1-time").textContent =
+            `${this.car1.startDelay.toFixed(1)} s`;
+          document.getElementById("car2-time").textContent =
+            `${this.car2.startDelay.toFixed(1)} s`;
+
+          // Update live data
+          document.getElementById("live-car1-speed").textContent =
+            this.car1.speed.toFixed(1);
+          document.getElementById("live-car2-speed").textContent =
+            this.car2.speed.toFixed(1);
+
+          document.getElementById("live-car1-velocity").textContent =
+            `${this.car1.speed.toFixed(1)} m/s`;
+          document.getElementById("live-car2-velocity").textContent =
+            `${this.car2.speed.toFixed(1)} m/s`;
+
+          // Update sliders
+          document.getElementById("car1-slider").value = this.car1.speed;
+          document.getElementById("car2-slider").value = this.car2.speed;
+
+          // Update race status
+          this.updateRaceStatus();
+        },
+
+        // Update race status
+        updateRaceStatus: function () {
+          const status = document.getElementById("race-status");
+          const leader = document.getElementById("leader-info");
+
+          if (!this.isRunning) {
+            status.innerHTML =
+              '<span style="color: #666;">Ready to start!</span>';
+            leader.textContent = "Click Start Race to begin";
+            return;
+          }
+
+          if (this.car1.hasStarted && this.car2.hasStarted) {
+            const diff = this.car1.distance - this.car2.distance;
+
+            if (Math.abs(diff) < 0.5) {
+              status.innerHTML =
+                '🏁 <span style="color: #4CAF50;">Cars are tied!</span>';
+              leader.textContent = "Very close race!";
+            } else if (diff > 0) {
+              status.innerHTML =
+                '🏁 <span style="color: #4CAF50;">Green car is ahead</span>';
+              leader.textContent = `Leading by ${Math.abs(diff).toFixed(1)} meters`;
+            } else {
+              status.innerHTML =
+                '🏁 <span style="color: #FF9800;">Orange car is ahead</span>';
+              leader.textContent = `Leading by ${Math.abs(diff).toFixed(1)} meters`;
+            }
+          } else if (this.car1.hasStarted && !this.car2.hasStarted) {
+            status.innerHTML =
+              '⏱️ <span style="color: #4CAF50;">Green car racing...</span>';
+            const timeLeft = this.car2.startDelay - this.elapsedTime;
+            leader.textContent = `Orange car starts in ${timeLeft.toFixed(1)}s`;
+          } else if (!this.car1.hasStarted && this.car2.hasStarted) {
+            status.innerHTML =
+              '⏱️ <span style="color: #FF9800;">Orange car racing...</span>';
+            const timeLeft = this.car1.startDelay - this.elapsedTime;
+            leader.textContent = `Green car starts in ${timeLeft.toFixed(1)}s`;
+          } else {
+            status.textContent = "Race starting...";
+            leader.textContent = "Cars at start line";
+          }
+        },
+
+        // Start race
+        start: function () {
+          this.isRunning = true;
+          this.startTime = Date.now();
+
+          // Update button
+          document.getElementById("start-btn").innerHTML =
+            '<i class="fas fa-running"></i> Race Running';
+          document.getElementById("start-btn").style.background =
+            "linear-gradient(135deg, #388E3C, #2E7D32)";
+
+          showMessage("Race started! Green car begins immediately.", "info");
+        },
+
+        // Pause race
+        pause: function () {
+          this.isRunning = false;
+
+          // Update button
+          document.getElementById("start-btn").innerHTML =
+            '<i class="fas fa-play"></i> Start Race';
+          document.getElementById("start-btn").style.background =
+            "linear-gradient(135deg, #4CAF50, #388E3C)";
+
+          showMessage("Race paused. You can adjust settings.", "warning");
+        },
+
+        // Reset race
+        reset: function () {
+          this.init();
+
+          // Update button
+          document.getElementById("start-btn").innerHTML =
+            '<i class="fas fa-play"></i> Start Race';
+          document.getElementById("start-btn").style.background =
+            "linear-gradient(135deg, #4CAF50, #388E3C)";
+
+          showMessage("Race reset. Try different speeds!", "info");
+        },
+      };
+
+      // ============================================
+      // DRAWING FUNCTIONS
+      // ============================================
+      function drawRace() {
+        // Clear canvas
+        ctx.fillStyle = "#87CEEB";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawTrack();
+        drawCars();
+        drawStartFinishLines();
+      }
+
+      function drawTrack() {
+        const middle = canvas.height / 2;
+
+        // Draw lanes
+        ctx.fillStyle = "#424242";
+        ctx.fillRect(50, middle - 50, canvas.width - 100, 30);
+        ctx.fillRect(50, middle + 20, canvas.width - 100, 30);
+
+        // Lane markings
+        ctx.strokeStyle = "#FFD700";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([15, 25]);
+
+        ctx.beginPath();
+        ctx.moveTo(50, middle - 35);
+        ctx.lineTo(canvas.width - 50, middle - 35);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(50, middle + 35);
+        ctx.lineTo(canvas.width - 50, middle + 35);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+      }
+
+      function drawStartFinishLines() {
+        // Start line
+        ctx.fillStyle = "#4CAF50";
+        ctx.fillRect(100, canvas.height * 0.25, 8, canvas.height * 0.5);
+
+        ctx.fillStyle = "#4CAF50";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("START", 104, canvas.height * 0.2);
+
+        // Finish line
+        ctx.fillStyle = "#F44336";
+        ctx.fillRect(
+          canvas.width - 100,
+          canvas.height * 0.25,
+          8,
+          canvas.height * 0.5,
+        );
+
+        ctx.fillStyle = "#F44336";
+        ctx.fillText("FINISH", canvas.width - 96, canvas.height * 0.2);
+      }
+
+      function drawCars() {
+        drawCar(race.car1);
+        drawCar(race.car2);
+
+        // Draw speed indicators
+        if (race.car1.hasStarted) {
+          ctx.fillStyle = race.car1.color;
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `${race.car1.speed.toFixed(1)} m/s`,
+            race.car1.x,
+            race.car1.y - 25,
+          );
+        }
+
+        if (race.car2.hasStarted) {
+          ctx.fillStyle = race.car2.color;
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `${race.car2.speed.toFixed(1)} m/s`,
+            race.car2.x,
+            race.car2.y - 25,
+          );
+        }
+      }
+
+      function drawCar(car) {
+        ctx.save();
+        ctx.translate(car.x, car.y);
+
+        // Car body
+        ctx.fillStyle = car.color;
+        ctx.fillRect(-30, -15, 60, 30);
+
+        // Car roof
+        ctx.fillStyle = car.color === "#4CAF50" ? "#388E3C" : "#F57C00";
+        ctx.fillRect(-20, -25, 40, 12);
+
+        // Windows
+        ctx.fillStyle = "#B3E5FC";
+        ctx.fillRect(-15, -20, 15, 8);
+        ctx.fillRect(5, -20, 10, 8);
+
+        // Wheels
+        ctx.fillStyle = "#212121";
+        ctx.fillRect(-25, -20, 10, 4);
+        ctx.fillRect(15, -20, 10, 4);
+        ctx.fillRect(-25, 16, 10, 4);
+        ctx.fillRect(15, 16, 10, 4);
+
+        ctx.restore();
+      }
+
+      // ============================================
+      // CONTROLS
+      // ============================================
+      // Button event listeners
+      document
+        .getElementById("start-btn")
+        .addEventListener("click", function () {
+          race.start();
+        });
+
+      document
+        .getElementById("pause-btn")
+        .addEventListener("click", function () {
+          race.pause();
+        });
+
+      document
+        .getElementById("reset-btn")
+        .addEventListener("click", function () {
+          race.reset();
+        });
+
+      // Speed sliders
+      document
+        .getElementById("car1-slider")
+        .addEventListener("input", function () {
+          race.car1.speed = parseFloat(this.value);
+          race.updateDisplays();
+          showMessage(`Green car speed: ${this.value} m/s`, "info");
+        });
+
+      document
+        .getElementById("car2-slider")
+        .addEventListener("input", function () {
+          race.car2.speed = parseFloat(this.value);
+          race.updateDisplays();
+          showMessage(`Orange car speed: ${this.value} m/s`, "info");
+        });
+
+      // Start time adjustments
+      function adjustStart(carId, change) {
+        const car = carId === "car1" ? race.car1 : race.car2;
+        car.startDelay = Math.max(0, car.startDelay + change);
+        race.updateDisplays();
+
+        const carName = carId === "car1" ? "Green car" : "Orange car";
+        showMessage(
+          `${carName} starts at ${car.startDelay.toFixed(1)} seconds`,
+          "info",
+        );
+      }
+
+      // Pre-set scenarios
+      function setScenario(type) {
+        if (type === "equal") {
+          race.car1.speed = 6;
+          race.car2.speed = 6;
+          race.car1.startDelay = 0;
+          race.car2.startDelay = 0;
+          showMessage(
+            "Equal race: Both cars same speed, start together",
+            "info",
+          );
+        } else if (type === "catchup") {
+          race.car1.speed = 5;
+          race.car2.speed = 8;
+          race.car1.startDelay = 0;
+          race.car2.startDelay = 3;
+          showMessage(
+            "Catch up: Orange car faster but starts 3s later",
+            "info",
+          );
+        }
+
+        race.updateDisplays();
+      }
+
+      // ============================================
+      // MESSAGE SYSTEM
+      // ============================================
+      function showMessage(text, type) {
+        // Remove existing message
+        const existing = document.querySelector(".message");
+        if (existing) existing.remove();
+
+        // Create new message
+        const msg = document.createElement("div");
+        msg.className = `message ${type}`;
+        msg.innerHTML = `
+                <i class="fas fa-${type === "warning" ? "exclamation-triangle" : "info-circle"}"></i>
+                <div>${text}</div>
+            `;
+
+        document.body.appendChild(msg);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+          if (msg.parentElement) {
+            msg.remove();
+          }
+        }, 4000);
+      }
+
+      // ============================================
+      // KEYBOARD SHORTCUTS
+      // ============================================
+      document.addEventListener("keydown", function (e) {
+        // Space to toggle start/pause
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (race.isRunning) {
+            race.pause();
+          } else {
+            race.start();
+          }
+        }
+
+        // R to reset
+        if (e.code === "KeyR") {
+          e.preventDefault();
+          race.reset();
+        }
+      });
+
+      // ============================================
+      // ANIMATION LOOP
+      // ============================================
+      function animate() {
+        race.update();
+        drawRace();
+        requestAnimationFrame(animate);
+      }
+
+      // ============================================
+      // INITIALIZE
+      // ============================================
+      race.init();
+      animate();
+
+      // Welcome message
+      setTimeout(() => {
+        showMessage(
+          "Welcome! Click Start Race to begin. Use sliders to adjust speeds.",
+          "info",
+        );
+      }, 1000);
     </script>
-</body>
+  </body>
 </html>

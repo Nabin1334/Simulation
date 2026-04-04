@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+    />
+    <title>WiFi · how it works</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+      }
+      body {
+        background: linear-gradient(145deg, #c5e5fb, #a0d0f0);
+        color: #01579b;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+      }
+      /* main card */
+      .wifi-card {
+        max-width: 1100px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        border-radius: 50px 50px 40px 40px;
+        box-shadow: 0 20px 30px rgba(0, 30, 50, 0.3);
+        padding: 24px 18px 30px;
+        border: 3px solid #48b5ff;
+      }
+
+      .header {
+        text-align: left;
+        margin-bottom: 16px;
+        padding: 0 8px;
+      }
+      .header h1 {
+        font-size: 2.8rem;
+        color: #01579b;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+      }
+      .header .simple-desc {
+        font-size: 1.2rem;
+        color: #0277bd;
+        background: #e1f3fe;
+        padding: 14px 20px;
+        border-radius: 50px;
+        margin-top: 10px;
+        border-left: 6px solid #0288d1;
+        box-shadow: 0 5px 10px rgba(0, 80, 120, 0.1);
+      }
+
+      /* diagram area — responsive height */
+      .network-diagram {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        min-height: 320px;
+        background: white;
+        border-radius: 48px;
+        box-shadow:
+          inset 0 -3px 8px #c0c0c0,
+          0 12px 20px rgba(0, 0, 0, 0.2);
+        position: relative;
+        border: 4px solid #039be5;
+        background: linear-gradient(145deg, #f3fbff, #d9ecfc);
+        margin: 20px 0 0; /* margin bottom removed, buttons will be below */
+        overflow: hidden;
+      }
+
+      /* devices with better spacing for mobile */
+      .mobile-container {
+        position: absolute;
+        left: 3%; /* responsive % */
+        top: 50%;
+        transform: translateY(-50%);
+        width: 22%;
+        min-width: 100px;
+        text-align: center;
+        z-index: 10;
+      }
+      .laptop-container {
+        position: absolute;
+        right: 3%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 22%;
+        min-width: 100px;
+        text-align: center;
+        z-index: 10;
+      }
+      .router-center-container {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 26%;
+        min-width: 130px;
+        text-align: center;
+        z-index: 10;
+      }
+
+      /* device cards - compact for small screens */
+      .device {
+        background: white;
+        border-radius: 28px;
+        padding: 12px 8px;
+        box-shadow:
+          0 12px 20px rgba(0, 0, 0, 0.2),
+          inset -2px -2px 5px #b8d8fc;
+        border: 2px solid #63b5ff;
+      }
+      .device-image-container {
+        width: 80%;
+        max-width: 130px;
+        margin: 8px auto;
+        aspect-ratio: 1/1;
+        background: #e1f0fa;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        border: 3px solid #0288d1;
+      }
+      .device-label {
+        background: #0288d1;
+        color: white;
+        padding: 8px 6px;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin: 6px 6px;
+      }
+      .signal-strength {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin: 8px 0;
+      }
+      .signal-bar {
+        width: 8px;
+        background: #bbdefb;
+        border-radius: 4px 4px 0 0;
+        opacity: 0.5;
+      }
+      .signal-bar.active {
+        background: #03a9f4;
+        opacity: 1;
+        box-shadow: 0 0 12px cyan;
+      }
+
+      /* packet layer — always on top */
+      .packets-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 200;
+        pointer-events: none;
+      }
+      .data-packet {
+        position: absolute;
+        width: 95px;
+        height: 70px;
+        background: #fffde7;
+        border: 4px solid #d32f2f;
+        border-radius: 20px;
+        box-shadow: 0 8px 15px black;
+        display: flex;
+        flex-direction: column;
+        font-size: 0.8rem;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.1s;
+        color: #0a3144;
+      }
+      .data-packet.active {
+        opacity: 1;
+        animation: packetFly 2.5s ease-in-out forwards;
+      }
+      .packet-header {
+        background: #d32f2f;
+        color: white;
+        padding: 4px;
+        border-radius: 16px 16px 0 0;
+        text-align: center;
+      }
+      .packet-body {
+        background: #fff1b8;
+        padding: 6px;
+        text-align: center;
+        border-radius: 0 0 16px 16px;
+        flex: 1;
+      }
+      @keyframes packetFly {
+        0% {
+          transform: translate(0, 0) scale(0.8);
+          opacity: 0;
+        }
+        15% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--dx), var(--dy)) scale(0.8);
+          opacity: 0;
+        }
+      }
+
+      /* waves behind packets */
+      .wifi-wave {
+        position: absolute;
+        border: 4px solid #03a9f4;
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: waveExpand 4s infinite ease-out;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 50;
+      }
+      @keyframes waveExpand {
+        0% {
+          width: 20px;
+          height: 20px;
+          opacity: 0.6;
+        }
+        100% {
+          width: 800px;
+          height: 800px;
+          opacity: 0;
+        }
+      }
+
+      /* status panels */
+      .status-panel,
+      .stats-panel {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        padding: 10px 18px;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        border: 2px solid #60b5f0;
+        z-index: 60;
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+      }
+      .status-panel {
+        top: 12px;
+        left: 12px;
+      }
+      .stats-panel {
+        top: 12px;
+        right: 12px;
+        text-align: right;
+      }
+
+      /* BUTTONS – NOW BETWEEN ANIMATION AND DESCRIPTION */
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
+        margin: 25px 0 25px; /* space above and below */
+        padding: 0 10px;
+      }
+      button {
+        background: #0288d1;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        padding: 16px 28px;
+        border-radius: 50px;
+        font-weight: bold;
+        box-shadow:
+          0 8px 0 #01579b,
+          0 10px 20px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: 0.08s;
+        border: 2px solid #7ac8ff;
+        flex: 1 0 auto;
+        min-width: 170px;
+      }
+      button:active {
+        transform: translateY(6px);
+        box-shadow: 0 2px 0 #01579b;
+      }
+
+      /* description box (how wifi works) placed AFTER buttons */
+      .info-text {
+        background: #ffffffde;
+        border-radius: 48px;
+        padding: 22px 25px;
+        margin: 0 0 16px; /* no top margin, buttons already provide space */
+        border: 2px solid #039be5;
+        box-shadow: 0 10px 15px rgba(0, 100, 150, 0.2);
+      }
+      .info-text h2 {
+        color: #01579b;
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .info-text p {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #023b66;
+        margin-bottom: 14px;
+      }
+      .info-text ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .info-text li {
+        background: #d1ecff;
+        padding: 12px 22px;
+        border-radius: 50px;
+        font-weight: bold;
+        color: #014175;
+        border-left: 6px solid #0288d1;
+      }
+
+      /* mobile fine-tuning */
+      @media (max-width: 700px) {
+        .device-image-container {
+          font-size: 2.5rem;
+        }
+        .device-label {
+          font-size: 0.7rem;
+          padding: 5px;
+        }
+        .status-panel {
+          font-size: 0.7rem;
+          padding: 6px 10px;
+        }
+        .stats-panel {
+          font-size: 0.7rem;
+          padding: 6px 10px;
+        }
+        .info-text p {
+          font-size: 1rem;
+        }
+        button {
+          font-size: 1rem;
+          padding: 14px 16px;
+          min-width: 140px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wifi-card">
+      <!-- header with simple title and short description -->
+      <div class="header">
+        <h1>📡 WiFi</h1>
+        <div class="simple-desc">
+          Radio waves carry your data. Router talks to phone & laptop using
+          invisible signals.
+        </div>
+      </div>
+
+      <!-- diagram area -->
+      <div class="network-diagram" id="diagram">
+        <!-- waves container (behind) -->
+        <div
+          id="wifiWaves"
+          style="position: absolute; width: 100%; height: 100%; z-index: 50"
+        ></div>
+
+        <!-- packets on top -->
+        <div id="packetsLayer" class="packets-layer"></div>
+
+        <!-- small status panels -->
+        <div class="status-panel">
+          <span>📱 Phone </span><span id="phone-status">●</span> &nbsp; | &nbsp;
+          <span>📶 Router </span><span id="router-status">●</span> &nbsp; |
+          &nbsp; <span>💻 Laptop </span><span id="laptop-status">●</span>
+        </div>
+        <div class="stats-panel">
+          <div>📦 <span id="sent">0</span> sent</div>
+          <div>✅ <span id="received">0</span> recv</div>
+        </div>
+
+        <!-- phone left -->
+        <div class="mobile-container">
+          <div class="device">
+            <div class="device-label">SMARTPHONE</div>
+            <div class="device-image-container">📱</div>
+            <div class="signal-strength" id="phoneSignal">
+              <div class="signal-bar" style="height: 12px"></div>
+              <div class="signal-bar" style="height: 18px"></div>
+              <div class="signal-bar" style="height: 24px"></div>
+              <div class="signal-bar" style="height: 30px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- router center -->
+        <div class="router-center-container">
+          <div class="device">
+            <div class="device-label">ROUTER</div>
+            <div class="device-image-container">📶</div>
+            <div class="signal-strength" id="routerSignal">
+              <div class="signal-bar active" style="height: 15px"></div>
+              <div class="signal-bar active" style="height: 22px"></div>
+              <div class="signal-bar active" style="height: 28px"></div>
+              <div class="signal-bar active" style="height: 35px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- laptop right -->
+        <div class="laptop-container">
+          <div class="device">
+            <div class="device-label">LAPTOP</div>
+            <div class="device-image-container">💻</div>
+            <div class="signal-strength" id="laptopSignal">
+              <div class="signal-bar" style="height: 12px"></div>
+              <div class="signal-bar" style="height: 18px"></div>
+              <div class="signal-bar" style="height: 24px"></div>
+              <div class="signal-bar" style="height: 30px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUTTONS – NOW BETWEEN ANIMATION AND DESCRIPTION -->
+      <div class="controls">
+        <button id="startBtn">▶️ Normal (browsing)</button>
+        <button id="streamBtn">⚡ Streaming (fast)</button>
+        <button id="packetBtn">📦 Send one packet</button>
+        <button id="resetBtn">🔄 Reset</button>
+      </div>
+
+      <!-- how wifi works description + data transfer explanation -->
+      <div class="info-text">
+        <h2>🌐 How WiFi transfers data</h2>
+        <p>
+          🔹 <strong>Radio waves</strong> (blue circles) carry information
+          through the air — like invisible messengers.
+        </p>
+        <p>
+          🔹 Files, photos, or videos are broken into tiny
+          <strong>data packets</strong> (red-bordered boxes). Each packet flies
+          from your phone to the router, then to the laptop.
+        </p>
+        <p>
+          🔹 The receiving device sends back a tiny
+          <strong>ACK (acknowledgment)</strong> packet to say "got it!" — that's
+          how WiFi makes sure nothing gets lost.
+        </p>
+        <ul>
+          <li>📱 Phone → 📶 Router → 💻 Laptop</li>
+          <li>💻 Laptop → 📶 Router → 📱 Phone</li>
+          <li>✅ ACK confirms delivery</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // ----- elements -----
+        const packetsLayer = document.getElementById("packetsLayer");
+        const wavesDiv = document.getElementById("wifiWaves");
+        const sentSpan = document.getElementById("sent");
+        const receivedSpan = document.getElementById("received");
+        const phoneStatus = document.getElementById("phone-status");
+        const routerStatus = document.getElementById("router-status");
+        const laptopStatus = document.getElementById("laptop-status");
+
+        const phoneBars = document.querySelectorAll("#phoneSignal .signal-bar");
+        const laptopBars = document.querySelectorAll(
+          "#laptopSignal .signal-bar",
+        );
+        const routerBars = document.querySelectorAll(
+          "#routerSignal .signal-bar",
+        );
+
+        // counters
+        let sent = 0,
+          received = 0;
+        let activeTimeouts = [];
+        let waveInterval = null,
+          streamInterval = null;
+
+        function updateUI() {
+          sentSpan.innerText = sent;
+          receivedSpan.innerText = received;
+        }
+
+        function clearAllTimers() {
+          activeTimeouts.forEach((t) => clearTimeout(t));
+          activeTimeouts = [];
+          if (waveInterval) clearInterval(waveInterval);
+          if (streamInterval) clearInterval(streamInterval);
+          waveInterval = null;
+          streamInterval = null;
+        }
+
+        function removePackets() {
+          document.querySelectorAll(".data-packet").forEach((p) => p.remove());
+        }
+
+        // waves
+        function createWave() {
+          const wave = document.createElement("div");
+          wave.className = "wifi-wave";
+          wavesDiv.appendChild(wave);
+          const t = setTimeout(() => {
+            if (wave.parentNode) wave.remove();
+          }, 4000);
+          activeTimeouts.push(t);
+        }
+        function startWaves() {
+          if (waveInterval) clearInterval(waveInterval);
+          createWave();
+          waveInterval = setInterval(createWave, 1600);
+        }
+        function stopWaves() {
+          if (waveInterval) {
+            clearInterval(waveInterval);
+            waveInterval = null;
+          }
+          document.querySelectorAll(".wifi-wave").forEach((w) => w.remove());
+        }
+
+        // signal strength (always strong for demo)
+        function setStrongSignal() {
+          phoneBars.forEach((b) => b.classList.add("active"));
+          laptopBars.forEach((b) => b.classList.add("active"));
+          routerBars.forEach((b) => b.classList.add("active"));
+        }
+
+        // send packet from/to: 'phone','router','laptop'
+        function sendPacket(from, to, type = "data", withAck = true) {
+          // dynamic positions based on container width — approximate percentages
+          const container = document.getElementById("diagram");
+          const rect = container.getBoundingClientRect();
+          const width = rect.width;
+          const centerY = rect.height / 2;
+
+          let x1, x2;
+          if (from === "phone")
+            x1 = width * 0.12; // ~ left 12%
+          else if (from === "router") x1 = width * 0.5;
+          else x1 = width * 0.88;
+
+          if (to === "phone") x2 = width * 0.12;
+          else if (to === "router") x2 = width * 0.5;
+          else x2 = width * 0.88;
+
+          const start = { x: x1, y: centerY - 10 };
+          const end = { x: x2, y: centerY - 10 };
+
+          const packet = document.createElement("div");
+          packet.className = "data-packet";
+          packet.style.left = start.x + "px";
+          packet.style.top = start.y + "px";
+          packet.style.transform = "translate(-50%, -50%)";
+
+          const dx = end.x - start.x;
+          const dy = end.y - start.y;
+          packet.style.setProperty("--dx", dx + "px");
+          packet.style.setProperty("--dy", dy + "px");
+
+          const header = document.createElement("div");
+          header.className = "packet-header";
+          header.innerText = type === "ack" ? "✅ ACK" : "📦 DATA";
+          const body = document.createElement("div");
+          body.className = "packet-body";
+          body.innerText =
+            type === "ack" ? "confirm" : from === "phone" ? "selfie" : "song";
+
+          packet.appendChild(header);
+          packet.appendChild(body);
+          packetsLayer.appendChild(packet);
+
+          void packet.offsetWidth;
+          packet.classList.add("active");
+
+          // counting
+          if (type === "data") {
+            if (from !== "router")
+              sent++; // device generates data
+            else sent++; // router forwarding also counts
+            if (to !== "router") received++;
+          } else {
+            // ack also counts as traffic
+            sent++;
+            if (to !== "router") received++;
+          }
+          updateUI();
+
+          const t1 = setTimeout(() => {
+            if (packet.parentNode) packet.remove();
+          }, 2600);
+          activeTimeouts.push(t1);
+
+          if (
+            withAck &&
+            type === "data" &&
+            (to === "laptop" || to === "phone")
+          ) {
+            const t2 = setTimeout(() => {
+              sendPacket(to, from, "ack", false);
+            }, 800);
+            activeTimeouts.push(t2);
+          }
+        }
+
+        // ---- scenarios ----
+        function resetAll() {
+          clearAllTimers();
+          stopWaves();
+          removePackets();
+          sent = 0;
+          received = 0;
+          updateUI();
+          setStrongSignal();
+          phoneStatus.innerText = "●";
+          routerStatus.innerText = "●";
+          laptopStatus.innerText = "●";
+        }
+
+        function normalTransfer() {
+          resetAll();
+          startWaves();
+          if (streamInterval) clearInterval(streamInterval);
+          streamInterval = setInterval(() => {
+            // random phone→router→laptop or reverse
+            if (Math.random() > 0.4) {
+              sendPacket("phone", "router", "data", true);
+              setTimeout(
+                () => sendPacket("router", "laptop", "data", true),
+                400,
+              );
+            } else {
+              sendPacket("laptop", "router", "data", true);
+              setTimeout(
+                () => sendPacket("router", "phone", "data", true),
+                400,
+              );
+            }
+          }, 3000);
+        }
+
+        function fastStreaming() {
+          resetAll();
+          startWaves();
+          if (streamInterval) clearInterval(streamInterval);
+          streamInterval = setInterval(() => {
+            sendPacket("phone", "router", "data", true);
+            setTimeout(() => sendPacket("router", "laptop", "data", true), 250);
+            setTimeout(() => sendPacket("laptop", "router", "ack", false), 900);
+          }, 1500);
+        }
+
+        function onePacket() {
+          if (!waveInterval) startWaves();
+          setStrongSignal();
+          sendPacket("phone", "router", "data", true);
+          setTimeout(() => sendPacket("router", "laptop", "data", true), 600);
+        }
+
+        // buttons
+        document
+          .getElementById("startBtn")
+          .addEventListener("click", normalTransfer);
+        document
+          .getElementById("streamBtn")
+          .addEventListener("click", fastStreaming);
+        document
+          .getElementById("packetBtn")
+          .addEventListener("click", onePacket);
+        document.getElementById("resetBtn").addEventListener("click", resetAll);
+
+        // initial
+        resetAll();
+        startWaves();
+        // show one packet after 1 sec as demo
+        setTimeout(onePacket, 1000);
+      })();
+    </script>
+  </body>
+</html>

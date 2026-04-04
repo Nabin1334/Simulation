@@ -1,388 +1,418 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Realistic Coconut Drop Sim</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        canvas { display: block; }
-        
-        /* UI Styling */
-        #ui-container {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 10;
-        }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #87ceeb;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      canvas {
+        display: block;
+      }
 
-        button {
-            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
-            border: 2px solid #1B5E20;
-            border-radius: 8px;
-            color: white;
-            padding: 12px 24px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.1s;
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            z-index: 100;
-        }
+      /* UI Styling */
+      #ui-container {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        z-index: 10;
+      }
 
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
+      button {
+        background: linear-gradient(to bottom, #4caf50, #2e7d32);
+        border: 2px solid #1b5e20;
+        border-radius: 8px;
+        color: white;
+        padding: 12px 24px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.1s;
+        position: fixed;
+        bottom: 30px;
+        left: 60%;
+        transform: translateX(-30%);
+        z-index: 100;
+      }
 
-        #status {
-            margin-top: 10px;
-            color: #333;
-            font-size: 14px;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
-            font-weight: 600;
-        }
+      button:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
 
-        /* Gravity Theory Panel */
-        #gravity-theory {
-            position: fixed;
-            bottom: 100px;
-            left: 30px;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 300px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 99;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+      #status {
+        margin-top: 10px;
+        color: #333;
+        font-size: 14px;
+        text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+      }
 
-        #gravity-theory h3 {
-            margin-top: 0;
-            color: #1B5E20;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 5px;
-        }
+      /* Gravity Theory Panel */
+      #gravity-theory {
+        position: fixed;
+        bottom: 100px;
+        left: 30px;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 15px;
+        border-radius: 10px;
+        max-width: 300px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 99;
+        font-size: 14px;
+        line-height: 1.5;
+      }
 
-        #gravity-theory p {
-            margin: 8px 0;
-        }
+      #gravity-theory h3 {
+        margin-top: 0;
+        color: #1b5e20;
+        border-bottom: 2px solid #4caf50;
+        padding-bottom: 5px;
+      }
 
-        #gravity-theory .formula {
-            background: #f5f5f5;
-            padding: 8px;
-            border-radius: 5px;
-            font-family: monospace;
-            text-align: center;
-            margin: 10px 0;
-            border-left: 3px solid #4CAF50;
-        }
+      #gravity-theory p {
+        margin: 8px 0;
+      }
 
-        #gravity-theory .highlight {
-            color: #1B5E20;
-            font-weight: bold;
-        }
+      #gravity-theory .formula {
+        background: #f5f5f5;
+        padding: 8px;
+        border-radius: 5px;
+        font-family: monospace;
+        text-align: center;
+        margin: 10px 0;
+        border-left: 3px solid #4caf50;
+      }
+
+      #gravity-theory .highlight {
+        color: #1b5e20;
+        font-weight: bold;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div id="ui-container">
-        <div id="status">Ready...</div>
+      <div id="status">Ready...</div>
     </div>
 
     <!-- Gravity Theory Panel -->
     <div id="gravity-theory">
-        <h3>Gravity</h3>
-        <p>This simulation demonstrates <span class="highlight">Gravitation</span>:</p>
-        
-        <div class="formula">
-            F = G × (m₁ × m₂) / r²
-        </div>
-        
-        <p><span class="highlight">Key Concepts:</span></p>
-        <p>• <strong>Acceleration:</strong> Gravity causes constant downward acceleration (9.8 m/s² on Earth)</p>
-        <p>• <strong>Velocity:</strong> Speed increases linearly with time: v = g × t</p>
-        <p>• <strong>Position:</strong> Distance fallen: d = ½ × g × t²</p>
-        <p>• <strong>Energy:</strong> Potential energy converts to kinetic energy</p>
-        
-        <p><span class="highlight">Simulation Physics:</span></p>
-        <p>• Gravity: <strong>-0.025 units/frame²</strong></p>
-        <p>• Bounce restitution: <strong>40% energy loss</strong></p>
-        <p>• Rolling friction applied after impact</p>
+      <h3>Gravity</h3>
+      <p>
+        This simulation demonstrates <span class="highlight">Gravitation</span>:
+      </p>
+
+      <div class="formula">F = G × (m₁ × m₂) / r²</div>
+
+      <p><span class="highlight">Key Concepts:</span></p>
+      <p>
+        • <strong>Acceleration:</strong> Gravity causes constant downward
+        acceleration (9.8 m/s² on Earth)
+      </p>
+      <p>
+        • <strong>Velocity:</strong> Speed increases linearly with time: v = g ×
+        t
+      </p>
+      <p>• <strong>Position:</strong> Distance fallen: d = ½ × g × t²</p>
+      <p>
+        • <strong>Energy:</strong> Potential energy converts to kinetic energy
+      </p>
+
+      <p><span class="highlight">Simulation Physics:</span></p>
+      <p>• Gravity: <strong>-0.025 units/frame²</strong></p>
+      <p>• Bounce restitution: <strong>40% energy loss</strong></p>
+      <p>• Rolling friction applied after impact</p>
     </div>
 
     <!-- Moved Button to Lower Left -->
     <button id="dropBtn">DROP COCONUT</button>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
+      }
     </script>
 
     <script type="module">
-        import * as THREE from 'three';
+      import * as THREE from "three";
 
-        // --- 1. SCENE & CAMERA SETUP ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, 20, 120); // Atmospheric fog
+      // --- 1. SCENE & CAMERA SETUP ---
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87ceeb);
+      scene.fog = new THREE.Fog(0x87ceeb, 20, 120); // Atmospheric fog
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.set(0, 10, 25);
-        camera.lookAt(0, 8, 0);
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        200,
+      );
+      camera.position.set(0, 10, 25);
+      camera.lookAt(0, 8, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
-        document.body.appendChild(renderer.domElement);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+      document.body.appendChild(renderer.domElement);
 
-        // --- 2. LIGHTING ---
-        // Ambient skylight
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffedd2, 0.5);
-        scene.add(hemiLight);
+      // --- 2. LIGHTING ---
+      // Ambient skylight
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffedd2, 0.5);
+      scene.add(hemiLight);
 
-        // Direct sunlight
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
-        dirLight.position.set(15, 30, 10);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
-        dirLight.shadow.camera.near = 0.5;
-        dirLight.shadow.camera.far = 100;
-        dirLight.shadow.camera.left = -20;
-        dirLight.shadow.camera.right = 20;
-        dirLight.shadow.camera.top = 20;
-        dirLight.shadow.camera.bottom = -20;
-        scene.add(dirLight);
+      // Direct sunlight
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
+      dirLight.position.set(15, 30, 10);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.camera.near = 0.5;
+      dirLight.shadow.camera.far = 100;
+      dirLight.shadow.camera.left = -20;
+      dirLight.shadow.camera.right = 20;
+      dirLight.shadow.camera.top = 20;
+      dirLight.shadow.camera.bottom = -20;
+      scene.add(dirLight);
 
-        // --- 3. OBJECTS ---
+      // --- 3. OBJECTS ---
 
-        // A. The Ground
-        const groundGeo = new THREE.PlaneGeometry(200, 200);
-        const groundMat = new THREE.MeshStandardMaterial({ 
-            color: 0xE6D690, // Sand
-            roughness: 1,
+      // A. The Ground
+      const groundGeo = new THREE.PlaneGeometry(200, 200);
+      const groundMat = new THREE.MeshStandardMaterial({
+        color: 0xe6d690, // Sand
+        roughness: 1,
+      });
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      // B. The "Real" Tree Generator
+      function createPalmTree() {
+        const treeGroup = new THREE.Group();
+
+        // 1. Trunk (Bent Cylinder)
+        const height = 18;
+        const segments = 16;
+        const trunkGeo = new THREE.CylinderGeometry(
+          0.5,
+          1.0,
+          height,
+          12,
+          segments,
+        );
+        const posAttr = trunkGeo.getAttribute("position");
+
+        // Bend the trunk algorithmically
+        const axis = new THREE.Vector3(1, 0, 0);
+        for (let i = 0; i < posAttr.count; i++) {
+          const y = posAttr.getY(i);
+          // Normalized height (0 at bottom, 1 at top)
+          const ratio = (y + height / 2) / height;
+          // Bend amount increases with height
+          const bend = ratio * ratio * 4.0;
+          posAttr.setX(i, posAttr.getX(i) + bend);
+        }
+        trunkGeo.computeVertexNormals();
+
+        const trunkMat = new THREE.MeshStandardMaterial({
+          color: 0x5d4037,
+          roughness: 0.9,
         });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
+        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+        trunk.position.y = height / 2;
+        trunk.castShadow = true;
+        trunk.receiveShadow = true;
+        treeGroup.add(trunk);
 
-        // B. The "Real" Tree Generator
-        function createPalmTree() {
-            const treeGroup = new THREE.Group();
-
-            // 1. Trunk (Bent Cylinder)
-            const height = 18;
-            const segments = 16;
-            const trunkGeo = new THREE.CylinderGeometry(0.5, 1.0, height, 12, segments);
-            const posAttr = trunkGeo.getAttribute('position');
-            
-            // Bend the trunk algorithmically
-            const axis = new THREE.Vector3(1, 0, 0); 
-            for (let i = 0; i < posAttr.count; i++) {
-                const y = posAttr.getY(i);
-                // Normalized height (0 at bottom, 1 at top)
-                const ratio = (y + height/2) / height; 
-                // Bend amount increases with height
-                const bend = ratio * ratio * 4.0; 
-                posAttr.setX(i, posAttr.getX(i) + bend);
-            }
-            trunkGeo.computeVertexNormals();
-
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.9 });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.y = height / 2;
-            trunk.castShadow = true;
-            trunk.receiveShadow = true;
-            treeGroup.add(trunk);
-
-            // 2. Palm Fronds (Leaves)
-            const leafGeo = new THREE.PlaneGeometry(2, 8, 4, 8);
-            // Curve the leaf geometry
-            const leafPos = leafGeo.getAttribute('position');
-            for(let i=0; i<leafPos.count; i++){
-                const y = leafPos.getY(i);
-                // Curve down like an arch
-                const zOffset = -Math.pow(y, 2) * 0.15; 
-                leafPos.setZ(i, leafPos.getZ(i) + zOffset);
-            }
-            leafGeo.computeVertexNormals();
-            // Move pivot to base of leaf
-            leafGeo.translate(0, 4, 0); 
-
-            const leafMat = new THREE.MeshStandardMaterial({ 
-                color: 0x2E7D32, 
-                side: THREE.DoubleSide, 
-                roughness: 0.6 
-            });
-
-            // Create 8 leaves rotated around the top
-            for (let i = 0; i < 9; i++) {
-                const leaf = new THREE.Mesh(leafGeo, leafMat);
-                leaf.position.set(4, height - 0.5, 0); // Offset x=4 because trunk bent by 4
-                leaf.rotation.x = Math.PI / 3; // Fan out
-                leaf.rotation.y = (i / 9) * Math.PI * 2; // Rotate around trunk
-                leaf.rotation.z = Math.PI / 4; // Tilt down
-                leaf.castShadow = true;
-                treeGroup.add(leaf);
-            }
-
-            return treeGroup;
+        // 2. Palm Fronds (Leaves)
+        const leafGeo = new THREE.PlaneGeometry(2, 8, 4, 8);
+        // Curve the leaf geometry
+        const leafPos = leafGeo.getAttribute("position");
+        for (let i = 0; i < leafPos.count; i++) {
+          const y = leafPos.getY(i);
+          // Curve down like an arch
+          const zOffset = -Math.pow(y, 2) * 0.15;
+          leafPos.setZ(i, leafPos.getZ(i) + zOffset);
         }
+        leafGeo.computeVertexNormals();
+        // Move pivot to base of leaf
+        leafGeo.translate(0, 4, 0);
 
-        const palmTree = createPalmTree();
-        scene.add(palmTree);
-
-
-        // C. The Coconut
-        const coconutRadius = 0.6;
-        // Icosahedron for lumpy, natural shape
-        const coconutGeo = new THREE.IcosahedronGeometry(coconutRadius, 1); 
-        const coconutMat = new THREE.MeshStandardMaterial({ 
-            color: 0x3E2723, 
-            roughness: 0.8,
-            flatShading: true // Looks like husk fiber
+        const leafMat = new THREE.MeshStandardMaterial({
+          color: 0x2e7d32,
+          side: THREE.DoubleSide,
+          roughness: 0.6,
         });
-        const coconut = new THREE.Mesh(coconutGeo, coconutMat);
-        coconut.castShadow = true;
-        scene.add(coconut);
 
-        // --- 4. PHYSICS ENGINE ---
-        
-        // Configuration
-        const gravity = -0.025;
-        const groundLevel = coconutRadius;
-        const treeTopPos = new THREE.Vector3(3.8, 17, 0); // Where it grows
-
-        // State
-        let pos = new THREE.Vector3();
-        let vel = new THREE.Vector3();
-        let isFalling = false;
-        let rotationalVel = { x:0, z:0 };
-
-        // Initialize (Hang in tree)
-        function reset() {
-            isFalling = false;
-            pos.copy(treeTopPos);
-            vel.set(0, 0, 0);
-            rotationalVel = { x:0, z:0 };
-            
-            coconut.position.copy(pos);
-            coconut.rotation.set(0,0,0);
-            
-            document.getElementById('status').innerText = "Coconut is hanging in the tree.";
-        }
-        
-        reset();
-
-        // The Drop Logic
-        function dropCoconut() {
-            if (isFalling) return; // Prevent double clicks
-            
-            isFalling = true;
-            document.getElementById('status').innerText = "Gravity in action!";
-            
-            // Initial Push (Random direction to simulate breaking off)
-            vel.x = (Math.random() - 0.5) * 0.1;
-            vel.z = (Math.random() - 0.5) * 0.1;
-            
-            // Random tumble spin
-            rotationalVel.x = Math.random() * 0.1;
-            rotationalVel.z = Math.random() * 0.1;
+        // Create 8 leaves rotated around the top
+        for (let i = 0; i < 9; i++) {
+          const leaf = new THREE.Mesh(leafGeo, leafMat);
+          leaf.position.set(4, height - 0.5, 0); // Offset x=4 because trunk bent by 4
+          leaf.rotation.x = Math.PI / 3; // Fan out
+          leaf.rotation.y = (i / 9) * Math.PI * 2; // Rotate around trunk
+          leaf.rotation.z = Math.PI / 4; // Tilt down
+          leaf.castShadow = true;
+          treeGroup.add(leaf);
         }
 
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
+        return treeGroup;
+      }
 
-            if (isFalling) {
-                // Apply Gravity
-                vel.y += gravity;
-                
-                // Update Position
-                pos.add(vel);
+      const palmTree = createPalmTree();
+      scene.add(palmTree);
 
-                // Update Rotation (Tumbling)
-                coconut.rotation.x += rotationalVel.x;
-                coconut.rotation.z += rotationalVel.z;
+      // C. The Coconut
+      const coconutRadius = 0.6;
+      // Icosahedron for lumpy, natural shape
+      const coconutGeo = new THREE.IcosahedronGeometry(coconutRadius, 1);
+      const coconutMat = new THREE.MeshStandardMaterial({
+        color: 0x3e2723,
+        roughness: 0.8,
+        flatShading: true, // Looks like husk fiber
+      });
+      const coconut = new THREE.Mesh(coconutGeo, coconutMat);
+      coconut.castShadow = true;
+      scene.add(coconut);
 
-                // --- COLLISION DETECTION ---
-                if (pos.y <= groundLevel) {
-                    pos.y = groundLevel;
-                    
-                    // Bounce Check
-                    if (Math.abs(vel.y) > 0.15) {
-                        // Bounce with energy loss (restitution)
-                        vel.y = -vel.y * 0.4; 
-                        
-                        // Friction: Slow down horizontal movement on impact
-                        vel.x *= 0.7;
-                        vel.z *= 0.7;
-                        
-                        // Dampen rotation on impact
-                        rotationalVel.x *= 0.6;
-                        rotationalVel.z *= 0.6;
-                    } else {
-                        // Stop if energy is low (Rolling / Resting)
-                        vel.y = 0;
-                        pos.y = groundLevel; // Ensure it sits on ground
-                        
-                        // Apply rolling friction
-                        vel.x *= 0.92;
-                        vel.z *= 0.92;
-                        rotationalVel.x *= 0.9;
-                        rotationalVel.z *= 0.9;
+      // --- 4. PHYSICS ENGINE ---
 
-                        // Rolling visuals based on velocity
-                        coconut.rotation.z -= vel.x; 
-                        coconut.rotation.x += vel.z;
+      // Configuration
+      const gravity = -0.025;
+      const groundLevel = coconutRadius;
+      const treeTopPos = new THREE.Vector3(3.8, 17, 0); // Where it grows
 
-                        if(Math.abs(vel.x) < 0.001 && Math.abs(vel.z) < 0.001) {
-                             document.getElementById('status').innerText = "Landed. Press Drop to restart.";
-                             isFalling = false; // Stop physics calculation
-                        }
-                    }
-                }
-                
-                coconut.position.copy(pos);
-            }
+      // State
+      let pos = new THREE.Vector3();
+      let vel = new THREE.Vector3();
+      let isFalling = false;
+      let rotationalVel = { x: 0, z: 0 };
 
-            renderer.render(scene, camera);
-        }
+      // Initialize (Hang in tree)
+      function reset() {
+        isFalling = false;
+        pos.copy(treeTopPos);
+        vel.set(0, 0, 0);
+        rotationalVel = { x: 0, z: 0 };
 
-        animate();
+        coconut.position.copy(pos);
+        coconut.rotation.set(0, 0, 0);
 
-        // --- 5. INTERACTION ---
-        const btn = document.getElementById('dropBtn');
-        
-        btn.addEventListener('click', () => {
-            // If it's already on the ground, reset first
-            if (coconut.position.y < 16 && !isFalling) {
-                reset();
-                // Short delay before dropping automatically for effect
-                setTimeout(dropCoconut, 100); 
+        document.getElementById("status").innerText =
+          "Coconut is hanging in the tree.";
+      }
+
+      reset();
+
+      // The Drop Logic
+      function dropCoconut() {
+        if (isFalling) return; // Prevent double clicks
+
+        isFalling = true;
+        document.getElementById("status").innerText = "Gravity in action!";
+
+        // Initial Push (Random direction to simulate breaking off)
+        vel.x = (Math.random() - 0.5) * 0.1;
+        vel.z = (Math.random() - 0.5) * 0.1;
+
+        // Random tumble spin
+        rotationalVel.x = Math.random() * 0.1;
+        rotationalVel.z = Math.random() * 0.1;
+      }
+
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        if (isFalling) {
+          // Apply Gravity
+          vel.y += gravity;
+
+          // Update Position
+          pos.add(vel);
+
+          // Update Rotation (Tumbling)
+          coconut.rotation.x += rotationalVel.x;
+          coconut.rotation.z += rotationalVel.z;
+
+          // --- COLLISION DETECTION ---
+          if (pos.y <= groundLevel) {
+            pos.y = groundLevel;
+
+            // Bounce Check
+            if (Math.abs(vel.y) > 0.15) {
+              // Bounce with energy loss (restitution)
+              vel.y = -vel.y * 0.4;
+
+              // Friction: Slow down horizontal movement on impact
+              vel.x *= 0.7;
+              vel.z *= 0.7;
+
+              // Dampen rotation on impact
+              rotationalVel.x *= 0.6;
+              rotationalVel.z *= 0.6;
             } else {
-                dropCoconut();
-            }
-        });
+              // Stop if energy is low (Rolling / Resting)
+              vel.y = 0;
+              pos.y = groundLevel; // Ensure it sits on ground
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+              // Apply rolling friction
+              vel.x *= 0.92;
+              vel.z *= 0.92;
+              rotationalVel.x *= 0.9;
+              rotationalVel.z *= 0.9;
+
+              // Rolling visuals based on velocity
+              coconut.rotation.z -= vel.x;
+              coconut.rotation.x += vel.z;
+
+              if (Math.abs(vel.x) < 0.001 && Math.abs(vel.z) < 0.001) {
+                document.getElementById("status").innerText =
+                  "Landed. Press Drop to restart.";
+                isFalling = false; // Stop physics calculation
+              }
+            }
+          }
+
+          coconut.position.copy(pos);
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // --- 5. INTERACTION ---
+      const btn = document.getElementById("dropBtn");
+
+      btn.addEventListener("click", () => {
+        // If it's already on the ground, reset first
+        if (coconut.position.y < 16 && !isFalling) {
+          reset();
+          // Short delay before dropping automatically for effect
+          setTimeout(dropCoconut, 100);
+        } else {
+          dropCoconut();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     </script>
-</body>
+  </body>
 </html>

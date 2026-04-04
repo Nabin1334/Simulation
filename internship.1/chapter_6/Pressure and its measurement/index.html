@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pressure and it's measurement</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 16px;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1600px;
+        background: rgba(15, 23, 42, 0.95);
+        border-radius: 24px;
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        margin: 20px auto;
+        min-height: 100vh;
+      }
+
+      .header {
+        background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+        padding: 20px 30px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.1) 50%,
+          transparent 70%
+        );
+        animation: shimmer 3s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .formula-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 25px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+      }
+
+      .main-formula {
+        font-size: 2.2rem;
+        font-family: "Cambria Math", "Times New Roman", serif;
+        background: linear-gradient(45deg, #ffffff, #dbeafe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .formula-explanation {
+        color: #dbeafe;
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: row;
+        min-height: 700px;
+        width: 100%;
+      }
+
+      /* LEFT SIDEBAR - DESCRIPTION BOX */
+      .left-sidebar {
+        width: 300px;
+        min-width: 240px;
+        max-width: 100vw;
+        background: rgba(30, 41, 59, 0.9);
+        padding: 20px;
+        border-right: 2px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .info-card {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+      }
+
+      .info-title {
+        font-size: 1.3rem;
+        color: #fbbf24;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+      }
+
+      .info-title::before {
+        content: "📝";
+        font-size: 1.2em;
+      }
+
+      .info-text {
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .formula-breakdown {
+        background: rgba(59, 130, 246, 0.1);
+        padding: 15px;
+        border-radius: 12px;
+        border-left: 4px solid #3b82f6;
+        margin: 15px 0;
+      }
+
+      .formula-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+      }
+
+      .formula-symbol {
+        color: #fbbf24;
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 1.1rem;
+      }
+
+      .formula-desc {
+        color: #94a3b8;
+      }
+
+      .unit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .unit-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .unit-value {
+        color: #fbbf24;
+        font-size: 1rem;
+        font-weight: bold;
+      }
+
+      .unit-label {
+        color: #94a3b8;
+        font-size: 0.8rem;
+      }
+
+      .pressure-item-small {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        margin-bottom: 10px;
+      }
+
+      .pressure-label-small {
+        color: #dbeafe;
+        font-size: 0.95rem;
+      }
+
+      .pressure-value-small {
+        color: #fbbf24;
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+
+      /* RIGHT CONTENT - SIMULATION AREA */
+      .right-content {
+        flex: 1;
+        min-width: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .simulation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .simulation-title {
+        font-size: 1.8rem;
+        color: white;
+        font-weight: 600;
+      }
+
+      .live-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(34, 197, 94, 0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .live-dot {
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .live-text {
+        color: #22c55e;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .canvas-container {
+        flex: 1;
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          inset 0 4px 20px rgba(0, 0, 0, 0.3),
+          0 8px 30px rgba(0, 0, 0, 0.3);
+        min-height: 300px;
+        min-width: 0;
+        cursor: grab;
+        position: relative;
+      }
+
+      .canvas-container.dragging {
+        cursor: grabbing;
+      }
+
+      #canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        pointer-events: none;
+      }
+
+      .drag-instruction {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: #fbbf24;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        border: 1px solid #fbbf24;
+        pointer-events: none;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        white-space: nowrap;
+        transition: opacity 0.3s ease;
+      }
+
+      .control-row {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        background: rgba(30, 41, 59, 0.9);
+        padding: 15px 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .control-label {
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: 600;
+        min-width: 60px;
+      }
+
+      .control-value-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        color: #fbbf24;
+        font-weight: bold;
+        font-size: 1.2rem;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .measurement-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        width: 100%;
+      }
+
+      .measurement-card {
+        background: linear-gradient(
+          145deg,
+          rgba(15, 23, 42, 0.8),
+          rgba(30, 41, 59, 0.8)
+        );
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      .measurement-label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .measurement-value {
+        color: white;
+        font-size: 1.6rem;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+      }
+
+      .measurement-unit {
+        color: #fbbf24;
+        font-size: 0.9rem;
+        margin-left: 4px;
+      }
+
+      .pressure-bar-container {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .pressure-bar {
+        height: 20px;
+        background: linear-gradient(90deg, #1e40af, #3b82f6);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+
+      .pressure-level {
+        height: 100%;
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.1s ease;
+      }
+
+      .pressure-bar-labels {
+        display: flex;
+        justify-content: space-between;
+        color: #94a3b8;
+        font-size: 0.8rem;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 15px;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(15, 23, 42, 0.5);
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .main-content {
+          flex-direction: column;
+        }
+        .left-sidebar {
+          width: 100%;
+          min-width: 0;
+          border-right: none;
+          border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .right-content {
+          padding: 16px 6vw;
+        }
+      }
+
+      @media (max-width: 700px) {
+        html {
+          font-size: 14px;
+        }
+        .container {
+          border-radius: 0;
+          margin: 0;
+          min-height: 100vh;
+        }
+        .main-content {
+          flex-direction: column;
+          min-height: unset;
+        }
+        .left-sidebar {
+          width: 100%;
+          min-width: 0;
+          padding: 10px;
+          border-radius: 0;
+        }
+        .right-content {
+          padding: 10px 2vw;
+        }
+        .canvas-container {
+          min-height: 180px;
+          border-radius: 10px;
+        }
+        .measurement-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .footer {
+          font-size: 0.75rem;
+          padding: 8px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        html {
+          font-size: 12px;
+        }
+        .container {
+          padding: 0;
+        }
+        .right-content {
+          padding: 4px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="header-content">
+          <h1>Pressure and it's measurement</h1>
+          <div class="formula-box">
+            <div class="main-formula">P = F / A</div>
+            <div class="formula-explanation">Pressure = Force ÷ Area</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <!-- LEFT SIDEBAR - DESCRIPTION BOX -->
+        <div class="left-sidebar">
+          <div class="info-card">
+            <div class="info-title">What is Pressure?</div>
+            <div class="info-text">
+              Pressure is the amount of force applied perpendicular to a surface
+              per unit area. The formula for pressure is:
+            </div>
+            <div class="formula-breakdown">
+              <div class="formula-item">
+                <span class="formula-symbol">P</span>
+                <span class="formula-desc">= Pressure (Pascal)</span>
+              </div>
+              <div class="formula-item">
+                <span class="formula-symbol">F</span>
+                <span class="formula-desc">= Force (Newton)</span>
+              </div>
+              <div class="formula-item">
+                <span class="formula-symbol">A</span>
+                <span class="formula-desc">= Area (m²)</span>
+              </div>
+            </div>
+            <div class="info-text">
+              <strong>👇 Drag DOWN to press the pencil into the foam</strong
+              ><br />
+              The floating rings disappear when the pencil touches the foam!
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">Current Values</div>
+            <div class="pressure-item-small">
+              <span class="pressure-label-small">Force (F):</span>
+              <span class="pressure-value-small" id="sidebar-force">0 N</span>
+            </div>
+            <div class="pressure-item-small">
+              <span class="pressure-label-small">Pressure (P):</span>
+              <span class="pressure-value-small" id="sidebar-pressure"
+                >0 Pa</span
+              >
+            </div>
+            <div class="pressure-item-small">
+              <span class="pressure-label-small">Area (A):</span>
+              <span class="pressure-value-small">0.0025 m²</span>
+            </div>
+            <div class="pressure-item-small">
+              <span class="pressure-label-small">Depth:</span>
+              <span class="pressure-value-small" id="sidebar-depth">0%</span>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">Units</div>
+            <div class="unit-grid">
+              <div class="unit-item">
+                <div class="unit-value">Pa</div>
+                <div class="unit-label">Pascal</div>
+              </div>
+              <div class="unit-item">
+                <div class="unit-value">N</div>
+                <div class="unit-label">Newton</div>
+              </div>
+              <div class="unit-item">
+                <div class="unit-value">m²</div>
+                <div class="unit-label">Square meter</div>
+              </div>
+              <div class="unit-item">
+                <div class="unit-value">cm²</div>
+                <div class="unit-label">25 cm²</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT CONTENT - SIMULATION AREA -->
+        <div class="right-content">
+          <div class="simulation-header">
+            <div class="simulation-title">Pencil Floating Above Foam</div>
+            <div class="live-indicator">
+              <div class="live-dot"></div>
+              <div class="live-text">LIVE</div>
+            </div>
+          </div>
+
+          <div class="canvas-container" id="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div class="drag-instruction" id="drag-instruction">
+              👇 Drag DOWN to press pencil into foam 👇
+            </div>
+          </div>
+
+          <!-- Control Row (shows values) -->
+          <div class="control-row">
+            <span class="control-label">Force:</span>
+            <span class="control-value-box" id="force-display">0 N</span>
+            <span style="color: #94a3b8; font-size: 0.9rem"
+              >← Drag down to increase force →</span
+            >
+          </div>
+
+          <!-- Measurement Cards -->
+          <div class="measurement-grid">
+            <div class="measurement-card">
+              <div class="measurement-label">Force Applied</div>
+              <div class="measurement-value" id="measurement-force">
+                0<span class="measurement-unit">N</span>
+              </div>
+            </div>
+            <div class="measurement-card">
+              <div class="measurement-label">Pressure</div>
+              <div class="measurement-value" id="measurement-pressure">
+                0<span class="measurement-unit">kPa</span>
+              </div>
+            </div>
+            <div class="measurement-card">
+              <div class="measurement-label">Indentation</div>
+              <div class="measurement-value" id="measurement-indent">
+                0<span class="measurement-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pressure Bar -->
+          <div class="pressure-bar-container">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+              "
+            >
+              <span>Pressure Level</span>
+              <span id="pressure-percent">0%</span>
+            </div>
+            <div class="pressure-bar">
+              <div
+                class="pressure-level"
+                id="pressure-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <div class="pressure-bar-labels">
+              <span>0 Pa</span>
+              <span>50 kPa</span>
+              <span>100 kPa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Pressure and its Measurement - Pencil floats, rings disappear when
+        touching foam
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const AREA = 0.0025; // m²
+        const MAX_FORCE = 200; // N
+        const MAX_INDENT = 70; // % max indentation
+        const PENCIL_LENGTH = 150; // pixels
+        const FLOAT_HEIGHT = 40; // Pixels above foam when no force
+        const TOUCH_FORCE = 10; // Force at which pencil touches foam
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const container = document.getElementById("canvas-container");
+
+        // Display elements
+        const forceDisplay = document.getElementById("force-display");
+        const sidebarForce = document.getElementById("sidebar-force");
+        const sidebarPressure = document.getElementById("sidebar-pressure");
+        const sidebarDepth = document.getElementById("sidebar-depth");
+        const measurementForce = document.getElementById("measurement-force");
+        const measurementPressure = document.getElementById(
+          "measurement-pressure",
+        );
+        const measurementIndent = document.getElementById("measurement-indent");
+        const pressurePercent = document.getElementById("pressure-percent");
+        const pressureBar = document.getElementById("pressure-bar");
+        const dragInstruction = document.getElementById("drag-instruction");
+
+        // State
+        let force = 0; // Current force in Newtons
+        let isDragging = false;
+        let startY = 0;
+        let startForce = 0;
+
+        function resizeCanvas() {
+          canvas.width = container.clientWidth;
+          canvas.height = container.clientHeight;
+          drawScene();
+        }
+
+        function formatNumber(num) {
+          if (num >= 1000) {
+            return (num / 1000).toFixed(1) + "k";
+          }
+          return Math.round(num).toString();
+        }
+
+        function updateDisplays() {
+          const pressure = force / AREA;
+          const indentPercent = (force / MAX_FORCE) * MAX_INDENT;
+          const pressureKPa = pressure / 1000;
+
+          // Update all displays
+          forceDisplay.innerText = Math.round(force) + " N";
+          sidebarForce.innerText = Math.round(force) + " N";
+          sidebarPressure.innerText =
+            Math.round(pressure).toLocaleString() + " Pa";
+          sidebarDepth.innerText = Math.round(indentPercent) + "%";
+          measurementForce.innerHTML =
+            Math.round(force) + '<span class="measurement-unit">N</span>';
+          measurementPressure.innerHTML =
+            formatNumber(pressureKPa) +
+            '<span class="measurement-unit">kPa</span>';
+          measurementIndent.innerHTML =
+            Math.round(indentPercent) +
+            '<span class="measurement-unit">%</span>';
+
+          const barPercent = Math.min(100, (pressure / 100000) * 100);
+          pressureBar.style.width = barPercent + "%";
+          pressurePercent.innerText = Math.round(barPercent) + "%";
+
+          drawScene();
+        }
+
+        function setForce(newForce) {
+          force = Math.max(0, Math.min(MAX_FORCE, newForce));
+          updateDisplays();
+        }
+
+        function drawScene() {
+          const w = canvas.width;
+          const h = canvas.height;
+
+          if (w === 0 || h === 0) return;
+
+          ctx.clearRect(0, 0, w, h);
+
+          // Background
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(0, 0, w, h);
+
+          // Floor line
+          ctx.beginPath();
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 2;
+          ctx.moveTo(0, h * 0.7);
+          ctx.lineTo(w, h * 0.7);
+          ctx.stroke();
+
+          // RECTANGULAR FOAM BLOCK
+          const blockWidth = w * 0.4;
+          const blockLeft = (w - blockWidth) / 2;
+          const blockBottom = h * 0.7;
+          const blockHeight = h * 0.25;
+          const blockTop = blockBottom - blockHeight;
+
+          // PENCIL position - floats above foam
+          const pencilX = blockLeft + blockWidth * 0.5; // Center of block
+
+          // Calculate indentation based on force
+          const indentPercent = (force / MAX_FORCE) * MAX_INDENT;
+          const maxIndentDepth = 45;
+          const indentDepth = (indentPercent / 100) * maxIndentDepth;
+          const indentWidth = 50 + force * 0.3;
+
+          // Calculate if pencil is touching foam
+          const isTouching = force >= TOUCH_FORCE;
+
+          // Pencil tip Y position
+          // When force = 0: tip is FLOAT_HEIGHT above foam
+          // When force = TOUCH_FORCE: tip exactly touches foam surface
+          // When force > TOUCH_FORCE: tip sinks into foam
+          let pencilTipY;
+          if (force <= TOUCH_FORCE) {
+            // Floating above or just touching
+            const t = force / TOUCH_FORCE;
+            pencilTipY = blockTop - FLOAT_HEIGHT + t * FLOAT_HEIGHT;
+          } else {
+            // Sinking into foam
+            const sinkForce = force - TOUCH_FORCE;
+            const maxSink = MAX_FORCE - TOUCH_FORCE;
+            const sinkPercent = sinkForce / maxSink;
+            pencilTipY = blockTop + sinkPercent * indentDepth;
+          }
+
+          // Draw FOAM BLOCK
+          ctx.save();
+          ctx.shadowColor = "rgba(0,0,0,0.5)";
+          ctx.shadowBlur = 15;
+          ctx.shadowOffsetY = 5;
+
+          // Foam gradient
+          const foamGradient = ctx.createLinearGradient(
+            blockLeft,
+            blockTop,
+            blockLeft + blockWidth,
+            blockBottom,
+          );
+          foamGradient.addColorStop(0, "#d2b48c");
+          foamGradient.addColorStop(1, "#b89a7a");
+
+          // Draw foam shape (with indentation if force applied)
+          ctx.beginPath();
+          ctx.moveTo(blockLeft, blockTop);
+
+          for (let x = blockLeft; x <= blockLeft + blockWidth; x += 5) {
+            if (force >= TOUCH_FORCE) {
+              const distanceFromCenter = Math.abs(x - pencilX);
+
+              if (distanceFromCenter < indentWidth) {
+                const t = distanceFromCenter / indentWidth;
+                const indentAmount = indentDepth * (1 - t * t);
+                ctx.lineTo(x, blockTop + indentAmount);
+              } else {
+                ctx.lineTo(x, blockTop);
+              }
+            } else {
+              ctx.lineTo(x, blockTop);
+            }
+          }
+
+          ctx.lineTo(blockLeft + blockWidth, blockBottom);
+          ctx.lineTo(blockLeft, blockBottom);
+          ctx.closePath();
+
+          ctx.fillStyle = foamGradient;
+          ctx.fill();
+          ctx.strokeStyle = "#8b6b4b";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          // Grid lines
+          ctx.strokeStyle = "#a58362";
+          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = 0.6;
+
+          // Horizontal grid lines (deformed when force applied)
+          for (let i = 1; i < 5; i++) {
+            const baseY = blockTop + (blockHeight / 5) * i;
+
+            ctx.beginPath();
+            ctx.moveTo(blockLeft, baseY);
+
+            for (let x = blockLeft; x <= blockLeft + blockWidth; x += 3) {
+              if (force >= TOUCH_FORCE) {
+                const distanceFromCenter = Math.abs(x - pencilX);
+
+                if (distanceFromCenter < indentWidth) {
+                  const depthFactor = 1 - i / 5.5;
+                  const t = distanceFromCenter / indentWidth;
+                  const indentAmount = indentDepth * (1 - t * t) * depthFactor;
+                  ctx.lineTo(x, baseY + indentAmount);
+                } else {
+                  ctx.lineTo(x, baseY);
+                }
+              } else {
+                ctx.lineTo(x, baseY);
+              }
+            }
+            ctx.stroke();
+          }
+
+          ctx.restore();
+
+          // Draw darker compressed area (only when force applied)
+          if (force >= TOUCH_FORCE) {
+            ctx.save();
+            ctx.beginPath();
+            for (
+              let x = pencilX - indentWidth;
+              x <= pencilX + indentWidth;
+              x += 2
+            ) {
+              const distanceFromCenter = Math.abs(x - pencilX);
+              const t = distanceFromCenter / indentWidth;
+              const y = blockTop + indentDepth * (1 - t * t);
+
+              if (x === pencilX - indentWidth) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+            ctx.lineTo(pencilX + indentWidth, blockTop + indentDepth * 0.3);
+            ctx.lineTo(pencilX - indentWidth, blockTop + indentDepth * 0.3);
+            ctx.closePath();
+
+            ctx.fillStyle = "#6b4f3a";
+            ctx.globalAlpha = 0.3;
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // Draw PENCIL
+          ctx.save();
+
+          // Pencil tip at calculated position
+          const tipX = pencilX;
+          const tipY = pencilTipY;
+
+          // Draw pencil (vertical)
+          if (!isTouching) {
+            // Floating - add glow
+            ctx.shadowColor = "#fbbf24";
+            ctx.shadowBlur = 15;
+          } else {
+            // Touching - normal shadow
+            ctx.shadowColor = "rgba(0,0,0,0.3)";
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 2;
+          }
+
+          // Pencil tip (graphite)
+          ctx.fillStyle = "#2d2d2d";
+          ctx.beginPath();
+          ctx.moveTo(tipX - 5, tipY);
+          ctx.lineTo(tipX, tipY - 18);
+          ctx.lineTo(tipX + 5, tipY);
+          ctx.closePath();
+          ctx.fill();
+
+          // Pencil body (yellow)
+          ctx.fillStyle = "#f5e56b";
+          ctx.fillRect(
+            tipX - 6,
+            tipY - PENCIL_LENGTH + 18,
+            12,
+            PENCIL_LENGTH - 28,
+          );
+
+          // Eraser (pink)
+          ctx.fillStyle = "#ff9b9b";
+          ctx.fillRect(tipX - 6, tipY - PENCIL_LENGTH + 5, 12, 13);
+
+          // Metal band
+          ctx.fillStyle = "#c0c0c0";
+          ctx.fillRect(tipX - 6, tipY - PENCIL_LENGTH + 18, 12, 5);
+
+          // Wood grain lines
+          ctx.strokeStyle = "#b89a4a";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(tipX - 3, tipY - PENCIL_LENGTH + 23);
+          ctx.lineTo(tipX - 3, tipY - 5);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(tipX + 3, tipY - PENCIL_LENGTH + 23);
+          ctx.lineTo(tipX + 3, tipY - 5);
+          ctx.stroke();
+
+          ctx.restore();
+
+          // Draw floating rings ONLY when not touching
+          if (!isTouching) {
+            ctx.save();
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.globalAlpha = 0.5;
+
+            // Draw floating rings
+            ctx.beginPath();
+            ctx.ellipse(pencilX, blockTop - 20, 30, 10, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(pencilX, blockTop - 20, 40, 15, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.restore();
+          }
+
+          // Draw force/depth text
+          ctx.save();
+          ctx.font = 'bold 14px "Segoe UI"';
+          ctx.fillStyle = "#fbbf24";
+          ctx.shadowColor = "#000";
+          ctx.shadowBlur = 5;
+          ctx.fillText(
+            `Force: ${Math.round(force)} N`,
+            blockLeft + 20,
+            blockTop - 60,
+          );
+          ctx.fillText(
+            `Depth: ${Math.round(indentPercent)}%`,
+            blockLeft + 20,
+            blockTop - 40,
+          );
+
+          // Show touch status
+          if (isTouching) {
+            ctx.fillStyle = "#22c55e";
+            ctx.fillText(`● Touching foam`, blockLeft + 20, blockTop - 20);
+          } else {
+            ctx.fillStyle = "#fbbf24";
+            ctx.fillText(`○ Floating`, blockLeft + 20, blockTop - 20);
+          }
+          ctx.restore();
+
+          // Hide instruction when dragging
+          if (isDragging) {
+            dragInstruction.style.opacity = "0";
+          } else {
+            dragInstruction.style.opacity = "1";
+          }
+        }
+
+        // Mouse event handlers for dragging
+        function handleMouseDown(e) {
+          e.preventDefault();
+          isDragging = true;
+          startY = e.clientY;
+          startForce = force;
+          container.classList.add("dragging");
+          dragInstruction.style.opacity = "0";
+        }
+
+        function handleMouseMove(e) {
+          if (!isDragging) return;
+
+          e.preventDefault();
+
+          // Calculate vertical distance moved
+          const deltaY = startY - e.clientY; // Negative when dragging down
+
+          // DRAGGING DOWN increases force
+          const forceDelta = (-deltaY / 200) * MAX_FORCE;
+          const newForce = startForce + forceDelta;
+
+          setForce(newForce);
+        }
+
+        function handleMouseUp(e) {
+          if (isDragging) {
+            isDragging = false;
+            container.classList.remove("dragging");
+          }
+        }
+
+        function handleMouseLeave(e) {
+          if (isDragging) {
+            isDragging = false;
+            container.classList.remove("dragging");
+          }
+        }
+
+        // Touch events for mobile
+        function handleTouchStart(e) {
+          e.preventDefault();
+          const touch = e.touches[0];
+
+          isDragging = true;
+          startY = touch.clientY;
+          startForce = force;
+          container.classList.add("dragging");
+          dragInstruction.style.opacity = "0";
+        }
+
+        function handleTouchMove(e) {
+          if (!isDragging) return;
+          e.preventDefault();
+
+          const touch = e.touches[0];
+          const deltaY = startY - touch.clientY;
+          const forceDelta = (-deltaY / 200) * MAX_FORCE;
+          const newForce = startForce + forceDelta;
+
+          setForce(newForce);
+        }
+
+        function handleTouchEnd(e) {
+          isDragging = false;
+          container.classList.remove("dragging");
+        }
+
+        // Add event listeners
+        container.addEventListener("mousedown", handleMouseDown);
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+        container.addEventListener("mouseleave", handleMouseLeave);
+
+        // Touch events
+        container.addEventListener("touchstart", handleTouchStart, {
+          passive: false,
+        });
+        window.addEventListener("touchmove", handleTouchMove, {
+          passive: false,
+        });
+        window.addEventListener("touchend", handleTouchEnd);
+
+        // Initialize
+        window.addEventListener("resize", function () {
+          resizeCanvas();
+        });
+
+        setTimeout(function () {
+          resizeCanvas();
+          setForce(0); // Start with pencil floating
+        }, 100);
+      });
+    </script>
+  </body>
+</html>

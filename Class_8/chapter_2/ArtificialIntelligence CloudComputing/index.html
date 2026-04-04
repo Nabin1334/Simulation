@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI & Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AI & Cloud — Chatty Robot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -50,6 +50,7 @@
             padding: 15px;
             position: relative;
             z-index: 1;
+            width: 100%;
         }
         
         header {
@@ -698,7 +699,8 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -707,209 +709,129 @@
         }
 
         .modal-content {
-            background-color: rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #1e2a5e, #2a1e5e);
             backdrop-filter: blur(15px);
-            padding: 20px;
+            padding: 25px;
             border: 3px solid #FFD54F;
             width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: pop-in 0.3s;
-            max-height: 90vh;
+            max-width: 520px;
+            border-radius: 32px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,213,79,0.2);
+            animation: modalPop 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+            max-height: 85vh;
             overflow-y: auto;
+        }
+        
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.92) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .close {
             color: #FFD54F;
             float: right;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            width: 30px;
-            height: 30px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(0,0,0,0.3);
-            margin: -10px -10px 10px 0;
+            background: rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            margin: -8px -8px 12px 0;
         }
 
         .close:hover,
         .close:focus {
             color: #fff;
-            background: rgba(0,0,0,0.5);
-        }
-
-        /* ====================== RESPONSIVE BREAKPOINTS ====================== */
-        
-        /* Small phones (up to 360px) */
-        @media (max-width: 360px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .tech-button {
-                width: 120px;
-                height: 120px;
-            }
-            
-            .main-content {
-                padding: 15px;
-            }
-            
-            .simulation-area {
-                padding: 15px;
-            }
-            
-            .interactive-box {
-                min-height: 200px;
-                padding: 12px;
-            }
+            background: rgba(255,213,79,0.4);
+            transform: rotate(90deg);
         }
         
-        /* Tablets and larger phones (min-width: 480px) */
-        @media (min-width: 480px) {
-            .input-wrapper {
-                flex-direction: row;
-            }
-            
-            .interactive-box {
-                width: calc(50% - 20px);
-                max-width: none;
-            }
+        .modal-icon {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 12px;
         }
         
-        /* Tablets (min-width: 768px) */
-        @media (min-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .tech-selector {
-                gap: 30px;
-            }
-            
-            .interactive-area {
-                gap: 25px;
-            }
-            
-            .interactive-box {
-                width: calc(50% - 25px);
-            }
+        .modal-title {
+            font-size: 1.9rem;
+            color: #FFD54F;
+            text-align: center;
+            margin-bottom: 18px;
+            border-bottom: 2px dashed #FFD54F;
+            display: inline-block;
+            width: auto;
+            padding-bottom: 6px;
         }
         
-        /* Desktop (min-width: 1024px) */
-        @media (min-width: 1024px) {
-            .interactive-box {
-                width: calc(33.333% - 25px);
-            }
-            
+        .modal-feature-list {
+            text-align: left;
+            margin-top: 18px;
+            list-style: none;
+        }
+        
+        .modal-feature-list li {
+            margin: 14px 0;
+            padding-left: 32px;
+            position: relative;
+            font-size: 1.05rem;
+            line-height: 1.45;
+        }
+        
+        .modal-feature-list li i {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: #FFD54F;
+            font-size: 1.2rem;
+        }
+        
+        /* ====================== RESPONSIVE ====================== */
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .main-content { padding: 15px; }
+            .interactive-box { width: 100%; max-width: 100%; }
+            .tech-button { width: 140px; height: 140px; }
+            .modal-content { padding: 18px; max-width: 94%; }
+            .modal-title { font-size: 1.5rem; }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            .interactive-box { width: calc(50% - 20px); max-width: none; }
+            .tech-button { width: 160px; height: 160px; }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .interactive-box { width: calc(33.33% - 20px); }
+        }
+        
+        @media (min-width: 1025px) {
+            .interactive-box { width: calc(20% - 20px); }
             .interactive-box:hover {
                 background-color: rgba(255, 255, 255, 0.25);
                 transform: translateY(-10px) scale(1.03);
                 border-style: solid;
-                border-color: #FFD54F;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            }
-            
-            .interactive-box:hover::before {
-                transform: scaleX(1);
-            }
-            
-            .tech-button:hover {
-                transform: translateY(-8px) scale(1.05);
-                box-shadow: 0 14px 0 #FF6F00, 0 0 30px rgba(255, 111, 0, 0.4);
-            }
-            
-            .tech-button:hover .button-icon {
-                transform: scale(1.2) rotate(15deg);
-            }
-            
-            .action-button:hover {
-                background: linear-gradient(145deg, #FFB74D, #FF9800);
-                transform: translateY(-5px);
-                box-shadow: 0 9px 0 #F57C00, 0 5px 20px rgba(255, 152, 0, 0.4);
             }
         }
         
-        /* Large screens (min-width: 1200px) */
-        @media (min-width: 1200px) {
-            .interactive-box {
-                width: calc(20% - 25px);
-            }
+        @media (orientation: landscape) and (max-height: 550px) {
+            .header-characters { display: none; }
+            .simulation-area { min-height: auto; }
+            .interactive-box { min-height: 170px; }
         }
         
-        /* Landscape orientation */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .header-characters {
-                display: none;
-            }
-            
-            .simulation-title {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-            .simulation-description {
-                font-size: 1rem;
-                margin-bottom: 15px;
-            }
-            
-            .interactive-box {
-                min-height: 180px;
-                padding: 10px;
-            }
-            
-            .main-content {
-                padding: 15px;
-            }
-        }
-        
-        /* Prevent text size adjustment on orientation change */
-        @media (orientation: landscape) {
-            html {
-                -webkit-text-size-adjust: 100%;
-                text-size-adjust: 100%;
-            }
-        }
-        
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .tech-button {
-                border: 3px solid white;
-            }
-            
-            .main-content {
-                border: 3px solid white;
-            }
-        }
-        
-        /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-        
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
-            }
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
-    <!-- Same HTML content as before, just with improved responsive classes -->
     <div class="floating-shapes" id="floating-shapes"></div>
     
-    <!-- Click Counter -->
     <div class="click-counter" id="click-counter">
         <i class="fas fa-mouse-pointer"></i>
         <span>Clicks: <span id="click-count">0</span></span>
@@ -919,7 +841,6 @@
         <header>
             <h1>🚀 Artificial Intelligence & Cloud Computing 🌟</h1>
             <p class="subtitle">Explore the amazing world of technology!</p>
-            
             <div class="header-characters">
                 <div class="character">🤖</div>
                 <div class="character">☁️</div>
@@ -954,9 +875,7 @@
                         <div class="ai-brain">🧠</div>
                         <p class="interactive-content">AI can recognize objects in pictures using computer vision!</p>
                         <div class="tooltip">
-                            <button id="detect-objects" class="action-button">
-                                <i class="fas fa-search"></i> Detect
-                            </button>
+                            <button id="detect-objects" class="action-button"><i class="fas fa-search"></i> Detect</button>
                             <span class="tooltip-text">Click to see AI recognize objects!</span>
                         </div>
                     </div>
@@ -966,11 +885,9 @@
                         <div class="ai-brain">🤖</div>
                         <p class="interactive-content">Ask AI a question and watch it respond!</p>
                         <div class="input-wrapper">
-                            <input type="text" id="ai-question" placeholder="Ask about AI...">
+                            <input type="text" id="ai-question" placeholder="Say anything... I'm listening 👂">
                             <div class="tooltip">
-                                <button id="ask-ai" class="action-button">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
+                                <button id="ask-ai" class="action-button"><i class="fas fa-paper-plane"></i></button>
                                 <span class="tooltip-text">Tap to ask AI!</span>
                             </div>
                         </div>
@@ -980,36 +897,21 @@
                         <h3 class="interactive-title">🎯 Pattern Finder</h3>
                         <div class="ai-brain">🔍</div>
                         <p class="interactive-content">AI is amazing at finding patterns in data!</p>
-                        <div class="tooltip">
-                            <button id="find-pattern" class="action-button">
-                                <i class="fas fa-chart-line"></i> Find
-                            </button>
-                            <span class="tooltip-text">Discover AI patterns!</span>
-                        </div>
+                        <button id="find-pattern" class="action-button"><i class="fas fa-chart-line"></i> Find</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">🎨 Creative AI</h3>
                         <div class="ai-brain">🎭</div>
                         <p class="interactive-content">Watch AI generate creative ideas!</p>
-                        <div class="tooltip">
-                            <button id="creative-ai" class="action-button">
-                                <i class="fas fa-magic"></i> Create
-                            </button>
-                            <span class="tooltip-text">See AI creativity!</span>
-                        </div>
+                        <button id="creative-ai" class="action-button"><i class="fas fa-magic"></i> Create</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">📊 Learning Progress</h3>
                         <div class="ai-brain">📈</div>
                         <p class="interactive-content">See how AI learns and improves!</p>
-                        <div class="tooltip">
-                            <button id="ai-learning" class="action-button">
-                                <i class="fas fa-graduation-cap"></i> Learn
-                            </button>
-                            <span class="tooltip-text">Watch AI learn!</span>
-                        </div>
+                        <button id="ai-learning" class="action-button"><i class="fas fa-graduation-cap"></i> Learn</button>
                     </div>
                 </div>
             </div>
@@ -1026,68 +928,35 @@
                         <h3 class="interactive-title">💾 Store in Cloud</h3>
                         <div class="cloud-server">☁️</div>
                         <p class="interactive-content">Save files to cloud and access anywhere!</p>
-                        <div class="tooltip">
-                            <button id="save-cloud" class="action-button">
-                                <i class="fas fa-cloud-upload-alt"></i> Save
-                            </button>
-                            <span class="tooltip-text">Save files to cloud!</span>
-                        </div>
+                        <button id="save-cloud" class="action-button"><i class="fas fa-cloud-upload-alt"></i> Save</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">🌐 Connect</h3>
-                        <div class="connection">
-                            <div class="connection-dot"></div>
-                            <div class="connection-dot"></div>
-                            <div class="connection-dot"></div>
-                        </div>
+                        <div class="connection"><div class="connection-dot"></div><div class="connection-dot"></div><div class="connection-dot"></div></div>
                         <p class="interactive-content">Connect devices to cloud from anywhere!</p>
-                        <div class="tooltip">
-                            <button id="connect-cloud" class="action-button">
-                                <i class="fas fa-link"></i> Connect
-                            </button>
-                            <span class="tooltip-text">Connect devices!</span>
-                        </div>
+                        <button id="connect-cloud" class="action-button"><i class="fas fa-link"></i> Connect</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">⚡ Power</h3>
-                        <div class="cloud-icons">
-                            <div class="cloud-icon">💻</div>
-                            <div class="cloud-icon">📱</div>
-                            <div class="cloud-icon">🖥️</div>
-                        </div>
+                        <div class="cloud-icons"><div class="cloud-icon">💻</div><div class="cloud-icon">📱</div><div class="cloud-icon">🖥️</div></div>
                         <p class="interactive-content">The cloud powers many devices at once!</p>
-                        <div class="tooltip">
-                            <button id="cloud-power" class="action-button">
-                                <i class="fas fa-bolt"></i> Power
-                            </button>
-                            <span class="tooltip-text">See cloud power!</span>
-                        </div>
+                        <button id="cloud-power" class="action-button"><i class="fas fa-bolt"></i> Power</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">🔄 Sync</h3>
                         <div class="cloud-server">🔄</div>
                         <p class="interactive-content">See how cloud keeps everything synced!</p>
-                        <div class="tooltip">
-                            <button id="cloud-sync" class="action-button">
-                                <i class="fas fa-sync-alt"></i> Sync
-                            </button>
-                            <span class="tooltip-text">Watch cloud sync!</span>
-                        </div>
+                        <button id="cloud-sync" class="action-button"><i class="fas fa-sync-alt"></i> Sync</button>
                     </div>
                     
                     <div class="interactive-box">
                         <h3 class="interactive-title">🔒 Security</h3>
                         <div class="cloud-server">🛡️</div>
                         <p class="interactive-content">Learn how cloud keeps data safe!</p>
-                        <div class="tooltip">
-                            <button id="cloud-security" class="action-button">
-                                <i class="fas fa-shield-alt"></i> Secure
-                            </button>
-                            <span class="tooltip-text">See cloud security!</span>
-                        </div>
+                        <button id="cloud-security" class="action-button"><i class="fas fa-shield-alt"></i> Secure</button>
                     </div>
                 </div>
             </div>
@@ -1095,9 +964,7 @@
         
         <footer>
             <p>✨ AI and Cloud Computing make our digital world exciting and powerful! ✨</p>
-            <p style="margin-top: 10px; font-size: 0.9rem;">
-                💡 <span class="highlight">Tip:</span> Tap all buttons to discover how these technologies work!
-            </p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">💡 <span class="highlight">Tip:</span> Tap any feature button to see detailed pop-up explanations!</p>
         </footer>
     </div>
 
@@ -1108,8 +975,191 @@
         </div>
     </div>
 
-    <!-- Same JavaScript as before -->
-    <script src="index.js">
+    <script>
+        (function(){
+            let clickCount = 0;
+            const clickSpan = document.getElementById('click-count');
+            function updateClicks() { clickSpan.innerText = clickCount; }
+            document.body.addEventListener('click', (e) => { if(e.target.closest('button, .action-button, .tech-button')){ clickCount++; updateClicks(); } });
+            
+            // Modal handling
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modal-body');
+            function closeModal() { modal.classList.add('hidden'); }
+            document.querySelector('.close').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+            
+            function showPopup(title, icon, description, itemsList = []) {
+                let itemsHtml = '';
+                if(itemsList.length){
+                    itemsHtml = '<ul class="modal-feature-list">' + itemsList.map(item => `<li><i class="fas ${item.icon || 'fa-star'}"></i> ${item.text}</li>`).join('') + '</ul>';
+                }
+                const content = `
+                    <div class="modal-icon">${icon}</div>
+                    <div style="text-align:center;"><span class="modal-title">${title}</span></div>
+                    <p style="text-align:center; margin:18px 0 10px; font-size:1.1rem; line-height:1.45;">${description}</p>
+                    ${itemsHtml}
+                    <div style="margin-top:22px; text-align:center;">
+                        <button id="modal-close-btn" style="background:#FF9800; border:none; padding:10px 28px; border-radius:50px; color:white; font-weight:bold; font-size:1rem; cursor:pointer; transition:0.2s;">Got it ✨</button>
+                    </div>
+                `;
+                modalBody.innerHTML = content;
+                modal.classList.remove('hidden');
+                document.getElementById('modal-close-btn')?.addEventListener('click', closeModal);
+            }
+            
+            // ========== AI & Cloud MAIN BUTTONS - POPUPS REMOVED (only toggle functionality) ==========
+            // AI button - no popup, just toggle active state and switch simulation
+            // Cloud button - no popup, just toggle active state and switch simulation
+            
+            // ========== ALL OTHER BUTTONS: POPUP MODAL FOR EVERY FEATURE ==========
+            // Object Detective
+            document.getElementById('detect-objects').addEventListener('click', (e) => {
+                e.stopPropagation();
+                showPopup(
+                    "🔍 Object Detective", 
+                    "🖼️🔎", 
+                    "AI uses computer vision to detect objects, faces, and even emotions in images! It's trained on millions of pictures.",
+                    [
+                        { icon: "fa-camera", text: "Detects cats, dogs, cars, humans with 95%+ accuracy 🐱🚗" },
+                        { icon: "fa-smile", text: "Recognizes happy, sad, surprised faces 😊😢" },
+                        { icon: "fa-chart-line", text: "Used in self-driving cars & medical scans 🚗🏥" }
+                    ]
+                );
+            });
+            
+            // Chatty Robot button (ask AI)
+            document.getElementById('ask-ai').addEventListener('click', () => {
+                const userMsg = document.getElementById('ai-question').value.trim();
+                if(userMsg){
+                    showPopup("💬 Chatty Robot Reply", "🤖💬", `You asked: "${userMsg}"\n\nI'm your AI pal! I love chatting about tech, space, and fun facts. Keep exploring! 🚀`, [
+                        { icon: "fa-comment", text: "Ask me anything about AI, cloud, or the future!" },
+                        { icon: "fa-smile", text: "I learn from every conversation — thanks for chatting! 🌟" }
+                    ]);
+                } else {
+                    showPopup("💬 Chatty Robot", "🤖✨", "I'm your friendly AI! Ask me questions about AI, cloud, or just say hello. Let's discover together!", [
+                        { icon: "fa-comment-dots", text: "Type a question and tap send to see magic ✨" },
+                        { icon: "fa-lightbulb", text: "Tip: ask 'how does AI learn?' or 'tell me about cloud!'" }
+                    ]);
+                }
+                document.getElementById('ai-question').value = '';
+            });
+            document.getElementById('ai-question').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('ask-ai').click(); });
+            
+            // Pattern Finder
+            document.getElementById('find-pattern').addEventListener('click', () => {
+                showPopup("🎯 Pattern Finder", "📊🔍", "AI detects hidden patterns in data — from stock market trends to music preferences!", [
+                    { icon: "fa-chart-simple", text: "Finds trends humans might miss 📈" },
+                    { icon: "fa-music", text: "Recommends songs based on your taste 🎵" },
+                    { icon: "fa-robot", text: "Used in fraud detection & medical diagnosis 🏥" }
+                ]);
+            });
+            
+            // Creative AI
+            document.getElementById('creative-ai').addEventListener('click', () => {
+                showPopup("🎨 Creative AI", "🎭✨", "AI can generate art, poetry, music, and even invent new recipes! Let imagination run wild.", [
+                    { icon: "fa-palette", text: "Creates unique digital paintings 🖼️" },
+                    { icon: "fa-feather", text: "Writes poems and stories ✍️" },
+                    { icon: "fa-headphones", text: "Composes original melodies 🎶" }
+                ]);
+            });
+            
+            // AI Learning
+            document.getElementById('ai-learning').addEventListener('click', () => {
+                showPopup("📊 Learning Progress", "📈🧠", "AI learns through training: more data = smarter outcomes. It's like exercising a brain!", [
+                    { icon: "fa-chart-line", text: "Improves accuracy with each iteration 📊" },
+                    { icon: "fa-dumbbell", text: "Reinforcement learning: learns by trial & error 💪" },
+                    { icon: "fa-graduation-cap", text: "AI models get 'smarter' over time 🎓" }
+                ]);
+            });
+            
+            // Cloud buttons all popups
+            document.getElementById('save-cloud').addEventListener('click', () => {
+                showPopup("💾 Store in Cloud", "☁️💾", "Your files are stored on remote servers, accessible from any device with internet.", [
+                    { icon: "fa-cloud-upload-alt", text: "Upload photos, docs, and more securely 📁" },
+                    { icon: "fa-globe", text: "Access from anywhere on Earth 🌍" },
+                    { icon: "fa-infinity", text: "Virtually unlimited storage capacity ✨" }
+                ]);
+            });
+            
+            document.getElementById('connect-cloud').addEventListener('click', () => {
+                showPopup("🌐 Connect", "🔗🌍", "Connect smartphones, tablets, laptops, and IoT devices to the cloud for seamless sync.", [
+                    { icon: "fa-mobile-alt", text: "Sync across all your gadgets 📱💻" },
+                    { icon: "fa-wifi", text: "Real-time data updates 📡" },
+                    { icon: "fa-network-wired", text: "Creates a unified digital ecosystem 🌐" }
+                ]);
+            });
+            
+            document.getElementById('cloud-power').addEventListener('click', () => {
+                showPopup("⚡ Power", "💪⚡", "Cloud data centers provide massive computing power for apps, AI, and global services.", [
+                    { icon: "fa-database", text: "Millions of servers working together 🖥️" },
+                    { icon: "fa-charging-station", text: "On-demand scalability ⚡" },
+                    { icon: "fa-rocket", text: "Powers Netflix, Spotify, and more! 🚀" }
+                ]);
+            });
+            
+            document.getElementById('cloud-sync').addEventListener('click', () => {
+                showPopup("🔄 Sync", "🔄✨", "Any change you make updates instantly across all your devices — always up to date!", [
+                    { icon: "fa-sync-alt", text: "Automatic background synchronization 🔄" },
+                    { icon: "fa-check-circle", text: "No manual transfers needed ✅" },
+                    { icon: "fa-cloud-sun", text: "Work offline, sync when reconnected 🌤️" }
+                ]);
+            });
+            
+            document.getElementById('cloud-security').addEventListener('click', () => {
+                showPopup("🔒 Security", "🛡️🔐", "Cloud providers use encryption, firewalls, and AI threat detection to keep your data safe.", [
+                    { icon: "fa-lock", text: "AES-256 encryption for data at rest 🔒" },
+                    { icon: "fa-shield-virus", text: "24/7 threat monitoring 🛡️" },
+                    { icon: "fa-user-check", text: "Multi-factor authentication & access controls ✅" }
+                ]);
+            });
+            
+            // Tech switcher (AI/Cloud toggles) - NO POPUPS, just toggle functionality
+            const aiDiv = document.getElementById('ai-simulation');
+            const cloudDiv = document.getElementById('cloud-simulation');
+            const aiBtn = document.getElementById('ai-button');
+            const cloudBtn = document.getElementById('cloud-button');
+            
+            aiBtn.addEventListener('click', () => { 
+                aiBtn.classList.add('active'); 
+                cloudBtn.classList.remove('active'); 
+                aiDiv.classList.remove('hidden'); 
+                cloudDiv.classList.add('hidden'); 
+            });
+            
+            cloudBtn.addEventListener('click', () => { 
+                cloudBtn.classList.add('active'); 
+                aiBtn.classList.remove('active'); 
+                cloudDiv.classList.remove('hidden'); 
+                aiDiv.classList.add('hidden'); 
+            });
+            
+            // floating shapes
+            for(let i=0;i<45;i++){
+                let shape = document.createElement('div');
+                shape.classList.add('shape');
+                let size = Math.random()*70+20;
+                shape.style.width = size+'px';
+                shape.style.height = size+'px';
+                shape.style.left = Math.random()*100+'%';
+                shape.style.top = Math.random()*100+'%';
+                shape.style.animationDuration = 12+Math.random()*28+'s';
+                shape.style.animationDelay = Math.random()*18+'s';
+                shape.style.backgroundColor = `rgba(255,215,79,${Math.random()*0.28+0.05})`;
+                document.getElementById('floating-shapes').appendChild(shape);
+            }
+            
+            // initial friendly greeting popup (optional but nice - only for new visitors)
+            setTimeout(() => {
+                if(!localStorage.getItem('greetingShown')){
+                    showPopup("👋 Welcome to AI & Cloud World!", "🤖☁️✨", "Tap any feature button below to discover amazing facts about Artificial Intelligence and Cloud Computing! Every feature has a detailed pop-up explanation.", [
+                        { icon: "fa-robot", text: "AI learns, creates, and solves problems 🧠" },
+                        { icon: "fa-cloud", text: "Cloud gives you power and storage from anywhere 🌍" }
+                    ]);
+                    localStorage.setItem('greetingShown', 'true');
+                }
+            }, 500);
+        })();
     </script>
 </body>
 </html>

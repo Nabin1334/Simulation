@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+    />
+    <title>AI · Cloud · Robotics · colorful icons · class 8</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+
+    
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI", Roboto, "Comic Sans MS", "Chalkboard SE", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(
+          135deg,
+          #1b235a 0%,
+          #2f2b6b 50%,
+          #421c5c 100%
+        );
+        color: #fff;
+        min-height: 100vh;
+        overflow-x: hidden;
+        padding: 16px;
+      }
+
+      /* floating fun shapes */
+      .floating-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+      }
+      .bg-bubble {
+        position: absolute;
+        background: rgba(255, 190, 11, 0.08);
+        border-radius: 50%;
+        animation: floatAround 25s infinite alternate ease-in-out;
+      }
+      .bg-bubble:nth-child(odd) {
+        background: rgba(0, 255, 200, 0.06);
+      }
+      @keyframes floatAround {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        100% {
+          transform: translate(40px, -40px) scale(1.5);
+        }
+      }
+
+      .main-card {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(25, 30, 58, 0.7);
+        backdrop-filter: blur(15px);
+        border-radius: 60px 60px 40px 40px;
+        padding: 24px 20px 32px;
+        border: 4px solid #ffc764;
+        box-shadow:
+          0 30px 50px rgba(0, 0, 0, 0.6),
+          inset 0 2px 5px #fff9d0;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .header h1 {
+        font-size: 2.8rem;
+        background: linear-gradient(145deg, #ffb347, #ffe484, #76e4ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 6px 8px #00000060);
+      }
+      .header-sub {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        flex-wrap: wrap;
+      }
+      .header-sub span {
+        background: #ffffff22;
+        padding: 10px 28px;
+        border-radius: 60px;
+        border: 3px solid #ffb703;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #fffdcc;
+        box-shadow: 0 5px 0 #8b5f1a;
+      }
+
+      /* tab buttons - extra colorful - NOW 3 TABS */
+      .tab-bar {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin: 30px 0 25px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #264e7b;
+        border: 4px solid #ffb85b;
+        border-radius: 50px;
+        padding: 16px 36px;
+        width: 220px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+        box-shadow:
+          0 10px 0 #9b6424,
+          0 0 20px #ffb70380;
+        color: white;
+      }
+      .tab-btn i {
+        font-size: 3.2rem;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 6px 3px #00000070);
+      }
+      .tab-btn span {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-shadow: 3px 3px 0 #333;
+      }
+      .tab-btn.active {
+        background: linear-gradient(145deg, #f9a826, #ff6b4a);
+        transform: translateY(-6px);
+        box-shadow:
+          0 16px 0 #b45f1a,
+          0 0 40px #ffc107;
+        border-color: #fffac2;
+      }
+      .tab-btn:active {
+        transform: translateY(6px);
+        box-shadow: 0 4px 0 #9b6424;
+      }
+
+      /* panel */
+      .simu-panel {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 60px;
+        padding: 30px 20px;
+        border: 4px solid #ffb347;
+        margin-top: 10px;
+      }
+      .panel-title {
+        font-size: 2.3rem;
+        color: #fff1b5;
+        text-align: center;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        text-shadow: 4px 4px 0 #42213d;
+      }
+      .panel-desc {
+        text-align: center;
+        color: #e6f0ff;
+        font-size: 1.2rem;
+        max-width: 750px;
+        margin: 0 auto 30px;
+        background: #00000040;
+        padding: 12px 25px;
+        border-radius: 60px;
+        border: 2px dashed #fdc55e;
+      }
+
+      /* CARDS GRID — with ATTRACTIVE COLORFUL ICONS */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 25px;
+        margin: 20px 0;
+      }
+      .inter-card {
+        background: rgba(20, 30, 60, 0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 48px;
+        padding: 22px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        border: 3px solid #ffbb2e;
+        transition: all 0.2s;
+        cursor: pointer;
+        box-shadow: 0 15px 20px #00000040;
+      }
+      .inter-card:active {
+        transform: scale(0.96);
+        background: rgba(255, 215, 100, 0.2);
+        border-color: #ffea9e;
+      }
+
+      /* each card icon gets its own vivid gradient */
+      .card-icon {
+        font-size: 3.2rem;
+        width: 100px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-bottom: 15px;
+        box-shadow:
+          0 10px 0 #00000050,
+          0 0 30px currentColor;
+        transition: transform 0.2s;
+        background: radial-gradient(
+          circle at 30% 30%,
+          rgba(255, 255, 255, 0.9),
+          rgba(200, 200, 200, 0.2)
+        );
+        color: white; /* fallback, but we override with inline style */
+      }
+      .inter-card:hover .card-icon {
+        transform: rotate(8deg) scale(1.08);
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #ffe484;
+        text-shadow: 2px 2px 0 #5a3200;
+      }
+      .card-text {
+        font-size: 1rem;
+        color: #d9edff;
+        margin-bottom: 18px;
+        flex: 1;
+        padding: 0 8px;
+      }
+      .card-btn {
+        background: #ff9300;
+        border: none;
+        color: white;
+        padding: 14px 20px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        width: 100%;
+        box-shadow: 0 7px 0 #9e5400;
+        cursor: pointer;
+        transition: 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 2px solid #ffdc9a;
+      }
+      .card-btn:active {
+        transform: translateY(5px);
+        box-shadow: 0 2px 0 #9e5400;
+      }
+
+      /* output area */
+      .output-box {
+        background: #19254b;
+        border-radius: 80px;
+        padding: 24px 20px;
+        margin-top: 35px;
+        border: 5px solid #ffb347;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        flex-wrap: wrap;
+      }
+      .output-icon {
+        font-size: 3.5rem;
+        background: #ffffff20;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #ffb14e;
+        box-shadow: 0 0 30px #ffbf69;
+      }
+      .output-message {
+        flex: 1;
+        font-size: 1.3rem;
+        line-height: 1.5;
+        color: #f5e9cb;
+        word-break: break-word;
+        font-weight: 500;
+      }
+
+      .footer-note {
+        text-align: center;
+        margin-top: 30px;
+        color: #ffe294;
+        border-top: 4px dotted #ff8c5a;
+        padding-top: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      /* modal */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 16px;
+      }
+      .modal-card {
+        background: linear-gradient(145deg, #312e6e, #1b1b4b);
+        border-radius: 80px;
+        padding: 35px 30px;
+        max-width: 450px;
+        border: 6px solid #fdc55e;
+        box-shadow: 0 30px 70px black;
+        color: white;
+        position: relative;
+        text-align: center;
+      }
+      .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        font-size: 2.5rem;
+        cursor: pointer;
+        color: #ffbb33;
+        font-weight: bold;
+      }
+      .modal-icon {
+        font-size: 5rem;
+        margin: 10px 0;
+        filter: drop-shadow(0 10px 10px black);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .tab-btn {
+          width: 170px;
+          padding: 12px;
+        }
+        .tab-btn i {
+          font-size: 2.5rem;
+        }
+        .tab-btn span {
+          font-size: 1.4rem;
+        }
+        .header h1 {
+          font-size: 2.2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="floating-bg" id="bg"></div>
+
+    <div class="main-card">
+      <div class="header">
+        <h1>🌈 AI · Cloud · Robotics</h1>
+        <div class="header-sub">
+          <span
+            ><i class="fas fa-robot" style="color: #a8e6cf"></i> ARTIFICIAL
+            INTELLIGENCE</span
+          >
+          <span
+            ><i class="fas fa-cloud" style="color: #ffd3b6"></i> CLOUD
+            COMPUTING</span
+          >
+          <span
+            ><i class="fas fa-cogs" style="color: #ffb3ba"></i> ROBOTICS</span
+          >
+        </div>
+      </div>
+
+      <!-- NOW 3 TABS -->
+      <div class="tab-bar">
+        <div class="tab-btn active" id="tabAI">
+          <i class="fas fa-robot" style="color: #ffe680"></i>
+          <span>AI</span>
+        </div>
+        <div class="tab-btn" id="tabCloud">
+          <i class="fas fa-cloud" style="color: #c4e6ff"></i>
+          <span>Cloud</span>
+        </div>
+        <div class="tab-btn" id="tabRobotics">
+          <i class="fas fa-cogs" style="color: #ffb3ba"></i>
+          <span>Robotics</span>
+        </div>
+      </div>
+
+      <!-- AI PANEL -->
+      <div id="aiPanel" class="simu-panel">
+        <div class="panel-title">
+          <i class="fas fa-brain" style="color: #f7b731"></i> AI PLAYGROUND
+          <i class="fas fa-microchip" style="color: #70db70"></i>
+        </div>
+        <div class="panel-desc">
+          Tap any card — each icon has a special color! AI learns, sees, talks,
+          and creates.
+        </div>
+
+        <div class="cards-grid" id="aiCards"></div>
+
+        <div class="output-box" id="aiOutput">
+          <div class="output-icon">
+            <i class="fas fa-robot" style="color: #ffb27a"></i>
+          </div>
+          <div class="output-message" id="aiMessage">🤖 Pick an AI card!</div>
+        </div>
+      </div>
+
+      <!-- CLOUD PANEL -->
+      <div id="cloudPanel" class="simu-panel hidden">
+        <div class="panel-title">
+          <i class="fas fa-cloud-upload-alt" style="color: #7fd4ff"></i> CLOUD
+          FUN ZONE <i class="fas fa-server" style="color: #b0a8ff"></i>
+        </div>
+        <div class="panel-desc">
+          Colorful cloud cards — tap to discover storage, sync, security and
+          more!
+        </div>
+
+        <div class="cards-grid" id="cloudCards"></div>
+
+        <div class="output-box" id="cloudOutput">
+          <div class="output-icon">
+            <i class="fas fa-cloud" style="color: #aad4ff"></i>
+          </div>
+          <div class="output-message" id="cloudMessage">
+            ☁️ Tap a colorful cloud card
+          </div>
+        </div>
+      </div>
+
+      <!-- ROBOTICS PANEL (NEW) -->
+      <div id="roboticsPanel" class="simu-panel hidden">
+        <div class="panel-title">
+          <i class="fas fa-cogs" style="color: #ff9f7f"></i> ROBOTICS LAB
+          <i class="fas fa-robot" style="color: #9bdeac"></i>
+        </div>
+        <div class="panel-desc">
+          Explore the world of robots! From sensors to movement to artificial
+          muscles.
+        </div>
+
+        <div class="cards-grid" id="roboticsCards"></div>
+
+        <div class="output-box" id="roboticsOutput">
+          <div class="output-icon">
+            <i class="fas fa-cogs" style="color: #ffb27a"></i>
+          </div>
+          <div class="output-message" id="roboticsMessage">
+            🤖 Tap a colorful robotics card
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        ⭐ every icon has its own bright color — just like your imagination!
+      </div>
+    </div>
+
+    <!-- modal -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-close" id="modalClose">&times;</div>
+        <div id="modalContent" style="padding: 10px"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // ---------- AI card data with vibrant icon colors ----------
+        const aiCardsData = [
+          {
+            icon: "fa-search",
+            title: "Object Detective",
+            desc: "AI recognizes cats, cars, and more!",
+            action: "object",
+            iconColor: "#FF6B6B",
+          }, // coral
+          {
+            icon: "fa-comment-dots",
+            title: "Chatty Robot",
+            desc: "Ask me anything — I’ll answer.",
+            action: "chat",
+            iconColor: "#4ECDC4",
+          }, // turquoise
+          {
+            icon: "fa-chart-line",
+            title: "Pattern Finder",
+            desc: "AI finds hidden patterns.",
+            action: "pattern",
+            iconColor: "#FFD93D",
+          }, // sunny
+          {
+            icon: "fa-paint-brush",
+            title: "Creative AI",
+            desc: "AI writes stories & poems.",
+            action: "creative",
+            iconColor: "#FF9FF3",
+          }, // pink
+          {
+            icon: "fa-graduation-cap",
+            title: "Learning Progress",
+            desc: "AI gets smarter every day.",
+            action: "learn",
+            iconColor: "#A3CB38",
+          }, // lime
+        ];
+
+        // cloud card data with bright colors
+        const cloudCardsData = [
+          {
+            icon: "fa-cloud-upload-alt",
+            title: "Store in Cloud",
+            desc: "Save files, get them anywhere.",
+            action: "save",
+            iconColor: "#6AB0F3",
+          },
+          {
+            icon: "fa-link",
+            title: "Connect",
+            desc: "Link all your devices.",
+            action: "connect",
+            iconColor: "#F9CA7F",
+          },
+          {
+            icon: "fa-bolt",
+            title: "Power",
+            desc: "Super computing from anywhere.",
+            action: "power",
+            iconColor: "#FFB347",
+          },
+          {
+            icon: "fa-sync-alt",
+            title: "Sync",
+            desc: "Everything up to date.",
+            action: "sync",
+            iconColor: "#A67FF4",
+          },
+          {
+            icon: "fa-shield-alt",
+            title: "Security",
+            desc: "Your data is locked safe.",
+            action: "security",
+            iconColor: "#FF8A80",
+          },
+        ];
+
+        // NEW ROBOTICS card data
+        const roboticsCardsData = [
+          {
+            icon: "fa-cogs",
+            title: "Robot Arm",
+            desc: "Arms that can build cars!",
+            action: "arm",
+            iconColor: "#FF9F7F",
+          },
+          {
+            icon: "fa-eye",
+            title: "Robot Vision",
+            desc: "Cameras help robots see.",
+            action: "vision",
+            iconColor: "#9BDEAC",
+          },
+          {
+            icon: "fa-microchip",
+            title: "Robot Brain",
+            desc: "Microcontrollers think fast.",
+            action: "brain",
+            iconColor: "#FFD966",
+          },
+          {
+            icon: "fa-bolt",
+            title: "Motors & Motion",
+            desc: "Servos, wheels, and legs.",
+            action: "motion",
+            iconColor: "#B39DDB",
+          },
+          {
+            icon: "fa-hand-peace",
+            title: "Sensors",
+            desc: "Touch, distance, sound.",
+            action: "sensors",
+            iconColor: "#FFAB91",
+          },
+        ];
+
+        const tabAI = document.getElementById("tabAI");
+        const tabCloud = document.getElementById("tabCloud");
+        const tabRobotics = document.getElementById("tabRobotics");
+        const aiPanel = document.getElementById("aiPanel");
+        const cloudPanel = document.getElementById("cloudPanel");
+        const roboticsPanel = document.getElementById("roboticsPanel");
+        const aiCardsDiv = document.getElementById("aiCards");
+        const cloudCardsDiv = document.getElementById("cloudCards");
+        const roboticsCardsDiv = document.getElementById("roboticsCards");
+        const aiMessage = document.getElementById("aiMessage");
+        const cloudMessage = document.getElementById("cloudMessage");
+        const roboticsMessage = document.getElementById("roboticsMessage");
+        const modal = document.getElementById("modal");
+        const modalContent = document.getElementById("modalContent");
+        const modalClose = document.getElementById("modalClose");
+
+        // fill cards with inline icon colors
+        function fillCards(container, data) {
+          container.innerHTML = data
+            .map(
+              (item) => `
+                    <div class="inter-card" data-action="${item.action}">
+                        <div class="card-icon" style="background: radial-gradient(circle at 30% 30%, #fff, ${item.iconColor}80); color: ${item.iconColor}; text-shadow: 0 3px 3px black;">
+                            <i class="fas ${item.icon}"></i>
+                        </div>
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-text">${item.desc}</div>
+                        <button class="card-btn"><i class="fas fa-hand-pointer" style="color:white;"></i> tap me</button>
+                    </div>
+                `,
+            )
+            .join("");
+        }
+
+        fillCards(aiCardsDiv, aiCardsData);
+        fillCards(cloudCardsDiv, cloudCardsData);
+        fillCards(roboticsCardsDiv, roboticsCardsData);
+
+        // ---- action handlers (with colorful modals) ----
+        function handleAiAction(action) {
+          let msg = "",
+            modalTitle = "",
+            modalBody = "",
+            iconEmoji = "";
+          switch (action) {
+            case "object":
+              msg = '🔍 AI sees: "cat 🐱, dog 🐶, tree 🌲"';
+              modalTitle = "👁️ Object Detection";
+              modalBody =
+                "AI uses neural networks to recognize objects. It’s like teaching a computer to see!";
+              iconEmoji = "🐱";
+              break;
+            case "chat":
+              msg = '💬 AI: "I love learning from you!"';
+              modalTitle = "🗣️ Chatbot magic";
+              modalBody =
+                "Chatbots learn from millions of conversations. They predict the best answer.";
+              iconEmoji = "🤖";
+              break;
+            case "pattern":
+              msg = "📊 AI found: 9/10 kids love colors!";
+              modalTitle = "📈 Pattern Finder";
+              modalBody =
+                "AI spots trends — like what games are popular. That’s how it recommends videos.";
+              iconEmoji = "🔎";
+              break;
+            case "creative":
+              msg = '🎨 AI poem: "Stars glow so bright, code dreams at night"';
+              modalTitle = "🎭 Creative AI";
+              modalBody =
+                "Generative AI writes stories, poems, and even music! It’s like a digital artist.";
+              iconEmoji = "✨";
+              break;
+            case "learn":
+              msg = "📚 AI accuracy went from 60% → 95%!";
+              modalTitle = "📖 Learning Progress";
+              modalBody =
+                "AI learns from examples — more practice, better results. Just like you!";
+              iconEmoji = "🧠";
+              break;
+          }
+          aiMessage.innerText = msg;
+          setTimeout(() => {
+            modalContent.innerHTML = `
+                        <div class="modal-icon" style="font-size:5rem;">${iconEmoji}</div>
+                        <h2 style="color:#ffdb7c; font-size:2rem;">${modalTitle}</h2>
+                        <p style="margin-top:20px; font-size:1.3rem;">${modalBody}</p>
+                    `;
+            modal.classList.remove("hidden");
+          }, 200);
+        }
+
+        function handleCloudAction(action) {
+          let msg = "",
+            modalTitle = "",
+            modalBody = "",
+            iconEmoji = "☁️";
+          switch (action) {
+            case "save":
+              msg = '💾 File "homework.pdf" saved to cloud!';
+              modalTitle = "☁️ Cloud Storage";
+              modalBody =
+                "Your files are stored in giant data centers — you can get them from any device!";
+              iconEmoji = "📂";
+              break;
+            case "connect":
+              msg = "📱 3 devices connected: phone, tablet, laptop";
+              modalTitle = "🔗 Connect & Sync";
+              modalBody =
+                "Cloud links all your gadgets. Start a game on one, finish on another.";
+              iconEmoji = "📲";
+              break;
+            case "power":
+              msg = "⚡ Cloud servers = 1000 laptops combined!";
+              modalTitle = "💪 Cloud Power";
+              modalBody =
+                "Cloud lets you use massive computer power from a tiny phone. Great for AI and games.";
+              iconEmoji = "🚀";
+              break;
+            case "sync":
+              msg = "🔄 134 photos synced across all devices";
+              modalTitle = "🔄 Auto Sync";
+              modalBody =
+                "Change a file anywhere — cloud updates everywhere. Magic!";
+              iconEmoji = "✨";
+              break;
+            case "security":
+              msg = "🔒 Your data is encrypted and safe.";
+              modalTitle = "🛡️ Cloud Security";
+              modalBody =
+                "Cloud scrambles your data (encryption) so only you can read it.";
+              iconEmoji = "🔐";
+              break;
+          }
+          cloudMessage.innerText = msg;
+          setTimeout(() => {
+            modalContent.innerHTML = `
+                        <div class="modal-icon" style="font-size:5rem;">${iconEmoji}</div>
+                        <h2 style="color:#ffdb7c; font-size:2rem;">${modalTitle}</h2>
+                        <p style="margin-top:20px; font-size:1.3rem;">${modalBody}</p>
+                    `;
+            modal.classList.remove("hidden");
+          }, 200);
+        }
+
+        // NEW Robotics action handler
+        function handleRoboticsAction(action) {
+          let msg = "",
+            modalTitle = "",
+            modalBody = "",
+            iconEmoji = "🤖";
+          switch (action) {
+            case "arm":
+              msg = "🦾 Robotic arm moving! Pick and place.";
+              modalTitle = "🦾 Robot Arm";
+              modalBody =
+                "Robot arms are used in factories to build cars, phones, and more. They're super precise!";
+              iconEmoji = "🦾";
+              break;
+            case "vision":
+              msg = "👁️ Robot sees: 'It's a red ball!'";
+              modalTitle = "👁️ Computer Vision";
+              modalBody =
+                "Robots use cameras and AI to understand the world around them. They can recognize faces, objects, and colors!";
+              iconEmoji = "📷";
+              break;
+            case "brain":
+              msg = "🧠 Microcontroller: 'Processing data...'";
+              modalTitle = "🧠 Robot Brain";
+              modalBody =
+                "The robot's brain is a tiny computer called a microcontroller. It tells the robot what to do!";
+              iconEmoji = "🧠";
+              break;
+            case "motion":
+              msg = "⚡ Motors spinning! Robot moves forward.";
+              modalTitle = "⚡ Motion & Motors";
+              modalBody =
+                "Robots use different types of motors: servo motors for precise movement, DC motors for wheels!";
+              iconEmoji = "🦿";
+              break;
+            case "sensors":
+              msg = "📡 Sensors detect: 'Object 5cm away!'";
+              modalTitle = "📡 Robot Sensors";
+              modalBody =
+                "Sensors help robots feel the world: ultrasonic for distance, touch sensors, light sensors, and more!";
+              iconEmoji = "📊";
+              break;
+          }
+          roboticsMessage.innerText = msg;
+          setTimeout(() => {
+            modalContent.innerHTML = `
+                        <div class="modal-icon" style="font-size:5rem;">${iconEmoji}</div>
+                        <h2 style="color:#ffdb7c; font-size:2rem;">${modalTitle}</h2>
+                        <p style="margin-top:20px; font-size:1.3rem;">${modalBody}</p>
+                    `;
+            modal.classList.remove("hidden");
+          }, 200);
+        }
+
+        // click listeners (delegation)
+        aiCardsDiv.addEventListener("click", (e) => {
+          const card = e.target.closest(".inter-card");
+          if (!card) return;
+          handleAiAction(card.dataset.action);
+        });
+        cloudCardsDiv.addEventListener("click", (e) => {
+          const card = e.target.closest(".inter-card");
+          if (!card) return;
+          handleCloudAction(card.dataset.action);
+        });
+        roboticsCardsDiv.addEventListener("click", (e) => {
+          const card = e.target.closest(".inter-card");
+          if (!card) return;
+          handleRoboticsAction(card.dataset.action);
+        });
+
+        // tab switching - NOW WITH 3 TABS
+        tabAI.addEventListener("click", () => {
+          tabAI.classList.add("active");
+          tabCloud.classList.remove("active");
+          tabRobotics.classList.remove("active");
+          aiPanel.classList.remove("hidden");
+          cloudPanel.classList.add("hidden");
+          roboticsPanel.classList.add("hidden");
+        });
+        tabCloud.addEventListener("click", () => {
+          tabCloud.classList.add("active");
+          tabAI.classList.remove("active");
+          tabRobotics.classList.remove("active");
+          cloudPanel.classList.remove("hidden");
+          aiPanel.classList.add("hidden");
+          roboticsPanel.classList.add("hidden");
+        });
+        tabRobotics.addEventListener("click", () => {
+          tabRobotics.classList.add("active");
+          tabAI.classList.remove("active");
+          tabCloud.classList.remove("active");
+          roboticsPanel.classList.remove("hidden");
+          aiPanel.classList.add("hidden");
+          cloudPanel.classList.add("hidden");
+        });
+
+        // modal close
+        modalClose.addEventListener("click", () =>
+          modal.classList.add("hidden"),
+        );
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) modal.classList.add("hidden");
+        });
+
+        // floating background
+        const bg = document.getElementById("bg");
+        for (let i = 0; i < 25; i++) {
+          let b = document.createElement("div");
+          b.className = "bg-bubble";
+          let size = Math.random() * 200 + 40;
+          b.style.width = size + "px";
+          b.style.height = size + "px";
+          b.style.left = Math.random() * 100 + "%";
+          b.style.top = Math.random() * 100 + "%";
+          b.style.animationDelay = Math.random() * 15 + "s";
+          b.style.animationDuration = Math.random() * 20 + 15 + "s";
+          bg.appendChild(b);
+        }
+
+        // set default messages
+        aiMessage.innerText = "🤖✨ Tap a colorful AI card!";
+        cloudMessage.innerText = "☁️🌈 Tap a cloud card with cool colors!";
+        roboticsMessage.innerText = "🤖🔧 Tap a colorful robotics card!";
+      })();
+    </script>
+
+    
+  </body>
+</html>

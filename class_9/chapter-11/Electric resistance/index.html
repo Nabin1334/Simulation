@@ -1,627 +1,1476 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electric Resistance </title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <title>Ohm's Law | Hyper-Realistic Bulb - Electric Resistance Lab</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;700;900&display=swap");
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #e0e0e0;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(15, 20, 30, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            overflow: hidden;
-            border: 1px solid rgba(100, 150, 200, 0.2);
-        }
+      body {
+        font-family: "Barlow Condensed", sans-serif;
+        background: radial-gradient(ellipse at 20% 30%, #0a1520, #020608);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        header {
-            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
-            color: #ffffff;
-            padding: 40px 30px;
-            text-align: center;
-            border-bottom: 1px solid rgba(100, 150, 200, 0.3);
-        }
+      .lab-container {
+        max-width: 1600px;
+        width: 100%;
+        margin: 0 auto;
+        background: rgba(4, 10, 18, 0.96);
+        border-radius: 2rem;
+        box-shadow:
+          0 40px 80px rgba(0, 0, 0, 0.8),
+          inset 0 1px 0 rgba(255, 180, 60, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 170, 60, 0.28);
+      }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0, 100, 200, 0.5);
-            background: linear-gradient(90deg, #ffa726, #ffca28, #ffee58);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
+      header {
+        background: linear-gradient(115deg, #090f18, #101c2e);
+        padding: 1.6rem 2rem;
+        text-align: center;
+        border-bottom: 1px solid #ffb34750;
+      }
 
-        .electric-resistance-title {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 10px rgba(0, 100, 200, 0.5);
-            background: linear-gradient(90deg, #ffa726, #ffca28, #ffee58);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-            letter-spacing: 2px;
-        }
+      .hero-title {
+        font-size: clamp(1.8rem, 5vw, 3.4rem);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        background: linear-gradient(135deg, #ffe08a, #ffa833, #ff7d00);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
 
-        .subtitle {
-            font-size: 1.5rem;
-            opacity: 0.9;
-            color: #bbdefb;
-            margin-top: 10px;
-            font-weight: 300;
-        }
+      .subhead {
+        font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+        color: #90b8d8;
+        margin-top: 0.25rem;
+        letter-spacing: 0.06em;
+      }
 
-        .content {
-            padding: 30px;
-            background: rgba(10, 15, 25, 0.8);
-        }
+      .dashboard {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 1.4rem;
+        padding: 1.6rem;
+      }
 
-        .intro-section {
-            background: rgba(20, 25, 35, 0.9);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 167, 38, 0.2);
+      @media (max-width: 1200px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+          padding: 1.1rem;
         }
-
-        .intro-section h2 {
-            color: #ffa726;
-            margin-bottom: 15px;
-            font-size: 1.6rem;
-        }
-
-        .intro-section p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #e0e0e0;
-            margin-bottom: 12px;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, rgba(255, 167, 38, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 5px solid #ffa726;
-            margin: 20px 0;
-            border: 1px solid rgba(255, 167, 38, 0.3);
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1.8fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .simulation-box {
-            background: rgba(20, 25, 35, 0.9);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 167, 38, 0.2);
-        }
-
-        .section-title {
-            color: #ffca28;
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .canvas-wrapper {
-            background: rgba(5, 10, 20, 0.9);
-            border-radius: 12px;
-            padding: 20px;
-            border: 2px solid rgba(255, 167, 38, 0.3);
-            margin-bottom: 20px;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
-        }
-
-        #canvas {
-            width: 100%;
-            height: 400px;
-            display: block;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        .click-hint {
-            text-align: center;
-            color: #ffca28;
-            font-size: 0.95rem;
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(255, 167, 38, 0.1);
-            border-radius: 6px;
-            border: 1px solid rgba(255, 167, 38, 0.3);
-        }
-
-        .measurements {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .measure-card {
-            background: linear-gradient(135deg, rgba(40, 50, 70, 0.9) 0%, rgba(30, 40, 60, 0.9) 100%);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            border: 2px solid rgba(255, 167, 38, 0.3);
-            transition: all 0.3s;
-        }
-
-        .measure-card:hover {
-            transform: translateY(-5px);
-            border-color: #ffa726;
-            box-shadow: 0 10px 20px rgba(255, 167, 38, 0.3);
-        }
-
-        .measure-label {
-            font-size: 0.85rem;
-            color: #bbdefb;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .measure-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #ffca28;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-            text-shadow: 0 0 15px rgba(255, 202, 40, 0.7);
-        }
-
-        .measure-unit {
-            font-size: 0.9rem;
-            color: #90a4ae;
-        }
-
-        .formula-box {
-            background: linear-gradient(135deg, #ff8f00, #ff6f00);
-            color: #212121;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(255, 111, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
+        .sim-panel,
         .control-panel {
-            background: rgba(20, 25, 35, 0.9);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 167, 38, 0.2);
+          border-radius: 1rem;
+          padding: 1rem;
         }
+      }
+      @media (max-width: 700px) {
+        .lab-container {
+          border-radius: 0.7rem;
+          padding: 0.2rem;
+        }
+        .dashboard {
+          gap: 0.7rem;
+          padding: 0.4rem;
+        }
+        .sim-panel,
+        .control-panel {
+          border-radius: 0.5rem;
+          padding: 0.5rem;
+        }
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+        .canvas-wrapper {
+          border-radius: 0.5rem;
+        }
+      }
+      @media (max-width: 500px) {
+        .hero-title {
+          font-size: 1.2rem;
+        }
+        .subhead {
+          font-size: 0.7rem;
+        }
+        .card-title {
+          font-size: 1rem;
+        }
+        .formula-panel {
+          font-size: 0.8rem;
+        }
+      }
 
-        /* Circuit Status - moved to left side */
-        .circuit-status-section {
-            margin-bottom: 25px;
-        }
+      .control-panel {
+        background: rgba(10, 18, 30, 0.92);
+        border-radius: 1.4rem;
+        padding: 1.3rem;
+        border: 1px solid rgba(255, 160, 60, 0.3);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
 
-        .status-box {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 18px;
-            background: linear-gradient(135deg, rgba(40, 50, 70, 0.9) 0%, rgba(30, 40, 60, 0.9) 100%);
-            border-radius: 12px;
-            border: 2px solid rgba(244, 67, 54, 0.3);
-            transition: all 0.3s;
-        }
+      .sim-panel {
+        background: rgba(3, 8, 15, 0.85);
+        border-radius: 1.4rem;
+        padding: 1.1rem;
+        border: 1px solid rgba(255, 170, 70, 0.35);
+      }
 
-        .status-box.active {
-            border-color: rgba(76, 175, 80, 0.5);
-            background: linear-gradient(135deg, rgba(40, 60, 50, 0.9) 0%, rgba(30, 50, 40, 0.9) 100%);
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
-        }
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ffb84a;
+        letter-spacing: 0.08em;
+        border-left: 3px solid #ff9900;
+        padding-left: 10px;
+      }
 
-        .led {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #f44336;
-            box-shadow: 0 0 15px #f44336;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
+      .status-card {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 1rem;
+        padding: 0.9rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        border-left: 4px solid #e53935;
+        transition: all 0.3s ease;
+      }
+      .status-card.active {
+        border-left-color: #43a047;
+        background: rgba(67, 160, 71, 0.1);
+      }
 
-        .led.on {
-            background: #4caf50;
-            box-shadow: 0 0 25px #4caf50;
-            animation: pulse 2s infinite;
+      .power-led {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #c62828;
+        box-shadow: 0 0 8px #c62828;
+        flex-shrink: 0;
+        transition: 0.15s;
+      }
+      .power-led.on {
+        background: #69ff75;
+        box-shadow:
+          0 0 24px #44ff55,
+          0 0 48px #22cc3380;
+        animation: ledPulse 1.1s infinite alternate;
+      }
+      @keyframes ledPulse {
+        from {
+          box-shadow: 0 0 10px #44ff55;
         }
+        to {
+          box-shadow:
+            0 0 32px #aaff8c,
+            0 0 64px #22cc3350;
+        }
+      }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 15px #4caf50; }
-            50% { box-shadow: 0 0 30px #4caf50; }
-        }
+      .res-control {
+        background: #07101c;
+        padding: 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 160, 50, 0.2);
+      }
+      .res-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+      }
+      .res-val {
+        color: #ffa030;
+        font-weight: 700;
+        font-family: "Share Tech Mono", monospace;
+      }
 
-        .status-text {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #e0e0e0;
-            flex-grow: 1;
-        }
+      input[type="range"] {
+        width: 100%;
+        height: 10px;
+        -webkit-appearance: none;
+        background: linear-gradient(90deg, #c43800, #ff9020);
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 28px;
+        height: 28px;
+        background: radial-gradient(circle at 35% 35%, #fff5cc, #ffd060);
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #ffcc77;
+        box-shadow:
+          0 0 8px #ffaa44,
+          0 3px 6px rgba(0, 0, 0, 0.5);
+      }
 
-        .status-details {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
-            color: #bbdefb;
-        }
+      button {
+        background: linear-gradient(110deg, #ff9318, #e05500);
+        border: none;
+        width: 100%;
+        padding: 12px;
+        border-radius: 40px;
+        font-weight: 700;
+        font-size: 1rem;
+        font-family: "Barlow Condensed", sans-serif;
+        letter-spacing: 0.05em;
+        color: #1a1000;
+        cursor: pointer;
+        transition:
+          transform 0.07s,
+          box-shadow 0.1s;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      }
+      button:hover {
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3);
+      }
+      button:active {
+        transform: scale(0.97);
+      }
 
-        .control-section {
-            margin-bottom: 25px;
-        }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .metric {
+        background: #081118;
+        border-radius: 0.9rem;
+        padding: 10px 6px;
+        text-align: center;
+        border: 1px solid rgba(255, 170, 60, 0.2);
+      }
+      .metric-label {
+        font-size: 0.68rem;
+        color: #6e96b8;
+        letter-spacing: 0.1em;
+      }
+      .metric-val {
+        font-size: clamp(1.4rem, 3.5vw, 2rem);
+        font-weight: 800;
+        color: #ffc060;
+        font-family: "Share Tech Mono", monospace;
+      }
 
-        .control-section h3 {
-            color: #ffca28;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-        }
+      .formula-panel {
+        background: linear-gradient(100deg, #e07000, #ff9c20);
+        color: #0f1200;
+        font-weight: 700;
+        padding: 0.85rem 1rem;
+        border-radius: 0.9rem;
+        text-align: center;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+      }
 
-        .control-section p {
-            color: #b0bec5;
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
+      .bulb-info {
+        background: #000000aa;
+        padding: 0.75rem 1rem;
+        border-radius: 0.9rem;
+        font-size: 0.82rem;
+        color: #b8d4e8;
+        border: 1px solid rgba(255, 180, 60, 0.15);
+      }
 
-        .slider-box {
-            background: linear-gradient(135deg, rgba(255, 167, 38, 0.1), rgba(255, 193, 7, 0.1));
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid rgba(255, 167, 38, 0.3);
-        }
+      .canvas-wrapper {
+        background: #000508;
+        border-radius: 1.2rem;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        cursor: pointer;
+      }
 
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+      .switch-hint {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 0.78rem;
+        color: #ffb870;
+        letter-spacing: 0.06em;
+      }
 
-        .slider-labels span {
-            font-weight: 600;
-            color: #e0e0e0;
-        }
-
-        .current-resistance {
-            font-size: 1.5rem;
-            color: #ffca28;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(255, 202, 40, 0.7);
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            background: linear-gradient(to right, #4caf50 0%, #ffca28 50%, #f44336 100%);
-            border-radius: 10px;
-            outline: none;
-            margin: 15px 0;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #ff8f00;
-            border: 4px solid #ffca28;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .resistance-info {
-            text-align: center;
-            padding: 12px;
-            background: rgba(40, 50, 70, 0.9);
-            border-radius: 8px;
-            margin-top: 12px;
-            font-weight: 600;
-            color: #ffca28;
-            border: 1px solid rgba(255, 202, 40, 0.3);
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        button {
-            padding: 16px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #ff8f00, #ff6f00);
-            color: #212121;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(255, 111, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 111, 0, 0.8);
-        }
-
-        .info-card {
-            background: rgba(20, 25, 35, 0.9);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 167, 38, 0.2);
-        }
-
-        .info-card h3 {
-            color: #ffca28;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-        }
-
-        .analogy-item {
-            display: flex;
-            align-items: start;
-            margin: 12px 0;
-            padding: 12px;
-            background: rgba(40, 50, 70, 0.9);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 167, 38, 0.2);
-        }
-
-        .analogy-icon {
-            font-size: 1.5rem;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        footer {
-            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
-            color: #bbdefb;
-            text-align: center;
-            padding: 25px;
-            border-top: 1px solid rgba(255, 167, 38, 0.3);
-        }
-
-        footer p {
-            margin: 5px 0;
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .electric-resistance-title {
-                font-size: 2.5rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .measurements {
-                grid-template-columns: 1fr;
-            }
-            
-            .button-group {
-                grid-template-columns: 1fr;
-            }
-            
-            .electric-resistance-title {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1.1rem;
-            }
-        }
+      footer {
+        text-align: center;
+        padding: 0.9rem;
+        font-size: 0.68rem;
+        color: #4a6a84;
+        border-top: 1px solid #ffb34730;
+      }
     </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <div class="electric-resistance-title">ELECTRIC RESISTANCE</div>
-            <p class="subtitle">Learn how resistance controls electric current - Interactive & Simple!</p>
-        </header>
+  </head>
+  <body>
+    <div class="lab-container">
+      <header>
+        <div class="hero-title">⚡ OHM'S LAW — ELECTRIC RESISTANCE LAB ⚡</div>
+        <div class="subhead">
+          PHOTOREALISTIC TUNGSTEN FILAMENT · TRUE BLACKBODY RADIATION · DYNAMIC
+          ELECTRON FLOW
+        </div>
+      </header>
 
-        <div class="content">
-            <div class="intro-section">
-                <h2>🎓 What is Electric Resistance?</h2>
-                <p>
-                    <strong>Resistance</strong> is anything that makes it harder for electricity to flow through a wire. 
-                    Think of it like this: when water flows through a pipe, a narrow section slows down the water. 
-                    In the same way, resistance slows down the flow of electricity (current).
-                </p>
-                
-                <div class="highlight-box">
-                    <p><strong>The Golden Rule (Ohm's Law):</strong></p>
-                    <p style="font-size: 1.2rem; margin-top: 10px;">
-                        More Resistance = Less Current<br>
-                        Less Resistance = More Current
-                    </p>
-                    <p style="margin-top: 10px;">The formula is: <strong>Current (I) = Voltage (V) ÷ Resistance (R)</strong></p>
-                </div>
+      <div class="dashboard">
+        <div class="control-panel">
+          <div class="card-title">🔌 POWER & CONTROL</div>
+
+          <div id="statusModule" class="status-card">
+            <div id="powerLed" class="power-led"></div>
+            <div>
+              <div
+                id="mainState"
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 700;
+                  letter-spacing: 0.05em;
+                "
+              >
+                OFFLINE
+              </div>
+              <div id="subState" style="font-size: 0.72rem; color: #6a8fa8">
+                Click switch or button to start
+              </div>
             </div>
+          </div>
 
-            <div class="main-grid">
-                <!-- Left Column - Controls and Status -->
-                <div class="control-panel">
-                    <div class="circuit-status-section">
-                        <h3 class="section-title">📊 Circuit Status</h3>
-                        <div class="status-box" id="statusBox">
-                            <div class="led" id="statusLed"></div>
-                            <div>
-                                <div class="status-text" id="statusText">Circuit is OFF</div>
-                                <div class="status-details" id="statusDetails">
-                                    No current flowing. Click the switch to turn on.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="control-section">
-                        <h3>🎚️ Change Resistance</h3>
-                        <p>Move the slider to change how much resistance is in the circuit. Watch what happens to the current!</p>
-                        
-                        <div class="slider-box">
-                            <div class="slider-labels">
-                                <span>Low<br>1Ω</span>
-                                <span class="current-resistance" id="sliderValue">10Ω</span>
-                                <span>High<br>100Ω</span>
-                            </div>
-                            <input type="range" id="resistanceSlider" min="1" max="100" value="10">
-                            <div class="resistance-info" id="resistanceInfo">
-                                Medium resistance - normal current
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="control-section">
-                        <h3>🎮 Controls</h3>
-                        <div class="button-group">
-                            <button id="toggleBtn">
-                                <span>⚡</span>
-                                <span>Toggle Switch</span>
-                            </button>
-                            <button id="resetBtn">
-                                <span>🔄</span>
-                                <span>Reset</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="control-section">
-                        <h3>🔬 Real-time Measurements</h3>
-                        <div class="measurements">
-                            <div class="measure-card">
-                                <div class="measure-label">CURRENT</div>
-                                <div class="measure-value" id="currentDisplay">0.00</div>
-                                <div class="measure-unit">Amps (A)</div>
-                            </div>
-                            <div class="measure-card">
-                                <div class="measure-label">VOLTAGE</div>
-                                <div class="measure-value">9.0</div>
-                                <div class="measure-unit">Volts (V)</div>
-                            </div>
-                            <div class="measure-card">
-                                <div class="measure-label">RESISTANCE</div>
-                                <div class="measure-value" id="resistanceDisplay">10</div>
-                                <div class="measure-unit">Ohms (Ω)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column - Simulation -->
-                <div class="simulation-box">
-                    <h2 class="section-title">🔌 Interactive Circuit</h2>
-                    
-                    <div class="canvas-wrapper">
-                        <canvas id="canvas" width="800" height="400"></canvas>
-                        <p class="click-hint">👆 Click the SWITCH to turn the circuit ON/OFF</p>
-                    </div>
-
-                    <div class="formula-box">
-                        <div id="formulaDisplay">Current = 9V ÷ 10Ω = 0.00A</div>
-                    </div>
-
-                    <div class="info-card">
-                        <h3>💡 Bulb Status</h3>
-                        <div id="bulbStatus" style="text-align: center; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-top: 10px;">
-                            <p style="color: #90a4ae; font-size: 0.9rem;">Circuit is OFF - Bulb is not glowing</p>
-                            <p style="color: #bbdefb; font-size: 0.8rem; margin-top: 5px;">Filament temperature: 300K</p>
-                        </div>
-                    </div>
-                </div>
+          <div class="res-control">
+            <div class="res-label">
+              <span style="color: #ccc">⚡ RESISTANCE (Ω)</span>
+              <span id="resValLabel" class="res-val">10 Ω</span>
             </div>
-
-            <div class="info-card">
-                <h3>💧 Easy to Understand: The Water Analogy</h3>
-                
-                <div class="analogy-item">
-                    <div class="analogy-icon">🔋</div>
-                    <div class="analogy-text">
-                        <strong>Battery = Water Pump</strong>
-                        Creates pressure to push water (electricity) through pipes (wires)
-                    </div>
-                </div>
-
-                <div class="analogy-item">
-                    <div class="analogy-icon">💦</div>
-                    <div class="analogy-text">
-                        <strong>Current = Water Flow</strong>
-                        How much water flows per second (like amps in electricity)
-                    </div>
-                </div>
-
-                <div class="analogy-item">
-                    <div class="analogy-icon">🚰</div>
-                    <div class="analogy-text">
-                        <strong>Resistance = Narrow Pipe</strong>
-                        A narrow section that slows down the water flow
-                    </div>
-                </div>
-
-                <div class="analogy-item">
-                    <div class="analogy-icon">💡</div>
-                    <div class="analogy-text">
-                        <strong>Light Bulb = Water Wheel</strong>
-                        Uses the flowing energy to do work (create light)
-                    </div>
-                </div>
+            <input
+              type="range"
+              id="resSlider"
+              min="1"
+              max="100"
+              value="10"
+              step="1"
+            />
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-top: 6px;
+                font-size: 0.72rem;
+                color: #6a8fa8;
+              "
+            >
+              <span>1 Ω</span><span>50 Ω</span><span>100 Ω</span>
             </div>
+          </div>
 
+          <button id="masterToggleBtn">🔘 TOGGLE POWER SWITCH</button>
+          <button
+            id="masterResetBtn"
+            style="
+              background: linear-gradient(110deg, #3a6080, #1a3a55);
+              color: #a0c8e8;
+            "
+          >
+            ⟳ RESET (10Ω / OFF)
+          </button>
+
+          <div class="card-title">📊 LIVE METRICS</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">CURRENT (A)</div>
+              <div id="currentMeter" class="metric-val">0.00</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">VOLTAGE (V)</div>
+              <div class="metric-val">9.0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">RESISTANCE</div>
+              <div id="resMeter" class="metric-val">10</div>
+            </div>
+          </div>
+
+          <div class="formula-panel" id="ohmText">I = 9V ÷ 10Ω = 0.000 A</div>
+
+          <div class="bulb-info">
+            <strong style="color: #ffb84a">💡 BULB STATUS</strong><br />
+            <span id="bulbLiveState">❄️ COLD / OFF</span><br />
+            <span id="filamentLiveData" style="color: #7aadca"
+              >Filament: 300 K · No current flow</span
+            >
+          </div>
         </div>
 
-        <footer>
-            <p><strong>⚡ Electric Resistance Educational Simulator</strong></p>
-            <p>Learn by doing - Experiment with different resistance values and see what happens!</p>
-        </footer>
+        <div class="sim-panel">
+          <div class="card-title" style="margin-bottom: 0.8rem">
+            💡 PHOTOREALISTIC TUNGSTEN BULB
+            <span
+              style="
+                font-size: 0.68rem;
+                background: #1a2e3e;
+                padding: 2px 10px;
+                border-radius: 20px;
+                margin-left: 8px;
+              "
+              >REAL THERMAL GLOW</span
+            >
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="circuitCanvas" width="1200" height="680"></canvas>
+          </div>
+          <div class="switch-hint">
+            ▼ CLICK THE INDUSTRIAL SWITCH TO TOGGLE POWER ▼
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        ⚡ Hyper-realistic bulb · Coiled tungsten filament · True blackbody
+        radiation · Dynamic electron simulation
+      </footer>
     </div>
 
-    <script src="index.js"></script>
-</body>
+    <script>
+      // ---- STATE & CIRCUIT ----
+      const CIRCUIT = { voltage: 9.0, resistance: 10 };
+      const STATE = {
+        isOn: false,
+        current: 0,
+        time: 0,
+        filamentTemp: 300,
+        brightness: 0,
+      };
+
+      let canvas, ctx;
+      const CW = 1200,
+        CH = 680;
+
+      const LAYOUT = {
+        battery: { x: 175, y: 360 },
+        bulb: { x: 1010, y: 340 },
+        switchPos: { x: 610, y: 145 },
+        resistorRect: { x: 408, y: 90, w: 340, h: 72 },
+        path: {
+          topLeft: { x: 175, y: 145 },
+          topRight: { x: 1010, y: 145 },
+          bottomRight: { x: 1010, y: 570 },
+          bottomLeft: { x: 175, y: 570 },
+        },
+      };
+
+      let electrons = [];
+      const ELECTRON_COUNT = 90;
+
+      function getLoopPosition(d) {
+        const p = LAYOUT.path;
+        const w = p.topRight.x - p.topLeft.x,
+          h = p.bottomLeft.y - p.topLeft.y;
+        const total = 2 * (w + h);
+        d = d % total;
+        if (d < w) return { x: p.bottomLeft.x + d, y: p.bottomLeft.y };
+        else if (d < w + h)
+          return { x: p.bottomRight.x, y: p.bottomRight.y - (d - w) };
+        else if (d < 2 * w + h)
+          return { x: p.topRight.x - (d - w - h), y: p.topRight.y };
+        else return { x: p.topLeft.x, y: p.topLeft.y + (d - 2 * w - h) };
+      }
+
+      function initElectrons() {
+        electrons = [];
+        const p = LAYOUT.path;
+        const total =
+          2 * (p.topRight.x - p.topLeft.x + (p.bottomLeft.y - p.topLeft.y));
+        for (let i = 0; i < ELECTRON_COUNT; i++)
+          electrons.push({ phase: (i / ELECTRON_COUNT) * total });
+      }
+
+      function computeCurrent() {
+        return STATE.isOn ? CIRCUIT.voltage / CIRCUIT.resistance : 0;
+      }
+
+      function updateUI() {
+        const current = computeCurrent();
+        STATE.current = current;
+        document.getElementById("currentMeter").textContent =
+          current.toFixed(2);
+        document.getElementById("resMeter").textContent = CIRCUIT.resistance;
+        document.getElementById("resValLabel").textContent =
+          `${CIRCUIT.resistance} Ω`;
+        document.getElementById("ohmText").textContent =
+          `I = ${CIRCUIT.voltage}V ÷ ${CIRCUIT.resistance}Ω = ${current.toFixed(3)} A`;
+
+        const statusDiv = document.getElementById("statusModule");
+        const led = document.getElementById("powerLed");
+        if (STATE.isOn) {
+          statusDiv.classList.add("active");
+          led.classList.add("on");
+          document.getElementById("mainState").textContent = "⚡ ENERGIZED";
+          document.getElementById("subState").textContent =
+            `Current: ${current.toFixed(3)} A · Flow active`;
+        } else {
+          statusDiv.classList.remove("active");
+          led.classList.remove("on");
+          document.getElementById("mainState").textContent = "⛔ OFFLINE";
+          document.getElementById("subState").textContent =
+            "Toggle switch to start current";
+        }
+
+        if (STATE.isOn && current > 0) {
+          const power = current * current * CIRCUIT.resistance;
+          // Make the bulb much brighter by increasing the effect of power and brightness scaling
+          let targetTemp = 300 + power * 160; // was 88
+          targetTemp = Math.min(4200, Math.max(300, targetTemp)); // allow higher temp
+          STATE.filamentTemp = STATE.filamentTemp * 0.92 + targetTemp * 0.08; // faster response
+          STATE.brightness = Math.max(
+            0,
+            Math.min(1.5, (STATE.filamentTemp - 300) / 2000), // was /3000, now brighter and can go above 1
+          );
+          let desc =
+            STATE.filamentTemp < 1500
+              ? "Warm amber glow"
+              : STATE.filamentTemp < 2300
+                ? "Radiant yellow-white"
+                : STATE.filamentTemp < 3000
+                  ? "Brilliant white"
+                  : "Intense white-hot plasma";
+          document.getElementById("bulbLiveState").innerHTML =
+            "🔥 INCANDESCENT";
+          document.getElementById("filamentLiveData").innerHTML =
+            `🌡️ ${Math.round(STATE.filamentTemp)} K · ${desc}<br>⚡ Power: ${power.toFixed(2)} W · Luminosity: ${Math.round(STATE.brightness * 100)}%`;
+        } else {
+          STATE.filamentTemp = STATE.filamentTemp * 0.975 + 300 * 0.025;
+          STATE.brightness = 0;
+          document.getElementById("bulbLiveState").innerHTML = "❄️ COLD / OFF";
+          document.getElementById("filamentLiveData").innerHTML =
+            `❄️ Filament: ${Math.round(STATE.filamentTemp)} K · Ambient · No current`;
+        }
+      }
+
+      // ========== BLACKBODY COLOR ==========
+      function bbColor(T) {
+        let r, g, b;
+        if (T < 1000) {
+          r = 255;
+          g = 70;
+          b = 10;
+        } else if (T < 1500) {
+          r = 255;
+          g = 110 + (T - 1000) * 0.14;
+          b = 30;
+        } else if (T < 2000) {
+          r = 255;
+          g = 180 + (T - 1500) * 0.1;
+          b = 60 + (T - 1500) * 0.06;
+        } else if (T < 2700) {
+          r = 255;
+          g = 215 + (T - 2000) * 0.06;
+          b = 110 + (T - 2000) * 0.1;
+        } else if (T < 3300) {
+          r = 255;
+          g = 248 + (T - 2700) * 0.02;
+          b = 210 + (T - 2700) * 0.06;
+        } else {
+          r = 255;
+          g = 255;
+          b = 252;
+        }
+        return [
+          Math.min(255, r) | 0,
+          Math.min(255, g) | 0,
+          Math.min(255, b) | 0,
+        ];
+      }
+
+      // ========== PHOTOREALISTIC BULB ==========
+      function drawRealisticBulb(cx, cy) {
+        const B = STATE.brightness;
+        const T = STATE.filamentTemp;
+        const [fr, fg, fb] = bbColor(T);
+        const t = STATE.time;
+
+        // --- 1. VOLUMETRIC BLOOM ---
+        if (B > 0.01) {
+          // Wide atmospheric halo (brighter and larger)
+          for (let i = 5; i >= 0; i--) {
+            const r = 100 + i * 65;
+            const alpha = B * (0.13 - i * 0.018);
+            const g2 = ctx.createRadialGradient(cx, cy - 30, 0, cx, cy - 30, r);
+            g2.addColorStop(
+              0,
+              `rgba(${fr},${Math.min(255, fg + 40)},${Math.min(255, fb + 80)},${alpha * 2.2})`,
+            );
+            g2.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g2;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 30, r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          // Tight intense core glow (brighter)
+          const cg = ctx.createRadialGradient(cx, cy - 30, 0, cx, cy - 30, 65);
+          cg.addColorStop(
+            0,
+            `rgba(${fr},${fg},${fb},${Math.min(1.2, B * 1.25)})`,
+          );
+          cg.addColorStop(
+            0.5,
+            `rgba(${fr},${Math.max(0, fg - 60)},${Math.max(0, fb - 80)},${Math.min(1, B * 0.7)})`,
+          );
+          cg.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = cg;
+          ctx.beginPath();
+          ctx.arc(cx, cy - 30, 65, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // --- 2. GLASS BULB SHAPE (A-19 style) ---
+        // Build the classic A-19 bulb silhouette using bezier paths
+        ctx.save();
+
+        // Glass body clip path (A-19 shape)
+        function bulbPath() {
+          ctx.beginPath();
+          // Top dome
+          ctx.arc(cx, cy - 30, 72, Math.PI * 1.18, Math.PI * 1.82, false);
+          // Right shoulder curves down to neck
+          ctx.bezierCurveTo(
+            cx + 72,
+            cy + 48,
+            cx + 52,
+            cy + 88,
+            cx + 28,
+            cy + 108,
+          );
+          ctx.lineTo(cx + 28, cy + 135);
+          ctx.lineTo(cx - 28, cy + 135);
+          ctx.lineTo(cx - 28, cy + 108);
+          // Left shoulder
+          ctx.bezierCurveTo(
+            cx - 52,
+            cy + 88,
+            cx - 72,
+            cy + 48,
+            cx - 72,
+            cy + 42,
+          );
+          ctx.closePath();
+        }
+
+        // Inner gas fill (argon/nitrogen look)
+        bulbPath();
+        ctx.clip();
+
+        if (B > 0.01) {
+          // Incandescent interior glow
+          const ig = ctx.createRadialGradient(cx, cy - 10, 0, cx, cy, 85);
+          ig.addColorStop(
+            0,
+            `rgba(${fr},${fg},${Math.min(255, fb + 30)},${B * 0.92})`,
+          );
+          ig.addColorStop(
+            0.3,
+            `rgba(${fr},${Math.max(0, fg - 20)},${Math.max(0, fb - 40)},${B * 0.55})`,
+          );
+          ig.addColorStop(
+            0.7,
+            `rgba(${Math.max(0, fr - 60)},${Math.max(0, fg - 80)},10,${B * 0.2})`,
+          );
+          ig.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = ig;
+          ctx.fillRect(cx - 80, cy - 110, 160, 260);
+        } else {
+          // Cold glass — very slightly blue-gray tinted
+          ctx.fillStyle = "rgba(200,215,230,0.06)";
+          ctx.fillRect(cx - 80, cy - 110, 160, 260);
+        }
+
+        // Glass body: layered to simulate glass thickness and refraction
+        // Primary glass body
+        const gBody = ctx.createLinearGradient(cx - 72, 0, cx + 72, 0);
+        if (B > 0.1) {
+          gBody.addColorStop(0, `rgba(255,248,220,${0.2 + B * 0.45})`);
+          gBody.addColorStop(0.12, `rgba(255,245,200,${0.08 + B * 0.12})`);
+          gBody.addColorStop(0.35, `rgba(255,252,240,${0.04 + B * 0.07})`);
+          gBody.addColorStop(0.65, `rgba(255,250,235,${0.04 + B * 0.07})`);
+          gBody.addColorStop(0.88, `rgba(255,245,200,${0.1 + B * 0.15})`);
+          gBody.addColorStop(1, `rgba(255,248,220,${0.22 + B * 0.5})`);
+        } else {
+          gBody.addColorStop(0, "rgba(200,220,240,0.55)");
+          gBody.addColorStop(0.1, "rgba(220,235,250,0.15)");
+          gBody.addColorStop(0.4, "rgba(240,248,255,0.06)");
+          gBody.addColorStop(0.6, "rgba(235,245,255,0.06)");
+          gBody.addColorStop(0.9, "rgba(220,235,250,0.18)");
+          gBody.addColorStop(1, "rgba(200,220,240,0.6)");
+        }
+        ctx.fillStyle = gBody;
+        ctx.fillRect(cx - 80, cy - 110, 160, 260);
+
+        // Specular highlight — main (left-side streak)
+        const spec1 = ctx.createLinearGradient(
+          cx - 55,
+          cy - 90,
+          cx - 30,
+          cy + 60,
+        );
+        spec1.addColorStop(0, `rgba(255,255,250,${0.0 + B * 0.15})`);
+        spec1.addColorStop(0.15, `rgba(255,255,255,${0.52 + B * 0.25})`);
+        spec1.addColorStop(0.5, `rgba(255,255,255,${0.2 + B * 0.12})`);
+        spec1.addColorStop(1, "rgba(255,255,255,0.0)");
+        ctx.fillStyle = spec1;
+        ctx.beginPath();
+        ctx.ellipse(cx - 38, cy - 20, 18, 62, -0.22, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Secondary specular (right edge glint)
+        const spec2 = ctx.createLinearGradient(
+          cx + 50,
+          cy - 60,
+          cx + 70,
+          cy + 20,
+        );
+        spec2.addColorStop(0, `rgba(255,255,250,${0.35 + B * 0.2})`);
+        spec2.addColorStop(0.5, `rgba(255,255,240,${0.12 + B * 0.08})`);
+        spec2.addColorStop(1, "rgba(255,255,240,0.0)");
+        ctx.fillStyle = spec2;
+        ctx.beginPath();
+        ctx.ellipse(cx + 58, cy - 18, 10, 38, 0.18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Top reflection arc (crown of glass)
+        const specTop = ctx.createRadialGradient(
+          cx - 14,
+          cy - 86,
+          2,
+          cx - 14,
+          cy - 86,
+          38,
+        );
+        specTop.addColorStop(0, `rgba(255,255,255,${0.5 + B * 0.3})`);
+        specTop.addColorStop(1, "rgba(255,255,255,0.0)");
+        ctx.fillStyle = specTop;
+        ctx.beginPath();
+        ctx.ellipse(cx - 14, cy - 82, 22, 12, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        // --- 3. GLASS OUTLINE ---
+        ctx.save();
+        bulbPath();
+        ctx.strokeStyle =
+          B > 0.15
+            ? `rgba(255,240,180,${0.5 + B * 0.4})`
+            : "rgba(160,190,220,0.7)";
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Rim glow when lit
+        if (B > 0.1) {
+          ctx.strokeStyle = `rgba(${fr},${fg},${fb},${B * 0.3})`;
+          ctx.lineWidth = 5;
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // --- 4. INNER GLASS ARBOR / STEM (the glass column inside) ---
+        ctx.save();
+        const stemGrad = ctx.createLinearGradient(cx - 8, 0, cx + 8, 0);
+        stemGrad.addColorStop(0, "rgba(180,200,220,0.7)");
+        stemGrad.addColorStop(0.4, "rgba(220,235,248,0.35)");
+        stemGrad.addColorStop(1, "rgba(180,200,220,0.7)");
+        ctx.fillStyle = stemGrad;
+        ctx.fillRect(cx - 8, cy + 48, 16, 66);
+        ctx.strokeStyle = "rgba(140,170,200,0.5)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx - 8, cy + 48, 16, 66);
+        ctx.restore();
+
+        // --- 5. LEAD-IN WIRES (from base through stem to filament) ---
+        ctx.save();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "rgba(200,185,155,0.85)";
+        ctx.beginPath();
+        ctx.moveTo(cx - 10, cy + 113);
+        ctx.lineTo(cx - 10, cy + 52);
+        ctx.lineTo(cx - 10, cy + 42);
+        ctx.bezierCurveTo(cx - 10, cy + 28, cx - 16, cy + 10, cx - 18, cy - 4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + 10, cy + 113);
+        ctx.lineTo(cx + 10, cy + 52);
+        ctx.lineTo(cx + 10, cy + 42);
+        ctx.bezierCurveTo(cx + 10, cy + 28, cx + 16, cy + 10, cx + 18, cy - 4);
+        ctx.stroke();
+        ctx.restore();
+
+        // --- 6. COILED TUNGSTEN FILAMENT ---
+        drawFilament(cx, cy, B, T, t);
+
+        // --- 7. NECK / SHOULDER TRANSITION ---
+        ctx.save();
+        const neckGrad = ctx.createLinearGradient(cx - 30, 0, cx + 30, 0);
+        neckGrad.addColorStop(0, "rgba(80,95,110,0.9)");
+        neckGrad.addColorStop(0.3, "rgba(100,115,130,0.5)");
+        neckGrad.addColorStop(0.7, "rgba(100,115,130,0.5)");
+        neckGrad.addColorStop(1, "rgba(80,95,110,0.9)");
+        ctx.fillStyle = neckGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 28, cy + 108);
+        ctx.lineTo(cx - 28, cy + 136);
+        ctx.lineTo(cx + 28, cy + 136);
+        ctx.lineTo(cx + 28, cy + 108);
+        ctx.bezierCurveTo(cx + 52, cy + 88, cx + 72, cy + 48, cx + 72, cy + 42);
+        ctx.bezierCurveTo(
+          cx + 72,
+          cy + 50,
+          cx + 50,
+          cy + 90,
+          cx + 28,
+          cy + 108,
+        );
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // --- 8. BRASS METAL BASE (Edison E27 screw) ---
+        drawMetalBase(cx, cy, B, fr, fg, fb);
+      }
+
+      function drawFilament(cx, cy, B, T, t) {
+        // Realistic double-coil tungsten filament
+        ctx.save();
+
+        const [fr, fg, fb] = bbColor(T);
+        const hot = B > 0.04;
+
+        if (hot) {
+          // Glow halo around filament (brighter)
+          ctx.shadowBlur = 38 + B * 60;
+          ctx.shadowColor = `rgba(${fr},${Math.min(255, fg + 40)},${Math.max(0, fb - 10)},${Math.min(1, B * 1.5)})`;
+        }
+
+        // Support arms (tungsten support wires)
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = hot
+          ? `rgba(${fr},${fg},${fb},0.9)`
+          : "rgba(150,165,180,0.8)";
+        ctx.lineCap = "round";
+        // Left support
+        ctx.beginPath();
+        ctx.moveTo(cx - 18, cy - 4);
+        ctx.lineTo(cx - 18, cy + 10);
+        ctx.lineTo(cx - 22, cy + 22);
+        ctx.stroke();
+        // Right support
+        ctx.beginPath();
+        ctx.moveTo(cx + 18, cy - 4);
+        ctx.lineTo(cx + 18, cy + 10);
+        ctx.lineTo(cx + 22, cy + 22);
+        ctx.stroke();
+
+        // Main filament coil — draw as a tight sine-wave on a curved path
+        // This simulates the coiled-coil (CC) structure of a real incandescent
+        const coilColor = hot
+          ? `rgba(${fr},${fg},${fb},1.0)`
+          : "rgba(145,160,175,0.95)";
+
+        ctx.lineWidth = hot ? 4.5 : 3.8;
+        ctx.strokeStyle = coilColor;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // Primary coil path (vertical helix, flattened to 2D)
+        ctx.beginPath();
+        const coilCX = cx,
+          coilCY = cy - 28;
+        const coilH = 52,
+          coilW = 22;
+        const turns = 12;
+        const steps = 200;
+
+        for (let i = 0; i <= steps; i++) {
+          const frac = i / steps;
+          const angle = frac * turns * Math.PI * 2;
+          // slight 3D perspective: amplitude shrinks as we go "behind"
+          const perspAmplitude =
+            coilW * (0.7 + 0.3 * Math.sin(angle * 0.5 + 0.8));
+          const px = coilCX + Math.sin(angle) * perspAmplitude;
+          const py = coilCY - coilH / 2 + frac * coilH;
+          // Depth cue: vary opacity for 3D look
+          const depth = (Math.sin(angle) + 1) * 0.5;
+          if (hot) {
+            ctx.shadowBlur = 10 + depth * 18 * B;
+            ctx.shadowColor = `rgba(${fr},${fg},${fb},${B * (0.4 + depth * 0.5)})`;
+          }
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Secondary (inner) coil for depth / realism
+        ctx.lineWidth = hot ? 2.8 : 2.2;
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = hot
+          ? `rgba(${Math.min(255, fr + 20)},${Math.min(255, fg + 30)},${Math.min(255, fb + 60)},0.9)`
+          : "rgba(180,195,210,0.7)";
+
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const frac = i / steps;
+          const angle = frac * turns * Math.PI * 2 + Math.PI * 0.4;
+          const perspAmplitude =
+            coilW * 0.48 * (0.5 + 0.5 * Math.sin(angle * 0.6));
+          const px = coilCX + Math.sin(angle) * perspAmplitude;
+          const py = coilCY - coilH / 2 + frac * coilH;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+
+        // Filament anchor cups (small metal holders)
+        ctx.shadowBlur = 0;
+        const anchorColor = hot
+          ? `rgba(${fr},${fg},${fb},0.9)`
+          : "rgba(175,185,200,0.9)";
+        ctx.fillStyle = anchorColor;
+        // Top anchor
+        ctx.beginPath();
+        ctx.arc(cx, coilCY - coilH / 2 - 3, 4, 0, Math.PI * 2);
+        ctx.fill();
+        // Bottom anchor
+        ctx.beginPath();
+        ctx.arc(cx, coilCY + coilH / 2 + 3, 4, 0, Math.PI * 2);
+        ctx.fill();
+        // Side anchors
+        ctx.beginPath();
+        ctx.arc(cx - 22, cy + 22, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + 22, cy + 22, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawMetalBase(cx, cy, B, fr, fg, fb) {
+        const baseTop = cy + 136;
+        const baseH = 68;
+
+        ctx.save();
+
+        // Outer brass shell
+        const brassGrad = ctx.createLinearGradient(cx - 30, 0, cx + 30, 0);
+        brassGrad.addColorStop(0, "#3A3020");
+        brassGrad.addColorStop(0.08, "#7A6A3A");
+        brassGrad.addColorStop(0.22, "#C49840");
+        brassGrad.addColorStop(0.38, "#E8BC58");
+        brassGrad.addColorStop(0.5, "#F0CA68");
+        brassGrad.addColorStop(0.62, "#D8AE50");
+        brassGrad.addColorStop(0.78, "#A07830");
+        brassGrad.addColorStop(0.92, "#6A5220");
+        brassGrad.addColorStop(1, "#3A3020");
+        ctx.fillStyle = brassGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 30, baseTop);
+        ctx.lineTo(cx - 26, baseTop + baseH);
+        ctx.arc(cx, baseTop + baseH, 26, Math.PI, 0, true);
+        ctx.lineTo(cx + 30, baseTop);
+        ctx.closePath();
+        ctx.fill();
+
+        // Screw threads (realistic — angled lines with depth shading)
+        const threadCount = 8;
+        for (let i = 0; i < threadCount; i++) {
+          const ty = baseTop + 6 + (i * (baseH - 10)) / threadCount;
+          const fade = i / threadCount;
+          // Shadow side thread
+          ctx.strokeStyle = `rgba(40,30,10,${0.7 - fade * 0.2})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 29 + fade * 3, ty);
+          ctx.lineTo(cx + 29 - fade * 3, ty);
+          ctx.stroke();
+          // Highlight thread
+          ctx.strokeStyle = `rgba(255,240,160,${0.25 - fade * 0.08})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(cx - 28 + fade * 3, ty - 1.5);
+          ctx.lineTo(cx + 28 - fade * 3, ty - 1.5);
+          ctx.stroke();
+        }
+
+        // Nickel-plate insulator ring
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(cx - 30, baseTop + baseH - 12, 60, 12);
+        ctx.fillStyle = "#282828";
+        ctx.fillRect(cx - 30, baseTop + baseH - 14, 60, 4);
+
+        // Bottom contact (copper/brass disc)
+        const contactGrad = ctx.createRadialGradient(
+          cx - 6,
+          baseTop + baseH + 6,
+          1,
+          cx,
+          baseTop + baseH + 8,
+          22,
+        );
+        contactGrad.addColorStop(0, "#FFE898");
+        contactGrad.addColorStop(0.4, "#D4A030");
+        contactGrad.addColorStop(1, "#805010");
+        ctx.fillStyle = contactGrad;
+        ctx.beginPath();
+        ctx.ellipse(cx, baseTop + baseH + 6, 20, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Contact highlight
+        ctx.fillStyle = "rgba(255,248,200,0.5)";
+        ctx.beginPath();
+        ctx.ellipse(cx - 4, baseTop + baseH + 4, 8, 3, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Base brand label
+        ctx.font = "bold 9px monospace";
+        ctx.fillStyle = "rgba(80,60,20,0.9)";
+        ctx.textAlign = "center";
+        ctx.fillText("9V", cx, baseTop + 30);
+
+        ctx.restore();
+      }
+
+      // ---- INDUSTRIAL SWITCH ----
+      function drawSwitch(x, y) {
+        const on = STATE.isOn;
+        ctx.save();
+
+        // Housing shadow
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.beginPath();
+        ctx.roundRect(x - 55, y - 34, 110, 82, 8);
+        ctx.fill();
+
+        // Main housing
+        const hGrad = ctx.createLinearGradient(x - 54, y - 33, x + 54, y + 46);
+        hGrad.addColorStop(0, "#2A3A4A");
+        hGrad.addColorStop(0.5, "#1E2D3C");
+        hGrad.addColorStop(1, "#16222E");
+        ctx.fillStyle = hGrad;
+        ctx.beginPath();
+        ctx.roundRect(x - 54, y - 33, 108, 80, 7);
+        ctx.fill();
+        ctx.strokeStyle = "#354555";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Screw heads
+        ctx.fillStyle = "#B0A090";
+        [
+          [x - 34, y - 18],
+          [x + 34, y - 18],
+          [x - 34, y + 28],
+          [x + 34, y + 28],
+        ].forEach(([sx, sy]) => {
+          ctx.beginPath();
+          ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#808070";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(sx - 4, sy);
+          ctx.lineTo(sx + 4, sy);
+          ctx.stroke();
+        });
+
+        // Toggle slot
+        ctx.fillStyle = "#0E1820";
+        ctx.beginPath();
+        ctx.roundRect(x - 16, y - 24, 32, 52, 6);
+        ctx.fill();
+        ctx.strokeStyle = "#0A1018";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Lever
+        const leverY = on ? y + 8 : y - 8;
+        const leverRot = on ? 0.35 : -0.35;
+        ctx.save();
+        ctx.translate(x, leverY);
+        ctx.rotate(leverRot);
+        // Lever body
+        const lGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+        lGrad.addColorStop(0, on ? "#2D6B3A" : "#7A2020");
+        lGrad.addColorStop(0.4, on ? "#5ABB60" : "#DD4040");
+        lGrad.addColorStop(1, on ? "#2D6B3A" : "#7A2020");
+        ctx.fillStyle = lGrad;
+        ctx.beginPath();
+        ctx.roundRect(-10, -22, 20, 44, 5);
+        ctx.fill();
+        // Lever grip ridges
+        ctx.strokeStyle = on
+          ? "rgba(120,255,130,0.35)"
+          : "rgba(255,100,80,0.35)";
+        ctx.lineWidth = 1.5;
+        for (let i = -10; i <= 10; i += 5) {
+          ctx.beginPath();
+          ctx.moveTo(i, -18);
+          ctx.lineTo(i, 18);
+          ctx.stroke();
+        }
+        // Lever tip
+        ctx.fillStyle = on ? "#7AFF80" : "#FF7060";
+        ctx.beginPath();
+        ctx.ellipse(0, on ? 18 : -18, 8, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Status indicator LED
+        ctx.fillStyle = on ? "#44FF50" : "#FF4840";
+        ctx.shadowBlur = on ? 16 : 8;
+        ctx.shadowColor = on ? "#00FF20" : "#FF2020";
+        ctx.beginPath();
+        ctx.arc(x - 38, y - 4, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Label
+        ctx.fillStyle = "#C8D8E0";
+        ctx.font = "bold 11px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(on ? "ON" : "OFF", x - 38, y + 14);
+
+        ctx.restore();
+      }
+
+      // ---- CIRCUIT WIRES & COMPONENTS ----
+      function drawCircuit() {
+        const p = LAYOUT.path;
+        const bat = LAYOUT.battery;
+        const res = LAYOUT.resistorRect;
+        const bulb = LAYOUT.bulb;
+        const sw = LAYOUT.switchPos;
+
+        // Wire shadow (depth)
+        ctx.beginPath();
+        ctx.moveTo(p.topLeft.x, p.topLeft.y + 3);
+        ctx.lineTo(p.topRight.x, p.topRight.y + 3);
+        ctx.lineTo(p.bottomRight.x + 3, p.bottomRight.y);
+        ctx.lineTo(p.bottomLeft.x + 3, p.bottomLeft.y);
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.lineWidth = 22;
+        ctx.stroke();
+
+        // Main wire loop
+        ctx.beginPath();
+        ctx.moveTo(p.topLeft.x, p.topLeft.y);
+        ctx.lineTo(p.topRight.x, p.topRight.y);
+        ctx.lineTo(p.bottomRight.x, p.bottomRight.y);
+        ctx.lineTo(p.bottomLeft.x, p.bottomLeft.y);
+        ctx.strokeStyle = "#4A6070";
+        ctx.lineWidth = 18;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+
+        // Active current glow
+        if (STATE.isOn && STATE.current > 0.01) {
+          const glow = 0.4 + Math.min(0.5, STATE.current * 0.18);
+          ctx.beginPath();
+          ctx.moveTo(p.topLeft.x, p.topLeft.y);
+          ctx.lineTo(p.topRight.x, p.topRight.y);
+          ctx.lineTo(p.bottomRight.x, p.bottomRight.y);
+          ctx.lineTo(p.bottomLeft.x, p.bottomLeft.y);
+          ctx.strokeStyle = `rgba(50,200,255,${glow})`;
+          ctx.lineWidth = 10;
+          ctx.stroke();
+          // Core bright line
+          ctx.strokeStyle = `rgba(160,240,255,${glow * 0.6})`;
+          ctx.lineWidth = 4;
+          ctx.stroke();
+        }
+
+        // Connector wires
+        ctx.lineWidth = 9;
+        ctx.strokeStyle = "#5A7080";
+        ctx.lineJoin = "round";
+        // Battery to loop
+        ctx.beginPath();
+        ctx.moveTo(bat.x + 42, bat.y - 74);
+        ctx.lineTo(p.topLeft.x + 12, p.topLeft.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(bat.x + 42, bat.y + 82);
+        ctx.lineTo(p.bottomLeft.x + 12, p.bottomLeft.y);
+        ctx.stroke();
+        // Loop to switch
+        ctx.beginPath();
+        ctx.moveTo(p.topLeft.x + 55, p.topLeft.y);
+        ctx.lineTo(sw.x - 52, sw.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(sw.x + 52, sw.y);
+        ctx.quadraticCurveTo(sw.x + 110, sw.y - 22, res.x - 24, res.y + 36);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(res.x + res.w + 24, res.y + 36);
+        ctx.lineTo(p.topRight.x - 52, p.topRight.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.topRight.x, p.topRight.y);
+        ctx.lineTo(bulb.x, bulb.y - 78);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.bottomRight.x, p.bottomRight.y);
+        ctx.lineTo(bulb.x, bulb.y + 78);
+        ctx.stroke();
+
+        // === BATTERY (3D realistic) ===
+        const bx = bat.x - 44,
+          by = bat.y - 90,
+          bw = 88,
+          bh = 180;
+        // Battery shadow
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(bx + 4, by + 4, bw, bh);
+        // Main body
+        const batBody = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        batBody.addColorStop(0, "#1A2838");
+        batBody.addColorStop(0.1, "#2A3848");
+        batBody.addColorStop(0.5, "#243240");
+        batBody.addColorStop(0.9, "#2A3848");
+        batBody.addColorStop(1, "#1A2838");
+        ctx.fillStyle = batBody;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 6);
+        ctx.fill();
+        ctx.strokeStyle = "#3A5060";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // Positive terminal (red)
+        const posGrad = ctx.createLinearGradient(bx, by, bx + bw, by + 28);
+        posGrad.addColorStop(0, "#7A1810");
+        posGrad.addColorStop(0.5, "#D42820");
+        posGrad.addColorStop(1, "#7A1810");
+        ctx.fillStyle = posGrad;
+        ctx.fillRect(bx, by, bw, 28);
+        ctx.strokeStyle = "#FF5040";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, by, bw, 28);
+        // Negative terminal (green)
+        const negGrad = ctx.createLinearGradient(
+          bx,
+          by + bh - 28,
+          bx + bw,
+          by + bh,
+        );
+        negGrad.addColorStop(0, "#104A20");
+        negGrad.addColorStop(0.5, "#1E8A38");
+        negGrad.addColorStop(1, "#104A20");
+        ctx.fillStyle = negGrad;
+        ctx.fillRect(bx, by + bh - 28, bw, 28);
+        ctx.strokeStyle = "#40FF70";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, by + bh - 28, bw, 28);
+        // Labels
+        ctx.font = "bold 22px monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FF8878";
+        ctx.fillText("+", bat.x, by + 20);
+        ctx.fillStyle = "#60FF90";
+        ctx.fillText("−", bat.x, by + bh - 8);
+        ctx.font = "bold 26px monospace";
+        ctx.fillStyle = "#FFD060";
+        ctx.fillText("9V", bat.x, bat.y + 10);
+
+        // === RESISTOR (ceramic film resistor) ===
+        const rx = res.x,
+          ry = res.y,
+          rw = res.w,
+          rh = res.h;
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.fillRect(rx + 3, ry + 3, rw, rh);
+        // Body
+        const resBody = ctx.createLinearGradient(rx, ry, rx, ry + rh);
+        resBody.addColorStop(0, "#C07840");
+        resBody.addColorStop(0.25, "#D49050");
+        resBody.addColorStop(0.5, "#C07840");
+        resBody.addColorStop(0.75, "#A86028");
+        resBody.addColorStop(1, "#8A4818");
+        ctx.fillStyle = resBody;
+        ctx.beginPath();
+        ctx.roundRect(rx, ry, rw, rh, 10);
+        ctx.fill();
+        ctx.strokeStyle = "#804010";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // Color bands (like a real resistor)
+        const bands = [
+          { x: rx + 28, color: "#1A1A1A" },
+          { x: rx + 55, color: "#C83020" },
+          { x: rx + 82, color: "#D0720A" },
+          { x: rx + 220, color: "#A0A0A0" },
+        ];
+        bands.forEach((b) => {
+          ctx.fillStyle = b.color;
+          ctx.fillRect(b.x, ry + 6, 16, rh - 12);
+          ctx.strokeStyle = "rgba(0,0,0,0.3)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(b.x, ry + 6, 16, rh - 12);
+        });
+        // Value label
+        ctx.font = 'bold 20px "Share Tech Mono",monospace';
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FFF0CC";
+        ctx.fillText(`${CIRCUIT.resistance} Ω`, rx + rw / 2, ry + rh - 12);
+
+        // Labels
+        ctx.font = 'bold 13px "Barlow Condensed",sans-serif';
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#FFB840";
+        ctx.fillText("VARIABLE RESISTOR", rx + rw / 2, ry - 10);
+        ctx.fillStyle = "#90B8D0";
+        ctx.fillText("POWER SWITCH", sw.x, sw.y - 38);
+      }
+
+      // ---- ELECTRONS ----
+      function drawElectrons() {
+        if (!STATE.isOn || STATE.current < 0.001) return;
+        // Subtle shimmer effect for invisible current flow
+        const speed = Math.min(18, 2.5 + 50 / Math.max(1, CIRCUIT.resistance));
+        const now = performance.now() / 1000;
+        const p = LAYOUT.path;
+        const total =
+          2 * (p.topRight.x - p.topLeft.x + (p.bottomLeft.y - p.topLeft.y));
+
+        // Draw a faint moving shimmer along the wire
+        for (let i = 0; i < 8; i++) {
+          const phase = (now * speed * 60 + i * (total / 8)) % total;
+          const pos = getLoopPosition(phase);
+          const shimmerAlpha = 0.1 + 0.08 * Math.sin(now * 2 + i);
+          const shimmerSize = 32 + 12 * Math.sin(now * 2.5 + i);
+          const grad = ctx.createRadialGradient(
+            pos.x,
+            pos.y,
+            0,
+            pos.x,
+            pos.y,
+            shimmerSize,
+          );
+          grad.addColorStop(0, `rgba(160,240,255,${shimmerAlpha})`);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.save();
+          ctx.globalAlpha = 0.7;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, shimmerSize, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // ---- MAIN RENDER ----
+      function render() {
+        ctx.clearRect(0, 0, CW, CH);
+        // Dark background with subtle vignette
+        ctx.fillStyle = "#000912";
+        ctx.fillRect(0, 0, CW, CH);
+        const vignette = ctx.createRadialGradient(
+          CW / 2,
+          CH / 2,
+          CH * 0.2,
+          CW / 2,
+          CH / 2,
+          CH * 0.85,
+        );
+        vignette.addColorStop(0, "rgba(0,0,0,0)");
+        vignette.addColorStop(1, "rgba(0,0,0,0.6)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, CW, CH);
+
+        drawCircuit();
+        drawSwitch(LAYOUT.switchPos.x, LAYOUT.switchPos.y);
+        drawRealisticBulb(LAYOUT.bulb.x, LAYOUT.bulb.y);
+        drawElectrons();
+      }
+
+      function loop() {
+        STATE.time += 0.016;
+        updateUI();
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      function togglePower() {
+        STATE.isOn = !STATE.isOn;
+        if (STATE.isOn) initElectrons();
+      }
+
+      function reset() {
+        CIRCUIT.resistance = 10;
+        STATE.isOn = false;
+        STATE.brightness = 0;
+        STATE.filamentTemp = 300;
+        document.getElementById("resSlider").value = "10";
+        updateUI();
+        initElectrons();
+      }
+
+      function handleClick(e) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = canvas.width / rect.width,
+          sy = canvas.height / rect.height;
+        let cx, cy;
+        if (e.touches) {
+          e.preventDefault();
+          cx = (e.touches[0].clientX - rect.left) * sx;
+          cy = (e.touches[0].clientY - rect.top) * sy;
+        } else {
+          cx = (e.clientX - rect.left) * sx;
+          cy = (e.clientY - rect.top) * sy;
+        }
+        if (Math.hypot(cx - LAYOUT.switchPos.x, cy - LAYOUT.switchPos.y) < 72)
+          togglePower();
+      }
+
+      function setup() {
+        canvas = document.getElementById("circuitCanvas");
+        ctx = canvas.getContext("2d");
+        canvas.width = CW;
+        canvas.height = CH;
+        initElectrons();
+        canvas.addEventListener("click", handleClick);
+        canvas.addEventListener("touchstart", handleClick, { passive: false });
+        document.getElementById("resSlider").addEventListener("input", (e) => {
+          CIRCUIT.resistance = parseFloat(e.target.value);
+          updateUI();
+        });
+        document
+          .getElementById("masterToggleBtn")
+          .addEventListener("click", togglePower);
+        document
+          .getElementById("masterResetBtn")
+          .addEventListener("click", reset);
+        updateUI();
+        loop();
+      }
+      window.addEventListener("load", setup);
+    </script>
+  </body>
 </html>

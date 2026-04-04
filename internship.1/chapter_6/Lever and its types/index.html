@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Physics Lever Simulation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ══════════════════════════════════════════════════════════
+         DESIGN: Deep-Sea Research Terminal
+         Blueprint teal-black · acid cyan accents ·
+         precise monospaced readouts · angular geometric panels
+      ══════════════════════════════════════════════════════════ */
+
+      :root {
+        --bg: #050c10;
+        --panel: #07131a;
+        --card: #091820;
+        --card-hi: #0d2030;
+        --line: rgba(0, 210, 180, 0.12);
+        --line-hi: rgba(0, 210, 180, 0.28);
+        --line-glow: rgba(0, 210, 180, 0.55);
+        --cyan: #00d4b4;
+        --cyan-dim: rgba(0, 212, 180, 0.13);
+        --cyan-glow: rgba(0, 212, 180, 0.35);
+        --load: #ff5e57;
+        --load-dim: rgba(255, 94, 87, 0.13);
+        --effort: #ffd166;
+        --effort-dim: rgba(255, 209, 102, 0.13);
+        --fulcrum: #74b9ff;
+        --fulcrum-dim: rgba(116, 185, 255, 0.13);
+        --t1: #d8f5f0;
+        --t2: #4d8078;
+        --t3: #1e3d38;
+        --fs: "Syne", sans-serif;
+        --fm: "Syne Mono", monospace;
+        --fi: "Instrument Serif", serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--fs);
+        background: var(--bg);
+        min-height: 100vh;
+        color: var(--t1);
+        padding: 24px 20px 56px;
+        background-image:
+          radial-gradient(
+            ellipse 100% 55% at 50% 0%,
+            rgba(0, 200, 170, 0.07) 0%,
+            transparent 65%
+          ),
+          linear-gradient(rgba(0, 210, 180, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 210, 180, 0.035) 1px, transparent 1px);
+        background-size:
+          100% 100%,
+          48px 48px,
+          48px 48px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      /* ── HEADER ── */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 32px;
+        background: var(--panel);
+        border: 1px solid var(--line-hi);
+        border-top: 2px solid var(--cyan);
+        position: relative;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 28px) 0,
+          100% 28px,
+          100% 100%,
+          0 100%
+        );
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both 0.05s;
+      }
+
+      .header::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, var(--cyan-dim) 0%, transparent 50%);
+        pointer-events: none;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 28px;
+        height: 28px;
+        background: var(--bg);
+        clip-path: polygon(0 0, 100% 100%, 100% 0);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .header-icon {
+        width: 48px;
+        height: 48px;
+        border: 1px solid var(--cyan);
+        display: grid;
+        place-items: center;
+        font-size: 1.4em;
+        flex-shrink: 0;
+        background: var(--cyan-dim);
+        clip-path: polygon(
+          10px 0%,
+          100% 0%,
+          100% calc(100% - 10px),
+          calc(100% - 10px) 100%,
+          0% 100%,
+          0% 10px
+        );
+      }
+
+      .header h1 {
+        font-family: var(--fs);
+        font-weight: 800;
+        font-size: 1.7em;
+        letter-spacing: -0.02em;
+        color: var(--t1);
+        line-height: 1;
+      }
+
+      .header h1 em {
+        font-family: var(--fi);
+        font-style: italic;
+        font-weight: 400;
+        color: var(--cyan);
+      }
+
+      .header p {
+        font-family: var(--fm);
+        font-size: 0.65em;
+        color: var(--t2);
+        margin-top: 6px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .header-badge {
+        font-family: var(--fm);
+        font-size: 0.7em;
+        color: var(--cyan);
+        background: var(--cyan-dim);
+        border: 1px solid var(--line-glow);
+        padding: 5px 14px;
+        letter-spacing: 0.08em;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ── MAIN GRID ── */
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 355px;
+        gap: 18px;
+        align-items: start;
+        animation: fadeUp 0.4s ease both 0.15s;
+      }
+
+      @media (max-width: 1060px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── SIMULATION ── */
+      .simulation-area {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .canvas-container {
+        position: relative;
+        height: 490px;
+        border: 1px solid var(--line-hi);
+        border-top: 2px solid var(--line-glow);
+        background: radial-gradient(
+          ellipse 80% 70% at 50% 85%,
+          #071820 0%,
+          #030d12 70%,
+          #020a0f 100%
+        );
+        overflow: hidden;
+      }
+
+      /* Scan-line overlay */
+      .canvas-container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(0, 0, 0, 0.07) 3px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      /* Corner brackets */
+      .canvas-container::after {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        background:
+          linear-gradient(var(--cyan), var(--cyan)) top left / 22px 1px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) top left / 1px 22px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) top right / 22px 1px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) top right / 1px 22px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) bottom left / 22px 1px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) bottom left / 1px 22px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) bottom right / 22px 1px
+            no-repeat,
+          linear-gradient(var(--cyan), var(--cyan)) bottom right / 1px 22px
+            no-repeat;
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0.5;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: crosshair;
+        position: relative;
+        z-index: 1;
+      }
+
+      .status-display {
+        position: absolute;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(5, 12, 16, 0.92);
+        backdrop-filter: blur(8px);
+        color: var(--cyan);
+        padding: 8px 22px;
+        font-family: var(--fm);
+        font-size: 0.72em;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: 1px solid var(--line-glow);
+        white-space: nowrap;
+        z-index: 10;
+        animation: pulse-border 3s ease-in-out infinite;
+      }
+
+      /* ── PHYSICS CARDS ── */
+      .physics-display {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+      }
+
+      .physics-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-bottom: 2px solid var(--accent-color, var(--cyan));
+        padding: 13px 10px 11px;
+        text-align: center;
+        position: relative;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 8px,
+          100% 100%,
+          0 100%
+        );
+      }
+
+      .physics-card:nth-child(1) {
+        --accent-color: var(--cyan);
+      }
+      .physics-card:nth-child(2) {
+        --accent-color: var(--load);
+      }
+      .physics-card:nth-child(3) {
+        --accent-color: var(--effort);
+      }
+      .physics-card:nth-child(4) {
+        --accent-color: var(--fulcrum);
+      }
+      .physics-card:nth-child(5) {
+        --accent-color: var(--t2);
+      }
+      .physics-card:hover {
+        background: var(--card-hi);
+        border-color: var(--line-hi);
+      }
+
+      .physics-label {
+        font-family: var(--fm);
+        font-size: 0.6em;
+        color: var(--t2);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .physics-value {
+        font-family: var(--fm);
+        font-size: 0.95em;
+        color: var(--t1);
+      }
+
+      /* ── LEGEND ── */
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--fm);
+        font-size: 0.68em;
+        color: var(--t2);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        flex-shrink: 0;
+      }
+
+      .legend-f {
+        background: var(--fulcrum);
+        box-shadow: 0 0 8px var(--fulcrum);
+      }
+      .legend-l {
+        background: var(--load);
+        box-shadow: 0 0 8px var(--load);
+      }
+      .legend-e {
+        background: var(--effort);
+        box-shadow: 0 0 8px var(--effort);
+      }
+
+      /* ── CONTROLS ── */
+      .controls-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .control-group {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-left: 2px solid var(--group-accent, var(--line-glow));
+        padding: 18px 20px;
+        transition: border-color 0.2s;
+      }
+
+      .control-group:hover {
+        border-color: var(--line-hi);
+      }
+      .control-group:nth-child(1) {
+        --group-accent: var(--cyan);
+      }
+      .control-group:nth-child(2) {
+        --group-accent: var(--load);
+      }
+      .control-group:nth-child(3) {
+        --group-accent: var(--effort);
+      }
+      .control-group:nth-child(4) {
+        --group-accent: var(--fulcrum);
+      }
+
+      .control-group h3 {
+        font-family: var(--fm);
+        font-size: 0.65em;
+        font-weight: 400;
+        color: var(--t2);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .control-group h3::before {
+        content: "";
+        width: 14px;
+        height: 1px;
+        background: var(--group-accent, var(--cyan));
+        flex-shrink: 0;
+      }
+
+      .group-icon {
+        display: none;
+      }
+
+      /* ── LEVER BUTTONS ── */
+      .lever-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .lever-type-btn {
+        padding: 13px 6px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--t2);
+        font-family: var(--fm);
+        font-size: 0.68em;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        clip-path: polygon(
+          6px 0%,
+          100% 0%,
+          100% calc(100% - 6px),
+          calc(100% - 6px) 100%,
+          0% 100%,
+          0% 6px
+        );
+      }
+
+      .lever-type-btn:hover {
+        border-color: var(--line-glow);
+        color: var(--cyan);
+        background: var(--cyan-dim);
+      }
+
+      .lever-type-btn.active {
+        border-color: var(--cyan);
+        color: var(--bg);
+        background: var(--cyan);
+        box-shadow: 0 0 18px var(--cyan-glow);
+      }
+
+      /* ── SLIDERS ── */
+      .parameter-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .slider-group {
+        padding: 12px 14px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-left: 2px solid var(--s-color, var(--line));
+      }
+
+      .slider-group:nth-child(1) {
+        --s-color: var(--load);
+      }
+      .slider-group:nth-child(2) {
+        --s-color: var(--effort);
+      }
+      .slider-group:nth-child(3) {
+        --s-color: var(--fulcrum);
+      }
+
+      .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .slider-header label {
+        font-family: var(--fm);
+        font-size: 0.65em;
+        color: var(--t2);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .slider-value {
+        font-family: var(--fm);
+        font-size: 0.75em;
+        padding: 2px 10px;
+        min-width: 56px;
+        text-align: center;
+      }
+
+      .slider-value.load {
+        color: var(--load);
+        border: 1px solid rgba(255, 94, 87, 0.4);
+        background: var(--load-dim);
+      }
+      .slider-value.effort {
+        color: var(--effort);
+        border: 1px solid rgba(255, 209, 102, 0.4);
+        background: var(--effort-dim);
+      }
+      .slider-value.length {
+        color: var(--fulcrum);
+        border: 1px solid rgba(116, 185, 255, 0.4);
+        background: var(--fulcrum-dim);
+      }
+
+      .slider-hint {
+        font-family: var(--fm);
+        font-size: 0.6em;
+        color: var(--t3);
+        margin-top: 7px;
+        letter-spacing: 0.06em;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 2px;
+        background: var(--line);
+        outline: none;
+        cursor: pointer;
+      }
+
+      #loadWeight {
+        background: linear-gradient(
+          to right,
+          var(--load) 0%,
+          var(--load) 50%,
+          rgba(255, 94, 87, 0.12) 50%
+        );
+      }
+      #effortForce {
+        background: linear-gradient(
+          to right,
+          var(--effort) 0%,
+          var(--effort) 25%,
+          rgba(255, 209, 102, 0.12) 25%
+        );
+      }
+      #leverLength {
+        background: linear-gradient(
+          to right,
+          var(--fulcrum) 0%,
+          var(--fulcrum) 50%,
+          rgba(116, 185, 255, 0.12) 50%
+        );
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        background: var(--bg);
+        border: 2px solid;
+        cursor: pointer;
+        transition: transform 0.15s;
+        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.4);
+      }
+
+      #loadWeight::-webkit-slider-thumb {
+        border-color: var(--load);
+        box-shadow: 0 0 8px rgba(255, 94, 87, 0.6);
+      }
+      #effortForce::-webkit-slider-thumb {
+        border-color: var(--effort);
+        box-shadow: 0 0 8px rgba(255, 209, 102, 0.6);
+      }
+      #leverLength::-webkit-slider-thumb {
+        border-color: var(--fulcrum);
+        box-shadow: 0 0 8px rgba(116, 185, 255, 0.6);
+      }
+
+      /* ── BUTTONS ── */
+      .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .action-btn {
+        padding: 14px 10px;
+        border: 1px solid;
+        background: transparent;
+        font-family: var(--fm);
+        font-size: 0.68em;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        clip-path: polygon(
+          6px 0%,
+          100% 0%,
+          100% calc(100% - 6px),
+          calc(100% - 6px) 100%,
+          0% 100%,
+          0% 6px
+        );
+        position: relative;
+        overflow: hidden;
+      }
+
+      .action-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.18s;
+      }
+      .action-btn:hover::before {
+        opacity: 1;
+      }
+      .action-btn:hover {
+        transform: translateY(-1px);
+      }
+      .action-btn:active {
+        transform: translateY(1px);
+      }
+
+      .action-btn.reset {
+        border-color: var(--load);
+        color: var(--load);
+      }
+      .action-btn.reset::before {
+        background: var(--load-dim);
+      }
+      .action-btn.reset:hover {
+        box-shadow: 0 0 18px rgba(255, 94, 87, 0.2);
+      }
+
+      .action-btn.balance {
+        border-color: var(--effort);
+        color: var(--effort);
+      }
+      .action-btn.balance::before {
+        background: var(--effort-dim);
+      }
+      .action-btn.balance:hover {
+        box-shadow: 0 0 18px rgba(255, 209, 102, 0.2);
+      }
+
+      /* ── INFO BOX ── */
+      .info-box {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-row-label {
+        font-family: var(--fm);
+        font-size: 0.62em;
+        color: var(--t3);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .info-row-value {
+        font-family: var(--fm);
+        font-size: 0.72em;
+        color: var(--t1);
+        text-align: right;
+        line-height: 1.5;
+      }
+
+      .info-row-value strong {
+        color: var(--cyan);
+        font-weight: 400;
+      }
+      .info-divider {
+        display: none;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 700px) {
+        .physics-display {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .header {
+          flex-direction: column;
+          gap: 14px;
+          clip-path: none;
+        }
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse-border {
+        0%,
+        100% {
+          box-shadow: 0 0 10px var(--cyan-dim);
+        }
+        50% {
+          box-shadow: 0 0 24px var(--cyan-glow);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-left">
+          <div class="header-icon">⚖️</div>
+          <div>
+            <h1>Lever <em>Physics</em></h1>
+            <p>All Three Classes · Real Torque Simulation</p>
+          </div>
+        </div>
+        <div class="header-badge">v2.0 · Interactive</div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="main-content">
+        <!-- LEFT: Simulation -->
+        <div class="simulation-area">
+          <!-- Canvas -->
+          <div class="canvas-container">
+            <canvas id="leverCanvas"></canvas>
+            <div class="status-display" id="statusDisplay">
+              Heavier side tilts downward — Adjust weights to see!
+            </div>
+          </div>
+
+          <!-- Physics readout cards -->
+          <div class="physics-display">
+            <div class="physics-card">
+              <div class="physics-label">Mech. Adv.</div>
+              <div class="physics-value" id="maValue">1.00</div>
+            </div>
+            <div class="physics-card">
+              <div class="physics-label">Load Torque</div>
+              <div class="physics-value" id="loadTorque">0.0 N·m</div>
+            </div>
+            <div class="physics-card">
+              <div class="physics-label">Effort Torque</div>
+              <div class="physics-value" id="effortTorque">0.0 N·m</div>
+            </div>
+            <div class="physics-card">
+              <div class="physics-label">Net Torque</div>
+              <div class="physics-value" id="netTorque">0.0 N·m</div>
+            </div>
+            <div class="physics-card">
+              <div class="physics-label">State</div>
+              <div class="physics-value" id="leverState">Balanced</div>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot legend-f"></div>
+              <span>Fulcrum</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-l"></div>
+              <span>Load</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-e"></div>
+              <span>Effort</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Controls -->
+        <div class="controls-panel">
+          <!-- Lever type -->
+          <div class="control-group">
+            <h3>
+              <span class="group-icon type-icon">⚙</span>
+              Lever Class
+            </h3>
+            <div class="lever-selector">
+              <button
+                class="lever-type-btn active"
+                onclick="changeLeverType(1)"
+              >
+                1st Class
+              </button>
+              <button class="lever-type-btn" onclick="changeLeverType(2)">
+                2nd Class
+              </button>
+              <button class="lever-type-btn" onclick="changeLeverType(3)">
+                3rd Class
+              </button>
+            </div>
+          </div>
+
+          <!-- Sliders -->
+          <div class="control-group">
+            <h3>
+              <span class="group-icon weight-icon">⚖</span>
+              Forces &amp; Geometry
+            </h3>
+            <div class="parameter-controls">
+              <div class="slider-group">
+                <div class="slider-header">
+                  <label>Load Weight</label>
+                  <span class="slider-value load" id="loadWeightValue"
+                    >50 N</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="loadWeight"
+                  min="10"
+                  max="200"
+                  value="50"
+                  step="1"
+                  oninput="updateLoadWeight(this.value)"
+                />
+                <div class="slider-hint">Heavier → tilts downward</div>
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-header">
+                  <label>Effort Force</label>
+                  <span class="slider-value effort" id="effortForceValue"
+                    >50 N</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="effortForce"
+                  min="1"
+                  max="200"
+                  value="50"
+                  step="1"
+                  oninput="updateEffortForce(this.value)"
+                />
+                <div class="slider-hint">Stronger → tilts upward</div>
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-header">
+                  <label>Lever Length</label>
+                  <span class="slider-value length" id="leverLengthValue"
+                    >8 m</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="leverLength"
+                  min="4"
+                  max="12"
+                  value="8"
+                  step="0.5"
+                  oninput="updateLeverLength(this.value)"
+                />
+                <div class="slider-hint">Longer → more leverage</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="control-group">
+            <h3>
+              <span class="group-icon ctrl-icon">↺</span>
+              Controls
+            </h3>
+            <div class="action-buttons">
+              <button class="action-btn reset" onclick="resetSimulation()">
+                Reset All
+              </button>
+              <button class="action-btn balance" onclick="autoBalance()">
+                Auto Balance
+              </button>
+            </div>
+          </div>
+
+          <!-- Info box -->
+          <div class="control-group">
+            <h3>
+              <span class="group-icon info-icon">ℹ</span>
+              Physics Info
+            </h3>
+            <div class="info-box">
+              <div class="info-row">
+                <span class="info-row-label">Lever Class</span>
+                <span class="info-row-value" id="currentLeverType"
+                  >First Class</span
+                >
+              </div>
+              <div class="info-divider"></div>
+              <div class="info-row">
+                <span class="info-row-label">Description</span>
+                <span class="info-row-value" id="leverDescription"
+                  >Fulcrum between effort and load</span
+                >
+              </div>
+              <div class="info-divider"></div>
+              <div class="info-row">
+                <span class="info-row-label">Mech. Advantage</span>
+                <span class="info-row-value"
+                  ><strong id="maDisplay">1.00</strong></span
+                >
+              </div>
+              <div class="info-divider"></div>
+              <div class="info-row">
+                <span class="info-row-label">Formula</span>
+                <span class="info-row-value" id="maFormula"
+                  >MA = Effort Arm / Load Arm</span
+                >
+              </div>
+              <div class="info-divider"></div>
+              <div class="info-row">
+                <span class="info-row-label">Real Examples</span>
+                <span class="info-row-value" id="realExample"
+                  >See-saw, scissors, crowbar</span
+                >
+              </div>
+              <div class="info-divider"></div>
+              <div class="info-row">
+                <span class="info-row-label">Key Principle</span>
+                <span class="info-row-value"
+                  >Heavier side tilts downward automatically</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /controls-panel -->
+      </div>
+      <!-- /main-content -->
+    </div>
+    <!-- /container -->
+
+    <script>
+      // Physics Simulation Variables
+      const canvas = document.getElementById("leverCanvas");
+      const ctx = canvas.getContext("2d");
+      let canvasWidth = 0,
+        canvasHeight = 0;
+
+      let leverType = 1;
+      let leverAngle = 0;
+      let leverLength = 8;
+      let loadWeight = 50;
+      let effortForce = 50;
+
+      const gravity = 9.81;
+      let animationId = null;
+      let isAnimating = true;
+
+      let fulcrumX = 0;
+      let fulcrumY = 0;
+
+      const leverConfigs = {
+        1: {
+          name: "First Class Lever",
+          realExample: "See-saw, scissors, crowbar, hammer",
+          fulcrumPos: 0,
+          loadPos: -leverLength / 2 + 1,
+          effortPos: leverLength / 2 - 1,
+          maFormula: "MA = Effort Arm / Load Arm",
+          description: "Fulcrum between effort and load",
+        },
+        2: {
+          name: "Second Class Lever",
+          realExample: "Wheelbarrow, nutcracker, bottle opener",
+          fulcrumPos: -leverLength / 2 + 1,
+          loadPos: 0,
+          effortPos: leverLength / 2 - 1,
+          maFormula: "MA = Effort Arm / Load Arm",
+          description: "Load between fulcrum and effort",
+        },
+        3: {
+          name: "Third Class Lever",
+          realExample: "Fishing rod, tweezers, human arm, baseball bat",
+          fulcrumPos: -leverLength / 2 + 1,
+          effortPos: 0,
+          loadPos: leverLength / 2 - 1,
+          maFormula: "MA = Effort Arm / Load Arm (< 1)",
+          description: "Effort between fulcrum and load",
+        },
+      };
+
+      function initSimulation() {
+        const container = canvas.parentElement;
+        canvasWidth = container.clientWidth;
+        canvasHeight = container.clientHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        fulcrumX = canvasWidth / 2;
+        fulcrumY = canvasHeight * 0.65;
+        if (animationId) cancelAnimationFrame(animationId);
+        if (isAnimating) animationId = requestAnimationFrame(animatePhysics);
+      }
+
+      function calculateRealPhysics() {
+        const config = leverConfigs[leverType];
+        const fulcrumPos = config.fulcrumPos;
+        const loadPos = config.loadPos;
+        const effortPos = config.effortPos;
+        const loadDistance = Math.abs(loadPos - fulcrumPos);
+        const effortDistance = Math.abs(effortPos - fulcrumPos);
+        const loadTorque = loadWeight * loadDistance * Math.cos(leverAngle);
+        const effortTorque =
+          effortForce * effortDistance * Math.cos(leverAngle);
+        const netTorque = effortTorque - loadTorque;
+        const mechanicalAdvantage = effortDistance / loadDistance;
+        return {
+          loadDistance,
+          effortDistance,
+          loadTorque,
+          effortTorque,
+          netTorque,
+          mechanicalAdvantage,
+          loadPos,
+          effortPos,
+          fulcrumPos,
+        };
+      }
+
+      function animatePhysics() {
+        const physics = calculateRealPhysics();
+        const momentOfInertia = 1000;
+        const damping = 0.92;
+        const angularAcceleration = physics.netTorque / momentOfInertia;
+        leverAngle += angularAcceleration * 0.02;
+        leverAngle *= damping;
+        const maxAngle = Math.PI / 4;
+        if (Math.abs(leverAngle) > maxAngle)
+          leverAngle = maxAngle * Math.sign(leverAngle);
+        if (Math.abs(physics.netTorque) < 2 && Math.abs(leverAngle) < 0.01)
+          leverAngle *= 0.9;
+        if (isAnimating) animationId = requestAnimationFrame(animatePhysics);
+        updateSimulation();
+      }
+
+      function drawSimulation() {
+        const skyGradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+        skyGradient.addColorStop(0, "#87CEEB");
+        skyGradient.addColorStop(1, "#5DADE2");
+        ctx.fillStyle = skyGradient;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        const groundY = fulcrumY + 150;
+        ctx.fillStyle = "#27ae60";
+        ctx.fillRect(0, groundY, canvasWidth, canvasHeight - groundY);
+        ctx.strokeStyle = "#2ecc71";
+        ctx.lineWidth = 2;
+        for (let x = 0; x < canvasWidth; x += 15) {
+          ctx.beginPath();
+          ctx.moveTo(x, groundY);
+          ctx.quadraticCurveTo(x + 3, groundY - 12, x + 6, groundY);
+          ctx.stroke();
+        }
+        ctx.save();
+        ctx.translate(fulcrumX, fulcrumY);
+        drawFulcrum();
+        ctx.rotate(leverAngle);
+        drawLeverBar();
+        drawLoad();
+        drawEffort();
+        ctx.restore();
+        updateDisplayInfo();
+      }
+
+      function drawFulcrum() {
+        ctx.fillStyle = "#3498db";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-20, 50);
+        ctx.lineTo(20, 50);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#2980b9";
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("F", 0, 0);
+      }
+
+      function drawLeverBar() {
+        const barLength = leverLength * 35;
+        ctx.fillStyle = "#f39c12";
+        ctx.fillRect(-barLength / 2, -8, barLength, 16);
+        ctx.strokeStyle = "#d35400";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-barLength / 2, -8, barLength, 16);
+        ctx.strokeStyle = "#e67e22";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-barLength / 2, -8, barLength, 16);
+      }
+
+      function drawLoad() {
+        const physics = calculateRealPhysics();
+        const loadX = physics.loadPos * 35;
+        const loadSize = 20 + (loadWeight / 200) * 60;
+        ctx.fillStyle = `rgba(0,0,0,${Math.min(0.4, loadWeight / 500)})`;
+        ctx.fillRect(
+          loadX - loadSize / 2 + 3,
+          -8 - loadSize + 3,
+          loadSize,
+          loadSize,
+        );
+        const g = ctx.createLinearGradient(
+          loadX - loadSize / 2,
+          -8 - loadSize,
+          loadX + loadSize / 2,
+          -8,
+        );
+        if (loadWeight < 80) {
+          g.addColorStop(0, "#ff9999");
+          g.addColorStop(0.5, "#ff6666");
+          g.addColorStop(1, "#ff3333");
+        } else if (loadWeight < 140) {
+          g.addColorStop(0, "#ff6b6b");
+          g.addColorStop(0.5, "#e74c3c");
+          g.addColorStop(1, "#c0392b");
+        } else {
+          g.addColorStop(0, "#ff4444");
+          g.addColorStop(0.5, "#dc3545");
+          g.addColorStop(1, "#b71c1c");
+        }
+        ctx.fillStyle = g;
+        ctx.fillRect(loadX - loadSize / 2, -8 - loadSize, loadSize, loadSize);
+        ctx.strokeStyle = loadWeight > 100 ? "#8b0000" : "#b33939";
+        ctx.lineWidth = loadWeight > 100 ? 4 : 3;
+        ctx.strokeRect(loadX - loadSize / 2, -8 - loadSize, loadSize, loadSize);
+        ctx.fillStyle = "white";
+        ctx.font = loadWeight > 100 ? "bold 18px Arial" : "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${loadWeight}N`, loadX, -8 - loadSize / 2);
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText("L", loadX, -8 - loadSize - 25);
+        ctx.strokeStyle = "#e74c3c";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(loadX, -8);
+        ctx.lineTo(loadX, -8 - loadSize);
+        ctx.stroke();
+      }
+
+      function drawEffort() {
+        const physics = calculateRealPhysics();
+        const effortX = physics.effortPos * 35;
+        const radius = (20 + (effortForce / 200) * 50) / 2;
+        ctx.fillStyle = "rgba(0,0,0,0.2)";
+        ctx.beginPath();
+        ctx.arc(effortX + 2, -8 - radius + 2, radius, 0, Math.PI * 2);
+        ctx.fill();
+        const g = ctx.createRadialGradient(
+          effortX,
+          -8 - radius,
+          radius / 3,
+          effortX,
+          -8 - radius,
+          radius,
+        );
+        g.addColorStop(0, "#7bed9f");
+        g.addColorStop(0.7, "#2ecc71");
+        g.addColorStop(1, "#27ae60");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(effortX, -8 - radius, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#229954";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${effortForce}N`, effortX, -8 - radius);
+        ctx.fillStyle = "#2c3e50";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText("E", effortX, -8 - radius - 20);
+        ctx.strokeStyle = "#2ecc71";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(effortX, -8);
+        ctx.lineTo(effortX, -8 - radius);
+        ctx.stroke();
+      }
+
+      function updateDisplayInfo() {
+        const p = calculateRealPhysics();
+        document.getElementById("maValue").textContent =
+          p.mechanicalAdvantage.toFixed(2);
+        document.getElementById("loadTorque").textContent =
+          `${p.loadTorque.toFixed(1)} N·m`;
+        document.getElementById("effortTorque").textContent =
+          `${p.effortTorque.toFixed(1)} N·m`;
+        document.getElementById("netTorque").textContent =
+          `${p.netTorque.toFixed(1)} N·m`;
+        document.getElementById("currentLeverType").textContent =
+          leverConfigs[leverType].name;
+        document.getElementById("leverDescription").textContent =
+          leverConfigs[leverType].description;
+        document.getElementById("maDisplay").textContent =
+          p.mechanicalAdvantage.toFixed(2);
+        document.getElementById("maFormula").textContent =
+          leverConfigs[leverType].maFormula;
+        document.getElementById("realExample").textContent =
+          leverConfigs[leverType].realExample;
+        let stateText, statusText;
+        if (Math.abs(p.netTorque) < 2) {
+          stateText = "Balanced ⚖️";
+          statusText = "Lever is balanced — no movement";
+        } else if (p.netTorque > 0) {
+          stateText = "Effort Winning ↗️";
+          statusText = `Effort is stronger (${p.netTorque.toFixed(1)} N·m torque)`;
+        } else {
+          stateText = "Load Winning ↘️";
+          statusText = `Load is heavier (${Math.abs(p.netTorque).toFixed(1)} N·m torque)`;
+        }
+        document.getElementById("leverState").textContent = stateText;
+        document.getElementById("statusDisplay").textContent = statusText;
+      }
+
+      function updatePositions() {
+        leverConfigs[1].loadPos = -leverLength / 2 + 1;
+        leverConfigs[1].effortPos = leverLength / 2 - 1;
+        leverConfigs[1].fulcrumPos = 0;
+        leverConfigs[2].fulcrumPos = -leverLength / 2 + 1;
+        leverConfigs[2].loadPos = 0;
+        leverConfigs[2].effortPos = leverLength / 2 - 1;
+        leverConfigs[3].fulcrumPos = -leverLength / 2 + 1;
+        leverConfigs[3].effortPos = 0;
+        leverConfigs[3].loadPos = leverLength / 2 - 1;
+      }
+
+      function updateSimulation() {
+        drawSimulation();
+      }
+
+      // ── Expose to global scope so inline onclick handlers work ──
+      window.changeLeverType = function (type) {
+        leverType = type;
+        document
+          .querySelectorAll(".lever-type-btn")
+          .forEach((btn, i) => btn.classList.toggle("active", i === type - 1));
+        updatePositions();
+        updateSimulation();
+      };
+
+      window.updateLoadWeight = function (value) {
+        loadWeight = parseInt(value);
+        document.getElementById("loadWeightValue").textContent = `${value} N`;
+        updateSimulation();
+      };
+
+      window.updateEffortForce = function (value) {
+        effortForce = parseInt(value);
+        document.getElementById("effortForceValue").textContent = `${value} N`;
+        updateSimulation();
+      };
+
+      window.updateLeverLength = function (value) {
+        leverLength = parseFloat(value);
+        document.getElementById("leverLengthValue").textContent = `${value} m`;
+        updatePositions();
+        updateSimulation();
+      };
+
+      window.resetSimulation = function () {
+        loadWeight = 50;
+        effortForce = 50;
+        leverLength = 8;
+        leverAngle = 0;
+        document.getElementById("loadWeight").value = 50;
+        document.getElementById("effortForce").value = 50;
+        document.getElementById("leverLength").value = 8;
+        document.getElementById("loadWeightValue").textContent = "50 N";
+        document.getElementById("effortForceValue").textContent = "50 N";
+        document.getElementById("leverLengthValue").textContent = "8 m";
+        updatePositions();
+        updateSimulation();
+      };
+
+      window.autoBalance = function () {
+        const p = calculateRealPhysics();
+        effortForce = Math.max(
+          1,
+          Math.min(
+            200,
+            Math.round((loadWeight * p.loadDistance) / p.effortDistance),
+          ),
+        );
+        document.getElementById("effortForce").value = effortForce;
+        document.getElementById("effortForceValue").textContent =
+          `${effortForce} N`;
+        updateSimulation();
+      };
+
+      window.addEventListener("load", () => {
+        initSimulation();
+        window.addEventListener("resize", initSimulation);
+      });
+    </script>
+  </body>
+</html>

@@ -7,7 +7,6 @@
         
         /* Dashboard Styling */
         #dashboard { 
-            
             position: absolute; top: 20px; left: 20px; 
             background: rgba(15, 15, 15, 0.95); 
             padding: 20px; border-radius: 12px; 
@@ -31,6 +30,22 @@
         /* Colors */
         .c-effort { color: #00d2ff; border-bottom: 2px solid #00d2ff; }
         .c-load { color: #ff5555; border-bottom: 2px solid #ff5555; }
+
+        /* Volume highlight glow when weight increases */
+        .vol-glow-effort {
+            animation: glowEffort 0.5s ease-out;
+        }
+        .vol-glow-load {
+            animation: glowLoad 0.5s ease-out;
+        }
+        @keyframes glowEffort {
+            0%   { box-shadow: 0 0 0px #00d2ff; background: #003a4a; }
+            100% { box-shadow: none; background: #2a2a2a; }
+        }
+        @keyframes glowLoad {
+            0%   { box-shadow: 0 0 0px #ff5555; background: #4a1a1a; }
+            100% { box-shadow: none; background: #2a2a2a; }
+        }
         
         /* Formula Area */
         .formula-box {
@@ -44,6 +59,11 @@
         label { font-size: 12px; color: #ccc; display: flex; justify-content: space-between; }
         input[type=range] { width: 100%; cursor: pointer; accent-color: #00d2ff; margin-top: 5px; }
 
+        /* Section divider */
+        .section-title {
+            font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px;
+            margin: 4px 0 8px 0; border-top: 1px solid #333; padding-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -51,6 +71,7 @@
 <div id="dashboard">
     <h2>Velocity Ratio</h2>
     
+    <!-- Row 1: Weights -->
     <div class="measure-grid">
         <div class="measure-box c-effort">
             <span class="m-label">Effort Weight (Blue)</span>
@@ -61,7 +82,8 @@
             <span id="lwVal" class="m-val">10.0 kg</span>
         </div>
     </div>
-    
+
+    <!-- Row 2: Distances -->
     <div class="measure-grid">
         <div class="measure-box c-effort">
             <span class="m-label">Effort Dist (Blue)</span>
@@ -70,6 +92,21 @@
         <div class="measure-box c-load">
             <span class="m-label">Load Dist (Red)</span>
             <span id="ldVal" class="m-val">0.00 m</span>
+        </div>
+    </div>
+
+    <!-- Row 3: Volume (Weight × Distance) -->
+    <div class="section-title">Volume (Weight × Distance)</div>
+    <div class="measure-grid">
+        <div class="measure-box c-effort" id="evBox">
+            <span class="m-label">Effort Volume</span>
+            <span id="evVal" class="m-val">0.00</span>
+            <span style="font-size:10px; color:#888; display:block;">kg·m</span>
+        </div>
+        <div class="measure-box c-load" id="lvBox">
+            <span class="m-label">Load Volume</span>
+            <span id="lvVal" class="m-val">0.00</span>
+            <span style="font-size:10px; color:#888; display:block;">kg·m</span>
         </div>
     </div>
 
@@ -88,7 +125,7 @@
     </div>
     <div class="control-group">
         <label><span>Pivot Position</span> <span>(Move Fulcrum)</span></label>
-        <input type="range" id="pivotPos" min="-2.0" max="2.0" step="0.1" value="0.5">
+        <input type="range" id="pivotPos" min="-2.0" max="2.0" step="0.1" value="0">
     </div>
     
     <div style="font-size:11px; color:#888; text-align:center;">
@@ -98,9 +135,206 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 
-<script src="index.js">
-    
+<script>
+     // --- 1. SCENE SETUP ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1e1e1e);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
 
+    // Light
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(5, 8, 5);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+    scene.add(new THREE.AmbientLight(0x555555));
+
+    // Floor Grid
+    const grid = new THREE.GridHelper(30, 30, 0x444444, 0x222222);
+    grid.position.y = -2;
+    scene.add(grid);
+
+
+    // --- 2. LEVER OBJECTS ---
+    const pivotGroup = new THREE.Group();
+    scene.add(pivotGroup);
+
+    // The Beam
+    const beam = new THREE.Mesh(
+        new THREE.BoxGeometry(10, 0.2, 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x999999 })
+    );
+    beam.castShadow = true;
+    pivotGroup.add(beam);
+
+    // Function to make nice weights
+    function createWeight(color, xPos) {
+        const g = new THREE.Group();
+        
+        const cyl = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.6, 0.6, 0.4, 32),
+            new THREE.MeshStandardMaterial({ color: color })
+        );
+        cyl.castShadow = true;
+        cyl.position.y = 0.3;
+        
+        const handle = new THREE.Mesh(
+            new THREE.TorusGeometry(0.2, 0.05, 8, 20),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+        );
+        handle.position.y = 0.55;
+        handle.rotation.y = Math.PI / 2;
+
+        g.add(cyl, handle);
+        g.position.x = xPos;
+        return g;
+    }
+
+    // Effort (Blue) - Right Side
+    const effortObj = createWeight(0x00d2ff, 4.5);
+    pivotGroup.add(effortObj);
+
+    // Load (Red) - Left Side
+    const loadObj = createWeight(0xff5555, -4.5);
+    pivotGroup.add(loadObj);
+
+    // Fulcrum (Triangle)
+    const fulcrum = new THREE.Mesh(
+        new THREE.ConeGeometry(0.5, 1.5, 4),
+        new THREE.MeshStandardMaterial({ color: 0x666666 })
+    );
+    fulcrum.position.y = -0.95;
+    scene.add(fulcrum);
+
+
+    // --- 3. DISTANCE MEASUREMENT LINES ---
+    function createLine(color) {
+        const mat = new THREE.LineDashedMaterial({ 
+            color: color, dashSize: 0.2, gapSize: 0.1, linewidth: 2 
+        });
+        const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]);
+        const line = new THREE.Line(geo, mat);
+        line.computeLineDistances();
+        return line;
+    }
+
+    const eLine = createLine(0x00d2ff);
+    const lLine = createLine(0xff5555);
+    scene.add(eLine);
+    scene.add(lLine);
+
+
+    // --- 4. WEIGHT SCALING FOR 3D OBJECTS ---
+    // Track previous weight values to detect increases
+    let prevME = 10, prevML = 10;
+
+    function updateWeightScale(obj, mass) {
+        // Scale the weight cylinder visually based on mass (5–40 range → 0.7–1.6 scale)
+        const s = 0.7 + (mass - 5) / 35 * 0.9;
+        obj.scale.set(s, s, s);
+    }
+
+    function triggerGlow(boxId, type) {
+        const box = document.getElementById(boxId);
+        box.classList.remove(type === 'effort' ? 'vol-glow-effort' : 'vol-glow-load');
+        void box.offsetWidth; // reflow to restart animation
+        box.classList.add(type === 'effort' ? 'vol-glow-effort' : 'vol-glow-load');
+    }
+
+
+    // --- 5. LOGIC LOOP ---
+    camera.position.set(0, 1.5, 13);
+    
+    const uiEMass = document.getElementById('eMass');
+    const uiLMass = document.getElementById('lMass');
+    const uiPivot = document.getElementById('pivotPos');
+
+    let currentAngle = 0;
+    const MAX_TILT = 0.35;
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const mE = parseFloat(uiEMass.value);
+        const mL = parseFloat(uiLMass.value);
+        const pOffset = parseFloat(uiPivot.value);
+
+        // Glow on weight increase
+        if (mE > prevME) triggerGlow('evBox', 'effort');
+        if (mL > prevML) triggerGlow('lvBox', 'load');
+        prevME = mE;
+        prevML = mL;
+
+        // Scale 3D weights
+        updateWeightScale(effortObj, mE);
+        updateWeightScale(loadObj, mL);
+
+        // Pivot/Beam positions
+        beam.position.x = pOffset;
+        effortObj.position.x = pOffset + 4.5;
+        loadObj.position.x = pOffset - 4.5;
+
+        // Torque Balance
+        const distE = Math.abs(effortObj.position.x);
+        const distL = Math.abs(loadObj.position.x);
+
+        const torqueE = mE * distE;
+        const torqueL = mL * distL;
+
+        let targetAngle = 0;
+        if (torqueE > torqueL + 2.0) targetAngle = -MAX_TILT;
+        else if (torqueL > torqueE + 2.0) targetAngle = MAX_TILT;
+        
+        currentAngle += (targetAngle - currentAngle) * 0.05;
+        pivotGroup.rotation.z = currentAngle;
+
+        // Measurement Lines
+        const ePos = new THREE.Vector3(); effortObj.getWorldPosition(ePos);
+        const lPos = new THREE.Vector3(); loadObj.getWorldPosition(lPos);
+
+        eLine.geometry.setFromPoints([
+            new THREE.Vector3(ePos.x, 0, 0),
+            new THREE.Vector3(ePos.x, ePos.y, 0)
+        ]);
+        eLine.computeLineDistances();
+
+        lLine.geometry.setFromPoints([
+            new THREE.Vector3(lPos.x, 0, 0),
+            new THREE.Vector3(lPos.x, lPos.y, 0)
+        ]);
+        lLine.computeLineDistances();
+
+        // VR Calculation
+        const vr = distE / distL;
+
+        // Volume = Weight × Arm Distance
+        const volE = mE * distE;
+        const volL = mL * distL;
+
+        // UI Updates
+        document.getElementById('ewVal').innerText = mE.toFixed(1) + " kg";
+        document.getElementById('lwVal').innerText = mL.toFixed(1) + " kg";
+        document.getElementById('edVal').innerText = distE.toFixed(2) + " m";
+        document.getElementById('ldVal').innerText = distL.toFixed(2) + " m";
+        document.getElementById('evVal').innerText = volE.toFixed(2);
+        document.getElementById('lvVal').innerText = volL.toFixed(2);
+        document.getElementById('vrResult').innerText = vr.toFixed(2);
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.onresize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    
 </script>
 </body>
 </html>

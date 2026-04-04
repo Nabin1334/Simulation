@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
+    />
+    <title>Web Tech · single packet · round trip</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #1e2b3a;
+        color: white;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* scroll container with gap */
+      .scroll-container {
+        position: relative;
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        scroll-padding: 10px;
+      }
+
+      .section {
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 30px 20px 30px 100px;
+        position: relative;
+        color: white;
+        margin-bottom: 25px;
+        border-radius: 60px 60px 30px 30px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+      }
+
+      .hero-section {
+        background: linear-gradient(145deg, #5b4b8a, #3a2c5f);
+      }
+      .search-section {
+        background: linear-gradient(145deg, #c44569, #ac2f5a);
+      }
+      .website-section {
+        background: linear-gradient(145deg, #3b9ae1, #1b6fb0);
+      }
+      .isp-section {
+        background: linear-gradient(145deg, #43b380, #1e7e5e);
+      }
+      .visualization-section {
+        background: linear-gradient(145deg, #e66767, #b13e3e);
+      }
+      .footer-section {
+        background: linear-gradient(145deg, #5f6f8a, #36445c);
+      }
+
+      .section-content {
+        max-width: 1200px;
+        width: 90%;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      /* ---------- LEFT PAGE BUTTONS ---------- */
+      .page-buttons {
+        position: fixed;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .page-btn {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: white;
+        color: #1e2b3a;
+        border: 4px solid #f6e05e;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow:
+          0 10px 20px rgba(0, 0, 0, 0.5),
+          0 0 0 3px rgba(255, 255, 200, 0.5);
+        transition: all 0.2s ease;
+        line-height: 1.2;
+      }
+
+      .page-btn span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: #2d3748;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 30px;
+        margin-top: -8px;
+        border: 1px solid gold;
+      }
+
+      .page-btn:hover {
+        transform: scale(1.15) translateX(5px);
+        background: #ffefb0;
+      }
+
+      .page-btn.active {
+        background: #f6e05e;
+        border-color: #faf089;
+        box-shadow: 0 0 30px #f9d71c;
+      }
+
+      /* floating scroll button */
+      .floating-scroll-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: white;
+        color: #333;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        z-index: 2000;
+        border: 3px solid #ffb347;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40% {
+          transform: translateY(-15px);
+        }
+        60% {
+          transform: translateY(-7px);
+        }
+      }
+
+      /* cards (unchanged) */
+      .search-engines {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+      }
+
+      .search-engine-card {
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        border-radius: 30px;
+        padding: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 3px solid transparent;
+      }
+
+      .search-engine-card.active {
+        border-color: gold;
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .search-icon {
+        font-size: 3rem;
+        height: 80px;
+        width: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        background: rgba(0, 0, 0, 0.3);
+      }
+
+      .website-categories {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .category-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 40px;
+        cursor: pointer;
+      }
+
+      .category-btn.active {
+        background: white;
+        color: #333;
+      }
+
+      .websites-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+      }
+
+      .website-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 25px;
+        padding: 25px;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .website-card.active {
+        border-color: gold;
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      .website-icon {
+        font-size: 2.5rem;
+        height: 70px;
+        width: 70px;
+        background: #00000040;
+        border-radius: 20px;
+        display: flex;
+        margin: 0 auto 15px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .isp-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .isp-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 35px;
+        padding: 35px;
+        cursor: pointer;
+        border: 3px solid transparent;
+      }
+
+      .isp-card.active {
+        border-color: gold;
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      /* ---------- NETWORK DIAGRAM (ONE PACKET, BACK&FORTH) ---------- */
+      .network-diagram {
+        width: 100%;
+        max-width: 950px;
+        height: 260px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 60px;
+        position: relative;
+        border: 4px solid rgba(255, 255, 255, 0.4);
+        margin: 20px auto;
+        overflow: visible;
+      }
+
+      .node {
+        position: absolute;
+        width: 75px;
+        height: 75px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid white;
+        font-size: 0.7rem;
+        transform: translate(-50%, -50%);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 0 25px rgba(255, 255, 0, 0.2);
+      }
+
+      .node i {
+        font-size: 2rem;
+      }
+
+      /* single packet - one at a time */
+      .packet {
+        position: absolute;
+        width: 38px;
+        height: 38px;
+        background: #ffcc00;
+        border-radius: 50%;
+        box-shadow:
+          0 0 40px #ffaa00,
+          0 0 80px #ff6600;
+        border: 3px solid white;
+        z-index: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transform: translate(-50%, -50%);
+        opacity: 0; /* hidden until animation starts */
+      }
+
+      .packet.animating {
+        animation: hop 1s linear forwards;
+      }
+
+      @keyframes hop {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+          background: #ffcc00;
+        }
+        100% {
+          opacity: 1;
+          transform: translate(var(--tx), var(--ty)) scale(1);
+          background: #ffaa33;
+        }
+      }
+
+      .control-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 25px 0;
+      }
+
+      .control-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 3px solid white;
+        padding: 15px 30px;
+        border-radius: 60px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: 0.2s;
+      }
+
+      .control-btn.primary {
+        background: white;
+        color: #222;
+      }
+
+      .control-btn:hover {
+        transform: scale(1.05);
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .browser-window {
+        max-width: 800px;
+        margin: 20px auto 0;
+        background: white;
+        border-radius: 30px;
+        overflow: hidden;
+        color: #333;
+      }
+
+      .browser-header {
+        background: #2d3748;
+        padding: 15px 20px;
+        display: flex;
+        gap: 12px;
+      }
+      .browser-control {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+      }
+      .control-close {
+        background: #ff5f57;
+      }
+      .control-minimize {
+        background: #ffbd2e;
+      }
+      .control-maximize {
+        background: #28ca42;
+      }
+      .url-bar {
+        flex: 1;
+        background: #4a5568;
+        padding: 8px 20px;
+        border-radius: 30px;
+        color: white;
+      }
+
+      .badge-row {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin: 25px 0;
+        flex-wrap: wrap;
+      }
+      .badge {
+        background: #eee;
+        padding: 10px 25px;
+        border-radius: 40px;
+        display: inline-flex;
+        gap: 10px;
+        font-weight: bold;
+      }
+
+      .footer-stats {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        margin: 40px 0;
+      }
+
+      @media (max-width: 800px) {
+        .section-title {
+          font-size: 2.5rem;
+        }
+        .page-btn {
+          width: 55px;
+          height: 55px;
+          font-size: 1.4rem;
+        }
+        .page-btn span {
+          font-size: 0.6rem;
+        }
+        .node {
+          width: 60px;
+          height: 60px;
+        }
+        .section {
+          padding-left: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LEFT PAGE BUTTONS -->
+    <div class="page-buttons" id="pageButtons">
+      <div class="page-btn" data-index="0">🏠<span>Home</span></div>
+      <div class="page-btn" data-index="1">🔍<span>Search</span></div>
+      <div class="page-btn" data-index="2">🌐<span>Websites</span></div>
+      <div class="page-btn" data-index="3">📡<span>ISP</span></div>
+      <div class="page-btn" data-index="4">⚡<span>Round</span></div>
+      <div class="page-btn" data-index="5">📊<span>Info</span></div>
+    </div>
+
+    <!-- floating scroll button -->
+    <div class="floating-scroll-btn" id="scrollBtn">
+      <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <!-- main scroller -->
+    <div class="scroll-container" id="scrollContainer">
+      <section class="section hero-section" id="s0">
+        <div class="section-content">
+          <h1 class="section-title">🌍 Web Explorer</h1>
+          <p style="font-size: 1.6rem; margin: 30px">
+            5.6B daily searches · 1.7B websites
+          </p>
+          <div
+            style="
+              display: flex;
+              gap: 30px;
+              justify-content: center;
+              font-size: 1.5rem;
+            "
+          >
+            <i class="fas fa-search"></i> <i class="fas fa-globe"></i>
+            <i class="fas fa-wifi"></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="section search-section" id="s1">
+        <div class="section-content">
+          <h2 class="section-title">
+            <i class="fas fa-search"></i> Search Engines
+          </h2>
+          <div class="search-engines" id="searchEngines">
+            <div class="search-engine-card active" data-engine="google">
+              <div class="search-icon" style="background: #4285f4">
+                <i class="fab fa-google"></i>
+              </div>
+              <h3>Google</h3>
+            </div>
+            <div class="search-engine-card" data-engine="bing">
+              <div class="search-icon" style="background: #008373">
+                <i class="fab fa-microsoft"></i>
+              </div>
+              <h3>Bing</h3>
+            </div>
+            <div class="search-engine-card" data-engine="duck">
+              <div class="search-icon" style="background: #d95333">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h3>DuckDuckGo</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section website-section" id="s2">
+        <div class="section-content">
+          <h2 class="section-title"><i class="fas fa-globe"></i> Websites</h2>
+          <div class="website-categories" id="webCats">
+            <button class="category-btn active" data-cat="all">All</button>
+            <button class="category-btn" data-cat="social">Social</button>
+            <button class="category-btn" data-cat="tech">Tech</button>
+            <button class="category-btn" data-cat="education">Edu</button>
+          </div>
+          <div class="websites-grid" id="websitesGrid"></div>
+        </div>
+      </section>
+
+      <section class="section isp-section" id="s3">
+        <div class="section-content">
+          <h2 class="section-title">
+            <i class="fas fa-wifi"></i> Internet Providers
+          </h2>
+          <div class="isp-options" id="ispCards">
+            <div class="isp-card active" data-isp="fiber">
+              <div class="search-icon" style="background: #8b5cf6">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <h2>Fiber</h2>
+              <p>1 Gbps</p>
+            </div>
+            <div class="isp-card" data-isp="cable">
+              <div class="search-icon" style="background: #3b82f6">
+                <i class="fas fa-tv"></i>
+              </div>
+              <h2>Cable</h2>
+              <p>200 Mbps</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISUALIZATION: single packet round trip -->
+      <section class="section visualization-section" id="s4">
+        <div class="section-content">
+          <h2 class="section-title">
+            <i class="fas fa-project-diagram"></i> Single packet · round trip
+          </h2>
+          <div class="network-diagram" id="netDiagram">
+            <div class="node" style="left: 12%; top: 50%">
+              <i class="fas fa-mobile-alt"></i><span>Phone</span>
+            </div>
+            <div class="node" style="left: 32%; top: 50%">
+              <i class="fas fa-router"></i><span>Router</span>
+            </div>
+            <div class="node" style="left: 52%; top: 50%">
+              <i class="fas fa-server"></i><span>ISP</span>
+            </div>
+            <div class="node" style="left: 72%; top: 50%">
+              <i class="fas fa-globe"></i><span>Internet</span>
+            </div>
+            <div class="node" style="left: 92%; top: 50%">
+              <i class="fas fa-database"></i><span>Server</span>
+            </div>
+            <!-- single packet (hidden by default) -->
+            <div class="packet" id="singlePacket">📦</div>
+          </div>
+          <div class="control-buttons">
+            <button class="control-btn primary" id="startRoundTrip">
+              ▶ Start round trip
+            </button>
+            <button class="control-btn" id="searchSim">
+              🔍 Simulate search
+            </button>
+            <button class="control-btn" id="resetSim">⟲ Reset</button>
+          </div>
+          <div class="browser-window">
+            <div class="browser-header">
+              <span class="browser-control control-close"></span>
+              <span class="browser-control control-minimize"></span>
+              <span class="browser-control control-maximize"></span>
+              <span class="url-bar" id="urlDisplay">https://google.com</span>
+            </div>
+            <div
+              class="browser-content"
+              id="browserContent"
+              style="min-height: 180px"
+            >
+              <div id="defaultPanel">
+                <div class="badge-row">
+                  <span class="badge" id="dispEngine">Google</span>
+                  <span class="badge" id="dispSite">YouTube</span>
+                  <span class="badge" id="dispISP">Fiber</span>
+                </div>
+                <p>
+                  ✨ One packet goes phone → router → ISP → internet → server
+                  and back.
+                </p>
+              </div>
+              <div
+                id="loadingPanel"
+                style="display: none; text-align: center; padding: 20px"
+              >
+                <div
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    border: 5px solid #ccc;
+                    border-top-color: #333;
+                    border-radius: 50%;
+                    animation: spin 1s infinite;
+                    margin: 10px auto;
+                  "
+                ></div>
+                <p>Loading ...</p>
+              </div>
+              <div id="resultPanel" style="display: none">
+                <div
+                  style="
+                    background: #f0f0f0;
+                    padding: 15px;
+                    border-radius: 15px;
+                  "
+                >
+                  🔹 Web technology guide<br />🔹 How routers work<br />🔹
+                  Packet switching basics
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section footer-section" id="s5">
+        <div class="section-content">
+          <h2 class="section-title">📊 Internet by numbers</h2>
+          <div class="footer-stats">
+            <div>
+              <span style="font-size: 2.5rem">130T</span><br />indexed pages
+            </div>
+            <div><span style="font-size: 2.5rem">750k</span><br />ISPs</div>
+            <div>
+              <span style="font-size: 2.5rem">3.2B</span><br />daily searches
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        // ----- DATA & STATE -----
+        const websites = [
+          {
+            name: "Google",
+            icon: "fab fa-google",
+            cat: "tech",
+            color: "#4285F4",
+          },
+          {
+            name: "YouTube",
+            icon: "fab fa-youtube",
+            cat: "social",
+            color: "#FF0000",
+          },
+          {
+            name: "Wikipedia",
+            icon: "fab fa-wikipedia-w",
+            cat: "education",
+            color: "#000",
+          },
+          {
+            name: "Amazon",
+            icon: "fab fa-amazon",
+            cat: "tech",
+            color: "#FF9900",
+          },
+          {
+            name: "Twitter",
+            icon: "fab fa-twitter",
+            cat: "social",
+            color: "#1DA1F2",
+          },
+          { name: "GitHub", icon: "fab fa-github", cat: "tech", color: "#333" },
+        ];
+        let currentEngine = "google",
+          currentSite = "Google",
+          currentISP = "fiber";
+
+        // DOM elements
+        const container = document.getElementById("scrollContainer");
+        const pageBtns = document.querySelectorAll(".page-btn");
+        const scrollBtn = document.getElementById("scrollBtn");
+        const engineCards = document.querySelectorAll(".search-engine-card");
+        const webGrid = document.getElementById("websitesGrid");
+        const catBtns = document.querySelectorAll(".category-btn");
+        const ispCards = document.querySelectorAll(".isp-card");
+        const dispEngine = document.getElementById("dispEngine");
+        const dispSite = document.getElementById("dispSite");
+        const dispISP = document.getElementById("dispISP");
+        const urlDisplay = document.getElementById("urlDisplay");
+
+        // simulation elements
+        const packet = document.getElementById("singlePacket");
+        const netDiagram = document.getElementById("netDiagram");
+        const startBtn = document.getElementById("startRoundTrip");
+        const searchBtn = document.getElementById("searchSim");
+        const resetBtn = document.getElementById("resetSim");
+        const defaultPanel = document.getElementById("defaultPanel");
+        const loadingPanel = document.getElementById("loadingPanel");
+        const resultPanel = document.getElementById("resultPanel");
+
+        // ----- helper: update UI -----
+        function updateSelection() {
+          let engName =
+            currentEngine === "google"
+              ? "Google"
+              : currentEngine === "bing"
+                ? "Bing"
+                : "DuckDuckGo";
+          dispEngine.innerText = engName;
+          dispSite.innerText = currentSite;
+          dispISP.innerText = currentISP === "fiber" ? "Fiber" : "Cable";
+          urlDisplay.innerText = `https://www.${engName.toLowerCase().replace("duckduckgo", "duck")}.com`;
+        }
+
+        // ----- render websites -----
+        function renderWebsites(cat = "all") {
+          let filtered = websites.filter((w) => cat === "all" || w.cat === cat);
+          webGrid.innerHTML = filtered
+            .map(
+              (w, idx) => `
+                    <div class="website-card ${idx === 0 ? "active" : ""}" data-site="${w.name}">
+                        <div class="website-icon" style="background:${w.color}"><i class="${w.icon}"></i></div>
+                        <h4>${w.name}</h4>
+                    </div>
+                `,
+            )
+            .join("");
+          document.querySelectorAll(".website-card").forEach((c) => {
+            c.addEventListener("click", function () {
+              document
+                .querySelectorAll(".website-card")
+                .forEach((c2) => c2.classList.remove("active"));
+              this.classList.add("active");
+              currentSite = this.dataset.site;
+              updateSelection();
+            });
+          });
+          const first = document.querySelector(".website-card.active");
+          if (first) currentSite = first.dataset.site;
+          updateSelection();
+        }
+
+        // ----- ANIMATION: single packet round trip (sequential hops) -----
+        function animateHop(startPercent, endPercent, duration, onComplete) {
+          const rect = netDiagram.getBoundingClientRect();
+          const startX = rect.width * (startPercent / 100);
+          const endX = rect.width * (endPercent / 100);
+          const y = rect.height / 2;
+
+          // position packet at start
+          packet.style.left = startX + "px";
+          packet.style.top = y + "px";
+          packet.style.opacity = "1";
+          packet.style.animation = "none";
+          // force reflow
+          void packet.offsetWidth;
+
+          // set target position
+          const tx = endX - startX + "px";
+          packet.style.setProperty("--tx", tx);
+          packet.style.setProperty("--ty", "0px");
+          packet.style.animation = `hop ${duration}ms linear forwards`;
+
+          const timeoutId = setTimeout(() => {
+            // move packet to end position visually (so it's ready for next hop)
+            packet.style.left = endX + "px";
+            packet.style.top = y + "px";
+            packet.style.animation = "none";
+            if (onComplete) onComplete();
+          }, duration);
+
+          return timeoutId;
+        }
+
+        function startRoundTrip() {
+          // remove any ongoing animation
+          packet.style.animation = "none";
+          packet.style.opacity = "0"; // hide
+          // clear any pending timeouts
+          if (window._hopTimeouts) {
+            window._hopTimeouts.forEach((t) => clearTimeout(t));
+          }
+          window._hopTimeouts = [];
+
+          const hopDuration = currentISP === "fiber" ? 700 : 1000; // ms per hop
+
+          // start from phone (12%) and go to router (32%)
+          let t1 = setTimeout(() => {
+            let t1hop = animateHop(12, 32, hopDuration, () => {
+              // after reaching router, go to ISP (52%)
+              let t2 = setTimeout(() => {
+                animateHop(32, 52, hopDuration, () => {
+                  let t3 = setTimeout(() => {
+                    animateHop(52, 72, hopDuration, () => {
+                      let t4 = setTimeout(() => {
+                        animateHop(72, 92, hopDuration, () => {
+                          // reached server, now turn back
+                          let t5 = setTimeout(() => {
+                            animateHop(92, 72, hopDuration, () => {
+                              let t6 = setTimeout(() => {
+                                animateHop(72, 52, hopDuration, () => {
+                                  let t7 = setTimeout(() => {
+                                    animateHop(52, 32, hopDuration, () => {
+                                      let t8 = setTimeout(() => {
+                                        animateHop(32, 12, hopDuration, () => {
+                                          // trip complete, hide packet
+                                          packet.style.opacity = "0";
+                                        });
+                                      }, hopDuration);
+                                      window._hopTimeouts.push(t8);
+                                    });
+                                  }, hopDuration);
+                                  window._hopTimeouts.push(t7);
+                                });
+                              }, hopDuration);
+                              window._hopTimeouts.push(t6);
+                            });
+                          }, hopDuration);
+                          window._hopTimeouts.push(t5);
+                        });
+                      }, hopDuration);
+                      window._hopTimeouts.push(t4);
+                    });
+                  }, hopDuration);
+                  window._hopTimeouts.push(t3);
+                });
+              }, hopDuration);
+              window._hopTimeouts.push(t2);
+            });
+          }, 50);
+          window._hopTimeouts.push(t1);
+        }
+
+        function simulateSearch() {
+          // similar round trip but show loading
+          if (window._hopTimeouts) {
+            window._hopTimeouts.forEach((t) => clearTimeout(t));
+          }
+          packet.style.opacity = "0";
+          defaultPanel.style.display = "none";
+          loadingPanel.style.display = "block";
+          resultPanel.style.display = "none";
+
+          // start the round trip visually
+          startRoundTrip();
+
+          let searchDelay = currentISP === "fiber" ? 4500 : 6500; // enough for round trip
+          setTimeout(() => {
+            loadingPanel.style.display = "none";
+            resultPanel.style.display = "block";
+            defaultPanel.style.display = "none";
+          }, searchDelay);
+        }
+
+        function resetAll() {
+          if (window._hopTimeouts) {
+            window._hopTimeouts.forEach((t) => clearTimeout(t));
+          }
+          packet.style.opacity = "0";
+          packet.style.animation = "none";
+          defaultPanel.style.display = "block";
+          loadingPanel.style.display = "none";
+          resultPanel.style.display = "none";
+        }
+
+        // ----- PAGE BUTTONS (left) -----
+        pageBtns.forEach((btn, idx) => {
+          btn.addEventListener("click", () => {
+            const section = document.getElementById(`s${idx}`);
+            if (section) {
+              container.scrollTo({
+                top: section.offsetTop,
+                behavior: "smooth",
+              });
+            }
+          });
+        });
+
+        container.addEventListener("scroll", () => {
+          let scrollTop = container.scrollTop;
+          let winH = window.innerHeight;
+          let activeIndex = Math.round(scrollTop / (winH + 25));
+          pageBtns.forEach((btn, i) => {
+            if (i === activeIndex) btn.classList.add("active");
+            else btn.classList.remove("active");
+          });
+        });
+
+        scrollBtn.addEventListener("click", () => {
+          container.scrollBy({
+            top: window.innerHeight + 30,
+            behavior: "smooth",
+          });
+        });
+
+        // ----- event listeners -----
+        engineCards.forEach((c) => {
+          c.addEventListener("click", function () {
+            engineCards.forEach((c2) => c2.classList.remove("active"));
+            this.classList.add("active");
+            currentEngine = this.dataset.engine;
+            updateSelection();
+          });
+        });
+
+        catBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            catBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            renderWebsites(this.dataset.cat);
+          });
+        });
+
+        ispCards.forEach((c) => {
+          c.addEventListener("click", function () {
+            ispCards.forEach((c2) => c2.classList.remove("active"));
+            this.classList.add("active");
+            currentISP = this.dataset.isp;
+            updateSelection();
+          });
+        });
+
+        startBtn.addEventListener("click", startRoundTrip);
+        searchBtn.addEventListener("click", simulateSearch);
+        resetBtn.addEventListener("click", resetAll);
+
+        // init
+        renderWebsites("all");
+        updateSelection();
+
+        setTimeout(() => {
+          const firstWeb = document.querySelector(".website-card");
+          if (firstWeb) {
+            firstWeb.classList.add("active");
+            currentSite = firstWeb.dataset.site;
+            updateSelection();
+          }
+        }, 50);
+      })();
+    </script>
+    <style>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </body>
+</html>

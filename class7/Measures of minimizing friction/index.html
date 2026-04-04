@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Friction Minimization</title>
+    <title>Friction Minimization</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -111,11 +111,13 @@
             min-width: 180px;
         }
         button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .rough { background: #dc3545; color: white; }
         .smooth { background: #fd7e14; color: white; }
         .lubricated { background: #20c997; color: white; }
         .ball-bearing { background: #4361ee; color: white; }
         .reset { background: #6c757d; color: white; }
+        .stop { background: #e74c3c; color: white; }
 
         .info-panel {
             display: grid;
@@ -156,11 +158,19 @@
         .spinning {
             animation: spin 0.5s linear infinite;
         }
+        .status-running {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-stopped {
+            color: #dc3545;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1> Friction Minimization</h1>
+        <h1>🚗 Friction Minimization</h1>
         <p style="text-align:center; font-size:18px;">
             See how ball bearings dramatically reduce friction compared to sliding!
         </p>
@@ -179,7 +189,8 @@
             <button class="smooth" onclick="start('smooth')">Smooth Sliding<br><small>Polished (μ = 0.40)</small></button>
             <button class="lubricated" onclick="start('lubricated')">Lubricated<br><small>Oil/Grease (μ = 0.05)</small></button>
             <button class="ball-bearing" onclick="start('bearing')">Ball Bearings!<br><small>Rolling (μ = 0.002)</small></button>
-            <button class="reset" onclick="reset()">Reset</button>
+            <button class="stop" id="stopBtn" onclick="stop()" disabled>⏸ Stop</button>
+            <button class="reset" onclick="reset()">🔄 Reset</button>
         </div>
 
         <div class="info-panel">
@@ -199,6 +210,10 @@
                 <div>Time Elapsed</div>
                 <div class="big-number" id="time">0.0 s</div>
             </div>
+            <div class="info-card">
+                <div>Lap Count</div>
+                <div class="big-number" id="laps">0</div>
+            </div>
         </div>
 
         <div style="margin-top:30px; line-height:1.8; background:#f0f8ff; padding:20px; border-radius:10px;">
@@ -212,7 +227,197 @@
         </div>
     </div>
 
-    <script src="index.js"></script>
+    <script>
+        const sim = document.getElementById('simulation');
+        const vehicle = document.getElementById('vehicle');
+        const wheel1 = document.getElementById('wheel1');
+        const wheel2 = document.getElementById('wheel2');
+        const modeEl = document.getElementById('mode');
+        const muEl = document.getElementById('mu');
+        const distEl = document.getElementById('distance');
+        const timeEl = document.getElementById('time');
+        const lapsEl = document.getElementById('laps');
+        const stopBtn = document.getElementById('stopBtn');
+
+        const g = 9.81;
+        const mass = 10; // kg
+        const initialV = 20; // m/s - increased for better visibility
+        const pixelsPerMeter = 30; // Visual scaling
+
+        let v = 0;
+        let pos = 0;
+        let totalDistance = 0;
+        let startTime = 0;
+        let animationId = null;
+        let currentMu = 0;
+        let mode = '';
+        let isRunning = false;
+        let lapCount = 0;
+        let maxDistance = 0;
+
+        function start(type) {
+            // Stop any existing animation
+            if (isRunning) {
+                stop();
+            }
+
+            reset();
+            mode = type;
+            isRunning = true;
+            stopBtn.disabled = false;
+
+            switch(type) {
+                case 'rough':   
+                    currentMu = 0.80; 
+                    modeEl.textContent = "Rough Surface (Sliding)"; 
+                    modeEl.className = 'status-running';
+                    break;
+                case 'smooth':  
+                    currentMu = 0.40; 
+                    modeEl.textContent = "Smooth Sliding"; 
+                    modeEl.className = 'status-running';
+                    break;
+                case 'lubricated': 
+                    currentMu = 0.05; 
+                    modeEl.textContent = "Lubricated (Oil)"; 
+                    modeEl.className = 'status-running';
+                    break;
+                case 'bearing': 
+                    currentMu = 0.002; 
+                    modeEl.textContent = "Ball Bearings! 🎉"; 
+                    modeEl.className = 'status-running';
+                    break;
+            }
+            muEl.textContent = currentMu.toFixed(3);
+            
+            // Visual feedback
+            if (type === 'bearing') {
+                wheel1.classList.add('spinning');
+                wheel2.classList.add('spinning');
+            } else {
+                wheel1.classList.remove('spinning');
+                wheel2.classList.remove('spinning');
+            }
+            if (type === 'lubricated') addOilDrops();
+
+            // Calculate max distance the car can travel
+            // Using v² = u² + 2as, where final v = 0
+            // 0 = initialV² - 2*μ*g*s
+            // s = initialV² / (2*μ*g)
+            maxDistance = (initialV * initialV) / (2 * currentMu * g);
+
+            v = initialV;
+            pos = 0;
+            totalDistance = 0;
+            lapCount = 0;
+            startTime = performance.now();
+            vehicle.style.left = '20px';
+            animate();
+        }
+
+        function animate() {
+            if (!isRunning) return;
+
+            const dt = 0.016; // ~60 FPS
+            const a = -currentMu * g; // deceleration due to friction
+            
+            v += a * dt;
+            if (v < 0) v = 0;
+
+            pos += v * dt;
+            totalDistance += Math.abs(v * dt);
+
+            // Calculate pixel position
+            const simWidth = sim.offsetWidth;
+            const carWidth = 120;
+            const usableWidth = simWidth - carWidth - 40; // 40px margins
+            
+            let pixelPos = 20 + (pos * pixelsPerMeter);
+            
+            // Loop the car when it reaches the end
+            if (pixelPos >= simWidth - carWidth) {
+                if (v > 0.5) { // Only loop if moving significantly
+                    lapCount++;
+                    lapsEl.textContent = lapCount;
+                    pos = 0; // Reset position for new lap
+                    pixelPos = 20;
+                    // Keep the velocity - car continues with current speed
+                } else {
+                    // Car has stopped
+                    pixelPos = simWidth - carWidth - 20;
+                    v = 0;
+                }
+            }
+            
+            vehicle.style.left = pixelPos + 'px';
+
+            const elapsed = (performance.now() - startTime) / 1000;
+            timeEl.textContent = elapsed.toFixed(1) + ' s';
+            distEl.textContent = totalDistance.toFixed(1) + ' m';
+
+            // Continue animation if car is still moving
+            if (v > 0.01) {
+                animationId = requestAnimationFrame(animate);
+            } else {
+                // Car has stopped
+                isRunning = false;
+                stopBtn.disabled = true;
+                if (mode === 'bearing') {
+                    modeEl.textContent = "Ball Bearings Win! 🏆";
+                } else {
+                    modeEl.textContent = modeEl.textContent + " (Stopped)";
+                }
+                modeEl.className = 'status-stopped';
+                wheel1.classList.remove('spinning');
+                wheel2.classList.remove('spinning');
+            }
+        }
+
+        function stop() {
+            if (isRunning) {
+                isRunning = false;
+                cancelAnimationFrame(animationId);
+                v = 0;
+                stopBtn.disabled = true;
+                modeEl.textContent = modeEl.textContent.replace(' 🎉', '') + " (Paused)";
+                modeEl.className = 'status-stopped';
+                wheel1.classList.remove('spinning');
+                wheel2.classList.remove('spinning');
+            }
+        }
+
+        function addOilDrops() {
+            for(let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    if (!isRunning && mode !== 'lubricated') return;
+                    const drop = document.createElement('div');
+                    drop.className = 'oil-drop';
+                    drop.style.left = Math.random() * 100 + '%';
+                    sim.appendChild(drop);
+                    setTimeout(() => drop.remove(), 3000);
+                }, i * 150);
+            }
+        }
+
+        function reset() {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            v = 0; 
+            pos = 0;
+            totalDistance = 0;
+            lapCount = 0;
+            vehicle.style.left = '20px';
+            distEl.textContent = '0.0 m';
+            timeEl.textContent = '0.0 s';
+            lapsEl.textContent = '0';
+            modeEl.textContent = 'Ready';
+            modeEl.className = '';
+            muEl.textContent = '—';
+            wheel1.classList.remove('spinning');
+            wheel2.classList.remove('spinning');
+            stopBtn.disabled = true;
+            document.querySelectorAll('.oil-drop').forEach(d => d.remove());
+        }
     </script>
 </body>
 </html>
