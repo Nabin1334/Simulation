@@ -1,658 +1,959 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Use of Internet to Find Study Materials</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        
-        body {
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Navigation */
-        .sidebar {
-            width: 220px;
-            background: white;
-            border-right: 1px solid #e2e8f0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-        
-        .sidebar-header {
-            background: #2563eb;
-            color: white;
-            padding: 20px 15px;
-            text-align: center;
-        }
-        
-        .sidebar-header h1 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        /* Navigation Menu */
-        .nav-menu {
-            padding: 20px 15px;
-        }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: #f1f5f9;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-            width: 100%;
-            color: #475569;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .nav-item:hover {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-        
-        .nav-item.active {
-            background: #2563eb;
-            color: white;
-        }
-        
-        .nav-icon {
-            font-size: 16px;
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: 220px;
-            padding: 25px;
-        }
-        
-        /* Content Sections */
-        .content-section {
-            display: none;
-        }
-        
-        .content-section.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .section-title {
-            color: #1e40af;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        /* Real Google Search Box */
-        .real-google-box {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            margin: 20px 0;
-            border: 1px solid #dadce0;
-            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-        }
-        
-        .google-search-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .google-logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .google-logo-text {
-            font-size: 40px;
-            font-weight: 700;
-            letter-spacing: -2px;
-            margin-bottom: 5px;
-            display: inline-block;
-            position: relative;
-        }
-        
-        .google-logo-text span:nth-child(1) { color: #4285f4; }
-        .google-logo-text span:nth-child(2) { color: #ea4335; }
-        .google-logo-text span:nth-child(3) { color: #fbbc05; }
-        .google-logo-text span:nth-child(4) { color: #4285f4; }
-        .google-logo-text span:nth-child(5) { color: #34a853; }
-        .google-logo-text span:nth-child(6) { color: #ea4335; }
-        
-        .google-search-bar {
-            display: flex;
-            align-items: center;
-            border: 1px solid #dfe1e5;
-            border-radius: 24px;
-            padding: 0 16px;
-            height: 46px;
-            margin: 20px 0;
-            transition: box-shadow 0.2s;
-        }
-        
-        .google-search-bar:hover {
-            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-        }
-        
-        .google-search-input {
-            flex: 1;
-            border: none;
-            background: none;
-            font-size: 16px;
-            color: #1e293b;
-            outline: none;
-            padding: 0 10px;
-        }
-        
-        .google-search-button {
-            background: #4285f4;
-            color: white;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-left: 10px;
-        }
-        
-        .google-search-button:hover {
-            background: #3367d6;
-        }
-        
-        .search-examples {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 25px;
-        }
-        
-        .example-box {
-            background: #f8f9fa;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .example-box:hover {
-            background: #e8f0fe;
-            transform: translateY(-2px);
-        }
-        
-        .example-text {
-            font-family: monospace;
-            color: #1a73e8;
-            font-size: 14px;
-            margin-top: 8px;
-        }
-        
-        /* YouTube Section */
-        .youtube-section {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            margin: 20px 0;
-            border: 1px solid #ff0000;
-        }
-        
-        .youtube-logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .youtube-logo {
-            position: relative;
-            width: 40px;
-            height: 40px;
-        }
-        
-        .youtube-logo::before {
-            content: "";
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: #ff0000;
-            border-radius: 10px;
-        }
-        
-        .youtube-logo::after {
-            content: "▶";
-            position: absolute;
-            color: white;
-            font-size: 20px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .youtube-logo-container h3 {
-            color: #ff0000;
-            font-size: 18px;
-        }
-        
-        /* Trust Check */
-        .trust-section {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            margin: 20px 0;
-            border: 1px solid #10b981;
-        }
-        
-        .domain-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .domain-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .domain-name {
-            font-weight: 600;
-            color: #047857;
-            margin: 8px 0;
-        }
-        
-        /* Copyright Section */
-        .copyright-section {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            margin: 20px 0;
-            border: 1px solid #f59e0b;
-        }
-        
-        .copyright-rules {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .dont-box, .do-box {
-            padding: 20px;
-            border-radius: 8px;
-        }
-        
-        .dont-box {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-        }
-        
-        .do-box {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-        }
-        
-        .rule-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .rule-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .rule-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-            font-size: 14px;
-        }
-        
-        .rule-list li:last-child {
-            border-bottom: none;
-        }
-        
-        /* Real Website Examples */
-        .website-examples {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .website-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .website-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .website-list li:last-child {
-            border-bottom: none;
-        }
-        
-        /* Error Message */
-        .error-message {
-            display: none;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        
-        .success-message {
-            display: none;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #15803d;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            
-            .copyright-rules {
-                grid-template-columns: 1fr;
-            }
-            
-            .domain-list {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .main-content {
-                padding: 15px;
-            }
-            
-            .domain-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .search-examples {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Use of Internet to Find Study Materials</title>
+
+  <!--
+  ============================================================
+   FIND STUDY MATERIALS ONLINE
+   A single-page interactive tool for students to:
+     1. Search Google with smart queries
+     2. Search YouTube for video lessons
+     3. Check website trustworthiness
+     4. Understand copyright rules
+  ============================================================
+
+  HOW IT WORKS
+  ------------
+  - Pure HTML + CSS + vanilla JavaScript. No frameworks, no build step.
+  - One file — open directly in any modern browser.
+  - All searches open real Google / YouTube results in a new tab.
+  - Navigation is tab-based; only one section is visible at a time.
+
+  FILE STRUCTURE (inside this file)
+  ----------------------------------
+  1. <head>      — meta, title, global CSS reset, CSS variables
+  2. .sidebar    — fixed left navigation
+  3. .main       — four content sections:
+       #s-google     Google search with example queries
+       #s-youtube    YouTube search with example queries
+       #s-trust      Trusted domain guide + trusted site list
+       #s-copyright  Do / Don't rules + free legal resource links
+  4. <script>    — tab switching, search handlers, keyboard support
+  ============================================================
+  -->
+
+  <style>
+    /* ─── Reset & base ───────────────────────────────────────── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 15px;
+      color: #1e293b;
+      background: #f1f5f9;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ─── CSS variables (easy theming) ──────────────────────── */
+    :root {
+      --blue:        #1a73e8;
+      --blue-dark:   #1557b0;
+      --blue-light:  #e8f0fe;
+      --red:         #ff0000;
+      --red-dark:    #cc0000;
+      --green:       #15803d;
+      --green-light: #f0fdf4;
+      --green-border:#bbf7d0;
+      --danger:      #dc2626;
+      --danger-light:#fef2f2;
+      --danger-border:#fecaca;
+      --border:      #e2e8f0;
+      --surface:     #ffffff;
+      --muted:       #64748b;
+      --radius:      8px;
+      --sidebar-w:   210px;
+    }
+
+    /* ─── Sidebar ────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-top {
+      background: var(--blue);
+      padding: 18px 14px;
+    }
+
+    .sidebar-top h1 {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    /* ─── Navigation buttons ─────────────────────────────────── */
+    .nav {
+      padding: 14px 10px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 13px;
+      margin-bottom: 6px;
+      border: none;
+      border-radius: var(--radius);
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.18s, color 0.18s;
+    }
+
+    .nav-btn:hover {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    /* Active tab — blue background, white text */
+    .nav-btn.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .nav-icon {
+      font-size: 15px;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* ─── Main content area ──────────────────────────────────── */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      padding: 28px 30px;
+    }
+
+    /* ─── Section visibility ─────────────────────────────────── */
+    /*
+      Only one section is shown at a time.
+      JavaScript toggles the .active class on both .nav-btn and .section.
+    */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Section heading ────────────────────────────────────── */
+    .sec-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* ─── Generic card ───────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    /* ─── Google logo (CSS text only, no image) ──────────────── */
+    .g-logo {
+      text-align: center;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+
+    .g-logo span:nth-child(1) { color: #4285f4; }
+    .g-logo span:nth-child(2) { color: #ea4335; }
+    .g-logo span:nth-child(3) { color: #fbbc05; }
+    .g-logo span:nth-child(4) { color: #4285f4; }
+    .g-logo span:nth-child(5) { color: #34a853; }
+    .g-logo span:nth-child(6) { color: #ea4335; }
+
+    /* ─── Search bar (shared by Google and YouTube sections) ─── */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-row input,
+    .yt-row input {
+      flex: 1;
+      padding: 11px 18px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      font-size: 15px;
+      color: #1e293b;
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* Focus ring — blue for Google, red for YouTube */
+    .search-row input:focus {
+      border-color: #4285f4;
+      box-shadow: 0 0 0 3px rgba(66,133,244,0.15);
+    }
+
+    .yt-row input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255,0,0,0.12);
+    }
+
+    /* ─── Action buttons ─────────────────────────────────────── */
+    .btn {
+      padding: 11px 22px;
+      border: none;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-blue {
+      background: #4285f4;
+      color: #fff;
+    }
+
+    .btn-blue:hover { background: #3367d6; }
+
+    .btn-red {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn-red:hover { background: var(--red-dark); }
+
+    /* ─── Example query boxes ────────────────────────────────── */
+    /*
+      Clicking an example box fills the input field with that query text.
+      The user can then edit it or press Search directly.
+    */
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 13px;
+      margin-top: 18px;
+    }
+
+    .ex-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .ex-box:hover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      transform: translateY(-2px);
+    }
+
+    .ex-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 7px;
+    }
+
+    .ex-query {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--blue);
+      word-break: break-all;
+    }
+
+    /* ─── YouTube section header ─────────────────────────────── */
+    .yt-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    /* Red rounded square icon mimicking YouTube logo */
+    .yt-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--red);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .yt-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--red);
+    }
+
+    .yt-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    /* ─── Domain trust grid ──────────────────────────────────── */
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .domain-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+    }
+
+    .domain-ext {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .domain-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 5px;
+    }
+
+    .domain-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ─── Trusted site list ──────────────────────────────────── */
+    .trusted-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .trusted-list li {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .trusted-list li:last-child {
+      border-bottom: none;
+    }
+
+    .trusted-list a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .trusted-list a:hover {
+      text-decoration: underline;
+    }
+
+    .trusted-list .desc {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ─── Copyright do / don't boxes ────────────────────────── */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .dont-box {
+      background: var(--danger-light);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .do-box {
+      background: var(--green-light);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .rule-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .rule-title.danger { color: var(--danger); }
+    .rule-title.success { color: var(--green); }
+
+    .rule-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .rule-list li {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .rule-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* ─── Free resources box ─────────────────────────────────── */
+    .free-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    .free-box-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1d4ed8;
+      margin-bottom: 12px;
+    }
+
+    .free-resource {
+      margin-bottom: 10px;
+    }
+
+    .free-resource a {
+      color: var(--blue);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .free-resource a:hover {
+      text-decoration: underline;
+    }
+
+    .free-resource p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ─── Toast notification ─────────────────────────────────── */
+    /*
+      Appears briefly at the bottom-right for validation errors.
+      Dismisses automatically after 2.5 seconds.
+    */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #323232;
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* ─── Responsive: stack sidebar on mobile ────────────────── */
+    @media (max-width: 640px) {
+      body { flex-direction: column; }
+
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 18px;
+      }
+
+      .rules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .examples-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .domain-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h1>Find Study Materials Online</h1>
-        </div>
-        
-        <div class="nav-menu">
-            <button class="nav-item active" data-section="google-search">
-                <div class="nav-icon">🔍</div>
-                <div>Google Search</div>
-            </button>
-            
-            <button class="nav-item" data-section="youtube-learning">
-                <div class="nav-icon">▶️</div>
-                <div>YouTube Learning</div>
-            </button>
-            
-            <button class="nav-item" data-section="trust-check">
-                <div class="nav-icon">✅</div>
-                <div>Check Websites</div>
-            </button>
-            
-            <button class="nav-item" data-section="copyright-guide">
-                <div class="nav-icon">⚖️</div>
-                <div>Copyright Rules</div>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Google Search Section -->
-        <div class="content-section active" id="google-search">
-            <h2 class="section-title">Search on Google</h2>
-            
-            <div class="real-google-box">
-                <div class="google-search-container">
-                    <div class="google-logo-container">
-                        <div class="google-logo-text">
-                            <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
-                        </div>
-                    </div>
-                    
-                    <div class="google-search-bar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" style="fill: #9aa0a6;">
-                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-                        </svg>
-                        <input type="text" class="google-search-input" id="googleSearchInput" placeholder="Search for class 9 study materials...">
-                        <button class="google-search-button" onclick="performSearch()">Google Search</button>
-                    </div>
-                    
-                    <div id="searchError" class="error-message"></div>
-                    <div id="searchSuccess" class="success-message"></div>
-                    
-                    <div style="text-align: center; font-size: 13px; color: #5f6368; margin-top: 20px;">
-                        Try these examples below:
-                    </div>
-                </div>
-            </div>
-            
-            <div class="search-examples">
-                <div class="example-box" onclick="fillSearch('class 9 science notes filetype:pdf')">
-                    <div style="font-weight: 600; color: #1e293b;">Find PDF Notes</div>
-                    <div class="example-text">class 9 science notes filetype:pdf</div>
-                </div>
-                
-                <div class="example-box" onclick="fillSearch('&quot;force and laws of motion&quot; class 9')">
-                    <div style="font-weight: 600; color: #1e293b;">Exact Topic</div>
-                    <div class="example-text">"force and laws of motion" class 9</div>
-                </div>
-                
-                <div class="example-box" onclick="fillSearch('site:ncert.nic.in class 9 science')">
-                    <div style="font-weight: 600; color: #1e293b;">Official Website</div>
-                    <div class="example-text">site:ncert.nic.in class 9 science</div>
-                </div>
-                
-                <div class="example-box" onclick="fillSearch('photosynthesis -plant class 9')">
-                    <div style="font-weight: 600; color: #1e293b;">Remove Results</div>
-                    <div class="example-text">photosynthesis -plant class 9</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- YouTube Learning -->
-        <div class="content-section" id="youtube-learning">
-            <h2 class="section-title">Learn from YouTube</h2>
-            
-            <div class="youtube-section">
-                <div class="youtube-logo-container">
-                    <div class="youtube-logo"></div>
-                    <h3>YouTube Search Examples</h3>
-                </div>
-                
-                <p>Copy and paste these in YouTube search:</p>
-                
-                <div class="search-examples">
-                    <div class="example-box" onclick="copyToClipboard('class 9 science chapter 1 explanation')">
-                        <div style="font-weight: 600; color: #1e293b;">Chapter Explanations</div>
-                        <div class="example-text">class 9 science chapter 1 explanation</div>
-                    </div>
-                    
-                    <div class="example-box" onclick="copyToClipboard('science experiments class 9')">
-                        <div style="font-weight: 600; color: #1e293b;">Science Experiments</div>
-                        <div class="example-text">science experiments class 9</div>
-                    </div>
-                    
-                    <div class="example-box" onclick="copyToClipboard('ncert class 9 science animation')">
-                        <div style="font-weight: 600; color: #1e293b;">Animated Lessons</div>
-                        <div class="example-text">ncert class 9 science animation</div>
-                    </div>
-                    
-                    <div class="example-box" onclick="copyToClipboard('class 9 science important questions')">
-                        <div style="font-weight: 600; color: #1e293b;">Exam Preparation</div>
-                        <div class="example-text">class 9 science important questions</div>
-                    </div>
-                </div>
-                
-                <div id="copyError" class="error-message"></div>
-                <div id="copySuccess" class="success-message"></div>
-            </div>
-        </div>
-        
-        <!-- Trust Check -->
-        <div class="content-section" id="trust-check">
-            <h2 class="section-title">Check Website Trust</h2>
-            
-            <div class="trust-section">
-                <h3 style="color: #047857; margin-bottom: 15px;">Look at Website Address</h3>
-                
-                <div class="domain-list">
-                    <div class="domain-item">
-                        <div style="color: #dc2626; font-size: 20px;">.gov</div>
-                        <div class="domain-name">Government Sites</div>
-                        <div style="color: #64748b; font-size: 13px;">Most trustworthy for official information</div>
-                    </div>
-                    
-                    <div class="domain-item">
-                        <div style="color: #2563eb; font-size: 20px;">.edu</div>
-                        <div class="domain-name">Educational Sites</div>
-                        <div style="color: #64748b; font-size: 13px;">Universities and colleges</div>
-                    </div>
-                    
-                    <div class="domain-item">
-                        <div style="color: #7c3aed; font-size: 20px;">.org</div>
-                        <div class="domain-name">Organizations</div>
-                        <div style="color: #64748b; font-size: 13px;">Usually reliable sources</div>
-                    </div>
-                    
-                    <div class="domain-item">
-                        <div style="color: #059669; font-size: 20px;">.com</div>
-                        <div class="domain-name">Commercial Sites</div>
-                        <div style="color: #64748b; font-size: 13px;">Check carefully before trusting</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="website-examples">
-                <h3 style="color: #1e293b; margin-bottom: 15px;">Trusted Websites for Class 9</h3>
-                <ul class="website-list">
-                    <li>
-                        <strong>ncert.nic.in</strong> - Official NCERT textbooks and resources
-                    </li>
-                    <li>
-                        <strong>academy.org</strong> - Free video lessons and practice
-                    </li>
-                    <li>
-                        <strong>moecd.gov.np</strong> - Nepal government education portal
-                    </li>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Copyright Guide -->
-        <div class="content-section" id="copyright-guide">
-            <h2 class="section-title">Copyright Rules</h2>
-            
-            <div class="copyright-section">
-                <h3 style="color: #b45309; margin-bottom: 20px;">For School Projects</h3>
-                
-                <div class="copyright-rules">
-                    <div class="dont-box">
-                        <div class="rule-title">
-                            <span style="color: #dc2626;">❌ Don't</span>
-                        </div>
-                        <ul class="rule-list">
-                            <li>Copy-paste entire webpages</li>
-                            <li>Use copyrighted images without permission</li>
-                            <li>Download paid books illegally</li>
-                            <li>Share someone else's work as yours</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="do-box">
-                        <div class="rule-title">
-                            <span style="color: #15803d;">✅ Do</span>
-                        </div>
-                        <ul class="rule-list">
-                            <li>Read and write in your own words</li>
-                            <li>Use Creative Commons licensed content</li>
-                            <li>Cite your sources properly</li>
-                            <li>Use free educational resources</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                    <strong>Free Resources for Students:</strong><br>
-                    <div style="margin-top: 10px; font-size: 14px;">
-                        • <strong>NCERT Official</strong> - All textbooks free on ncert.nic.in<br>
-                        • <strong> Academy</strong> - Complete lessons free<br>
-                        • <strong>PhET Simulations</strong> - Science experiments free to use
-                    </div>
-                </div>
-            </div>
-        </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SIDEBAR NAVIGATION
+       data-s attribute must match the id of the target section
+       e.g. data-s="google" matches id="s-google"
+  ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar" aria-label="Navigation">
+    <div class="sidebar-top">
+      <h1>Use of Internet to Find Study Materials</h1>
     </div>
 
-    <script src="index.js">
-    </script>
+    <nav class="nav" aria-label="Main navigation">
+      <button class="nav-btn active" data-s="google" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">🔍</span>
+        Google search
+      </button>
+
+      <button class="nav-btn" data-s="youtube">
+        <span class="nav-icon" aria-hidden="true">▶</span>
+        YouTube
+      </button>
+
+      <button class="nav-btn" data-s="trust">
+        <span class="nav-icon" aria-hidden="true">✅</span>
+        Check websites
+      </button>
+
+      <button class="nav-btn" data-s="copyright">
+        <span class="nav-icon" aria-hidden="true">⚖</span>
+        Copyright rules
+      </button>
+    </nav>
+  </aside>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── SECTION 1: Google Search ───────────────────────── -->
+    <section class="section active" id="s-google" aria-label="Google Search">
+      <h2 class="sec-title">Search on Google</h2>
+
+      <div class="card">
+        <!-- Google logo built from coloured spans — no image needed -->
+        <div class="g-logo" aria-label="Google">
+          <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+        </div>
+
+        <!--
+          HOW GOOGLE SEARCH WORKS
+          Google is a search engine — it scans billions of web pages and
+          shows you the most relevant results for your query.
+
+          To get better results, be specific. Instead of searching
+          "science notes", search "photosynthesis notes filetype:pdf".
+          The more detail you give, the more useful the results.
+
+          SEARCH BAR
+          Type your query below and press Search or hit Enter.
+          The search opens real Google results in a new tab.
+          Input id="gInput" is referenced by doGoogle() and setG() functions.
+        -->
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;line-height:1.6;">
+          Google searches billions of web pages and shows the most relevant results.
+          Be specific — the more detail you include, the better your results.
+          You can also use <strong>special operators</strong> (shown below) to filter results by file type, website, or exact phrase.
+        </p>
+
+        <div class="search-row">
+          <input
+            type="text"
+            id="gInput"
+            placeholder="e.g. photosynthesis notes filetype:pdf"
+            aria-label="Google search query"
+            autocomplete="off"
+          />
+          <button class="btn btn-blue" onclick="doGoogle()">Search</button>
+        </div>
+      </div>
+
+      <!--
+        EXAMPLE QUERY BOXES
+        onclick="setG('…')" fills the input with the example text.
+        Replace the subject, topic, or grade with your own.
+
+        SEARCH OPERATORS EXPLAINED:
+          filetype:pdf      — returns only PDF files (great for notes/books)
+          "exact phrase"    — results must contain this exact phrase
+          site:domain.com   — only shows results from that specific website
+          -word             — removes results that contain this word
+          OR                — matches either term (e.g. "biology OR chemistry")
+      -->
+      <div class="examples-grid">
+
+        <div class="ex-box" onclick="setG('science notes filetype:pdf')">
+          <div class="ex-label">Find PDF notes</div>
+          <div class="ex-query">science notes filetype:pdf</div>
+        </div>
+
+        <div class="ex-box" onclick="setG('&quot;photosynthesis process&quot; explanation')">
+          <div class="ex-label">Exact phrase search</div>
+          <div class="ex-query">"photosynthesis process" explanation</div>
+        </div>
+
+        <div class="ex-box" onclick="setG('site:ncert.nic.in science textbook')">
+          <div class="ex-label">Search one website only</div>
+          <div class="ex-query">site:ncert.nic.in science textbook</div>
+        </div>
+
+        <div class="ex-box" onclick="setG('maths algebra solved examples filetype:pdf')">
+          <div class="ex-label">Solved PDF examples</div>
+          <div class="ex-query">maths algebra solved examples filetype:pdf</div>
+        </div>
+
+        <div class="ex-box" onclick="setG('history notes filetype:pdf site:edu')">
+          <div class="ex-label">PDF from .edu sites only</div>
+          <div class="ex-query">history notes filetype:pdf site:edu</div>
+        </div>
+
+        <div class="ex-box" onclick="setG('photosynthesis diagram -worksheet')">
+          <div class="ex-label">Exclude a word with  ( - )</div>
+          <div class="ex-query">photosynthesis diagram -worksheet</div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ── SECTION 2: YouTube Learning ────────────────────── -->
+    <section class="section" id="s-youtube" aria-label="YouTube Learning">
+      <h2 class="sec-title">Learn from YouTube</h2>
+
+      <div class="card">
+        <div class="yt-header">
+          <!-- YouTube icon: red rounded square with play arrow -->
+          <div class="yt-icon" aria-hidden="true">▶</div>
+          <h3>YouTube search</h3>
+        </div>
+
+        <!--
+          HOW YOUTUBE HELPS STUDENTS
+          YouTube has millions of free educational videos covering every subject
+          at every level. Channels like Khan Academy, CrashCourse, and many
+          local teachers explain difficult topics with visuals and examples.
+
+          TIPS FOR BETTER YOUTUBE SEARCHES:
+          - Add the word "explanation" or "tutorial" for step-by-step lessons.
+          - Add "animation" for visual/diagram-based explanations.
+          - Add "in Hindi" or "in Nepali" for your preferred language.
+          - Add "exam" or "important questions" for exam-focused content.
+
+          YOUTUBE SEARCH BAR
+          On click or Enter key → opens YouTube search in a new tab.
+          Input id="ytInput" is referenced by doYT() and setYT() functions.
+        -->
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;line-height:1.6;">
+          YouTube has millions of free educational videos. Searching with clear keywords like
+          <em>subject + topic + "explanation"</em> gives the best results.
+          Click any example below to fill the search box, then press <strong>Search YouTube</strong>.
+        </p>
+
+        <div class="yt-row">
+          <input
+            type="text"
+            id="ytInput"
+            placeholder="e.g. photosynthesis explanation animation"
+            aria-label="YouTube search query"
+            autocomplete="off"
+          />
+          <button class="btn btn-red" onclick="doYT()">Search YouTube</button>
+        </div>
+      </div>
+
+      <!-- YOUTUBE EXAMPLE QUERIES — subject-general, usable at any grade -->
+      <div class="examples-grid">
+
+        <div class="ex-box" onclick="setYT('photosynthesis explanation animation')">
+          <div class="ex-label">Topic explanation</div>
+          <div class="ex-query">photosynthesis explanation animation</div>
+        </div>
+
+        <div class="ex-box" onclick="setYT('science experiments at home students')">
+          <div class="ex-label">Science experiments</div>
+          <div class="ex-query">science experiments at home students</div>
+        </div>
+
+        <div class="ex-box" onclick="setYT('algebra basics tutorial for beginners')">
+          <div class="ex-label">Maths basics</div>
+          <div class="ex-query">algebra basics tutorial for beginners</div>
+        </div>
+
+        <div class="ex-box" onclick="setYT('english grammar tenses full lesson')">
+          <div class="ex-label">English grammar</div>
+          <div class="ex-query">english grammar tenses full lesson</div>
+        </div>
+
+        <div class="ex-box" onclick="setYT('history world war 2 explained')">
+          <div class="ex-label">History lesson</div>
+          <div class="ex-query">history world war 2 explained</div>
+        </div>
+
+        <div class="ex-box" onclick="setYT('exam preparation tips students study')">
+          <div class="ex-label">Exam preparation</div>
+          <div class="ex-query">exam preparation tips students study</div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ── SECTION 3: Check Websites ──────────────────────── -->
+    <section class="section" id="s-trust" aria-label="Check Website Trust">
+      <h2 class="sec-title">Check website trust</h2>
+
+      <!-- Domain extension guide -->
+      <div class="card">
+        <!--
+          WHY WEBSITE TRUST MATTERS
+          Not everything on the internet is correct. Anyone can publish a website,
+          so you must check whether a source is reliable before using its information
+          for school work or assignments.
+
+          The easiest first check is the domain extension — the ending of the
+          web address (e.g. .gov, .edu, .org, .com). It tells you who owns the site.
+
+          Always cross-check facts across at least two different trusted sources.
+        -->
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px;line-height:1.6;">
+          Not everything online is accurate. Before using a website for school work,
+          check <strong>who runs it</strong> and <strong>when it was last updated</strong>.
+          The domain extension — the ending of a web address — is the quickest first clue.
+        </p>
+
+        <p style="font-size:14px;font-weight:600;margin-bottom:14px;">
+          Domain extension guide
+        </p>
+
+        <div class="domain-grid">
+          <div class="domain-card">
+            <div class="domain-ext" style="color:#dc2626;">.gov</div>
+            <div class="domain-name">Government</div>
+            <div class="domain-desc">Official government sites — most trustworthy for factual information</div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-ext" style="color:#2563eb;">.edu</div>
+            <div class="domain-name">Educational</div>
+            <div class="domain-desc">Universities and schools — generally accurate and well-reviewed</div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-ext" style="color:#7c3aed;">.org</div>
+            <div class="domain-name">Organizations</div>
+            <div class="domain-desc">Non-profits and bodies — usually reliable, but still check who runs it</div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-ext" style="color:#059669;">.com</div>
+            <div class="domain-name">Commercial</div>
+            <div class="domain-desc">Anyone can own — always verify information against a second source</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trusted websites list — all links open in new tab -->
+      <div class="card">
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px;line-height:1.6;">
+          The websites below are free, reliable, and safe to use for any student.
+          They are maintained by governments, universities, or well-known educational organisations.
+        </p>
+        <p style="font-size:14px;font-weight:600;margin-bottom:14px;">
+          Recommended websites for students
+        </p>
+
+        <ul class="trusted-list">
+          <li>
+            <a href="https://ncert.nic.in" target="_blank" rel="noopener">ncert.nic.in</a>
+            <span class="desc"> — Official NCERT textbooks for all grades, free to read and download</span>
+          </li>
+          <li>
+            <a href="https://www.khanacademy.org" target="_blank" rel="noopener">khanacademy.org</a>
+            <span class="desc"> — Free video lessons, articles, and practice exercises covering every subject and grade level</span>
+          </li>
+          <li>
+            <a href="https://phet.colorado.edu" target="_blank" rel="noopener">phet.colorado.edu</a>
+            <span class="desc"> — Free interactive science and maths simulations made by the University of Colorado</span>
+          </li>
+          <li>
+            <a href="https://www.moe.gov.np" target="_blank" rel="noopener">moe.gov.np</a>
+            <span class="desc"> — Nepal Ministry of Education — official curriculum, policy, and resource portal</span>
+          </li>
+          <li>
+            <a href="https://diksha.gov.in" target="_blank" rel="noopener">diksha.gov.in</a>
+            <span class="desc"> — Government digital learning platform with free content for all grade levels</span>
+          </li>
+          <li>
+            <a href="https://en.wikipedia.org" target="_blank" rel="noopener">en.wikipedia.org</a>
+            <span class="desc"> — Good starting point for background reading; always confirm key facts in a second source</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+
+    <!-- ── SECTION 4: Copyright Rules ─────────────────────── -->
+    <section class="section" id="s-copyright" aria-label="Copyright Rules">
+      <h2 class="sec-title">Copyright rules for school projects</h2>
+
+      <div class="card">
+        <!--
+          WHAT IS COPYRIGHT?
+          Copyright is a legal right that protects the work of its creator —
+          whether it is text, images, music, or videos. When someone creates
+          something and publishes it online, they still own it. You cannot
+          copy, share, or present it as your own without permission.
+
+          FOR STUDENTS:
+          Using copyrighted material without credit is called plagiarism.
+          It can result in a zero mark, disqualification, or disciplinary action.
+
+          The good news is there are thousands of free, openly licensed resources
+          made specifically for students that you can use without any risk.
+        -->
+        <p style="font-size:13px;color:#64748b;margin-bottom:18px;line-height:1.6;">
+          Copyright is a legal right that protects the work of its creator — text, images, music, and videos.
+          When you find something online, that does not mean it is free to copy or use.
+          Using someone else's work without credit is called <strong>plagiarism</strong> and can result in
+          serious consequences at school. Always cite your sources and use freely licensed materials.
+        </p>
+
+        <!-- DO / DON'T side-by-side boxes -->
+        <div class="rules-grid">
+
+          <div class="dont-box">
+            <div class="rule-title danger">❌ Do not do this</div>
+            <ul class="rule-list">
+              <li>Copy-paste entire webpages into your work</li>
+              <li>Use copyrighted images without permission or credit</li>
+              <li>Download paid books or courses for free illegally</li>
+              <li>Submit someone else's work as your own</li>
+              <li>Share pirated PDFs or files with others</li>
+            </ul>
+          </div>
+
+          <div class="do-box">
+            <div class="rule-title success">✅ Do this instead</div>
+            <ul class="rule-list">
+              <li>Read the material, then write the idea in your own words</li>
+              <li>Use images marked as Creative Commons or public domain</li>
+              <li>Write a reference or citation at the end of your work</li>
+              <li>Use free official educational platforms (listed below)</li>
+              <li>Ask your teacher if you are unsure whether something is allowed</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Free legal resources — all links open in new tab -->
+        <div class="free-box">
+          <div class="free-box-title">Free resources students can use legally</div>
+
+          <div class="free-resource">
+            <a href="https://ncert.nic.in" target="_blank" rel="noopener">NCERT official</a>
+            <p>All school textbooks freely available — reading and downloading is permitted from the official site</p>
+          </div>
+
+          <div class="free-resource">
+            <a href="https://www.khanacademy.org" target="_blank" rel="noopener">Khan Academy</a>
+            <p>All lessons, videos, and exercises are freely licensed for students worldwide</p>
+          </div>
+
+          <div class="free-resource">
+            <a href="https://phet.colorado.edu" target="_blank" rel="noopener">PhET simulations</a>
+            <p>Science and maths simulations are free to use and share for educational purposes</p>
+          </div>
+
+          <div class="free-resource">
+            <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a>
+            <p>Millions of free images, diagrams, and media files — safe to use in projects with attribution</p>
+          </div>
+
+          <div class="free-resource">
+            <a href="https://openstax.org" target="_blank" rel="noopener">OpenStax</a>
+            <p>Peer-reviewed textbooks with open licences — free to read, download, and print</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- Toast notification (shown for validation errors) -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════════════════════════════ -->
+  <script src="index.js">
+    /*
+      JavaScript handles:
+      1. Tab switching logic
+      2. Search button actions for Google and YouTube
+      3. Example query box clicks to fill the search input
+      4. Keyboard support (Enter key triggers search)
+      5. Toast notifications for validation errors
+    */
+  </script>
+
 </body>
 </html>

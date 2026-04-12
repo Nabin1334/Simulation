@@ -1,107 +1,122 @@
 
-        // Navigation functionality
-        const navItems = document.querySelectorAll('.nav-item');
-        const contentSections = document.querySelectorAll('.content-section');
-        
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                // Remove active class from all items
-                navItems.forEach(nav => nav.classList.remove('active'));
-                
-                // Add active class to clicked item
-                item.classList.add('active');
-                
-                // Hide all content sections
-                contentSections.forEach(section => section.classList.remove('active'));
-                
-                // Show the selected section
-                const sectionId = item.getAttribute('data-section');
-                document.getElementById(sectionId).classList.add('active');
-                
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Deactivate all buttons and sections
+        document.querySelectorAll('.nav-btn').forEach(b => {
+          b.classList.remove('active');
+          b.removeAttribute('aria-current');
         });
-        
-        // Show/hide messages
-        function showMessage(elementId, message, isError = false) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
-            
-            // Hide message after 3 seconds
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Google Search functionality
-        function fillSearch(text) {
-            document.getElementById('googleSearchInput').value = text;
-            showMessage('searchSuccess', '✓ Search term added to search box');
-        }
-        
-        function performSearch() {
-            const query = document.getElementById('googleSearchInput').value.trim();
-            const errorElement = document.getElementById('searchError');
-            const successElement = document.getElementById('searchSuccess');
-            
-            // Hide previous messages
-            errorElement.style.display = 'none';
-            successElement.style.display = 'none';
-            
-            if (!query) {
-                showMessage('searchError', '⚠️ Please enter a search term or click an example.', true);
-                return;
-            }
-            
-            if (query.length < 3) {
-                showMessage('searchError', '⚠️ Search term is too short. Please enter at least 3 characters.', true);
-                return;
-            }
-            
-            // Simulate search
-            showMessage('searchSuccess', '🔍 Searching Google for: ' + query);
-        }
-        
-        function copyToClipboard(text) {
-            const errorElement = document.getElementById('copyError');
-            const successElement = document.getElementById('copySuccess');
-            
-            // Hide previous messages
-            errorElement.style.display = 'none';
-            successElement.style.display = 'none';
-            
-            // Create a temporary textarea element
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showMessage('copySuccess', '✓ Copied to clipboard: ' + text);
-                } else {
-                    showMessage('copyError', '⚠️ Could not copy to clipboard. Please try again.', true);
-                }
-            } catch (err) {
-                showMessage('copyError', '⚠️ Could not copy to clipboard. Please try again.', true);
-            }
-            
-            // Remove the textarea
-            document.body.removeChild(textarea);
-        }
-        
-        // Make example boxes clickable
-        document.querySelectorAll('.example-box').forEach(box => {
-            box.style.cursor = 'pointer';
-            box.title = 'Click to use this search';
-        });
-        
-        // Enter key support for search
-        document.getElementById('googleSearchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+        // Activate clicked button and its section
+        btn.classList.add('active');
+        btn.setAttribute('aria-current', 'page');
+        document.getElementById('s-' + btn.dataset.s).classList.add('active');
+
+        // Scroll to top on mobile
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+
+    /*
+    ──────────────────────────────────────────────────────────
+     GOOGLE SEARCH
+     Opens a real Google search for the entered query in a new tab.
+     URL format: https://www.google.com/search?q=ENCODED_QUERY
+    ──────────────────────────────────────────────────────────
+    */
+    function doGoogle() {
+      const query = document.getElementById('gInput').value.trim();
+
+      if (!query) {
+        showToast('Please type a search term first.');
+        return;
+      }
+
+      // encodeURIComponent handles special characters, spaces, operators
+      const url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    /*
+    ──────────────────────────────────────────────────────────
+     FILL GOOGLE INPUT
+     Called by example box onclick handlers.
+     Sets the input value and focuses it so the user can edit.
+    ──────────────────────────────────────────────────────────
+    */
+    function setG(text) {
+      const input = document.getElementById('gInput');
+      input.value = text;
+      input.focus();
+    }
+
+
+    /*
+    ──────────────────────────────────────────────────────────
+     YOUTUBE SEARCH
+     Opens a real YouTube search for the entered query in a new tab.
+     URL format: https://www.youtube.com/results?search_query=ENCODED_QUERY
+    ──────────────────────────────────────────────────────────
+    */
+    function doYT() {
+      const query = document.getElementById('ytInput').value.trim();
+
+      if (!query) {
+        showToast('Please type a topic first.');
+        return;
+      }
+
+      const url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    /*
+    ──────────────────────────────────────────────────────────
+     FILL YOUTUBE INPUT
+    ──────────────────────────────────────────────────────────
+    */
+    function setYT(text) {
+      const input = document.getElementById('ytInput');
+      input.value = text;
+      input.focus();
+    }
+
+
+    /*
+    ──────────────────────────────────────────────────────────
+     TOAST NOTIFICATION
+     Displays a short message at the bottom-right of the screen.
+     Disappears automatically after 2.5 seconds.
+    ──────────────────────────────────────────────────────────
+    */
+    let toastTimer = null;
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+
+      // Clear any existing timer before starting a new one
+      if (toastTimer) clearTimeout(toastTimer);
+
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+
+    /*
+    ──────────────────────────────────────────────────────────
+     KEYBOARD SUPPORT
+     Press Enter in either input to trigger the search.
+    ──────────────────────────────────────────────────────────
+    */
+    document.getElementById('gInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doGoogle();
+    });
+
+    document.getElementById('ytInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doYT();
+    });

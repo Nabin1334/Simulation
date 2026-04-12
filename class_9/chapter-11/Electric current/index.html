@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Electric Circuit Simulator</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>⚡ Interactive Electric Circuit Simulator | Ohm's Law & DC Circuits</title>
+    <!-- Font Awesome 6 (free icons, no external requests if offline? but using CDN is safe; works locally) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
       * {
         margin: 0;
@@ -93,6 +91,7 @@
         cursor: pointer;
         box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
         border: 2px solid rgba(100, 150, 255, 0.2);
+        display: block;
       }
 
       .info-panel {
@@ -121,21 +120,10 @@
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
       }
 
-      .circuit-status-section {
-        border-left-color: #4fc3f7;
-      }
-
-      .controls-section {
-        border-left-color: #ff9800;
-      }
-
-      .components-section {
-        border-left-color: #9c27b0;
-      }
-
-      .instructions-section {
-        border-left-color: #4caf50;
-      }
+      .circuit-status-section { border-left-color: #4fc3f7; }
+      .controls-section { border-left-color: #ff9800; }
+      .components-section { border-left-color: #9c27b0; }
+      .instructions-section { border-left-color: #4caf50; }
 
       h2 {
         font-size: 1.6rem;
@@ -143,10 +131,6 @@
         display: flex;
         align-items: center;
         gap: 12px;
-      }
-
-      h2 i {
-        font-size: 1.4rem;
       }
 
       .circuit-state {
@@ -172,37 +156,16 @@
       }
 
       @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-        }
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
       }
 
-      .state-text {
-        font-size: 1.5rem;
-        font-weight: bold;
-        transition: all 0.5s ease;
-      }
+      .state-text.open { color: #ff5252; }
+      .state-text.closed { color: #69f0ae; }
+      .state-text { font-size: 1.5rem; font-weight: bold; transition: all 0.5s ease; }
 
-      .state-text.open {
-        color: #ff5252;
-      }
-
-      .state-text.closed {
-        color: #69f0ae;
-      }
-
-      .controls {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-      }
-
+      .controls { display: flex; gap: 15px; flex-wrap: wrap; }
       button {
         padding: 14px 20px;
         border: none;
@@ -220,45 +183,15 @@
         gap: 10px;
         min-width: 180px;
       }
+      button:hover { transform: translateY(-4px); box-shadow: 0 10px 0 #0d47a1; }
+      button:active { transform: translateY(2px); box-shadow: 0 3px 0 #0d47a1; }
+      button.secondary { background: linear-gradient(to right, #ff9800, #ffb74d); box-shadow: 0 6px 0 #e65100; }
 
-      button:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 0 #0d47a1;
-      }
+      .instructions ul { padding-left: 25px; margin-top: 15px; }
+      .instructions li { margin-bottom: 12px; position: relative; }
+      .instructions li:before { content: "⚡"; position: absolute; left: -25px; color: #ffeb3b; }
 
-      button:active {
-        transform: translateY(2px);
-        box-shadow: 0 3px 0 #0d47a1;
-      }
-
-      button.secondary {
-        background: linear-gradient(to right, #ff9800, #ffb74d);
-        box-shadow: 0 6px 0 #e65100;
-      }
-
-      .instructions ul {
-        padding-left: 25px;
-        margin-top: 15px;
-      }
-
-      .instructions li {
-        margin-bottom: 12px;
-        position: relative;
-      }
-
-      .instructions li:before {
-        content: "⚡";
-        position: absolute;
-        left: -25px;
-        color: #ffeb3b;
-      }
-
-      .components {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 18px;
-      }
-
+      .components { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
       .component {
         background: rgba(255, 255, 255, 0.1);
         padding: 18px;
@@ -268,25 +201,9 @@
         cursor: pointer;
         border: 1px solid rgba(255, 255, 255, 0.05);
       }
-
-      .component:hover {
-        background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      .component-icon {
-        font-size: 2.5rem;
-        margin-bottom: 12px;
-        color: #4fc3f7;
-      }
-
-      .component-name {
-        font-weight: bold;
-        margin-bottom: 8px;
-        color: #ff9800;
-        font-size: 1.2rem;
-      }
+      .component:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-5px); }
+      .component-icon { font-size: 2.5rem; margin-bottom: 12px; color: #4fc3f7; }
+      .component-name { font-weight: bold; margin-bottom: 8px; color: #ff9800; font-size: 1.2rem; }
 
       .current-flow {
         height: 5px;
@@ -297,20 +214,8 @@
         opacity: 0;
         transition: opacity 0.8s;
       }
-
-      .current-flow.active {
-        opacity: 1;
-        animation: flow 1.5s linear infinite;
-      }
-
-      @keyframes flow {
-        0% {
-          background-position: 0% 50%;
-        }
-        100% {
-          background-position: 200% 50%;
-        }
-      }
+      .current-flow.active { opacity: 1; animation: flow 1.5s linear infinite; }
+      @keyframes flow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
       .measurements {
         display: flex;
@@ -319,7 +224,6 @@
         flex-wrap: wrap;
         gap: 20px;
       }
-
       .measurement {
         text-align: center;
         background: rgba(0, 0, 0, 0.4);
@@ -329,52 +233,14 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
       }
+      .measurement:hover { transform: translateY(-5px); background: rgba(0, 0, 0, 0.6); }
+      .measurement-title { font-size: 1.1rem; margin-bottom: 10px; color: #b0bec5; }
+      .measurement-value { font-size: 1.8rem; font-weight: bold; color: #4fc3f7; text-shadow: 0 0 10px rgba(79, 195, 247, 0.5); }
+      .measurement-unit { font-size: 1rem; color: #90a4ae; margin-left: 5px; }
 
-      .measurement:hover {
-        transform: translateY(-5px);
-        background: rgba(0, 0, 0, 0.6);
-      }
-
-      .measurement-title {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
-        color: #b0bec5;
-      }
-
-      .measurement-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #4fc3f7;
-        text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
-      }
-
-      .measurement-unit {
-        font-size: 1rem;
-        color: #90a4ae;
-        margin-left: 5px;
-      }
-
-      .component-symbols {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 20px;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-
-      .symbol {
-        text-align: center;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        border-radius: 10px;
-        width: 120px;
-      }
-
-      .symbol-icon {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: #ffeb3b;
-      }
+      .component-symbols { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; gap: 20px; }
+      .symbol { text-align: center; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; width: 120px; }
+      .symbol-icon { font-size: 2.5rem; margin-bottom: 10px; color: #ffeb3b; }
 
       footer {
         text-align: center;
@@ -391,60 +257,23 @@
         flex-wrap: wrap;
         gap: 15px;
       }
-
-      .footer-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .ohm-law {
-        font-size: 1.2rem;
-        background: rgba(0, 0, 0, 0.4);
-        padding: 10px 20px;
-        border-radius: 10px;
-        border: 1px solid rgba(79, 195, 247, 0.3);
-      }
+      .footer-info { display: flex; align-items: center; gap: 10px; }
+      .ohm-law { font-size: 1.2rem; background: rgba(0, 0, 0, 0.4); padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(79, 195, 247, 0.3); }
 
       @media (max-width: 1100px) {
-        .content {
-          flex-direction: column;
-        }
-        .circuit-container {
-          min-width: 100%;
-        }
-        h1 {
-          font-size: 2.5rem;
-        }
+        .content { flex-direction: column; }
+        .circuit-container { min-width: 100%; }
+        h1 { font-size: 2.5rem; }
       }
-
       @media (max-width: 768px) {
-        h1 {
-          font-size: 2rem;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .measurements {
-          flex-direction: column;
-          align-items: center;
-        }
-        .controls {
-          flex-direction: column;
-        }
-        button {
-          width: 100%;
-        }
-        footer {
-          flex-direction: column;
-          text-align: center;
-        }
+        h1 { font-size: 2rem; flex-direction: column; gap: 10px; }
+        .measurements { flex-direction: column; align-items: center; }
+        .controls { flex-direction: column; }
+        button { width: 100%; }
+        footer { flex-direction: column; text-align: center; }
       }
 
-      .tooltip {
-        position: relative;
-        display: inline-block;
-      }
-
+      .tooltip { position: relative; display: inline-block; }
       .tooltip .tooltiptext {
         visibility: hidden;
         width: 200px;
@@ -463,229 +292,439 @@
         font-size: 0.9rem;
         border: 1px solid rgba(255, 255, 255, 0.2);
       }
-
-      .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-      }
+      .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
       .click-hint {
         position: absolute;
         top: 10px;
         right: 10px;
-        background: rgba(255, 215, 0, 0.2);
+        background: rgba(0, 0, 0, 0.6);
         color: #ffeb3b;
         padding: 8px 12px;
         border-radius: 8px;
         font-size: 0.9rem;
         animation: blink 2s infinite;
         border: 1px solid rgba(255, 215, 0, 0.3);
+        pointer-events: none;
       }
+      @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-      @keyframes blink {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.6;
-        }
-      }
+      @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>
-          <i class="fas fa-bolt"></i>
-          Electric Circuit Simulator
-          <i class="fas fa-microchip"></i>
-        </h1>
-        <p class="subtitle">
-          Interactive visualization of electric circuits with realistic physics
-          simulation. Click directly on the switch or bulb to interact with the
-          circuit!
-        </p>
-      </header>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><i class="fas fa-bolt"></i> Electric Circuit Simulator <i class="fas fa-microchip"></i></h1>
+        <p class="subtitle">Interactive visualization of electric circuits with realistic physics simulation. Click directly on the switch or bulb to interact!</p>
+    </header>
 
-      <div class="content">
+    <div class="content">
         <div class="info-panel">
-          <div class="panel-section circuit-status-section">
-            <h2><i class="fas fa-chart-line"></i> Circuit Status</h2>
-            <div class="circuit-state">
-              <div class="state-indicator"></div>
-              <div class="state-text open">Circuit Open - No Current Flow</div>
+            <div class="panel-section circuit-status-section">
+                <h2><i class="fas fa-chart-line"></i> Circuit Status</h2>
+                <div class="circuit-state">
+                    <div class="state-indicator" id="state-indicator"></div>
+                    <div class="state-text open" id="state-text">Circuit Open - No Current Flow</div>
+                </div>
+                <div class="current-flow" id="current-flow-bar"></div>
+                <div class="ohm-law" style="margin-top: 20px; text-align: center">Ohm's Law: <strong>V = I × R</strong></div>
             </div>
-            <div class="current-flow"></div>
-            <div class="ohm-law" style="margin-top: 20px; text-align: center">
-              Ohm's Law: <strong>V = I × R</strong>
-            </div>
-          </div>
 
-          <div class="panel-section controls-section">
-            <h2><i class="fas fa-sliders-h"></i> Controls</h2>
-            <div class="controls">
-              <button id="toggle-circuit">
-                <i class="fas fa-toggle-on"></i> Toggle Switch
-              </button>
-              <button id="reset-circuit" class="secondary">
-                <i class="fas fa-redo"></i> Reset Circuit
-              </button>
-              <button id="change-voltage" class="secondary">
-                <i class="fas fa-bolt"></i> Change Voltage
-              </button>
+            <div class="panel-section controls-section">
+                <h2><i class="fas fa-sliders-h"></i> Controls</h2>
+                <div class="controls">
+                    <button id="toggle-circuit"><i class="fas fa-toggle-on"></i> Toggle Switch</button>
+                    <button id="reset-circuit" class="secondary"><i class="fas fa-redo"></i> Reset Circuit</button>
+                    <button id="change-voltage" class="secondary"><i class="fas fa-bolt"></i> Change Voltage</button>
+                </div>
             </div>
-          </div>
 
-          <div class="panel-section components-section">
-            <h2><i class="fas fa-cogs"></i> Circuit Components</h2>
-            <div class="components">
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-car-battery"></i>
+            <div class="panel-section components-section">
+                <h2><i class="fas fa-cogs"></i> Circuit Components</h2>
+                <div class="components">
+                    <div class="component tooltip"><div class="component-icon"><i class="fas fa-car-battery"></i></div><div class="component-name">Power Source</div><div class="component-desc">Dry Cell (DC)</div><span class="tooltiptext">Provides electrical energy to the circuit. Converts chemical energy.</span></div>
+                    <div class="component tooltip"><div class="component-icon"><i class="fas fa-toggle-on"></i></div><div class="component-name">Switch</div><div class="component-desc">Controls current flow</div><span class="tooltiptext">Opens or closes the circuit to control current.</span></div>
+                    <div class="component tooltip"><div class="component-icon"><i class="fas fa-lightbulb"></i></div><div class="component-name">Light Bulb</div><div class="component-desc">Load & Visual Indicator</div><span class="tooltiptext">Converts electrical energy into light & heat.</span></div>
+                    <div class="component tooltip"><div class="component-icon"><i class="fas fa-bolt"></i></div><div class="component-name">Conducting Wires</div><div class="component-desc">Current Pathway</div><span class="tooltiptext">Path for electrons to flow.</span></div>
                 </div>
-                <div class="component-name">Power Source</div>
-                <div class="component-desc">Dry Cell (DC Voltage Source)</div>
-                <span class="tooltiptext"
-                  >Provides electrical energy to the circuit. Converts chemical
-                  energy to electrical energy.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-toggle-on"></i>
-                </div>
-                <div class="component-name">Switch</div>
-                <div class="component-desc">
-                  Controls current flow (Open/Closed)
-                </div>
-                <span class="tooltiptext"
-                  >A mechanical device that opens or closes the circuit to
-                  control the flow of current.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon">
-                  <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="component-name">Light Bulb</div>
-                <div class="component-desc">Load & Visual Indicator</div>
-                <span class="tooltiptext"
-                  >Converts electrical energy into light and heat. Acts as a
-                  resistor in the circuit.</span
-                >
-              </div>
-              <div class="component tooltip">
-                <div class="component-icon"><i class="fas fa-bolt"></i></div>
-                <div class="component-name">Conducting Wires</div>
-                <div class="component-desc">Current Pathway (Copper)</div>
-                <span class="tooltiptext"
-                  >Provides a path for electrons to flow. Made of conductive
-                  materials like copper.</span
-                >
-              </div>
             </div>
-          </div>
 
-          <div class="panel-section instructions-section">
-            <h2><i class="fas fa-info-circle"></i> Instructions</h2>
-            <div class="instructions">
-              <ul>
-                <li>
-                  <strong>Click directly on the switch</strong> in the circuit
-                  diagram to open/close it.
-                </li>
-                <li>
-                  <strong>Click on the bulb</strong> to change its brightness
-                  level.
-                </li>
-                <li>
-                  When the circuit is closed, current flows and the bulb lights
-                  up.
-                </li>
-                <li>
-                  When the circuit is open, no current flows and the bulb
-                  remains off.
-                </li>
-                <li>
-                  Change the voltage to see how it affects current (Ohm's Law: I
-                  = V/R).
-                </li>
-              </ul>
+            <div class="panel-section instructions-section">
+                <h2><i class="fas fa-info-circle"></i> Instructions</h2>
+                <div class="instructions"><ul>
+                    <li><strong>Click directly on the switch</strong> in the circuit diagram to open/close it.</li>
+                    <li><strong>Click on the bulb</strong> to change its brightness level (resistance changes).</li>
+                    <li>When circuit closed, current flows and bulb lights up.</li>
+                    <li>Open circuit: no current, bulb off.</li>
+                    <li>Change voltage to see Ohm's Law in action (I = V/R).</li>
+                </ul></div>
             </div>
-          </div>
         </div>
 
         <div class="circuit-container">
-          <h2><i class="fas fa-project-diagram"></i> Circuit Diagram</h2>
-          <div style="position: relative">
-            <canvas id="circuit-canvas" width="1000" height="450"></canvas>
-            <div class="click-hint">Click on switch or bulb to interact</div>
-          </div>
+            <h2><i class="fas fa-project-diagram"></i> Circuit Diagram</h2>
+            <div style="position: relative">
+                <canvas id="circuit-canvas" width="1000" height="450"></canvas>
+                <div class="click-hint">🔌 Click on switch or bulb to interact</div>
+            </div>
 
-          <div class="measurements">
-            <div class="measurement">
-              <div class="measurement-title">Current (I)</div>
-              <div class="measurement-value" id="current-value">
-                0.00<span class="measurement-unit">A</span>
-              </div>
+            <div class="measurements">
+                <div class="measurement"><div class="measurement-title">Current (I)</div><div class="measurement-value" id="current-value">0.00<span class="measurement-unit">A</span></div></div>
+                <div class="measurement"><div class="measurement-title">Voltage (V)</div><div class="measurement-value" id="voltage-value">1.50<span class="measurement-unit">V</span></div></div>
+                <div class="measurement"><div class="measurement-title">Resistance (R)</div><div class="measurement-value" id="resistance-value">10.0<span class="measurement-unit">Ω</span></div></div>
+                <div class="measurement"><div class="measurement-title">Power (P)</div><div class="measurement-value" id="power-value">0.00<span class="measurement-unit">W</span></div></div>
             </div>
-            <div class="measurement">
-              <div class="measurement-title">Voltage (V)</div>
-              <div class="measurement-value" id="voltage-value">
-                1.50<span class="measurement-unit">V</span>
-              </div>
+            <div class="component-symbols">
+                <div class="symbol"><div class="symbol-icon">⎓</div><div class="symbol-name">DC Source</div></div>
+                <div class="symbol"><div class="symbol-icon">⭘</div><div class="symbol-name">Switch</div></div>
+                <div class="symbol"><div class="symbol-icon">⚡</div><div class="symbol-name">Bulb</div></div>
+                <div class="symbol"><div class="symbol-icon">⏛</div><div class="symbol-name">Resistor</div></div>
             </div>
-            <div class="measurement">
-              <div class="measurement-title">Resistance (R)</div>
-              <div class="measurement-value" id="resistance-value">
-                10.0<span class="measurement-unit">Ω</span>
-              </div>
-            </div>
-            <div class="measurement">
-              <div class="measurement-title">Power (P)</div>
-              <div class="measurement-value" id="power-value">
-                0.00<span class="measurement-unit">W</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="component-symbols">
-            <div class="symbol">
-              <div class="symbol-icon">⎓</div>
-              <div class="symbol-name">DC Source</div>
-            </div>
-            <div class="symbol">
-              <div class="symbol-icon">⭘</div>
-              <div class="symbol-name">Switch</div>
-            </div>
-            <div class="symbol">
-              <div class="symbol-icon">⚡</div>
-              <div class="symbol-name">Bulb</div>
-            </div>
-            <div class="symbol">
-              <div class="symbol-icon">⏛</div>
-              <div class="symbol-name">Resistor</div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <footer>
-        <div class="footer-info">
-          <i class="fas fa-graduation-cap"></i>
-          <span
-            >Electric Circuit Visualization | Demonstrating Circuit Principles &
-            Ohm's Law</span
-          >
-        </div>
-        <div class="ohm-law">
-          P = V × I = <span id="power-equation">0.00 W</span>
-        </div>
-      </footer>
     </div>
 
-    <script src="index.js">
-    </script>
-  </body>
+    <footer>
+        <div class="footer-info"><i class="fas fa-graduation-cap"></i><span>Electric Circuit Visualization | Demonstrating Circuit Principles & Ohm's Law</span></div>
+        <div class="ohm-law">P = V × I = <span id="power-equation">0.00 W</span></div>
+    </footer>
+</div>
+
+<script>
+    (function(){
+        // ---- Circuit Simulator Class (fully local, no external deps except canvas) ----
+        class CircuitSimulator {
+            constructor() {
+                this.circuitClosed = false;
+                this.current = 0;
+                this.voltage = 1.5;
+                this.resistance = 10.0;
+                this.power = 0;
+                this.bulbBrightness = 1.0;   // multiplier effect
+
+                this.canvas = document.getElementById("circuit-canvas");
+                this.ctx = this.canvas.getContext("2d");
+
+                // component hit zones & positions (relative to canvas)
+                this.components = {
+                    battery: { x: 120, y: 225, width: 70, height: 90 },
+                    switch: { x: 400, y: 225, width: 100, height: 50 },
+                    bulb: { x: 700, y: 225, width: 80, height: 100 },
+                    resistor: { x: 550, y: 225, width: 60, height: 40 },
+                    wires: {
+                        top: { x: 120, y: 180, width: 660, height: 6 },
+                        bottom: { x: 120, y: 270, width: 660, height: 6 },
+                        left: { x: 120, y: 180, width: 6, height: 90 },
+                        right: { x: 780, y: 180, width: 6, height: 90 },
+                    }
+                };
+
+                this.animationId = null;
+                this.electrons = [];
+                this.initElectrons();
+
+                // DOM elements
+                this.currentValueEl = document.getElementById("current-value");
+                this.voltageValueEl = document.getElementById("voltage-value");
+                this.resistanceValueEl = document.getElementById("resistance-value");
+                this.powerValueEl = document.getElementById("power-value");
+                this.powerEquationEl = document.getElementById("power-equation");
+                this.stateIndicator = document.getElementById("state-indicator");
+                this.stateText = document.getElementById("state-text");
+                this.currentFlowBar = document.getElementById("current-flow-bar");
+
+                this.initEvents();
+                this.updateMeasurements();
+                this.drawCircuit();
+                this.animateFlow(); // start animation loop that only draws particles if circuit closed
+            }
+
+            initElectrons() {
+                this.electrons = [];
+                for(let i=0; i<28; i++) {
+                    this.electrons.push({
+                        x: this.components.battery.x + 20 + i * 25,
+                        y: this.components.wires.top.y + 3,
+                        speed: 1.8 + Math.random() * 1.2,
+                        radius: 3 + Math.random() * 2,
+                        offset: i * 0.6,
+                        progress: (i * 0.05) % 4
+                    });
+                }
+            }
+
+            initEvents() {
+                this.canvas.addEventListener("click", (e) => this.handleCanvasClick(e));
+                document.getElementById("toggle-circuit").addEventListener("click", () => this.toggleCircuit());
+                document.getElementById("reset-circuit").addEventListener("click", () => this.resetCircuit());
+                document.getElementById("change-voltage").addEventListener("click", () => this.changeVoltage());
+                document.addEventListener("keydown", (e) => {
+                    if (e.code === "Space" || e.code === "KeyS") { this.toggleCircuit(); e.preventDefault(); }
+                    if (e.code === "KeyR") { this.resetCircuit(); }
+                    if (e.code === "KeyV") { this.changeVoltage(); }
+                    if (e.code === "KeyB") { this.changeBulbBrightness(); }
+                });
+            }
+
+            drawCircuit() {
+                if(!this.ctx) return;
+                const w = this.canvas.width, h = this.canvas.height;
+                const grad = this.ctx.createLinearGradient(0,0,w,h);
+                grad.addColorStop(0,"#0a0a1a");
+                grad.addColorStop(1,"#11112a");
+                this.ctx.fillStyle = grad;
+                this.ctx.fillRect(0,0,w,h);
+                this.drawGrid();
+                this.drawWires();
+                this.drawBattery();
+                this.drawResistor();
+                this.drawSwitch();
+                this.drawBulb();
+                this.drawLabels();
+                if(this.circuitClosed) this.drawCurrentFlowParticles();
+            }
+
+            drawGrid() {
+                this.ctx.strokeStyle = "rgba(100,150,255,0.05)";
+                this.ctx.lineWidth = 1;
+                for(let x=0; x<this.canvas.width; x+=50) { this.ctx.beginPath(); this.ctx.moveTo(x,0); this.ctx.lineTo(x,this.canvas.height); this.ctx.stroke(); }
+                for(let y=0; y<this.canvas.height; y+=50) { this.ctx.beginPath(); this.ctx.moveTo(0,y); this.ctx.lineTo(this.canvas.width,y); this.ctx.stroke(); }
+            }
+
+            drawWires() {
+                const w = this.components.wires;
+                this.ctx.fillStyle = this.circuitClosed ? "#4fc3f7" : "#666";
+                if(this.circuitClosed) {
+                    const grad = this.ctx.createLinearGradient(0,0,this.canvas.width,0);
+                    grad.addColorStop(0,"#2e86c1"); grad.addColorStop(0.5,"#4fc3f7"); grad.addColorStop(1,"#2e86c1");
+                    this.ctx.fillStyle = grad;
+                }
+                this.ctx.fillRect(w.top.x, w.top.y, w.top.width, w.top.height);
+                this.ctx.fillRect(w.bottom.x, w.bottom.y, w.bottom.width, w.bottom.height);
+                this.ctx.fillRect(w.left.x, w.left.y, w.left.width, w.left.height);
+                this.ctx.fillRect(w.right.x, w.right.y, w.right.width, w.right.height);
+                this.ctx.fillStyle = this.circuitClosed ? "#ffeb3b" : "#888";
+                const drawJunction = (x,y) => { this.ctx.beginPath(); this.ctx.arc(x,y,8,0,Math.PI*2); this.ctx.fill(); this.ctx.fillStyle="#222"; this.ctx.beginPath(); this.ctx.arc(x,y,4,0,Math.PI*2); this.ctx.fill(); this.ctx.fillStyle=this.circuitClosed?"#ffeb3b":"#888"; };
+                drawJunction(w.top.x, w.top.y+3); drawJunction(w.top.x+w.top.width, w.top.y+3);
+                drawJunction(w.bottom.x, w.bottom.y+3); drawJunction(w.bottom.x+w.bottom.width, w.bottom.y+3);
+            }
+
+            drawBattery() {
+                const b = this.components.battery;
+                this.ctx.fillStyle = "#333"; this.ctx.fillRect(b.x,b.y,b.width,b.height);
+                this.ctx.fillStyle = "#444"; this.ctx.fillRect(b.x+5,b.y+5,b.width-10,15);
+                this.ctx.fillStyle = "#e53935"; this.ctx.fillRect(b.x-8,b.y+15,10,25);
+                this.ctx.fillStyle = "#1565c0"; this.ctx.fillRect(b.x-8,b.y+b.height-40,10,25);
+                this.ctx.fillStyle = "#fff"; this.ctx.font = "bold 16px Arial";
+                this.ctx.fillText("+", b.x+b.width/2-5, b.y+30);
+                this.ctx.fillText("-", b.x+b.width/2-5, b.y+b.height-20);
+                this.ctx.font = "14px Arial";
+                this.ctx.fillText(`${this.voltage}V`, b.x+b.width/2-15, b.y+b.height/2+5);
+            }
+
+            drawResistor() {
+                const r = this.components.resistor;
+                this.ctx.fillStyle = this.circuitClosed ? "#ff9800" : "#888";
+                this.ctx.fillRect(r.x, r.y, r.width, r.height);
+                this.ctx.fillStyle = "#333";
+                this.ctx.fillRect(r.x+10, r.y, 5, r.height);
+                this.ctx.fillRect(r.x+25, r.y, 5, r.height);
+                this.ctx.fillRect(r.x+40, r.y, 5, r.height);
+                this.ctx.fillStyle = "#fff";
+                this.ctx.fillText(`${this.resistance.toFixed(1)}Ω`, r.x+r.width/2-15, r.y+r.height+20);
+            }
+
+            drawSwitch() {
+                const sw = this.components.switch;
+                this.ctx.fillStyle = "#5d4037"; this.ctx.fillRect(sw.x, sw.y, sw.width, sw.height);
+                this.ctx.fillStyle = "#ffd700";
+                this.ctx.beginPath(); this.ctx.arc(sw.x+25, sw.y+sw.height/2, 8,0,Math.PI*2); this.ctx.fill();
+                this.ctx.beginPath(); this.ctx.arc(sw.x+sw.width-25, sw.y+sw.height/2, 8,0,Math.PI*2); this.ctx.fill();
+                this.ctx.strokeStyle = "#212121"; this.ctx.lineWidth = 6; this.ctx.lineCap = "round";
+                this.ctx.beginPath();
+                if(this.circuitClosed) this.ctx.moveTo(sw.x+25, sw.y+sw.height/2), this.ctx.lineTo(sw.x+sw.width-25, sw.y+sw.height/2);
+                else this.ctx.moveTo(sw.x+25, sw.y+sw.height/2), this.ctx.lineTo(sw.x+25+40, sw.y+sw.height/2-30);
+                this.ctx.stroke();
+                this.ctx.fillStyle = this.circuitClosed ? "#4caf50" : "#f44336";
+                if(this.circuitClosed) { this.ctx.beginPath(); this.ctx.arc(sw.x+sw.width-25, sw.y+sw.height/2,12,0,Math.PI*2); this.ctx.fill(); }
+                else { this.ctx.beginPath(); this.ctx.arc(sw.x+25+40, sw.y+sw.height/2-30,12,0,Math.PI*2); this.ctx.fill(); }
+            }
+
+            drawBulb() {
+                const bulb = this.components.bulb;
+                const cx = bulb.x+bulb.width/2, cy = bulb.y+bulb.height/2;
+                if(this.circuitClosed && this.bulbBrightness>0) {
+                    let intensity = this.bulbBrightness * Math.min(1, this.current/0.2);
+                    const outer = this.ctx.createRadialGradient(cx,cy,0,cx,cy,100*intensity);
+                    outer.addColorStop(0,`rgba(255,255,180,${0.3*intensity})`);
+                    outer.addColorStop(1,`rgba(255,255,100,0)`);
+                    this.ctx.fillStyle = outer; this.ctx.beginPath(); this.ctx.arc(cx,cy,100*intensity,0,Math.PI*2); this.ctx.fill();
+                }
+                this.ctx.fillStyle = this.circuitClosed ? `rgba(255,255,220,${0.8+0.2*this.bulbBrightness})` : "rgba(224,224,224,0.9)";
+                this.ctx.beginPath(); this.ctx.moveTo(cx, bulb.y+10);
+                this.ctx.bezierCurveTo(cx-35, bulb.y+10, cx-40, cy, cx, cy+30);
+                this.ctx.bezierCurveTo(cx+40, cy, cx+35, bulb.y+10, cx, bulb.y+10);
+                this.ctx.fill();
+                this.ctx.fillStyle = this.circuitClosed ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)";
+                this.ctx.beginPath(); this.ctx.ellipse(cx-10, cy-15, 15,25,0.3,0,Math.PI*2); this.ctx.fill();
+                this.ctx.fillStyle = "#8b7355";
+                this.ctx.beginPath(); this.ctx.moveTo(bulb.x+20, cy+20); this.ctx.lineTo(bulb.x+bulb.width-20, cy+20); this.ctx.lineTo(bulb.x+bulb.width-15, bulb.y+bulb.height-10); this.ctx.lineTo(bulb.x+15, bulb.y+bulb.height-10); this.ctx.fill();
+                this.ctx.strokeStyle = this.circuitClosed ? `rgba(255,${180+75*this.bulbBrightness},0,0.9)` : "rgba(160,160,160,0.7)";
+                this.ctx.lineWidth = this.circuitClosed ? 4 : 2;
+                this.ctx.beginPath(); this.ctx.moveTo(cx-15, cy); this.ctx.bezierCurveTo(cx-10,cy-10,cx-5,cy-5,cx,cy-8); this.ctx.bezierCurveTo(cx+5,cy-5,cx+10,cy-10,cx+15,cy); this.ctx.stroke();
+                if(this.circuitClosed && this.current>0.02){
+                    this.ctx.fillStyle = "#fff"; this.ctx.font = "10px Arial";
+                    this.ctx.fillText(`💡 ${Math.round(this.bulbBrightness*100)}%`, cx-28, bulb.y+bulb.height+18);
+                }
+            }
+
+            drawLabels(){
+                this.ctx.fillStyle = "#fff"; this.ctx.font = "bold 14px Arial";
+                this.ctx.fillText("Dry Cell", this.components.battery.x+this.components.battery.width/2-28, this.components.battery.y+this.components.battery.height+28);
+                this.ctx.fillText("Switch", this.components.switch.x+this.components.switch.width/2-22, this.components.switch.y+this.components.switch.height+28);
+                this.ctx.fillText("Light Bulb", this.components.bulb.x+this.components.bulb.width/2-32, this.components.bulb.y+this.components.bulb.height+28);
+                this.ctx.fillText("Resistor", this.components.resistor.x+this.components.resistor.width/2-28, this.components.resistor.y-8);
+            }
+
+            drawCurrentFlowParticles() {
+                if(!this.circuitClosed) return;
+                const time = Date.now() / 1000;
+                const wires = this.components.wires;
+                for(let e of this.electrons) {
+                    let prog = (time * e.speed + e.offset) % 4;
+                    if(prog < 1) { e.x = wires.top.x + 10 + prog * wires.top.width; e.y = wires.top.y+3; }
+                    else if(prog < 2) { let p = prog-1; e.x = wires.right.x+3; e.y = wires.right.y + p * wires.right.height; }
+                    else if(prog < 3) { let p = prog-2; e.x = wires.bottom.x + wires.bottom.width - p * wires.bottom.width; e.y = wires.bottom.y+3; }
+                    else { let p = prog-3; e.x = wires.left.x+3; e.y = wires.left.y + wires.left.height - p * wires.left.height; }
+                    this.ctx.fillStyle = "#4fc3f7"; this.ctx.beginPath(); this.ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2); this.ctx.fill();
+                    const glow = this.ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.radius*3);
+                    glow.addColorStop(0,"rgba(79,195,247,0.7)"); glow.addColorStop(1,"rgba(79,195,247,0)");
+                    this.ctx.fillStyle = glow; this.ctx.beginPath(); this.ctx.arc(e.x, e.y, e.radius*3, 0, Math.PI*2); this.ctx.fill();
+                    this.ctx.fillStyle = "#fff"; this.ctx.font = "9px Arial"; this.ctx.fillText("-", e.x-3, e.y+3);
+                }
+                this.drawArrows();
+            }
+
+            drawArrows(){
+                const w = this.components.wires;
+                this.ctx.fillStyle = "#ff5252"; this.ctx.strokeStyle = "#ff5252"; this.ctx.lineWidth = 2;
+                const drawArrow = (fx,fy,tx,ty) => {
+                    let ang = Math.atan2(ty-fy, tx-fx); let sz=10;
+                    this.ctx.beginPath(); this.ctx.moveTo(fx,fy); this.ctx.lineTo(tx,ty); this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.moveTo(tx,ty); this.ctx.lineTo(tx-sz*Math.cos(ang-Math.PI/6), ty-sz*Math.sin(ang-Math.PI/6));
+                    this.ctx.lineTo(tx-sz*Math.cos(ang+Math.PI/6), ty-sz*Math.sin(ang+Math.PI/6)); this.ctx.fill();
+                };
+                drawArrow(w.top.x+150, w.top.y+3, w.top.x+200, w.top.y+3);
+                drawArrow(w.right.x+3, w.right.y+40, w.right.x+3, w.right.y+90);
+                drawArrow(w.bottom.x+500, w.bottom.y+3, w.bottom.x+450, w.bottom.y+3);
+                drawArrow(w.left.x+3, w.left.y+70, w.left.x+3, w.left.y+20);
+            }
+
+            updateMeasurements() {
+                if(this.circuitClosed){
+                    this.current = this.voltage / this.resistance;
+                    this.power = this.voltage * this.current;
+                    this.currentValueEl.innerHTML = `${this.current.toFixed(2)}<span class="measurement-unit">A</span>`;
+                    this.powerValueEl.innerHTML = `${this.power.toFixed(2)}<span class="measurement-unit">W</span>`;
+                    this.powerEquationEl.textContent = `${this.power.toFixed(2)} W`;
+                } else {
+                    this.current = 0; this.power = 0;
+                    this.currentValueEl.innerHTML = `0.00<span class="measurement-unit">A</span>`;
+                    this.powerValueEl.innerHTML = `0.00<span class="measurement-unit">W</span>`;
+                    this.powerEquationEl.textContent = `0.00 W`;
+                }
+                this.voltageValueEl.innerHTML = `${this.voltage.toFixed(2)}<span class="measurement-unit">V</span>`;
+                this.resistanceValueEl.innerHTML = `${this.resistance.toFixed(1)}<span class="measurement-unit">Ω</span>`;
+            }
+
+            toggleCircuit() {
+                this.circuitClosed = !this.circuitClosed;
+                if(this.circuitClosed){
+                    this.stateIndicator.classList.add("active");
+                    this.stateText.textContent = "Circuit Closed - Current Flowing";
+                    this.stateText.className = "state-text closed";
+                    this.currentFlowBar.classList.add("active");
+                    this.showNotif("🔌 Circuit Closed! Bulb ON ⚡");
+                } else {
+                    this.stateIndicator.classList.remove("active");
+                    this.stateText.textContent = "Circuit Open - No Current Flow";
+                    this.stateText.className = "state-text open";
+                    this.currentFlowBar.classList.remove("active");
+                    this.showNotif("⛔ Circuit Open! Bulb OFF");
+                }
+                this.updateMeasurements();
+                this.drawCircuit();
+            }
+
+            changeBulbBrightness() {
+                if(!this.circuitClosed){ this.showNotif("Open circuit: close switch first!"); return; }
+                let levels = [0.4,0.7,1.0,1.3,1.6];
+                let idx = levels.indexOf(this.bulbBrightness);
+                this.bulbBrightness = levels[(idx+1) % levels.length];
+                this.resistance = 10.0 / this.bulbBrightness;
+                this.showNotif(`💡 Bulb brightness: ${Math.round(this.bulbBrightness*100)}% (R = ${this.resistance.toFixed(1)}Ω)`);
+                this.updateMeasurements();
+                this.drawCircuit();
+            }
+
+            resetCircuit() {
+                this.circuitClosed = false;
+                this.voltage = 1.5;
+                this.resistance = 10.0;
+                this.bulbBrightness = 1.0;
+                this.stateIndicator.classList.remove("active");
+                this.stateText.textContent = "Circuit Open - No Current Flow";
+                this.stateText.className = "state-text open";
+                this.currentFlowBar.classList.remove("active");
+                this.updateMeasurements();
+                this.drawCircuit();
+                this.showNotif("🔄 Circuit reset (Open, 1.5V, 10Ω)");
+            }
+
+            changeVoltage() {
+                let voltages = [1.5, 3.0, 4.5, 6.0, 9.0];
+                let idx = voltages.indexOf(this.voltage);
+                this.voltage = voltages[(idx+1) % voltages.length];
+                this.showNotif(`🔋 Voltage = ${this.voltage} V`);
+                this.updateMeasurements();
+                this.drawCircuit();
+            }
+
+            showNotif(msg){
+                let div = document.createElement("div");
+                div.textContent = msg;
+                div.style.cssText = `position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.85); color:white; padding:12px 20px; border-radius:12px; z-index:2000; border-left:5px solid #4fc3f7; animation:slideIn 0.3s ease; font-size:1rem; max-width:300px; backdrop-filter:blur(4px);`;
+                document.body.appendChild(div);
+                setTimeout(()=>{ div.style.animation="slideOut 0.3s ease"; setTimeout(()=>div.remove(),300); },2500);
+            }
+
+            handleCanvasClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                let x = (e.clientX - rect.left) * scaleX;
+                let y = (e.clientY - rect.top) * scaleY;
+                const sw = this.components.switch;
+                if(x>=sw.x && x<=sw.x+sw.width && y>=sw.y && y<=sw.y+sw.height) { this.toggleCircuit(); return; }
+                const bat = this.components.battery;
+                if(x>=bat.x && x<=bat.x+bat.width && y>=bat.y && y<=bat.y+bat.height) { this.changeVoltage(); return; }
+                const bulb = this.components.bulb;
+                const cx = bulb.x+bulb.width/2, cy = bulb.y+bulb.height/2;
+                const dist = Math.hypot(x-cx, y-cy);
+                if(dist < 55) { this.changeBulbBrightness(); return; }
+            }
+
+            animateFlow() {
+                this.drawCircuit();
+                requestAnimationFrame(() => this.animateFlow());
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            new CircuitSimulator();
+        });
+    })();
+</script>
+</body>
 </html>
