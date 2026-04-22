@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Demagnetization Lab | Fully Responsive for Any Device & Whiteboard</title>
+    <style>
+        /* ----------------------------------------------
+            GLOBAL RESET + RESPONSIVE CORE
+        ------------------------------------------------ */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-color: #1a1a24;
+            --ui-bg: rgba(18, 18, 26, 0.94);
+            --accent: #ff3366;
+            --accent-glow: #ff3366cc;
+            --text: #f0f0f0;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at 20% 30%, #252532, #0a0a0f);
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            color: var(--text);
+            touch-action: none;
+            position: fixed;
+        }
+
+        /* Canvas container full viewport */
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #2a2a35 0%, #08080c 100%);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        /* ----------------------------------------------
+            RESPONSIVE HUD (top-right, adaptive)
+        ------------------------------------------------ */
+        #hud {
+            position: absolute;
+            top: max(12px, var(--safe-top));
+            right: max(12px, var(--safe-right));
+            pointer-events: none;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            width: auto;
+            max-width: min(300px, 40vw);
+        }
+
+        .panel {
+            background: var(--ui-bg);
+            backdrop-filter: blur(16px);
+            padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2vw, 18px);
+            border-right: 4px solid var(--accent);
+            border-radius: 20px;
+            width: 100%;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        h2 {
+            margin: 0 0 6px 0;
+            font-size: clamp(11px, 1.8vw, 15px);
+            letter-spacing: 1.5px;
+            color: #bbb;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        p {
+            margin: 4px 0 0;
+            font-size: clamp(11px, 1.5vw, 14px);
+            font-weight: 600;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .meter-box {
+            background: #000000aa;
+            height: 12px;
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #555;
+            margin-top: 6px;
+        }
+
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3366, #ffaa33);
+            width: 100%;
+            transition: width 0.08s linear;
+            border-radius: 20px;
+        }
+
+        /* ----------------------------------------------
+            CIRCUIT SWITCH - top left, fully touch friendly
+        ------------------------------------------------ */
+        #circuit-switch {
+            position: absolute;
+            left: max(14px, var(--safe-left));
+            top: max(14px, var(--safe-top));
+            width: clamp(48px, 7vw, 70px);
+            height: clamp(72px, 10vw, 110px);
+            background: #2c2c38;
+            border: 2px solid #6a6a7a;
+            border-radius: 28px;
+            cursor: pointer;
+            z-index: 110;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #circuit-switch.on {
+            background: #0a3a2a;
+            border-color: #2eff7a;
+            box-shadow: 0 0 16px #2eff7a88;
+        }
+
+        .switch-lever {
+            width: clamp(14px, 2.5vw, 24px);
+            height: clamp(36px, 5vw, 55px);
+            background: #aaa;
+            border-radius: 20px;
+            transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            transform: translateY(30%);
+        }
+
+        #circuit-switch.on .switch-lever {
+            transform: translateY(-30%);
+            background: #2eff7a;
+            box-shadow: 0 0 12px #2eff7a;
+        }
+
+        .switch-label {
+            position: absolute;
+            bottom: -24px;
+            font-weight: bold;
+            width: 90px;
+            text-align: center;
+            font-size: clamp(8px, 1.2vw, 11px);
+            color: #ccc;
+            pointer-events: none;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* ----------------------------------------------
+            LEFT TOOLBAR - transforms to BOTTOM on small screens
+            (fully responsive + whiteboard friendly)
+        ------------------------------------------------ */
+        #controls {
+            position: absolute;
+            left: max(12px, var(--safe-left));
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            pointer-events: auto;
+            z-index: 100;
+            transition: all 0.25s ease;
+        }
+
+        .tool-btn {
+            background: rgba(35, 35, 48, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid #5a5a6e;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: clamp(12px, 1.4vw, 15px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+            width: clamp(150px, 18vw, 210px);
+            white-space: nowrap;
+            touch-action: manipulation;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-btn:hover {
+            background: #4a4a5e;
+            border-color: var(--accent);
+            transform: translateX(6px);
+        }
+
+        .tool-btn:active {
+            transform: scale(0.96);
+        }
+
+        .tool-btn.active {
+            background: var(--accent);
+            border-color: white;
+            box-shadow: 0 0 14px var(--accent-glow);
+        }
+
+        /* ==============================================
+            📱 RESPONSIVE BREAKPOINTS
+            Tablet & Mobile → horizontal toolbar at bottom
+        ============================================== */
+        @media (max-width: 850px), (max-height: 550px) {
+            #controls {
+                left: 0;
+                right: 0;
+                top: auto;
+                bottom: 0;
+                transform: none;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 12px calc(12px + var(--safe-bottom));
+                background: rgba(12, 12, 18, 0.92);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255, 255, 255, 0.15);
+                overflow-x: auto;
+                overflow-y: hidden;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            #controls::-webkit-scrollbar {
+                display: none;
+            }
+
+            .tool-btn {
+                width: auto;
+                flex: 0 0 auto;
+                padding: 10px 16px;
+                font-size: 12px;
+                gap: 8px;
+                white-space: nowrap;
+            }
+            
+            .tool-btn:hover {
+                transform: translateY(-2px);
+            }
+            
+            /* HUD slightly smaller */
+            #hud {
+                max-width: min(240px, 45vw);
+                gap: 6px;
+                top: max(8px, var(--safe-top));
+                right: max(8px, var(--safe-right));
+            }
+            
+            .panel {
+                padding: 8px 12px;
+            }
+            
+            /* circuit switch adjustment */
+            #circuit-switch {
+                width: 52px;
+                height: 80px;
+                left: 12px;
+                top: 12px;
+            }
+            .switch-lever {
+                width: 14px;
+                height: 38px;
+            }
+            .switch-label {
+                font-size: 8px;
+                bottom: -20px;
+                width: 70px;
+            }
+        }
+
+        /* Extra small phones & very narrow screens */
+        @media (max-width: 550px) {
+            #controls {
+                gap: 8px;
+                padding: 8px 10px calc(10px + var(--safe-bottom));
+            }
+            .tool-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+                gap: 5px;
+                border-radius: 40px;
+            }
+            #hud .panel:last-child {
+                display: none;  /* hide status panel on tiny screens to save space */
+            }
+            #hud {
+                max-width: min(160px, 50vw);
+            }
+            h2 {
+                font-size: 9px;
+                letter-spacing: 1px;
+            }
+            p {
+                font-size: 10px;
+            }
+            .meter-box {
+                height: 8px;
+            }
+            #circuit-switch {
+                width: 44px;
+                height: 68px;
+            }
+            .switch-lever {
+                width: 12px;
+                height: 32px;
+            }
+        }
+
+        /* Landscape orientation and very short screens */
+        @media (max-height: 480px) {
+            #hud .panel:first-child {
+                padding: 6px 10px;
+            }
+            #hud {
+                top: 6px;
+                right: 6px;
+            }
+            .tool-btn {
+                padding: 6px 12px;
+                font-size: 10px;
+            }
+            #controls {
+                padding: 6px 8px calc(6px + var(--safe-bottom));
+            }
+            #circuit-switch {
+                width: 40px;
+                height: 60px;
+                top: 6px;
+                left: 6px;
+            }
+            .switch-label {
+                display: none;
+            }
+        }
+
+        /* Touch devices : increase tap target */
+        @media (pointer: coarse) {
+            .tool-btn {
+                min-height: 48px;
+            }
+            #circuit-switch {
+                min-height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-container">
+    <canvas id="simCanvas"></canvas>
+
+    <!-- HUD elements -->
+    <div id="hud">
+        <div class="panel">
+            <h2>🧲 MAGNETIC STRENGTH</h2>
+            <div class="meter-box"><div class="meter-fill" id="strength-meter"></div></div>
+            <p id="strength-val">100%</p>
+        </div>
+        <div class="panel">
+            <h2>📡 STATUS</h2>
+            <p id="status-text">Ready. Drag tools & interact.</p>
+        </div>
+    </div>
+
+    <!-- Dynamic controls -->
+    <div id="controls">
+        <button class="tool-btn" data-tool="candle" id="btn-candle">🔥 HEAT (Candle)</button>
+        <button class="tool-btn" data-tool="hammer" id="btn-hammer">🔨 HAMMER (Impact)</button>
+        <button class="tool-btn" data-tool="coil" id="btn-coil">⚡ AC COIL</button>
+        <button class="tool-btn" id="reset-btn">🔄 RESET LAB</button>
+    </div>
+
+    <!-- Circuit switch (coil power) -->
+    <div id="circuit-switch">
+        <div class="switch-lever"></div>
+        <div class="switch-label">⚡ COIL POWER</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----------------------------------------------
+        //  FULLY RESPONSIVE SIMULATION ENGINE
+        //  Works on any interactive whiteboard, touchscreen, desktop, tablet.
+        //  No external changes needed. Hammer impact + demagnetization fixed.
+        // ----------------------------------------------
+        
+        const canvas = document.getElementById("simCanvas");
+        const ctx = canvas.getContext("2d");
+        const hudBar = document.getElementById("strength-meter");
+        const hudVal = document.getElementById("strength-val");
+        const statusText = document.getElementById("status-text");
+        const switchEl = document.getElementById("circuit-switch");
+
+        // Dimensions
+        let width, height;
+        let time = 0;
+        let lastPointerPos = { x: 0, y: 0 };
+        let pointerVelocity = 0;    // used for hammer impact
+        let hammerCooldown = 0;
+
+        // ----- MAGNET -----
+        const magnet = {
+            x: 0, y: 0, w: 200, h: 50,
+            strength: 100,
+            temp: 0,
+            colorN: "#e74c3c",
+            colorS: "#2980b9",
+            isDragging: false,
+            update() {
+                if (this.strength > 0) this.strength -= 0.004;
+                if (this.temp > 0) this.temp -= 0.09;
+                this.strength = Math.max(0, Math.min(100, this.strength));
+                hudBar.style.width = this.strength + "%";
+                hudVal.innerText = Math.floor(this.strength) + "%";
+            },
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                if (this.temp > 12) {
+                    ctx.shadowBlur = Math.min(24, this.temp * 1.1);
+                    ctx.shadowColor = `rgba(255, 80, 40, ${this.temp / 80})`;
+                }
+                ctx.fillStyle = this.colorS;
+                ctx.fillRect(-this.w/2, -this.h/2, this.w/2, this.h);
+                ctx.fillStyle = this.colorN;
+                ctx.fillRect(0, -this.h/2, this.w/2, this.h);
+                ctx.fillStyle = "#fff";
+                ctx.font = `bold ${Math.max(18, Math.min(26, this.h * 0.6))}px "Segoe UI", system-ui`;
+                ctx.fillText("S", -this.w/4 - 8, 10);
+                ctx.fillText("N", this.w/4 - 8, 10);
+                ctx.restore();
+            }
+        };
+
+        // ----- CANDLE -----
+        const candle = {
+            x: 0, y: 0, w: 30, h: 80, visible: false, isDragging: false,
+            draw(ctx) {
+                if (!this.visible) return;
+                ctx.save();
+                let floatY = (!this.isDragging) ? Math.sin(time * 0.05) * 8 : 0;
+                ctx.translate(this.x, this.y + floatY);
+                ctx.fillStyle = "#f5e6d3";
+                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+                ctx.fillStyle = "#d4b48c";
+                ctx.fillRect(-this.w/2+2, -this.h/2, 4, this.h);
+                ctx.fillStyle = "#2a1e0c";
+                ctx.fillRect(-2, -this.h/2 - 4, 4, 8);
+                let flick = 3 + Math.sin(time * 0.4) * 2;
+                ctx.fillStyle = "#ff8800cc";
+                ctx.beginPath();
+                ctx.ellipse(0, -this.h/2 - 14, 7 + flick*0.3, 14 + flick*0.4, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ffcc44";
+                ctx.beginPath();
+                ctx.ellipse(0, -this.h/2 - 12, 4, 8, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+            }
+        };
+
+        // ----- HAMMER (impact detection fully functional)-----
+        const hammer = {
+            x: 0, y: 0, w: 60, h: 60, visible: false, isDragging: false,
+            justHit: false,
+            angle: 0,
+            draw(ctx) {
+                if (!this.visible) return;
+                ctx.save();
+                let floatY = (!this.isDragging) ? Math.sin(time * 0.05) * 8 : 0;
+                ctx.translate(this.x, this.y + floatY);
+                let swing = Math.min(Math.max(pointerVelocity * 2.2, -0.9), 0.9);
+                ctx.rotate(this.angle + swing);
+                ctx.fillStyle = "#7f5e3c";
+                ctx.fillRect(-6, -55, 12, 110);
+                ctx.fillStyle = "#5a5f6e";
+                ctx.fillRect(-22, -58, 44, 36);
+                ctx.fillStyle = "#3a3f4e";
+                ctx.fillRect(-18, -52, 36, 24);
+                if (this.justHit && (time % 12 < 6)) {
+                    ctx.fillStyle = "#ffaa55";
+                    ctx.beginPath();
+                    ctx.arc(0, -30, 14, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        };
+
+        // ----- AC COIL -----
+        const coilTool = {
+            x: 0, y: 0, w: 260, h: 130, visible: false, isDragging: false, active: false, anim: 0,
+            draw(ctx) {
+                if (!this.visible) return;
+                ctx.save();
+                let floatY = (!this.isDragging) ? Math.sin(time * 0.05) * 8 : 0;
+                ctx.translate(this.x, this.y + floatY);
+                ctx.fillStyle = "#6b3e1a";
+                ctx.fillRect(-this.w/2 - 10, 50, this.w + 20, 18);
+                ctx.fillStyle = "#8b5a2b";
+                ctx.fillRect(-this.w/2 - 5, 35, this.w + 10, 16);
+                for (let i = -this.w/2 + 20; i < this.w/2; i += 18) {
+                    ctx.beginPath();
+                    ctx.arc(i, 0, 45, 0, Math.PI*2);
+                    ctx.strokeStyle = this.active ? "#33ff99" : "#b8860b";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                if (this.active) {
+                    this.anim++;
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = "#2effaa";
+                    for (let s = 0; s < 4; s++) {
+                        let offX = (Math.sin(time*0.2 + s)*12);
+                        ctx.beginPath();
+                        ctx.arc(offX, -8 + Math.sin(time*0.5 + s)*6, 6, 0, Math.PI*2);
+                        ctx.fillStyle = `rgba(100, 255, 150, 0.5)`;
+                        ctx.fill();
+                    }
+                    if (this.anim % 4 === 0) {
+                        for (let sp=0; sp<3; sp++) {
+                            ctx.beginPath();
+                            ctx.moveTo(-40 + Math.random()*80, -20 + Math.random()*40);
+                            ctx.lineTo(-30 + Math.random()*60, -35 + Math.random()*50);
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "#ffff66";
+                            ctx.stroke();
+                        }
+                    }
+                }
+                if (this.active) {
+                    ctx.fillStyle = "#0f0";
+                    ctx.shadowBlur = 12;
+                    ctx.beginPath();
+                    ctx.arc(this.w/2 + 18, -45, 10, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        };
+
+        // ----- NAILS (magnetic particles) -----
+        let nails = [];
+        class Nail {
+            constructor() {
+                this.baseX = Math.random() * (typeof width !== 'undefined' ? width : 1200);
+                this.baseY = Math.random() * 400 + 100;
+                this.x = this.baseX; this.y = this.baseY;
+                this.floatPhase = Math.random() * Math.PI * 2;
+                this.vx = 0; this.vy = 0;
+                this.angle = Math.random() * 6.28;
+                this.w = 28; this.h = 5;
+                this.stuck = false;
+                this.stuckOffset = { x:0, y:0 };
+                this.floating = true;
+            }
+            update() {
+                if (this.stuck) {
+                    if (magnet.strength < 8) { this.stuck = false; this.floating = false; }
+                    else { this.x = magnet.x + this.stuckOffset.x; this.y = magnet.y + this.stuckOffset.y; this.vx = 0; this.vy = 0; return; }
+                }
+                if (this.floating && magnet.strength > 0) {
+                    this.x = this.baseX + Math.sin(time * 0.028 + this.floatPhase) * 20;
+                    this.y = this.baseY + Math.cos(time * 0.022 + this.floatPhase) * 15;
+                }
+                if (!this.stuck && magnet.strength > 0) {
+                    const dx = magnet.x - this.x, dy = magnet.y - this.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 420) {
+                        const force = (magnet.strength / 100) * (2800 / (dist * dist + 140));
+                        this.vx += (dx / dist) * force;
+                        this.vy += (dy / dist) * force;
+                        const targetAngle = Math.atan2(dy, dx);
+                        this.angle += (targetAngle - this.angle) * 0.12;
+                        if (dist < 130) this.floating = false;
+                    }
+                }
+                this.vx *= 0.93; this.vy *= 0.93;
+                if (magnet.strength < 15 || !this.stuck) { if (!this.floating) this.vy += 0.2; }
+                this.x += this.vx; this.y += this.vy;
+                if (this.y > height - 28) { this.y = height - 28; this.vy *= -0.45; this.vx *= 0.9; }
+                if (this.x < 20) this.x = 20;
+                if (this.x > width-20) this.x = width-20;
+                if (!this.stuck && magnet.strength > 8 && 
+                    Math.abs(this.x - magnet.x) < magnet.w/2 + 12 && Math.abs(this.y - magnet.y) < magnet.h/2 + 12) {
+                    this.stuck = true;
+                    this.stuckOffset = { x: this.x - magnet.x, y: this.y - magnet.y };
+                    this.floating = false;
+                }
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = "#bac6d9";
+                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+                ctx.fillStyle = "#6c7a8e";
+                ctx.fillRect(-this.w/2, -this.h/2 - 5, 4, this.h + 8);
+                ctx.restore();
+            }
+        }
+
+        // --- Drag & pointer logic (unified for touch/mouse/pen)---
+        let draggingItem = null;
+        let dragOffset = { x:0, y:0 };
+        let lastDragPos = { x:0, y:0 };
+        
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let x = (clientX - rect.left) * (canvas.width / rect.width);
+            let y = (clientY - rect.top) * (canvas.height / rect.height);
+            x = Math.min(width, Math.max(0, x));
+            y = Math.min(height, Math.max(0, y));
+            return { x, y };
+        }
+
+        function checkHit(obj, mx, my) {
+            if (obj === magnet) {
+                return (mx > obj.x - obj.w/2 && mx < obj.x + obj.w/2 && my > obj.y - obj.h/2 && my < obj.y + obj.h/2);
+            } else {
+                let currentY = obj.y;
+                if (!obj.isDragging && obj !== coilTool) currentY += Math.sin(time * 0.05) * 8;
+                let tolerance = (obj === coilTool) ? 70 : 55;
+                return (Math.abs(mx - obj.x) < tolerance && Math.abs(my - currentY) < tolerance);
+            }
+        }
+
+        function onPointerStart(e) {
+            e.preventDefault();
+            const pos = getPointerPos(e);
+            if (candle.visible && checkHit(candle, pos.x, pos.y)) draggingItem = candle;
+            else if (hammer.visible && checkHit(hammer, pos.x, pos.y)) draggingItem = hammer;
+            else if (coilTool.visible && checkHit(coilTool, pos.x, pos.y)) draggingItem = coilTool;
+            else if (checkHit(magnet, pos.x, pos.y)) draggingItem = magnet;
+            if (draggingItem) {
+                draggingItem.isDragging = true;
+                let objY = draggingItem.y;
+                if (draggingItem !== magnet && draggingItem !== coilTool) objY += Math.sin(time*0.05)*8;
+                dragOffset.x = pos.x - draggingItem.x;
+                dragOffset.y = pos.y - objY;
+                lastDragPos = pos;
+                pointerVelocity = 0;
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!draggingItem) {
+                const pos = getPointerPos(e);
+                const dx = pos.x - lastPointerPos.x;
+                const dy = pos.y - lastPointerPos.y;
+                pointerVelocity = Math.hypot(dx, dy);
+                lastPointerPos = pos;
+                return;
+            }
+            e.preventDefault();
+            const pos = getPointerPos(e);
+            const deltaX = pos.x - lastDragPos.x;
+            const deltaY = pos.y - lastDragPos.y;
+            const currentVel = Math.hypot(deltaX, deltaY);
+            draggingItem.x = Math.min(width - 20, Math.max(20, pos.x - dragOffset.x));
+            let newY = pos.y - dragOffset.y;
+            newY = Math.min(height - 40, Math.max(40, newY));
+            draggingItem.y = newY;
+            
+            // HAMMER IMPACT FIXED
+            if (draggingItem === hammer && hammer.visible && currentVel > 13 && hammerCooldown <= 0) {
+                const dist = Math.hypot(hammer.x - magnet.x, hammer.y - magnet.y);
+                if (dist < 110) {
+                    let impact = Math.min(20, currentVel * 0.85);
+                    magnet.strength = Math.max(0, magnet.strength - impact);
+                    magnet.x += (Math.random() - 0.5) * 14;
+                    magnet.y += (Math.random() - 0.5) * 10;
+                    statusText.innerText = `💥 HAMMER SMASH! -${Math.floor(impact)}% strength!`;
+                    hammer.justHit = true;
+                    hammerCooldown = 12;
+                    magnet.colorN = "#ff8866";
+                    magnet.colorS = "#88aaff";
+                    setTimeout(() => { if(magnet.colorN === "#ff8866") { magnet.colorN = "#e74c3c"; magnet.colorS = "#2980b9"; } }, 200);
+                }
+            }
+            lastDragPos = pos;
+            pointerVelocity = currentVel;
+        }
+
+        function onPointerEnd(e) {
+            if (draggingItem) draggingItem.isDragging = false;
+            draggingItem = null;
+            if (hammerCooldown > 0) setTimeout(() => { hammer.justHit = false; }, 150);
+        }
+
+        function attachGlobalEvents() {
+            canvas.addEventListener("mousedown", onPointerStart);
+            window.addEventListener("mousemove", onPointerMove);
+            window.addEventListener("mouseup", onPointerEnd);
+            canvas.addEventListener("touchstart", onPointerStart, { passive: false });
+            window.addEventListener("touchmove", onPointerMove, { passive: false });
+            window.addEventListener("touchend", onPointerEnd);
+            window.addEventListener("touchcancel", onPointerEnd);
+        }
+
+        // --- UI Interactions ---
+        function toggleTool(tool) {
+            if (tool === 'candle') {
+                candle.visible = !candle.visible;
+                if (candle.visible) { candle.x = width*0.2; candle.y = height*0.7; }
+                document.getElementById('btn-candle').classList.toggle('active');
+                statusText.innerText = candle.visible ? "Candle: heat near magnet → weakens magnetism." : "Candle removed.";
+            }
+            if (tool === 'hammer') {
+                hammer.visible = !hammer.visible;
+                if (hammer.visible) { hammer.x = width*0.28; hammer.y = height*0.72; }
+                document.getElementById('btn-hammer').classList.toggle('active');
+                statusText.innerText = hammer.visible ? "HAMMER: swing FAST near magnet to smash & demagnetize!" : "Hammer removed.";
+            }
+            if (tool === 'coil') {
+                coilTool.visible = !coilTool.visible;
+                if (coilTool.visible) { coilTool.x = width*0.25; coilTool.y = height*0.7; coilTool.active = false; switchEl.classList.remove('on');}
+                document.getElementById('btn-coil').classList.toggle('active');
+                statusText.innerText = coilTool.visible ? "AC Coil: toggle left switch, drag near magnet → strong demagnetization." : "Coil removed.";
+            }
+        }
+
+        function toggleCircuitSwitch() {
+            if (!coilTool.visible) { statusText.innerText = "Place AC Coil first!"; return; }
+            coilTool.active = !coilTool.active;
+            switchEl.classList.toggle('on', coilTool.active);
+            statusText.innerText = coilTool.active ? "⚡ AC Coil ACTIVE! Demagnetizing field." : "Coil OFF.";
+        }
+
+        function resetSimulation() {
+            magnet.strength = 100; magnet.temp = 0; magnet.x = width/2; magnet.y = height/2;
+            magnet.colorN = "#e74c3c"; magnet.colorS = "#2980b9";
+            candle.visible = false; hammer.visible = false; coilTool.visible = false; coilTool.active = false;
+            switchEl.classList.remove('on');
+            document.getElementById('btn-candle').classList.remove('active');
+            document.getElementById('btn-hammer').classList.remove('active');
+            document.getElementById('btn-coil').classList.remove('active');
+            nails = [];
+            for (let i=0; i<28; i++) nails.push(new Nail());
+            statusText.innerText = "Lab reset. Magnet fully magnetized.";
+            draggingItem = null;
+            hammerCooldown = 0;
+            hammer.justHit = false;
+        }
+
+        // --- Update effects (Candle heat + Coil demag)---
+        function updateEffects() {
+            if (candle.visible) {
+                let cy = candle.y + (candle.isDragging ? 0 : Math.sin(time*0.05)*8);
+                if (Math.hypot(candle.x - magnet.x, cy - 40 - magnet.y) < 85) {
+                    magnet.temp += 0.9;
+                    magnet.strength -= 0.5;
+                    statusText.innerText = "🔥 Candle heating: domains randomizing!";
+                }
+            }
+            if (coilTool.visible && coilTool.active) {
+                let dist = Math.hypot(coilTool.x - magnet.x, coilTool.y - magnet.y);
+                if (dist < 135) {
+                    magnet.strength -= 0.95;
+                    if (time % 5 === 0) { magnet.x += (Math.random() - 0.5)*4; magnet.y += (Math.random() - 0.5)*3; }
+                    magnet.colorN = "#ffffaa"; magnet.colorS = "#aaffff";
+                    statusText.innerText = "🌀 AC FIELD: Strong demagnetization!";
+                } else if (dist < 220) {
+                    magnet.strength -= 0.3;
+                    statusText.innerText = "⚡ AC field affecting domains...";
+                }
+            }
+            if (hammerCooldown > 0) hammerCooldown--;
+            else hammer.justHit = false;
+        }
+
+        // --- Resize & canvas handling ---
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            magnet.x = Math.min(width-60, Math.max(60, magnet.x || width/2));
+            magnet.y = Math.min(height-60, Math.max(60, magnet.y || height/2));
+            if (nails.length === 0) { for (let i=0;i<28;i++) nails.push(new Nail()); }
+            else { nails.forEach(n => { if (n.baseX > width) n.baseX = width-40; if (n.baseY > height-60) n.baseY = height-80; }); }
+        }
+
+        function updateNails() { for (let n of nails) n.update(); }
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            nails.forEach(n => n.draw(ctx));
+            magnet.draw(ctx);
+            candle.draw(ctx);
+            hammer.draw(ctx);
+            coilTool.draw(ctx);
+        }
+
+        function animate() {
+            time++;
+            magnet.update();
+            updateNails();
+            updateEffects();
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        function init() {
+            resizeCanvas();
+            attachGlobalEvents();
+            resetSimulation();
+            window.addEventListener('resize', () => { resizeCanvas(); });
+            document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+                btn.addEventListener('click', (e) => { e.stopPropagation(); toggleTool(btn.dataset.tool); });
+            });
+            document.getElementById('reset-btn').addEventListener('click', () => resetSimulation());
+            switchEl.addEventListener('click', (e) => { e.stopPropagation(); toggleCircuitSwitch(); });
+            animate();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>

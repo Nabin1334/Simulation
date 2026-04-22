@@ -1,0 +1,1682 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Anomalous Expansion of Water — Improved</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /*
+ ╔══════════════════════════════════════════════════════════════╗
+ ║  CHANGED LINE  1  (css):  body background #07101c → #e8f0f7 ║
+ ║  CHANGED LINE  2  (css):  body color #e4eef8 → unchanged     ║
+ ║  CHANGED LINE  3  (css):  .view background #010810 → #c9dcea ║
+ ╚══════════════════════════════════════════════════════════════╝
+*/
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #e8f0f7; /* CHANGED LINE 1 – was #07101c (near-black) → light lab blue-gray */
+        font-family: "Inter", sans-serif;
+        color: #e4eef8;
+      }
+      .app {
+        display: flex;
+        height: 100vh;
+      }
+
+      .panel {
+        width: 300px;
+        flex-shrink: 0;
+        background: #0b1828;
+        border-right: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .pscroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .pscroll::-webkit-scrollbar {
+        width: 3px;
+      }
+      .pscroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+      }
+
+      .badge {
+        font-size: 0.58rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+      }
+      .title {
+        font-size: 1.08rem;
+        font-weight: 800;
+        line-height: 1.3;
+        margin-top: 3px;
+      }
+      .title span {
+        color: #38bdf8;
+      }
+      .subtitle {
+        font-size: 0.68rem;
+        color: rgba(255, 255, 255, 0.28);
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      .temp-card {
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .t-label {
+        font-size: 0.58rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+        margin-bottom: 5px;
+      }
+      .t-num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 3.4rem;
+        font-weight: 600;
+        line-height: 1;
+        transition: color 0.4s;
+      }
+      .t-deg {
+        font-size: 1.2rem;
+        opacity: 0.4;
+        font-weight: 400;
+      }
+      .phase-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        border: 1.5px solid;
+        transition: all 0.4s;
+        width: fit-content;
+      }
+
+      .slabel {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      input[type="range"] {
+        width: 100%;
+        margin: 8px 0 0;
+        background: transparent;
+        -webkit-appearance: none;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #fff;
+        cursor: grab;
+        box-shadow:
+          0 0 0 3px rgba(255, 255, 255, 0.16),
+          0 3px 10px rgba(0, 0, 0, 0.5);
+        transition: transform 0.1s;
+        margin-top: -10px;
+      }
+      input[type="range"]:active::-webkit-slider-thumb {
+        transform: scale(1.2);
+        cursor: grabbing;
+      }
+      .marks {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+      }
+      .mk {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.55rem;
+        color: rgba(255, 255, 255, 0.28);
+      }
+      .mk.hi {
+        color: rgba(56, 189, 248, 0.7);
+        font-weight: 600;
+      }
+
+      .burner-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 13px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        background: rgba(255, 255, 255, 0.03);
+        font-size: 0.76rem;
+        font-weight: 700;
+        transition: all 0.4s;
+      }
+      .burner-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #334155;
+        transition: background 0.4s;
+        flex-shrink: 0;
+      }
+
+      .sgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+      .scard {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 9px;
+        padding: 10px 12px;
+      }
+      .sc-l {
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: rgba(255, 255, 255, 0.32);
+        margin-bottom: 3px;
+      }
+      .sc-v {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: color 0.35s;
+      }
+      .sc-u {
+        font-size: 0.55rem;
+        color: rgba(255, 255, 255, 0.25);
+        margin-top: 2px;
+      }
+
+      .fact {
+        background: rgba(56, 189, 248, 0.06);
+        border: 1px solid rgba(56, 189, 248, 0.16);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 0.72rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.52);
+        transition:
+          background 0.4s,
+          border-color 0.4s;
+      }
+
+      .etitle {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.28);
+      }
+      .ecards {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .ecard {
+        border-radius: 9px;
+        padding: 10px 12px 10px 13px;
+        border: 1.5px solid rgba(255, 255, 255, 0.06);
+        border-left: 3px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+        opacity: 0.28;
+        transition: all 0.4s ease;
+      }
+      .ecard.on {
+        opacity: 1;
+      }
+      .ecard.on.cice {
+        background: rgba(147, 197, 253, 0.08);
+        border-color: rgba(147, 197, 253, 0.22);
+        border-left-color: #93c5fd;
+      }
+      .ecard.on.cblu {
+        background: rgba(56, 189, 248, 0.08);
+        border-color: rgba(56, 189, 248, 0.22);
+        border-left-color: #38bdf8;
+      }
+      .ecard.on.cgld {
+        background: rgba(251, 191, 36, 0.08);
+        border-color: rgba(251, 191, 36, 0.22);
+        border-left-color: #fbbf24;
+      }
+      .ecard.on.cred {
+        background: rgba(248, 113, 113, 0.08);
+        border-color: rgba(248, 113, 113, 0.22);
+        border-left-color: #f87171;
+      }
+      .ecard.on.cgrn {
+        background: rgba(52, 211, 153, 0.08);
+        border-color: rgba(52, 211, 153, 0.22);
+        border-left-color: #34d399;
+      }
+      .ecard.on.cpur {
+        background: rgba(167, 139, 250, 0.08);
+        border-color: rgba(167, 139, 250, 0.22);
+        border-left-color: #a78bfa;
+      }
+      .ehead {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 4px;
+      }
+      .eico {
+        font-size: 0.95rem;
+      }
+      .enm {
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      .edsc {
+        font-size: 0.67rem;
+        color: rgba(255, 255, 255, 0.45);
+        line-height: 1.5;
+      }
+
+      /* CHANGED LINE 3 – .view background: #010810 (pitch black) → #c9dcea (light lab blue) */
+      .view {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #c9dcea;
+      }
+      #c {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .ov {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* CHANGED LINE 4 – tbar gradient: rgba(1,8,16,...) → rgba(200,220,235,...) for light bg */
+      .tbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 13px 22px;
+        background: linear-gradient(
+          to bottom,
+          rgba(200, 220, 235, 0.9) 0%,
+          transparent 100%
+        ); /* CHANGED LINE 4 */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* CHANGED LINE 5 – tbar text colors: white → dark for readability on light background */
+      .tbar-ph {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        transition: color 0.4s;
+        color: #1a3a5c;
+      } /* CHANGED LINE 5 – was inheriting white */
+      .tbar-d {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        color: #2a4a6c;
+        transition: color 0.4s;
+      } /* CHANGED LINE 5b – was rgba(255,255,255,.32) */
+
+      .fl {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(
+          240,
+          248,
+          255,
+          0.9
+        ); /* CHANGED LINE 6 – was rgba(1,8,16,.82) dark → light */
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(100, 160, 220, 0.35);
+        border-left: 2.5px solid;
+        padding: 5px 12px;
+        border-radius: 7px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.64rem;
+        color: #1a2a3c; /* CHANGED LINE 6b – text: white → dark */
+        opacity: 0;
+        transition: opacity 0.5s;
+        white-space: nowrap;
+      }
+      .fl.v {
+        opacity: 1;
+      }
+      #fl-ice {
+        top: 18%;
+        right: 22px;
+        border-left-color: #93c5fd;
+      }
+      #fl-cold {
+        top: 37%;
+        right: 22px;
+        border-left-color: #a78bfa;
+      }
+      #fl-4c {
+        top: 54%;
+        right: 22px;
+        border-left-color: #fbbf24;
+      }
+      #fl-bub {
+        top: 43%;
+        right: 22px;
+        border-left-color: #34d399;
+      }
+      #fl-stm {
+        top: 12%;
+        right: 22px;
+        border-left-color: #f87171;
+      }
+
+      /* CHANGED LINE 7 – bbar gradient: dark → light for lab bg */
+      .bbar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px 24px 16px;
+        background: linear-gradient(
+          to top,
+          rgba(200, 220, 238, 0.92) 0%,
+          transparent 100%
+        ); /* CHANGED LINE 7 */
+        text-align: center;
+      }
+      .bfact {
+        font-size: 0.72rem;
+        color: #2a4060;
+        line-height: 1.65;
+        max-width: 520px;
+        margin: 0 auto;
+      } /* CHANGED LINE 8 – text: white-40% → dark */
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <div class="pscroll">
+          <div>
+            <div class="badge">Class 10 · Physics Lab</div>
+            <div class="title">
+              Anomalous Expansion<br />of <span>Water</span>
+            </div>
+            <div class="subtitle">Realistic Beaker &amp; Lab Environment</div>
+          </div>
+          <div class="temp-card">
+            <div class="t-label">Water Temperature</div>
+            <div class="t-num" id="tnum">20.0<span class="t-deg">°C</span></div>
+            <div class="phase-pill" id="ppill">💧 Liquid Water</div>
+          </div>
+          <div>
+            <div class="slabel">Set Temperature</div>
+            <input
+              type="range"
+              id="sl"
+              min="-15"
+              max="115"
+              step="0.5"
+              value="20"
+            />
+            <div class="marks">
+              <span class="mk">−15°C</span><span class="mk hi">0°C</span
+              ><span class="mk hi">4°C</span><span class="mk">50°C</span
+              ><span class="mk hi">100°C</span>
+            </div>
+          </div>
+          <div class="burner-box" id="bbox">
+            <div class="burner-dot" id="bdot"></div>
+            <span id="btxt">Stable — no heat change</span>
+          </div>
+          <div>
+            <div class="slabel" style="margin-bottom: 7px">
+              Physical Properties
+            </div>
+            <div class="sgrid">
+              <div class="scard">
+                <div class="sc-l">Density</div>
+                <div class="sc-v" id="sden">0.99821</div>
+                <div class="sc-u">g/cm³</div>
+              </div>
+              <div class="scard">
+                <div class="sc-l">Volume</div>
+                <div class="sc-v" id="svol">1.00180</div>
+                <div class="sc-u">rel. to 4°C</div>
+              </div>
+              <div class="scard">
+                <div class="sc-l">Expansion</div>
+                <div class="sc-v" id="sexp">+0.18%</div>
+                <div class="sc-u">from 4°C</div>
+              </div>
+              <div class="scard">
+                <div class="sc-l">State</div>
+                <div class="sc-v" id="ssta">Liquid</div>
+                <div class="sc-u">phase</div>
+              </div>
+            </div>
+          </div>
+          <div class="fact" id="fact">
+            Liquid water at 20°C. Density decreasing slightly as temperature
+            rises — standard thermal expansion.
+          </div>
+          <div>
+            <div class="etitle" style="margin-bottom: 7px">
+              Effects of Anomalous Expansion
+            </div>
+            <div class="ecards">
+              <div class="ecard" id="e1">
+                <div class="ehead">
+                  <span class="eico">🧊</span
+                  ><span class="enm">Ice Floats on Water</span>
+                </div>
+                <div class="edsc">
+                  Freezing expands water ~9%. Ice density = 0.917 g/cm³, less
+                  than liquid water. So ice floats, insulating lakes.
+                </div>
+              </div>
+              <div class="ecard" id="e2">
+                <div class="ehead">
+                  <span class="eico">🐟</span
+                  ><span class="enm">Aquatic Life Survives Winter</span>
+                </div>
+                <div class="edsc">
+                  Densest water (4°C) sinks to lake bottom. Ice forms on top.
+                  Fish survive in warm layer below ice all winter.
+                </div>
+              </div>
+              <div class="ecard" id="e3">
+                <div class="ehead">
+                  <span class="eico">⭐</span
+                  ><span class="enm">Maximum Density at 4°C</span>
+                </div>
+                <div class="edsc">
+                  Water is densest at exactly 4°C. Both cooling below AND
+                  heating above cause expansion — unique to water!
+                </div>
+              </div>
+              <div class="ecard" id="e4">
+                <div class="ehead">
+                  <span class="eico">💥</span
+                  ><span class="enm">Burst Water Pipes in Winter</span>
+                </div>
+                <div class="edsc">
+                  Freezing water expands with ~25,000 psi force, bursting metal
+                  and plastic pipes in cold climates.
+                </div>
+              </div>
+              <div class="ecard" id="e5">
+                <div class="ehead">
+                  <span class="eico">🗿</span
+                  ><span class="enm">Weathering of Rocks</span>
+                </div>
+                <div class="edsc">
+                  Water in rock cracks freezes, expands, splits the rock.
+                  Repeated freeze-thaw cycles shape mountains into soil.
+                </div>
+              </div>
+              <div class="ecard" id="e6">
+                <div class="ehead">
+                  <span class="eico">♨️</span
+                  ><span class="enm">Boiling &amp; Steam Power</span>
+                </div>
+                <div class="edsc">
+                  At 100°C water becomes steam, expanding ~1700×. Latent heat =
+                  2260 J/g. Powers steam engines &amp; turbines.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="view">
+        <canvas id="c"></canvas>
+        <div class="ov">
+          <div class="tbar">
+            <div class="tbar-ph" id="ophase">Liquid Water</div>
+            <div class="tbar-d" id="oden">ρ = 0.99821 g/cm³</div>
+          </div>
+          <div class="fl" id="fl-ice">
+            🧊 Ice layer — density 0.917 g/cm³ — floats!
+          </div>
+          <div class="fl" id="fl-cold">
+            ❄️ Anomalous zone: cooling EXPANDS water (0–4°C)
+          </div>
+          <div class="fl" id="fl-4c">⭐ 4°C — water at MAXIMUM density</div>
+          <div class="fl" id="fl-bub">
+            🫧 Nucleate boiling — bubbles rise from the bottom
+          </div>
+          <div class="fl" id="fl-stm">
+            ♨️ Steam — water converts to gas phase
+          </div>
+          <div class="bbar">
+            <div class="bfact" id="bfact">
+              Move the slider to change temperature and observe the effects.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      /*
+ ╔══════════════════════════════════════════════════════════════════════╗
+ ║  JS CHANGES SUMMARY                                                  ║
+ ║  CHANGED LINE  9  : scene.background → light lab blue-gray          ║
+ ║  CHANGED LINE 10  : AmbientLight color → bright lab white           ║
+ ║  CHANGED LINE 11  : Sun DirectionalLight → adjusted for daylight    ║
+ ║  CHANGED LINE 12  : fill1 light → warmer lab fluorescent            ║
+ ║  CHANGED LINE 13  : ADD lab room backdrop plane (wall + floor)      ║
+ ║  CHANGED LINE 14  : Beaker outer glass opacity 0.18 → 0.38 + color ║
+ ║  CHANGED LINE 15  : Beaker inner glass opacity 0.15 → 0.25         ║
+ ║  CHANGED LINE 16  : Beaker bottom opacity 0.2  → 0.32              ║
+ ║  CHANGED LINE 17  : Rim material: more reflective metalness         ║
+ ║  CHANGED LINE 18  : ADD vertical glass highlight strip on beaker    ║
+ ║  CHANGED LINE 19  : ADD horizontal glass band / label area          ║
+ ║  CHANGED LINE 20  : background lerp targets → lighter lab tones     ║
+ ╚══════════════════════════════════════════════════════════════════════╝
+*/
+      (function () {
+        // --- Physics (unchanged) ---
+        function density(T) {
+          if (T <= 0) return 0.9168;
+          const t = Math.min(Math.max(T, 0), 100);
+          return (
+            (999.842594 +
+              6.793952e-2 * t -
+              9.09529e-3 * t * t +
+              1.001685e-4 * t * t * t -
+              1.120083e-6 * Math.pow(t, 4) +
+              6.536332e-9 * Math.pow(t, 5)) /
+            1000
+          );
+        }
+        const D4 = density(4);
+
+        // --- Setup ---
+        const canvas = document.getElementById("c");
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true,
+          powerPreference: "high-performance",
+        });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1; /* CHANGED LINE 9a – was 1.3, reduced for lighter scene */
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        const scene = new THREE.Scene();
+        /* CHANGED LINE 9 – scene background 0x030a14 (near-black) → 0xbdd0e2 (light sky-lab blue) */
+        scene.background = new THREE.Color(0xbdd0e2);
+        scene.fog = new THREE.Fog(
+          0xbdd0e2,
+          35,
+          80,
+        ); /* CHANGED LINE 9b – ADD soft depth fog matching bg */
+
+        const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 200);
+        camera.position.set(0, 5.2, 24);
+        camera.lookAt(0, 2.5, 0);
+
+        function resize() {
+          const w = canvas.clientWidth,
+            h = canvas.clientHeight;
+          if (
+            renderer.domElement.width === w &&
+            renderer.domElement.height === h
+          )
+            return;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        new ResizeObserver(resize).observe(canvas);
+        resize();
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 10 – Lighting: lab environment
+        // ─────────────────────────────────────────────
+        /* CHANGED LINE 10 – Ambient: 0x1e2f4a (dark blue) → 0xd0dde8 (bright diffuse lab light) */
+        scene.add(new THREE.AmbientLight(0xd0dde8, 2.2));
+
+        /* CHANGED LINE 11 – Sun: harsher lab overhead light from above */
+        const sun = new THREE.DirectionalLight(
+          0xfff8ee,
+          2.8,
+        ); /* was 0xfff2d6 intensity 3.2 */
+        sun.position.set(8, 22, 12);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        Object.assign(sun.shadow.camera, {
+          left: -14,
+          right: 14,
+          top: 14,
+          bottom: -14,
+          near: 5,
+          far: 40,
+        });
+        sun.shadow.bias = -0.0008;
+        sun.shadow.normalBias = 0.02;
+        scene.add(sun);
+
+        /* CHANGED LINE 12 – fill1: cool white fluorescent lab overhead fill */
+        const fill1 = new THREE.DirectionalLight(
+          0xe8f2ff,
+          1.4,
+        ); /* was 0xaaccff 0.9 */
+        fill1.position.set(-8, 12, -6);
+        scene.add(fill1);
+
+        const fill2 = new THREE.PointLight(
+          0x8ab0cc,
+          0.4,
+          30,
+        ); /* CHANGED: was 0x1e3a5f */
+        fill2.position.set(0, -6, 6);
+        scene.add(fill2);
+
+        const rim = new THREE.DirectionalLight(
+          0xffffff,
+          1.0,
+        ); /* CHANGED: brighter white rim */
+        rim.position.set(0, 5, -16);
+        scene.add(rim);
+
+        const wglow = new THREE.PointLight(
+          0x4ab4f8,
+          1.6,
+          20,
+        ); /* slightly softer */
+        wglow.position.set(0, 0, 0);
+        scene.add(wglow);
+
+        const heatL = new THREE.PointLight(0xff5500, 0, 14);
+        heatL.position.set(0, -4.8, 0);
+        scene.add(heatL);
+        const coldL = new THREE.PointLight(0x2266ff, 0, 14);
+        coldL.position.set(0, -4.8, 0);
+        scene.add(coldL);
+        const specLight = new THREE.PointLight(
+          0xffffff,
+          1.2,
+          20,
+        ); /* CHANGED: brighter spec for glass */
+        specLight.position.set(4, 10, 8);
+        scene.add(specLight);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 13 – ADD lab room backdrop
+        // ─────────────────────────────────────────────
+        /* CHANGED LINE 13 – ADD: lab wall background plane (was open void) */
+        const wallMat = new THREE.MeshStandardMaterial({
+          color: 0xdce8f0,
+          roughness: 0.85,
+          metalness: 0.0,
+          envMapIntensity: 0.2,
+        });
+        const wall = new THREE.Mesh(new THREE.PlaneGeometry(80, 40), wallMat);
+        wall.position.set(0, 5, -18);
+        wall.receiveShadow = true;
+        scene.add(wall);
+
+        /* CHANGED LINE 13b – ADD: lab ceiling tiles suggestion */
+        const ceilMat = new THREE.MeshStandardMaterial({
+          color: 0xf0f5f8,
+          roughness: 0.9,
+        });
+        const ceil = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), ceilMat);
+        ceil.rotation.x = Math.PI / 2;
+        ceil.position.set(0, 20, 0);
+        scene.add(ceil);
+
+        /* CHANGED LINE 13c – ADD: lab floor (light tile effect) */
+        const floorMat = new THREE.MeshStandardMaterial({
+          color: 0xc8d8e0,
+          roughness: 0.6,
+          metalness: 0.05,
+        });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.set(0, -8.5, 0);
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        /* CHANGED LINE 13d – ADD: lab bench / table (richer wood color visible on light bg) */
+        const tableMat = new THREE.MeshStandardMaterial({
+          color: 0x6b4a2a,
+          roughness: 0.72,
+          metalness: 0.02,
+        });
+        const table = new THREE.Mesh(
+          new THREE.BoxGeometry(30, 1.2, 16),
+          tableMat,
+        );
+        table.position.set(0, -7.8, 0);
+        table.receiveShadow = true;
+        table.castShadow = true;
+        scene.add(table);
+
+        // --- Lab Stand (unchanged geometry, adjusted colors for light bg) ---
+        const legMat = new THREE.MeshStandardMaterial({
+          color: 0x7a9ab8,
+          roughness: 0.28,
+          metalness: 0.92,
+        });
+        for (let i = 0; i < 3; i++) {
+          const angle = (i / 3) * Math.PI * 2;
+          const leg = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.16, 0.22, 7.2, 12),
+            legMat,
+          );
+          leg.position.set(
+            Math.cos(angle) * 3.8,
+            -4.5 + 0.6,
+            Math.sin(angle) * 3.8,
+          );
+          leg.rotation.z = Math.cos(angle) * 0.18;
+          leg.rotation.x = Math.sin(angle) * 0.18;
+          leg.castShadow = true;
+          leg.receiveShadow = true;
+          scene.add(leg);
+        }
+
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: 0xb8c8d8,
+          roughness: 0.22,
+          metalness: 0.95,
+        });
+        const ringMesh = new THREE.Mesh(
+          new THREE.TorusGeometry(4.6, 0.15, 16, 64),
+          ringMat,
+        );
+        ringMesh.rotation.x = Math.PI / 2;
+        ringMesh.position.y = -1.7;
+        ringMesh.castShadow = true;
+        ringMesh.receiveShadow = true;
+        scene.add(ringMesh);
+
+        const bplateMat = new THREE.MeshStandardMaterial({
+          color: 0x6080a0,
+          roughness: 0.35,
+          metalness: 0.85,
+        });
+        const bplate = new THREE.Mesh(
+          new THREE.CylinderGeometry(4.2, 4.6, 0.8, 32),
+          bplateMat,
+        );
+        bplate.position.y = -5.5;
+        bplate.castShadow = true;
+        bplate.receiveShadow = true;
+        scene.add(bplate);
+
+        const hpadMat = new THREE.MeshStandardMaterial({
+          color: 0x282828,
+          roughness: 0.7,
+          metalness: 0.2,
+          emissive: 0x000000,
+        });
+        const hpad = new THREE.Mesh(
+          new THREE.CylinderGeometry(4.0, 4.0, 0.4, 32),
+          hpadMat,
+        );
+        hpad.position.y = -5.0;
+        hpad.castShadow = true;
+        hpad.receiveShadow = true;
+        scene.add(hpad);
+
+        // --- Beaker (Realistic Glass) ---
+        const BR = 3.9,
+          BH = 12.5,
+          BBOT = -4.8;
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 14 – Beaker outer glass
+        //  Key change: opacity 0.18 → 0.38, color tinted
+        //  clearer glass appearance visible on light bg
+        // ─────────────────────────────────────────────
+        const glassOuterMat = new THREE.MeshPhysicalMaterial({
+          color: 0xd8eeff /* CHANGED LINE 14a – was 0xe0f0ff, slightly more blue-tinted glass */,
+          transmission: 0.88 /* CHANGED LINE 14b – was 0.98; more visible glass body */,
+          roughness: 0.04 /* CHANGED LINE 14c – was 0.008; slight surface texture */,
+          metalness: 0,
+          ior: 1.52,
+          thickness: 4.0 /* CHANGED LINE 14d – was 3.0; thicker glass for refraction */,
+          transparent: true,
+          opacity: 0.38 /* CHANGED LINE 14e – was 0.18 (invisible) → 0.38 (visible glass) */,
+          side: THREE.DoubleSide,
+          clearcoat: 1.0,
+          clearcoatRoughness: 0.05 /* CHANGED LINE 14f – was 0.1; smoother clearcoat = more shine */,
+        });
+        const bwall = new THREE.Mesh(
+          new THREE.CylinderGeometry(BR, BR, BH, 80, 1, true),
+          glassOuterMat,
+        );
+        bwall.position.y = BBOT + BH / 2;
+        bwall.castShadow = true;
+        bwall.receiveShadow = true;
+        bwall.renderOrder = 15;
+        scene.add(bwall);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 15 – Inner glass layer
+        // ─────────────────────────────────────────────
+        const glassInnerMat = new THREE.MeshPhysicalMaterial({
+          color: 0xeef6ff,
+          transmission: 0.92,
+          roughness: 0.02,
+          ior: 1.34,
+          thickness: 2.5 /* CHANGED LINE 15a – was 2.0 */,
+          transparent: true,
+          opacity: 0.25 /* CHANGED LINE 15b – was 0.15 → 0.25 more visible */,
+          side: THREE.BackSide,
+        });
+        const binner = new THREE.Mesh(
+          new THREE.CylinderGeometry(
+            BR - 0.15,
+            BR - 0.15,
+            BH - 0.4,
+            80,
+            1,
+            true,
+          ),
+          glassInnerMat,
+        );
+        binner.position.y = BBOT + BH / 2;
+        binner.renderOrder = 16;
+        scene.add(binner);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 16 – Beaker bottom disc
+        // ─────────────────────────────────────────────
+        const bbaseMat = new THREE.MeshPhysicalMaterial({
+          color: 0xd4ecff,
+          transmission: 0.85 /* CHANGED LINE 16a – was 0.98 */,
+          roughness: 0.03,
+          ior: 1.52,
+          thickness: 3.0 /* CHANGED LINE 16b – was 2.0; thicker base */,
+          transparent: true,
+          opacity: 0.42 /* CHANGED LINE 16c – was 0.2 → 0.42 visible base */,
+          side: THREE.DoubleSide,
+        });
+        const bbase = new THREE.Mesh(
+          new THREE.CircleGeometry(BR - 0.05, 64),
+          bbaseMat,
+        );
+        bbase.rotation.x = -Math.PI / 2;
+        bbase.position.y = BBOT;
+        bbase.renderOrder = 14;
+        scene.add(bbase);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 17 – Rim: shinier metalness
+        // ─────────────────────────────────────────────
+        /* CHANGED LINE 17 – rim: darker more metallic glass rim for realism */
+        const rimMat = new THREE.MeshStandardMaterial({
+          color: 0x88aacc /* CHANGED: was 0xaac0d0 */,
+          roughness: 0.15 /* CHANGED: was 0.25; shinier */,
+          metalness: 0.35 /* CHANGED: was 0.2; more metallic sheen */,
+          emissive: 0x091520,
+        });
+        const brim = new THREE.Mesh(
+          new THREE.TorusGeometry(BR, 0.2, 16, 80),
+          rimMat,
+        );
+        brim.rotation.x = Math.PI / 2;
+        brim.position.y = BBOT + BH;
+        brim.castShadow = true;
+        brim.receiveShadow = true;
+        scene.add(brim);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 18 – ADD glass highlight strip
+        //  Simulates specular reflection on left edge
+        // ─────────────────────────────────────────────
+        /* CHANGED LINE 18 – ADD: vertical bright highlight strip on beaker left edge (glass shine) */
+        const hlMat = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.28,
+          side: THREE.FrontSide,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
+        const hlGeo = new THREE.CylinderGeometry(
+          BR + 0.01,
+          BR + 0.01,
+          BH * 0.85,
+          80,
+          1,
+          true,
+          -Math.PI * 0.06,
+          Math.PI * 0.1,
+        ); /* arc section = highlight stripe */
+        const hlMesh = new THREE.Mesh(hlGeo, hlMat);
+        hlMesh.position.y = BBOT + BH / 2;
+        hlMesh.rotation.y = -0.4; /* rotated to face light source */
+        hlMesh.renderOrder = 20;
+        scene.add(hlMesh);
+
+        /* CHANGED LINE 18b – ADD: secondary thinner highlight for extra realism */
+        const hl2Mat = new THREE.MeshBasicMaterial({
+          color: 0xe8f4ff,
+          transparent: true,
+          opacity: 0.18,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
+        const hl2Geo = new THREE.CylinderGeometry(
+          BR + 0.02,
+          BR + 0.02,
+          BH * 0.6,
+          80,
+          1,
+          true,
+          Math.PI * 0.55,
+          Math.PI * 0.05,
+        );
+        const hl2Mesh = new THREE.Mesh(hl2Geo, hl2Mat);
+        hl2Mesh.position.y = BBOT + BH / 2 + 0.5;
+        hl2Mesh.renderOrder = 21;
+        scene.add(hl2Mesh);
+
+        // ─────────────────────────────────────────────
+        //  CHANGED LINE 19 – ADD beaker label band
+        //  White frosted band where label goes on real beakers
+        // ─────────────────────────────────────────────
+        /* CHANGED LINE 19 – ADD: frosted white label band (standard on real lab beakers) */
+        const labelBandMat = new THREE.MeshStandardMaterial({
+          color: 0xf4f9ff,
+          roughness: 0.8,
+          metalness: 0.0,
+          transparent: true,
+          opacity: 0.22,
+          side: THREE.DoubleSide,
+        });
+        const labelBandGeo = new THREE.CylinderGeometry(
+          BR + 0.05,
+          BR + 0.05,
+          2.2,
+          80,
+          1,
+          true,
+        );
+        const labelBand = new THREE.Mesh(labelBandGeo, labelBandMat);
+        labelBand.position.y = BBOT + BH * 0.35;
+        labelBand.renderOrder = 17;
+        scene.add(labelBand);
+
+        // Measurement lines (unchanged geometry)
+        const lineMat = new THREE.MeshStandardMaterial({
+          color: 0x7799bb,
+          emissive: 0x0a1a2a,
+        });
+        for (let i = 1; i <= 6; i++) {
+          const lineY = BBOT + i * 1.8;
+          if (lineY < BBOT + BH - 0.5) {
+            const line = new THREE.Mesh(
+              new THREE.TorusGeometry(BR + 0.02, 0.035, 8, 80, Math.PI * 0.03),
+              lineMat,
+            );
+            line.rotation.x = Math.PI / 2;
+            line.position.y = lineY;
+            line.scale.set(1, 0.02, 1);
+            line.castShadow = true;
+            scene.add(line);
+          }
+        }
+
+        // --- Water Volume (unchanged) ---
+        const wbGeo = new THREE.CylinderGeometry(BR - 0.4, BR - 0.4, 1, 64);
+        wbGeo.translate(0, 0.5, 0);
+        const wbMat = new THREE.MeshPhysicalMaterial({
+          color: 0x3a8fe0,
+          emissive: 0x001122,
+          transmission: 0.92,
+          roughness: 0.02,
+          metalness: 0,
+          thickness: 5,
+          ior: 1.33,
+          transparent: true,
+          opacity: 0.55,
+          attenuationColor: new THREE.Color(0x2266aa),
+          attenuationDistance: 4.0,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const wbM = new THREE.Mesh(wbGeo, wbMat);
+        wbM.renderOrder = 3;
+        scene.add(wbM);
+
+        // Water surface shader (unchanged)
+        const VS = `
+    uniform float uT; uniform float uAmp; varying vec3 vP; varying vec3 vN; varying vec2 vUv;
+    vec3 gw(vec2 xz,vec2 d,float a,float k,float sp,float ph){return vec3(0.,a*sin(k*dot(d,xz)+sp*uT+ph),0.);}
+    void main(){
+      vUv=uv; vec3 p=position;
+      p+=gw(p.xz,normalize(vec2(1.,.5)),.22*uAmp,0.9,1.3,0.0);
+      p+=gw(p.xz,normalize(vec2(-.7,.8)),.16*uAmp,1.4,1.7,1.2);
+      p+=gw(p.xz,normalize(vec2(.6,-.6)),.12*uAmp,2.3,2.1,2.5);
+      p+=gw(p.xz,normalize(vec2(.9,.3)),.08*uAmp,3.5,3.0,1.8);
+      p+=gw(p.xz,normalize(vec2(-.4,-.9)),.05*uAmp,5.2,4.0,3.3);
+      vP=(modelMatrix*vec4(p,1.)).xyz;
+      float e=0.1; vec3 px=position+vec3(e,0,0);
+      px+=gw(px.xz,normalize(vec2(1.,.5)),.22*uAmp,0.9,1.3,0.0);
+      px+=gw(px.xz,normalize(vec2(-.7,.8)),.16*uAmp,1.4,1.7,1.2);
+      vec3 pz=position+vec3(0,0,e);
+      pz+=gw(pz.xz,normalize(vec2(1.,.5)),.22*uAmp,0.9,1.3,0.0);
+      pz+=gw(pz.xz,normalize(vec2(-.7,.8)),.16*uAmp,1.4,1.7,1.2);
+      vN=normalMatrix*normalize(cross(normalize(pz-p+vec3(0,0,e)),normalize(px-p+vec3(e,0,0))));
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
+    }
+  `;
+        const FS = `
+    precision highp float; uniform float uT; uniform float uTemp; uniform vec3 uCam;
+    varying vec3 vP; varying vec3 vN; varying vec2 vUv;
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.545);}
+    float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+    float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.2;a*=.5;}return v;}
+    void main(){
+      float T=uTemp; vec3 deep; float rough,alpha,foam=0.0;
+      if(T<=0.){deep=vec3(.65,.85,.96);rough=.02;alpha=.92;}
+      else if(T<4.){float f=T/4.;deep=mix(vec3(.65,.85,.96),vec3(.20,.70,.95),f);rough=.025;alpha=.88;}
+      else if(T<30.){float f=(T-4.)/26.;deep=mix(vec3(.20,.70,.95),vec3(.10,.50,.85),f);rough=.03;alpha=.83;}
+      else if(T<60.){float f=(T-30.)/30.;deep=mix(vec3(.10,.50,.85),vec3(.05,.30,.70),f);rough=.045;alpha=.74;}
+      else if(T<80.){float f=(T-60.)/20.;deep=mix(vec3(.05,.30,.70),vec3(.25,.20,.40),f);rough=.08;alpha=.60;}
+      else if(T<98.){float f=(T-80.)/18.;deep=mix(vec3(.25,.20,.40),vec3(.65,.15,.15),f);rough=.15;alpha=.45;}
+      else if(T<101.){deep=vec3(.80,.50,.40);rough=.28;alpha=.28;foam=0.5;}
+      else{deep=vec3(.90,.85,.90);rough=.42;alpha=.10;foam=1.0;}
+      vec3 N=normalize(vN); vec3 V=normalize(uCam-vP); vec3 L=normalize(vec3(0.8,1.0,0.6));
+      float nv=fbm(vUv*12.+uT*0.2); N+=vec3((nv-0.5)*0.4,(nv-0.5)*0.2,(nv-0.5)*0.4); N=normalize(N);
+      float NdL=max(dot(N,L),0.);
+      float sss=pow(max(dot(-L,-V),0.),2.5)*0.8;
+      vec3 col=deep*NdL*0.7+deep*sss*1.8+deep*0.3;
+      if(foam>0.0){float fpat=fbm(vUv*20.+uT*3.0);col=mix(col,vec3(0.95,0.95,1.0),smoothstep(0.3,0.7,fpat)*foam*0.9);}
+      gl_FragColor=vec4(col,alpha);
+    }
+  `;
+        const surfGeo = new THREE.CircleGeometry(BR - 0.4, 80);
+        surfGeo.rotateX(-Math.PI / 2);
+        const surfMat = new THREE.ShaderMaterial({
+          vertexShader: VS,
+          fragmentShader: FS,
+          uniforms: {
+            uT: { value: 0 },
+            uAmp: { value: 0.4 },
+            uTemp: { value: 20 },
+            uCam: { value: camera.position },
+          },
+          transparent: true,
+          depthWrite: false,
+          side: THREE.FrontSide,
+        });
+        const surfM = new THREE.Mesh(surfGeo, surfMat);
+        surfM.renderOrder = 7;
+        scene.add(surfM);
+
+        // --- Ice (unchanged) ---
+        const iceVolGeo = new THREE.CylinderGeometry(BR - 0.4, BR - 0.4, 1, 64);
+        iceVolGeo.translate(0, -0.5, 0);
+        const iceVolMat = new THREE.MeshPhysicalMaterial({
+          color: 0xc8e4ff,
+          roughness: 0.65,
+          transmission: 0.15,
+          ior: 1.31,
+          transparent: true,
+          opacity: 0,
+          emissive: 0x111122,
+          side: THREE.DoubleSide,
+        });
+        const iceVol = new THREE.Mesh(iceVolGeo, iceVolMat);
+        iceVol.renderOrder = 9;
+        scene.add(iceVol);
+        const iceTopGeo = new THREE.CircleGeometry(BR - 0.4, 64);
+        iceTopGeo.rotateX(-Math.PI / 2);
+        const iceTopMat = new THREE.MeshStandardMaterial({
+          color: 0xe0f0ff,
+          roughness: 0.4,
+          emissive: 0x112233,
+          transparent: true,
+          opacity: 0,
+        });
+        const iceTop = new THREE.Mesh(iceTopGeo, iceTopMat);
+        iceTop.renderOrder = 10;
+        scene.add(iceTop);
+
+        // --- Bubbles (unchanged) ---
+        const NBUB = 120,
+          bubs = [];
+        const bubG = new THREE.SphereGeometry(1, 16, 12);
+        for (let i = 0; i < NBUB; i++) {
+          const m = new THREE.Mesh(
+            bubG,
+            new THREE.MeshPhysicalMaterial({
+              color: 0xf0faff,
+              transmission: 0.98,
+              roughness: 0.01,
+              thickness: 0.2,
+              ior: 1.0,
+              transparent: true,
+              opacity: 0.4,
+              depthWrite: false,
+            }),
+          );
+          m.visible = false;
+          scene.add(m);
+          bubs.push({
+            mesh: m,
+            on: false,
+            x: 0,
+            y: 0,
+            z: 0,
+            vy: 0,
+            wx: 0,
+            wz: 0,
+            ws: 0,
+            r: 0.08,
+            ph: 0,
+          });
+        }
+        function spawnBub(b, topY, T) {
+          b.on = true;
+          const a = Math.random() * Math.PI * 2,
+            rd = Math.random() * (BR - 1.5);
+          b.x = Math.cos(a) * rd;
+          b.z = Math.sin(a) * rd;
+          b.y = BBOT + 1.0;
+          b.r =
+            T > 100 ? 0.18 + Math.random() * 0.3 : 0.06 + Math.random() * 0.12;
+          b.vy = 0.5 + Math.random() * 2.5;
+          b.wx = (Math.random() - 0.5) * 0.5;
+          b.wz = (Math.random() - 0.5) * 0.5;
+          b.ws = 1.2 + Math.random() * 3.0;
+          b.ph = Math.random() * Math.PI * 2;
+          b.mesh.scale.setScalar(b.r);
+          b.mesh.visible = true;
+        }
+
+        // --- Steam (unchanged) ---
+        function createSteamTexture() {
+          const c = document.createElement("canvas");
+          c.width = 256;
+          c.height = 256;
+          const ctx = c.getContext("2d");
+          const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+          g.addColorStop(0, "rgba(255,255,255,1)");
+          g.addColorStop(0.3, "rgba(230,240,255,0.9)");
+          g.addColorStop(0.6, "rgba(200,220,250,0.5)");
+          g.addColorStop(0.8, "rgba(180,200,240,0.2)");
+          g.addColorStop(1, "rgba(160,180,220,0)");
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, 256, 256);
+          return new THREE.CanvasTexture(c);
+        }
+        const steamTex = createSteamTexture();
+        const NSTEAM = 600;
+        let steamParticles = [];
+        for (let i = 0; i < NSTEAM; i++) {
+          const mat = new THREE.SpriteMaterial({
+            map: steamTex,
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+            blending: THREE.NormalBlending,
+            color: 0xffffff,
+          });
+          const spr = new THREE.Sprite(mat);
+          spr.visible = false;
+          scene.add(spr);
+          steamParticles.push({
+            mesh: spr,
+            life: 0,
+            maxLife: 2 + Math.random() * 4,
+            x: 0,
+            z: 0,
+            vx: 0,
+            vy: 0,
+            vz: 0,
+            scaleBase: 0.5 + Math.random() * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.02,
+            turbulence: 0.02 + Math.random() * 0.04,
+          });
+        }
+        function spawnSteam(p, topY, T) {
+          p.mesh.visible = true;
+          const angle = Math.random() * Math.PI * 2,
+            radius = Math.random() * (BR - 0.8);
+          p.mesh.position.set(
+            Math.cos(angle) * radius,
+            topY + 0.1 + Math.random() * 0.3,
+            Math.sin(angle) * radius,
+          );
+          p.life = 0;
+          const intensity = Math.min(1, (T - 70) / 40);
+          p.maxLife = 1.5 + Math.random() * 4 + intensity * 4;
+          p.vy = 0.8 + Math.random() * 2.5 + intensity * 3;
+          p.vx =
+            (Math.random() - 0.5) * 0.6 +
+            (Math.random() - 0.5) * intensity * 0.8;
+          p.vz =
+            (Math.random() - 0.5) * 0.6 +
+            (Math.random() - 0.5) * intensity * 0.8;
+          p.scaleBase = 0.4 + Math.random() * 2.2 + intensity * 1.5;
+          p.turbulence = 0.02 + Math.random() * 0.06 + intensity * 0.05;
+          if (T >= 100) p.mesh.material.color.setHSL(0.0, 0, 1.0);
+          else if (T > 90) p.mesh.material.color.setHSL(0.05, 0.2, 0.95);
+          else p.mesh.material.color.setHSL(0.6, 0.2, 0.9);
+        }
+
+        // --- State Variables ---
+        const BH_WATER = 9.0;
+        let targetT = 20,
+          simT = 20,
+          curTop = BBOT + BH_WATER,
+          curIceH = 0;
+        let evaporationFactor = 1.0;
+        const HEAT_RATE = 10;
+        document.getElementById("sl").addEventListener("input", function () {
+          targetT = parseFloat(this.value);
+        });
+
+        // --- UI Helper Functions (unchanged) ---
+        const FACTS = {
+          "-15": "Ice below freezing – volume expands.",
+          0: "Freezing/melting point – ice floats.",
+          1: "Anomalous: cooling expands water (0–4°C)",
+          4: "⭐ MAXIMUM DENSITY at 4°C",
+          10: "Liquid water – normal expansion",
+          30: "Warm water – density decreases",
+          60: "Hot water – molecules moving fast",
+          80: "Nucleate boiling – bubbles form",
+          96: "Vigorous boiling – steam appears",
+          100: "BOILING POINT – phase change",
+          110: "Superheated steam – invisible gas",
+        };
+        function getFact(T) {
+          const ks = Object.keys(FACTS)
+            .map(Number)
+            .sort((a, b) => a - b);
+          for (let i = ks.length - 1; i >= 0; i--)
+            if (T >= ks[i]) return FACTS[ks[i]];
+          return FACTS["-15"];
+        }
+        function fl(id, on) {
+          document.getElementById(id).classList[on ? "add" : "remove"]("v");
+        }
+        function ec(id, on, cls) {
+          const el = document.getElementById(id);
+          ["cice", "cblu", "cgld", "cred", "cgrn", "cpur"].forEach((c) =>
+            el.classList.remove(c),
+          );
+          el.classList[on ? "add" : "remove"]("on");
+          if (on && cls) el.classList.add(cls);
+        }
+
+        function ui(T) {
+          const den = density(T),
+            vol = D4 / den,
+            exp = (vol - 1) * 100;
+          let tc = "#38bdf8";
+          if (T < 0) tc = "#93c5fd";
+          else if (T < 4) tc = "#a78bfa";
+          else if (T < 30) tc = "#38bdf8";
+          else if (T < 70) tc = "#fbbf24";
+          else if (T < 100) tc = "#fb923c";
+          else tc = "#f87171";
+
+          document.getElementById("tnum").innerHTML =
+            T.toFixed(1) + '<span class="t-deg">°C</span>';
+          document.getElementById("tnum").style.color = tc;
+
+          let ph, pc, pb, pbr;
+          if (T < 0) {
+            ph = "🧊 Solid Ice";
+            pc = "#93c5fd";
+            pb = "rgba(147,197,253,.12)";
+            pbr = "rgba(147,197,253,.3)";
+          } else if (T < 4) {
+            ph = "❄️ Anomalous Liquid";
+            pc = "#a78bfa";
+            pb = "rgba(167,139,250,.12)";
+            pbr = "rgba(167,139,250,.3)";
+          } else if (T < 100) {
+            ph = "💧 Liquid Water";
+            pc = "#38bdf8";
+            pb = "rgba(56,189,248,.12)";
+            pbr = "rgba(56,189,248,.3)";
+          } else {
+            ph = "♨️ Steam (Gas)";
+            pc = "#f87171";
+            pb = "rgba(248,113,113,.12)";
+            pbr = "rgba(248,113,113,.3)";
+          }
+
+          const pill = document.getElementById("ppill");
+          pill.textContent = ph;
+          pill.style.color = pc;
+          pill.style.background = pb;
+          pill.style.borderColor = pbr;
+
+          document.getElementById("sden").textContent = den.toFixed(5);
+          document.getElementById("sden").style.color = tc;
+          document.getElementById("svol").textContent = vol.toFixed(5);
+          document.getElementById("sexp").textContent =
+            (exp >= 0 ? "+" : "") + exp.toFixed(3) + "%";
+          document.getElementById("ssta").textContent =
+            T < 0 ? "Solid Ice" : T < 100 ? "Liquid" : "Gas";
+
+          const factEl = document.getElementById("fact");
+          factEl.textContent = getFact(T);
+          if (T < 0) {
+            factEl.style.background = "rgba(147,197,253,.06)";
+            factEl.style.borderColor = "rgba(147,197,253,.18)";
+          } else if (T < 4) {
+            factEl.style.background = "rgba(167,139,250,.06)";
+            factEl.style.borderColor = "rgba(167,139,250,.18)";
+          } else if (T < 100) {
+            factEl.style.background = "rgba(56,189,248,.06)";
+            factEl.style.borderColor = "rgba(56,189,248,.18)";
+          } else {
+            factEl.style.background = "rgba(248,113,113,.06)";
+            factEl.style.borderColor = "rgba(248,113,113,.18)";
+          }
+
+          document.getElementById("bfact").textContent = getFact(T);
+
+          let ps = "Liquid Water";
+          if (T < 0) ps = "Solid Ice — Frozen Water";
+          else if (T < 4) ps = "Anomalous Expansion Zone (0–4°C)";
+          else if (T < 4.8) ps = "⭐ Maximum Density — 4°C";
+          else if (T >= 100) ps = "♨️ Steam — Gas Phase";
+          document.getElementById("ophase").textContent = ps;
+          document.getElementById("ophase").style.color = tc;
+          document.getElementById("oden").innerHTML =
+            `ρ = ${den.toFixed(5)} g/cm³`;
+          document.getElementById("oden").style.color = tc;
+
+          fl("fl-ice", T < -0.3);
+          fl("fl-cold", T > 0.2 && T < 4.6);
+          fl("fl-4c", T > 3.2 && T < 5.2);
+          fl("fl-bub", T > 62 && T < 100);
+          fl("fl-stm", T > 80);
+
+          const diff = targetT - simT,
+            bb = document.getElementById("bbox"),
+            bd = document.getElementById("bdot"),
+            bt = document.getElementById("btxt");
+          if (Math.abs(diff) > 1.5) {
+            bb.style.background =
+              diff > 0 ? "rgba(124,45,18,.4)" : "rgba(23,37,84,.4)";
+            bb.style.borderColor =
+              diff > 0 ? "rgba(251,146,60,.25)" : "rgba(96,165,250,.25)";
+            bd.style.background = diff > 0 ? "#fb923c" : "#60a5fa";
+            bt.textContent =
+              diff > 0
+                ? "🔥 Heating — burner ON"
+                : "❄️ Cooling — temperature falling";
+            bt.style.color = diff > 0 ? "#fb923c" : "#60a5fa";
+          } else {
+            bb.style.background = "rgba(255,255,255,.03)";
+            bb.style.borderColor = "rgba(255,255,255,.07)";
+            bd.style.background = "#334155";
+            bt.textContent = "— Stable temperature";
+            bt.style.color = "rgba(255,255,255,.35)";
+          }
+
+          ec("e1", T < 5, T < 0 ? "cice" : "cblu");
+          ec("e2", T < 12, "cblu");
+          ec("e3", T > 2 && T < 8, "cgld");
+          ec("e4", T < 1, "cred");
+          ec("e5", T < 1, "cred");
+          ec("e6", T >= 80, "cgrn");
+        }
+
+        // --- Animation Loop ---
+        let clk = 0,
+          lt = performance.now();
+        function frame() {
+          requestAnimationFrame(frame);
+          resize();
+          const now = performance.now();
+          const dt = Math.min((now - lt) * 0.001, 0.05);
+          lt = now;
+          clk += dt;
+
+          const diff = targetT - simT;
+          if (Math.abs(diff) > 0.05) {
+            simT += Math.sign(diff) * HEAT_RATE * dt;
+            if (Math.sign(targetT - simT) !== Math.sign(diff)) simT = targetT;
+          }
+          const T = simT;
+
+          // Heater glow
+          if (diff > 1.5) {
+            const i = Math.min(diff / 45, 1);
+            hpadMat.emissive.setHex(0xff5500);
+            hpadMat.emissiveIntensity = i * 2.5;
+            heatL.intensity = i * 1.8;
+            coldL.intensity = 0;
+          } else if (diff < -1.5) {
+            const i = Math.min(-diff / 45, 1);
+            hpadMat.emissive.setHex(0x2266ff);
+            hpadMat.emissiveIntensity = i * 1.8;
+            coldL.intensity = i * 1.2;
+            heatL.intensity = 0;
+          } else {
+            hpadMat.emissiveIntensity = 0;
+            heatL.intensity = 0;
+            coldL.intensity = 0;
+          }
+
+          // Evaporation
+          if (T > 70)
+            evaporationFactor = Math.max(
+              0.4,
+              evaporationFactor - ((T - 70) / 100) * 0.15 * dt,
+            );
+          else evaporationFactor = Math.min(1.0, evaporationFactor + 0.02 * dt);
+
+          const den = density(T);
+          const baseHeight = BH_WATER * (D4 / den) * evaporationFactor;
+          const tgt = BBOT + Math.max(0.3, baseHeight);
+          curTop += (tgt - curTop) * 0.07;
+          const wH = Math.max(0.1, curTop - BBOT);
+
+          surfM.position.y = curTop;
+          wbM.position.y = BBOT;
+          wbM.scale.y = wH;
+
+          const wc = new THREE.Color();
+          if (T <= 0) wc.setHex(0x5a9ed9);
+          else if (T < 4) wc.setHex(0x1e96d0);
+          else if (T < 40) wc.setHex(0x1269b0);
+          else if (T < 80) wc.setHex(0x1d3a70);
+          else if (T < 100) wc.setHex(0x7a2e1a);
+          else wc.setHex(0x8a8a96);
+          wbMat.color.lerp(wc, 0.06);
+          wbMat.opacity = T >= 100 ? 0.15 : 0.55;
+
+          let amp = 0;
+          if (T > 0) {
+            if (T < 8) amp = 0.008 + T * 0.009;
+            else if (T < 40) amp = 0.07 + (T - 8) * 0.003;
+            else if (T < 80) amp = 0.13 + (T - 40) * 0.006;
+            else if (T < 100) amp = 0.28 + (T - 80) * 0.015;
+            else amp = 0.58;
+          }
+          surfMat.uniforms.uAmp.value +=
+            (amp - surfMat.uniforms.uAmp.value) * 0.1;
+          surfMat.uniforms.uT.value = clk;
+          surfMat.uniforms.uTemp.value = T;
+          surfMat.uniforms.uCam.value.copy(camera.position);
+
+          const gc = new THREE.Color();
+          if (T < 0) gc.setHex(0x4fa0e0);
+          else if (T < 4) gc.setHex(0x35d0fa);
+          else if (T < 40) gc.setHex(0x0d9eef);
+          else if (T < 80) gc.setHex(0xfb9f2a);
+          else gc.setHex(0xff6b35);
+          wglow.color.lerp(gc, 0.08);
+          wglow.position.y = curTop - 3.0;
+          wglow.intensity = T >= 100 ? 0.25 : 1.8;
+
+          // Ice
+          const iceTarget = T < 0 ? Math.min(2.5, (-T / 6) * 2.8) : 0;
+          curIceH += (iceTarget - curIceH) * 0.05;
+          if (curIceH > 0.05) {
+            iceVol.visible = true;
+            iceTop.visible = true;
+            iceVol.position.y = curTop - curIceH / 2;
+            iceVol.scale.y = curIceH;
+            iceTop.position.y = curTop + 0.02;
+            const iceOp = Math.min(0.92, curIceH / 1.8);
+            iceVol.material.opacity = iceOp;
+            iceTop.material.opacity = iceOp * 0.9;
+          } else {
+            iceVol.visible = false;
+            iceTop.visible = false;
+          }
+
+          // Bubbles
+          const maxB =
+            T < 62 ? 0 : T < 80 ? 8 : T < 93 ? 35 : T < 100 ? 80 : 150;
+          let nB = 0;
+          bubs.forEach((b) => {
+            if (!b.on) {
+              if (nB < maxB && Math.random() < (T > 95 ? 0.6 : 0.1)) {
+                spawnBub(b, curTop, T);
+                nB++;
+              }
+              return;
+            }
+            nB++;
+            b.y += b.vy * dt;
+            b.mesh.position.set(
+              b.x + Math.sin(clk * b.ws + b.ph) * b.wx * 0.8,
+              b.y,
+              b.z + Math.cos(clk * b.ws * 0.7 + b.ph) * b.wz * 0.8,
+            );
+            b.r *= 1 + dt * 0.05;
+            b.mesh.scale.setScalar(b.r);
+            if (b.y > curTop + 0.6) {
+              b.on = false;
+              b.mesh.visible = false;
+            }
+          });
+
+          // Steam
+          const steamBaseCount =
+            T < 70 ? 0 : T < 82 ? 20 : T < 92 ? 80 : T < 100 ? 180 : 380;
+          const maxSteam = Math.min(NSTEAM, Math.floor(steamBaseCount));
+          let nS = 0;
+          steamParticles.forEach((p) => {
+            if (!p.mesh.visible) {
+              if (nS < maxSteam && Math.random() < (T > 98 ? 0.4 : 0.1)) {
+                spawnSteam(p, curTop, T);
+                nS++;
+              }
+              return;
+            }
+            nS++;
+            p.life += dt;
+            if (p.life > p.maxLife) {
+              p.mesh.visible = false;
+              return;
+            }
+            const lifeFactor = p.life / p.maxLife;
+            p.vx += (Math.random() - 0.5) * p.turbulence * dt * 15;
+            p.vz += (Math.random() - 0.5) * p.turbulence * dt * 15;
+            p.vy += 0.02 * dt * 20;
+            p.mesh.position.x += p.vx * dt;
+            p.mesh.position.y += p.vy * dt;
+            p.mesh.position.z += p.vz * dt;
+            p.mesh.rotation.z += p.rotSpeed * dt * 30;
+            const scale = p.scaleBase * (0.8 + lifeFactor * 2.2);
+            p.mesh.scale.set(scale, scale, 1);
+            let op;
+            if (lifeFactor < 0.2) op = lifeFactor * 4.5;
+            else if (lifeFactor > 0.7) op = (1 - lifeFactor) * 3.3;
+            else op = 0.9;
+            op *= T > 100 ? 1.2 : 0.9;
+            p.mesh.material.opacity = Math.min(1.0, op);
+            if (p.mesh.position.y > curTop + 9) p.mesh.visible = false;
+          });
+
+          // ─────────────────────────────────────────────
+          //  CHANGED LINE 20 – Background lerp targets
+          //  All colors shifted to lighter lab tones
+          // ─────────────────────────────────────────────
+          const bg = new THREE.Color();
+          if (T < 0) bg.setHex(0xb0c8de); /* CHANGED LINE 20a – was 0x020812 */
+          else if (T < 4)
+            bg.setHex(0xb8cee4); /* CHANGED LINE 20b – was 0x04101c */
+          else if (T < 40)
+            bg.setHex(0xbdd0e2); /* CHANGED LINE 20c – was 0x03111f */
+          else if (T < 80)
+            bg.setHex(
+              0xd0c0a8,
+            ); /* CHANGED LINE 20d – was 0x140a02 warm tinted */
+          else
+            bg.setHex(
+              0xe0b898,
+            ); /* CHANGED LINE 20e – was 0x300808 warm orange-glow */
+          scene.background.lerp(bg, 0.04);
+          scene.fog.color.copy(scene.background); /* keep fog in sync with bg */
+
+          ui(T);
+          renderer.render(scene, camera);
+        }
+
+        ui(20);
+        frame();
+      })();
+    </script>
+  </body>
+</html>

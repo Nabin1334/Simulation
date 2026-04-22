@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Lightning Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      #controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+        max-width: 320px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      h2 {
+        margin-top: 0;
+        color: #4fc3f7;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+      }
+
+      .control-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #ccc;
+        font-size: 14px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        height: 6px;
+        background: #333;
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #4fc3f7;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(79, 195, 247, 0.8);
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #4fc3f7, #2196f3);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 5px;
+        font-weight: bold;
+        transition: all 0.3s;
+      }
+
+      button:hover {
+        background: linear-gradient(135deg, #29b6f6, #1976d2);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      #stats {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+        align-items: center;
+      }
+
+      .stat-value {
+        color: #4fc3f7;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .instructions {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        border-radius: 8px;
+        color: #ccc;
+        font-size: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      }
+
+      .audio-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .audio-btn {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+        background: rgba(79, 195, 247, 0.2);
+        border: 1px solid rgba(79, 195, 247, 0.3);
+      }
+
+      .audio-btn.active {
+        background: #4fc3f7;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h2>⚡ Lightning </h2>
+
+      <div class="control-group">
+        <label for="flashRate"
+          >Flash Rate: <span id="flashRateValue">2.0</span>/s</label
+        >
+        <input
+          type="range"
+          id="flashRate"
+          min="0.1"
+          max="5"
+          step="0.1"
+          value="2.0"
+        />
+      </div>
+
+      <div class="control-group">
+        <label for="intensity"
+          >Intensity: <span id="intensityValue">8.0</span></label
+        >
+        <input
+          type="range"
+          id="intensity"
+          min="1"
+          max="15"
+          step="0.5"
+          value="8.0"
+        />
+      </div>
+
+      <div class="control-group">
+        <label for="branches"
+          >Branches: <span id="branchesValue">5</span></label
+        >
+        <input type="range" id="branches" min="0" max="15" step="1" value="5" />
+      </div>
+
+      <button id="strikeButton">⚡ Strike Now!</button>
+      <button id="megaStrike">💥 Mega Strike!</button>
+
+      <div class="audio-controls">
+        <button id="audioBtn" class="audio-btn active">🔊 Sound On</button>
+        <button id="volumeBtn" class="audio-btn">🔈 Low</button>
+      </div>
+
+      <div id="stats">
+        <div class="stat">
+          <span>Total Strikes:</span>
+          <span class="stat-value" id="strikeCount">0</span>
+        </div>
+        <div class="stat">
+          <span>Temperature:</span>
+          <span class="stat-value" id="temperature">30,000°C</span>
+        </div>
+        <div class="stat">
+          <span>Voltage:</span>
+          <span class="stat-value" id="voltage">1 Billion V</span>
+        </div>
+        <div class="stat">
+          <span>Current Flash:</span>
+          <span class="stat-value" id="currentFlash">None</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      Drag to rotate • Scroll to zoom • Right-click to pan
+    </div>
+
+    <script >
+
+      // ========================== USER CONFIGURATION ==========================
+      // USER: Configure your sound files here
+      const SOUND_CONFIG = {
+        // Set to false to disable all sound
+        enabled: true,
+        
+        // Default volume level (0.0 to 1.0)
+        defaultVolume: 0.3,
+        
+        // Sound delay settings (in milliseconds)
+        normalStrikeDelay: 300,  // Delay for normal strikes
+        megaStrikeDelay: 100,    // Delay for mega strikes
+        
+        // ====== PUT YOUR OWN SOUND FILE URLS HERE ======
+        // You can use:
+        // 1. Relative paths: "sounds/thunder.mp3"
+        // 2. Absolute paths: "https://yourserver.com/sounds/thunder.mp3"
+        // 3. Base64 encoded strings (for small sounds)
+        
+        // Normal thunder sound
+        normalSoundURL: "lightning.mp3",
+        
+        // Mega thunder sound (louder/longer)
+        megaSoundURL: "lightning.mp3",
+        
+        // Crack sound (optional, played immediately)
+        crackSoundURL: null, // Set to null if you don't have a crack sound
+        
+        // If you don't have sound files, set to null and the system will use computer-generated sounds
+        // Example: normalSoundURL: null,
+        
+        // Retry loading sounds if they fail
+        retryLoading: true,
+        maxRetries: 2
+      };
+      // END OF USER CONFIGURATION
+      // =======================================================================
+
+      // ==================== LIGHTNING AUDIO SYSTEM ====================
+      class LightningAudio {
+        constructor(config) {
+          this.config = config;
+          this.soundEnabled = config.enabled;
+          this.volume = config.defaultVolume;
+          this.audioElements = {
+            normal: null,
+            mega: null,
+            crack: null
+          };
+          this.audioContext = null;
+          this.gainNode = null;
+          this.init();
+        }
+
+        async init() {
+          try {
+            // Create Web Audio context for better control
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.gain.value = this.volume;
+            this.gainNode.connect(this.audioContext.destination);
+            
+            console.log("Audio system initialized with Web Audio API");
+            
+            // Load user's sound files
+            await this.loadSounds();
+            
+          } catch (e) {
+            console.log("Web Audio API not available:", e);
+            this.soundEnabled = false;
+          }
+        }
+
+        async loadSounds() {
+          console.log("Loading sound files...");
+          
+          // Load normal thunder sound
+          if (this.config.normalSoundURL) {
+            this.audioElements.normal = await this.loadSound(this.config.normalSoundURL, "normal");
+          }
+          
+          // Load mega thunder sound
+          if (this.config.megaSoundURL) {
+            this.audioElements.mega = await this.loadSound(this.config.megaSoundURL, "mega");
+          }
+          
+          // Load crack sound (optional)
+          if (this.config.crackSoundURL) {
+            this.audioElements.crack = await this.loadSound(this.config.crackSoundURL, "crack");
+          }
+          
+          console.log("Sound loading complete");
+        }
+
+        async loadSound(url, name, retryCount = 0) {
+          try {
+            console.log(`Loading ${name} sound from: ${url}`);
+            
+            if (!url) {
+              console.log(`No URL provided for ${name} sound`);
+              return null;
+            }
+            
+            // Create audio element
+            const audio = new Audio();
+            audio.src = url;
+            audio.volume = this.volume;
+            audio.preload = 'auto';
+            
+            // Wait for audio to load
+            await new Promise((resolve, reject) => {
+              audio.addEventListener('canplaythrough', resolve);
+              audio.addEventListener('error', reject);
+              
+              try {
+                audio.load();
+              } catch (e) {
+                reject(e);
+              }
+              
+              // Timeout after 5 seconds
+              setTimeout(() => reject(new Error(`Timeout loading ${name} sound`)), 5000);
+            });
+            
+            console.log(`Successfully loaded ${name} sound`);
+            return audio;
+            
+          } catch (error) {
+            console.log(`Failed to load ${name} sound:`, error);
+            
+            // Retry if configured
+            if (this.config.retryLoading && retryCount < this.config.maxRetries) {
+              console.log(`Retrying ${name} sound loading (attempt ${retryCount + 1})...`);
+              return await this.loadSound(url, name, retryCount + 1);
+            }
+            
+            console.log(`Using computer-generated sound for ${name}`);
+            return null;
+          }
+        }
+
+        playThunder(isMega = false) {
+          if (!this.soundEnabled) return;
+          
+          try {
+            const soundType = isMega ? 'mega' : 'normal';
+            const audio = this.audioElements[soundType];
+            
+            if (audio) {
+              // Play user's MP3 sound
+              this.playAudioElement(audio);
+            } else {
+              // Fallback to computer-generated sound
+              this.playComputerSound(isMega);
+            }
+            
+            // Play crack sound immediately for mega strikes
+            if (isMega && this.audioElements.crack) {
+              this.playAudioElement(this.audioElements.crack);
+            }
+            
+          } catch (error) {
+            console.log("Error playing thunder sound:", error);
+            this.playComputerSound(isMega);
+          }
+        }
+
+        playAudioElement(audioElement) {
+          if (!audioElement) return;
+          
+          try {
+            // Reset audio to start
+            audioElement.currentTime = 0;
+            audioElement.volume = this.volume;
+            
+            // Play the sound
+            const playPromise = audioElement.play();
+            
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.log("Audio play failed:", error);
+              });
+            }
+          } catch (error) {
+            console.log("Error playing audio element:", error);
+          }
+        }
+
+        playComputerSound(isMega = false) {
+          // Computer-generated fallback sound
+          if (!this.audioContext) return;
+          
+          try {
+            const now = this.audioContext.currentTime;
+            const duration = isMega ? 2.0 : 1.5;
+            const baseFreq = isMega ? 80 : 60;
+            const intensity = isMega ? 0.8 : 0.6;
+            
+            // Create main thunder oscillator
+            const mainOsc = this.audioContext.createOscillator();
+            const mainGain = this.audioContext.createGain();
+            
+            mainOsc.type = 'sine';
+            mainOsc.frequency.setValueAtTime(baseFreq, now);
+            mainOsc.frequency.exponentialRampToValueAtTime(baseFreq * 0.7, now + duration);
+            
+            mainGain.gain.setValueAtTime(0, now);
+            mainGain.gain.linearRampToValueAtTime(this.volume * intensity, now + 0.1);
+            mainGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            
+            mainOsc.connect(mainGain);
+            mainGain.connect(this.gainNode);
+            
+            // Add high frequency crackle
+            const crackOsc = this.audioContext.createOscillator();
+            const crackGain = this.audioContext.createGain();
+            
+            crackOsc.type = 'triangle';
+            crackOsc.frequency.setValueAtTime(800 + Math.random() * 400, now);
+            crackOsc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+            
+            crackGain.gain.setValueAtTime(0, now);
+            crackGain.gain.linearRampToValueAtTime(this.volume * 0.3, now + 0.02);
+            crackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            
+            crackOsc.connect(crackGain);
+            crackGain.connect(this.gainNode);
+            
+            // Start oscillators
+            mainOsc.start();
+            crackOsc.start();
+            
+            // Stop after duration
+            mainOsc.stop(now + duration);
+            crackOsc.stop(now + 0.5);
+            
+          } catch (error) {
+            console.log("Error playing computer sound:", error);
+          }
+        }
+
+        toggleSound() {
+          this.soundEnabled = !this.soundEnabled;
+          // Resume audio context if it was suspended
+          if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+          }
+          return this.soundEnabled;
+        }
+
+        setVolume(vol) {
+          this.volume = Math.max(0, Math.min(1, vol));
+          
+          // Update volume on audio context
+          if (this.gainNode) {
+            this.gainNode.gain.value = this.volume;
+          }
+          
+          // Update volume on all loaded audio elements
+          Object.values(this.audioElements).forEach(audio => {
+            if (audio && audio.volume !== undefined) {
+              audio.volume = this.volume;
+            }
+          });
+        }
+      }
+
+      // ==================== 3D SCENE SETUP ====================
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x000000, 10, 100);
+
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(0, 15, 30);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 10;
+      controls.maxDistance = 100;
+      controls.maxPolarAngle = Math.PI * 0.9;
+
+      const ambientLight = new THREE.AmbientLight(0x111122, 0.2);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0x223366, 0.3);
+      directionalLight.position.set(-10, 20, 10);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 1024;
+      directionalLight.shadow.mapSize.height = 1024;
+      scene.add(directionalLight);
+
+      const globalFlash = new THREE.PointLight(0x88ccff, 0, 100);
+      scene.add(globalFlash);
+
+      const groundGeometry = new THREE.PlaneGeometry(200, 200, 32, 32);
+      const groundColors = [];
+      for (let i = 0; i < groundGeometry.attributes.position.count; i++) {
+        const darkness = 0.1 + Math.random() * 0.2;
+        groundColors.push(darkness, darkness * 0.8, darkness * 0.6);
+      }
+      groundGeometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(groundColors, 3)
+      );
+
+      const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        roughness: 0.9,
+        metalness: 0.1,
+        vertexColors: true,
+      });
+
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -5;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      function createHills() {
+        const hillGroup = new THREE.Group();
+        for (let i = 0; i < 10; i++) {
+          const hill = new THREE.Mesh(
+            new THREE.ConeGeometry(
+              10 + Math.random() * 20,
+              20 + Math.random() * 20,
+              16
+            ),
+            new THREE.MeshStandardMaterial({
+              color: 0x222222,
+              roughness: 0.9,
+            })
+          );
+          const angle = (i / 10) * Math.PI * 2;
+          const distance = 60 + Math.random() * 40;
+          hill.position.set(
+            Math.cos(angle) * distance,
+            -5,
+            Math.sin(angle) * distance
+          );
+          hillGroup.add(hill);
+        }
+        scene.add(hillGroup);
+      }
+      createHills();
+
+      // ==================== LIGHTNING SYSTEM ====================
+      let audioSystem;
+      let lightningObjects = [];
+      let strikeCount = 0;
+      let lastStrikeTime = 0;
+      let megaStrikeActive = false;
+
+      const settings = {
+        flashRate: 2.0,
+        intensity: 8.0,
+        branches: 5,
+      };
+
+      // Initialize audio system asynchronously
+      async function initAudioSystem() {
+        audioSystem = new LightningAudio(SOUND_CONFIG);
+        await audioSystem.init();
+        
+        // Update UI based on sound availability
+        if (!audioSystem.soundEnabled) {
+          document.getElementById("audioBtn").textContent = "🔇 Sound Off";
+          document.getElementById("audioBtn").classList.remove("active");
+        }
+      }
+
+      function createLightning(isMega = false) {
+        const lightningGroup = new THREE.Group();
+        const cloudGroup = new THREE.Group();
+        const cloudGeometry = new THREE.SphereGeometry(1, 10, 10);
+        const cloudMaterial = new THREE.MeshStandardMaterial({
+          color: 0x222222,
+          roughness: 1,
+          metalness: 0,
+          transparent: true,
+          opacity: 0.9,
+        });
+
+        for (let i = 0; i < 30; i++) {
+          const cloudPart = new THREE.Mesh(cloudGeometry, cloudMaterial);
+          cloudPart.position.set(
+            (Math.random() - 0.5) * (isMega ? 8 : 5),
+            (Math.random() - 0.5) * (isMega ? 3 : 2),
+            (Math.random() - 0.5) * (isMega ? 8 : 5)
+          );
+          cloudPart.scale.set(
+            0.5 + Math.random() * (isMega ? 2 : 1.5),
+            0.5 + Math.random() * (isMega ? 2 : 1.5),
+            0.5 + Math.random() * (isMega ? 2 : 1.5)
+          );
+          cloudPart.castShadow = true;
+          cloudGroup.add(cloudPart);
+        }
+
+        cloudGroup.position.y = 15;
+        lightningGroup.add(cloudGroup);
+
+        function generateLightningPath(startY, endY, jaggedness = 1.0) {
+          const points = [];
+          const segments = 15 + Math.floor(Math.random() * 10);
+          const segmentHeight = (endY - startY) / segments;
+
+          points.push(new THREE.Vector3(0, startY, 0));
+
+          let currentX = 0;
+          let currentZ = 0;
+
+          for (let i = 1; i < segments; i++) {
+            currentX += (Math.random() - 0.5) * jaggedness * 2;
+            currentZ += (Math.random() - 0.5) * jaggedness * 2;
+            currentX *= 0.8;
+            currentZ *= 0.8;
+            const y = startY + segmentHeight * i;
+            points.push(new THREE.Vector3(currentX, y, currentZ));
+          }
+
+          points.push(new THREE.Vector3(0, endY, 0));
+          return points;
+        }
+
+        const jaggedness = 1.0 + (isMega ? 1.5 : 0);
+        const mainPoints = generateLightningPath(12, -4, jaggedness);
+        const mainGeometry = new THREE.BufferGeometry().setFromPoints(mainPoints);
+
+        const boltMaterial = new THREE.LineBasicMaterial({
+          color: isMega ? 0xffffff : 0x4fc3f7,
+          linewidth: isMega ? 5 : 3,
+          transparent: true,
+        });
+
+        const mainBolt = new THREE.Line(mainGeometry, boltMaterial);
+        lightningGroup.add(mainBolt);
+
+        const glowGeometry = new THREE.TubeGeometry(
+          new THREE.CatmullRomCurve3(mainPoints),
+          32,
+          0.8,
+          8,
+          false
+        );
+        const glowMaterial = new THREE.MeshBasicMaterial({
+          color: isMega ? 0x88aaff : 0x4466ff,
+          transparent: true,
+          opacity: 0.3,
+          side: THREE.BackSide,
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        lightningGroup.add(glow);
+
+        const branchCount = isMega ? settings.branches * 2 : settings.branches;
+        for (let i = 0; i < branchCount; i++) {
+          if (mainPoints.length > 3) {
+            const branchPoints = [];
+            const startIndex = Math.floor(Math.random() * (mainPoints.length - 3)) + 1;
+            const startPoint = mainPoints[startIndex].clone();
+
+            branchPoints.push(startPoint);
+            const branchLength = 3 + Math.random() * 4;
+            const branchSegments = 3 + Math.floor(Math.random() * 4);
+
+            for (let j = 0; j < branchSegments; j++) {
+              const angle = Math.random() * Math.PI * 2;
+              const distance = branchLength / branchSegments;
+              startPoint.x += Math.cos(angle) * distance;
+              startPoint.y -= distance * (0.7 + Math.random() * 0.3);
+              startPoint.z += Math.sin(angle) * distance;
+              branchPoints.push(startPoint.clone());
+            }
+
+            const branchGeometry = new THREE.BufferGeometry().setFromPoints(branchPoints);
+            const branch = new THREE.Line(branchGeometry, boltMaterial);
+            lightningGroup.add(branch);
+
+            const branchGlowGeometry = new THREE.TubeGeometry(
+              new THREE.CatmullRomCurve3(branchPoints),
+              16,
+              0.4,
+              4,
+              false
+            );
+            const branchGlow = new THREE.Mesh(branchGlowGeometry, glowMaterial);
+            lightningGroup.add(branchGlow);
+          }
+        }
+
+        const flashIntensity = isMega ? settings.intensity * 3 : settings.intensity;
+        const flashLight = new THREE.PointLight(
+          isMega ? 0xffffff : 0x4fc3f7,
+          0,
+          50
+        );
+        flashLight.position.set(0, 8, 0);
+        lightningGroup.add(flashLight);
+
+        const groundFlash = new THREE.PointLight(0xffffff, 0, 30);
+        groundFlash.position.set(0, -4, 0);
+        lightningGroup.add(groundFlash);
+
+        lightningGroup.userData = {
+          flashLight: flashLight,
+          groundFlash: groundFlash,
+          mainBolt: mainBolt,
+          glow: glow,
+          created: Date.now(),
+          lifetime: (isMega ? 800 : 500) + Math.random() * 300,
+          isMega: isMega,
+          intensity: flashIntensity,
+        };
+
+        const xPos = (Math.random() - 0.5) * (isMega ? 40 : 25);
+        const zPos = (Math.random() - 0.5) * (isMega ? 40 : 25);
+        lightningGroup.position.set(xPos, 0, zPos);
+
+        return lightningGroup;
+      }
+
+      function generateStrike(isMega = false) {
+        const lightning = createLightning(isMega);
+        scene.add(lightning);
+        lightningObjects.push(lightning);
+
+        strikeCount++;
+        document.getElementById("strikeCount").textContent = strikeCount;
+        document.getElementById("currentFlash").textContent = isMega ? "MEGA" : "Normal";
+
+        const temp = 28000 + Math.floor(Math.random() * 4000) + (isMega ? 5000 : 0);
+        document.getElementById("temperature").textContent = temp.toLocaleString() + "°C";
+
+        const voltage = (0.8 + Math.random() * 0.4 + (isMega ? 0.5 : 0)).toFixed(1);
+        document.getElementById("voltage").textContent = voltage + " Billion V";
+
+        if (audioSystem && audioSystem.soundEnabled) {
+          const delay = isMega ? SOUND_CONFIG.megaStrikeDelay : SOUND_CONFIG.normalStrikeDelay;
+          setTimeout(() => {
+            audioSystem.playThunder(isMega);
+          }, delay);
+        }
+
+        return lightning;
+      }
+
+      function updateLightning() {
+        const now = Date.now();
+        for (let i = lightningObjects.length - 1; i >= 0; i--) {
+          const lightning = lightningObjects[i];
+          const age = now - lightning.userData.created;
+
+          if (age > lightning.userData.lifetime) {
+            scene.remove(lightning);
+            lightningObjects.splice(i, 1);
+            if (lightningObjects.length === 0) {
+              document.getElementById("currentFlash").textContent = "None";
+            }
+            continue;
+          }
+
+          const progress = age / lightning.userData.lifetime;
+          if (progress < 0.15) {
+            const intensity = lightning.userData.intensity * (1 - progress / 0.15);
+            lightning.userData.flashLight.intensity = intensity;
+            lightning.userData.groundFlash.intensity = intensity * 0.6;
+            globalFlash.intensity = intensity * 0.1;
+            lightning.userData.mainBolt.material.opacity = 1;
+            lightning.userData.glow.material.opacity = 0.4;
+          } else if (progress < 0.4) {
+            const fade = 1 - (progress - 0.15) / 0.25;
+            lightning.userData.flashLight.intensity = lightning.userData.intensity * fade;
+            lightning.userData.groundFlash.intensity = lightning.userData.intensity * 0.6 * fade;
+            globalFlash.intensity = lightning.userData.intensity * 0.1 * fade;
+            const opacity = 0.5 * fade;
+            lightning.userData.mainBolt.material.opacity = opacity;
+            lightning.userData.glow.material.opacity = opacity * 0.6;
+          } else {
+            const fade = 1 - (progress - 0.4) / 0.6;
+            lightning.userData.flashLight.intensity = 0;
+            lightning.userData.groundFlash.intensity = 0;
+            globalFlash.intensity = 0;
+            const opacity = Math.max(0, 0.3 * fade);
+            lightning.userData.mainBolt.material.opacity = opacity;
+            lightning.userData.glow.material.opacity = opacity * 0.4;
+          }
+        }
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const currentTime = Date.now();
+
+        if (currentTime - lastStrikeTime > 1000 / settings.flashRate) {
+          generateStrike();
+          lastStrikeTime = currentTime;
+        }
+
+        updateLightning();
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      // ==================== UI CONTROLS ====================
+      document.getElementById("flashRate").addEventListener("input", (e) => {
+        settings.flashRate = parseFloat(e.target.value);
+        document.getElementById("flashRateValue").textContent = settings.flashRate.toFixed(1);
+      });
+
+      document.getElementById("intensity").addEventListener("input", (e) => {
+        settings.intensity = parseFloat(e.target.value);
+        document.getElementById("intensityValue").textContent = settings.intensity.toFixed(1);
+      });
+
+      document.getElementById("branches").addEventListener("input", (e) => {
+        settings.branches = parseInt(e.target.value);
+        document.getElementById("branchesValue").textContent = settings.branches;
+      });
+
+      document.getElementById("strikeButton").addEventListener("click", () => {
+        generateStrike();
+      });
+
+      document.getElementById("megaStrike").addEventListener("click", () => {
+        megaStrikeActive = true;
+        generateStrike(true);
+        setTimeout(() => {
+          megaStrikeActive = false;
+        }, 2000);
+      });
+
+      document.getElementById("audioBtn").addEventListener("click", () => {
+        if (audioSystem) {
+          const enabled = audioSystem.toggleSound();
+          const button = document.getElementById("audioBtn");
+          button.textContent = enabled ? "🔊 Sound On" : "🔇 Sound Off";
+          button.classList.toggle("active", enabled);
+        }
+      });
+
+      document.getElementById("volumeBtn").addEventListener("click", () => {
+        if (audioSystem) {
+          const currentVol = audioSystem.volume;
+          const newVol = currentVol < 0.3 ? 0.6 : currentVol < 0.7 ? 1.0 : 0.1;
+          audioSystem.setVolume(newVol);
+          const button = document.getElementById("volumeBtn");
+          button.textContent = newVol < 0.4 ? "🔈 Low" : newVol < 0.8 ? "🔉 Med" : "🔊 High";
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // ==================== INITIALIZE ====================
+      // Initialize audio system first
+      initAudioSystem().then(() => {
+        console.log("Audio system ready");
+      }).catch(error => {
+        console.log("Failed to initialize audio system:", error);
+      });
+
+      // Start animation
+      animate();
+
+      // Initial strikes
+      setTimeout(() => {
+        generateStrike();
+        setTimeout(() => generateStrike(), 800);
+      }, 1000);   
+    </script>
+  </body>
+</html>

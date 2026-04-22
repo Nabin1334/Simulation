@@ -2,134 +2,167 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Atmospheric Pressure - Dramatic Drum Crushing</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      :root {
+        --accent: #ff6b4a;
+        --accent-light: #ff8a6a;
+        --accent-dark: #ff3d2a;
+        --bg-deep: #0a0f1e;
+        --bg-panel: rgba(30, 30, 40, 0.95);
+        --border: #4a4a5a;
+        --text: #eee;
+        --text-dim: #aaa;
+        --green: #4caf50;
+        --blue: #2196f3;
+        --orange: #ff9800;
+        /* Fluid panel width: min 240px, max 380px, ~28vw */
+        --panel-w: clamp(220px, 28vw, 380px);
+        /* Explanation panel width */
+        --expl-w: clamp(200px, 24vw, 350px);
+        /* Scale factor for UI text */
+        --ui-scale: clamp(0.72, 1.2vw, 1);
       }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(to bottom, #0a0f1e, #1a1f2e);
+        background: linear-gradient(to bottom, var(--bg-deep), #1a1f2e);
         overflow: hidden;
-        color: #333;
+        color: var(--text);
+        /* Allow all touch actions on body, we control per-element */
         touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
       }
+
       #container {
         position: relative;
         width: 100vw;
         height: 100vh;
+        /* Prevent rubber-band scroll on iOS */
+        overflow: hidden;
       }
+
       canvas {
         display: block;
         width: 100%;
         height: 100%;
         cursor: grab;
+        touch-action: none;
       }
-      canvas:active {
-        cursor: grabbing;
-      }
+      canvas:active { cursor: grabbing; }
+
+      /* ── UI Panel ── */
       #ui-panel {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        width: 380px;
-        background: rgba(30, 30, 40, 0.95);
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        border: 2px solid #ff6b4a;
+        top: clamp(8px, 1.5vh, 20px);
+        left: clamp(8px, 1.5vw, 20px);
+        width: var(--panel-w);
+        max-height: calc(100vh - 2 * clamp(8px, 1.5vh, 20px));
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: var(--bg-panel);
+        border-radius: clamp(8px, 1vw, 15px);
+        padding: clamp(10px, 1.5vw, 20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        border: 2px solid var(--accent);
         z-index: 10;
-        color: #eee;
+        color: var(--text);
         backdrop-filter: blur(5px);
         pointer-events: none;
+        /* Smooth hide-scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) transparent;
+        font-size: calc(var(--ui-scale) * 14px);
       }
-      #ui-panel button {
-        pointer-events: auto;
-      }
+      #ui-panel::-webkit-scrollbar { width: 4px; }
+      #ui-panel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+      #ui-panel button { pointer-events: auto; touch-action: manipulation; }
+
       h1 {
-        color: #ff8a6a;
-        font-size: 1.4rem;
-        margin-bottom: 15px;
+        color: var(--accent-light);
+        font-size: clamp(0.85rem, 1.6vw, 1.4rem);
+        margin-bottom: clamp(8px, 1vh, 15px);
         text-align: center;
-        text-shadow: 0 2px 5px rgba(255, 107, 74, 0.3);
+        text-shadow: 0 2px 5px rgba(255,107,74,0.3);
       }
+
       .instructions {
-        background: rgba(40, 40, 50, 0.9);
-        padding: 12px;
+        background: rgba(40,40,50,0.9);
+        padding: clamp(8px, 1vw, 12px);
         border-radius: 8px;
-        margin-bottom: 15px;
-        border-left: 4px solid #4caf50;
-        font-size: 0.9rem;
+        margin-bottom: clamp(8px, 1vh, 15px);
+        border-left: 4px solid var(--green);
+        font-size: clamp(0.72rem, 1.1vw, 0.9rem);
         line-height: 1.5;
         color: #ddd;
       }
-      .instructions strong {
-        color: #4caf50;
-      }
+      .instructions strong { color: var(--green); }
+
       .stage-info {
-        background: rgba(40, 40, 50, 0.9);
-        padding: 12px;
+        background: rgba(40,40,50,0.9);
+        padding: clamp(8px, 1vw, 12px);
         border-radius: 8px;
-        margin-bottom: 12px;
-        border-left: 4px solid #2196f3;
-        font-size: 0.9rem;
+        margin-bottom: clamp(6px, 0.8vh, 12px);
+        border-left: 4px solid var(--blue);
+        font-size: clamp(0.72rem, 1.1vw, 0.9rem);
         line-height: 1.5;
         transition: all 0.3s;
         color: #ddd;
       }
       .stage-info.active {
-        background: rgba(60, 50, 40, 0.9);
-        border-left-color: #ff9800;
+        background: rgba(60,50,40,0.9);
+        border-left-color: var(--orange);
         animation: pulse 1.5s infinite;
       }
+
       @keyframes pulse {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.02);
-        }
+        0%,100% { transform: scale(1); }
+        50%      { transform: scale(1.02); }
       }
-      .highlight {
-        color: #ff9800;
-        font-weight: bold;
-      }
+
+      .highlight { color: var(--orange); font-weight: bold; }
+
       .button-group {
         display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: clamp(6px, 0.8vw, 10px);
+        margin-bottom: clamp(6px, 0.8vh, 10px);
       }
+
       button {
         flex: 1;
-        padding: 14px;
+        padding: clamp(8px, 1.2vh, 14px) clamp(6px, 0.8vw, 14px);
         border: none;
         border-radius: 8px;
-        font-size: 1rem;
+        font-size: clamp(0.7rem, 1.1vw, 1rem);
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s;
         text-transform: uppercase;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
+
       #btnHeat {
         background: linear-gradient(135deg, #ff6b4a, #ff3d2a);
         color: white;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
       }
       #btnHeat:hover:not(:disabled) {
         background: linear-gradient(135deg, #ff8a6a, #ff5a4a);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 107, 74, 0.5);
+        box-shadow: 0 6px 16px rgba(255,107,74,0.5);
       }
-      #btnHeat:disabled {
-        background: #4a4a5a;
-        cursor: not-allowed;
-        transform: none;
-      }
+      #btnHeat:disabled { background: #4a4a5a; cursor: not-allowed; transform: none; }
+
       #btnStopHeat {
         background: linear-gradient(135deg, #4a4a5a, #3a3a4a);
         color: white;
@@ -138,182 +171,204 @@
         background: linear-gradient(135deg, #5a5a6a, #4a4a5a);
         transform: translateY(-2px);
       }
-      #btnStopHeat:disabled {
-        background: #2a2a3a;
-        cursor: not-allowed;
-        transform: none;
-        opacity: 0.5;
-      }
+      #btnStopHeat:disabled { background: #2a2a3a; cursor: not-allowed; transform: none; opacity: 0.5; }
+
       #btnReset {
         background: linear-gradient(135deg, #4a4a5a, #3a3a4a);
         color: white;
-        margin-top: 5px;
+        margin-top: clamp(3px, 0.5vh, 5px);
+        width: 100%;
       }
       #btnReset:hover {
         background: linear-gradient(135deg, #5a5a6a, #4a4a5a);
         transform: translateY(-2px);
       }
+
       .gauges {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin: 15px 0;
-        padding-top: 15px;
-        border-top: 2px solid #4a4a5a;
+        gap: clamp(6px, 0.8vw, 10px);
+        margin: clamp(8px, 1.2vh, 15px) 0;
+        padding-top: clamp(8px, 1.2vh, 15px);
+        border-top: 2px solid var(--border);
       }
+
       .gauge {
         background: #2a2a3a;
-        padding: 12px;
+        padding: clamp(8px, 1vw, 12px);
         border-radius: 8px;
         text-align: center;
-        border: 2px solid #4a4a5a;
+        border: 2px solid var(--border);
         transition: all 0.3s;
       }
-      .gauge.warning {
-        background: #3a2a2a;
-        border-color: #ff6b4a;
-        animation: pulse-warning 1s infinite;
-      }
-      .gauge.critical {
-        background: #4a2a2a;
-        border-color: #ff3d2a;
-        animation: pulse-critical 0.5s infinite;
-      }
-      @keyframes pulse-warning {
-        0%,
-        100% {
-          border-color: #ff6b4a;
-        }
-        50% {
-          border-color: #ff8a6a;
-        }
-      }
-      @keyframes pulse-critical {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.02);
-        }
-      }
+      .gauge.warning  { background: #3a2a2a; border-color: var(--accent); animation: pulse-warning 1s infinite; }
+      .gauge.critical { background: #4a2a2a; border-color: var(--accent-dark); animation: pulse-critical 0.5s infinite; }
+
+      @keyframes pulse-warning  { 0%,100% { border-color: var(--accent); } 50% { border-color: var(--accent-light); } }
+      @keyframes pulse-critical { 0%,100% { transform: scale(1); }         50% { transform: scale(1.02); } }
+
       .gauge-value {
         display: block;
-        font-size: 1.6rem;
+        font-size: clamp(1rem, 1.8vw, 1.6rem);
         font-weight: bold;
-        color: #ff8a6a;
-        margin-bottom: 5px;
+        color: var(--accent-light);
+        margin-bottom: 4px;
       }
-      .gauge.warning .gauge-value {
-        color: #ff6b4a;
-      }
-      .gauge.critical .gauge-value {
-        color: #ff3d2a;
-      }
-      .gauge-label {
-        font-size: 0.75rem;
-        color: #aaa;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
+      .gauge.warning  .gauge-value { color: var(--accent); }
+      .gauge.critical .gauge-value { color: var(--accent-dark); }
+      .gauge-label { font-size: clamp(0.6rem, 0.9vw, 0.75rem); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
       .info-box {
         background: #2a3a2a;
-        border: 2px solid #4caf50;
+        border: 2px solid var(--green);
         border-radius: 8px;
-        padding: 12px;
-        font-size: 0.85rem;
+        padding: clamp(8px, 1vw, 12px);
+        font-size: clamp(0.68rem, 1vw, 0.85rem);
         color: #a0d6a0;
         line-height: 1.5;
-        margin-top: 15px;
+        margin-top: clamp(8px, 1.2vh, 15px);
       }
+
+      /* ── Status bar ── */
       #status {
         position: absolute;
-        top: 20px;
+        top: clamp(8px, 1.5vh, 20px);
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(20, 20, 30, 0.95);
-        padding: 12px 24px;
+        background: rgba(20,20,30,0.95);
+        padding: clamp(8px, 1.2vh, 12px) clamp(14px, 2vw, 24px);
         border-radius: 25px;
         font-weight: bold;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        border: 2px solid #ff6b4a;
+        font-size: clamp(0.75rem, 1.2vw, 1rem);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        border: 2px solid var(--accent);
         display: none;
-        z-index: 10;
+        z-index: 20;
         text-align: center;
-        color: #eee;
+        color: var(--text);
+        max-width: 60vw;
+        white-space: nowrap;
       }
-      #status.show {
-        display: block;
-        animation: slideDown 0.3s ease-out;
-      }
+      #status.show { display: block; animation: slideDown 0.3s ease-out; }
+
       @keyframes slideDown {
-        from {
-          transform: translateX(-50%) translateY(-20px);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(-50%) translateY(0);
-          opacity: 1;
-        }
+        from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+        to   { transform: translateX(-50%) translateY(0);     opacity: 1; }
       }
+
+      /* ── Explanation panel ── */
       .explanation {
         position: absolute;
-        bottom: 20px;
-        right: 20px;
-        width: 350px;
-        background: rgba(30, 30, 40, 0.95);
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        border: 2px solid #ff6b4a;
+        bottom: clamp(8px, 1.5vh, 20px);
+        right: clamp(8px, 1.5vw, 20px);
+        width: var(--expl-w);
+        background: var(--bg-panel);
+        border-radius: clamp(8px, 1vw, 10px);
+        padding: clamp(10px, 1.3vw, 15px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        border: 2px solid var(--accent);
         z-index: 10;
-        color: #eee;
+        color: var(--text);
         backdrop-filter: blur(5px);
         pointer-events: none;
+        font-size: calc(var(--ui-scale) * 13px);
       }
       .explanation h3 {
-        color: #ff8a6a;
-        margin-bottom: 10px;
+        color: var(--accent-light);
+        margin-bottom: clamp(6px, 0.8vh, 10px);
         text-align: center;
+        font-size: clamp(0.8rem, 1.3vw, 1rem);
       }
       .explanation p {
-        font-size: 0.9rem;
+        font-size: clamp(0.68rem, 1vw, 0.9rem);
         line-height: 1.5;
-        margin-bottom: 8px;
+        margin-bottom: clamp(4px, 0.6vh, 8px);
         color: #ccc;
       }
+
+      /* ── Drag hint ── */
       #dragHint {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(20, 20, 30, 0.9);
-        padding: 15px 25px;
+        background: rgba(20,20,30,0.9);
+        padding: clamp(10px, 1.5vh, 15px) clamp(16px, 2vw, 25px);
         border-radius: 10px;
         font-weight: bold;
-        color: #ff8a6a;
-        border: 2px dashed #ff6b4a;
+        color: var(--accent-light);
+        border: 2px dashed var(--accent);
         text-align: center;
         z-index: 5;
         pointer-events: none;
         animation: fadeInOut 2s infinite;
         backdrop-filter: blur(5px);
-        font-size: 1.2rem;
+        font-size: clamp(0.85rem, 1.5vw, 1.2rem);
       }
-      @keyframes fadeInOut {
-        0%,
-        100% {
-          opacity: 0.7;
+      @keyframes fadeInOut { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+      /* ── Responsive breakpoints ── */
+
+      /* Tablet landscape / medium whiteboard */
+      @media (max-width: 1100px) {
+        :root {
+          --panel-w: clamp(200px, 32vw, 320px);
+          --expl-w:  clamp(180px, 28vw, 280px);
         }
-        50% {
-          opacity: 1;
+      }
+
+      /* Tablet portrait / small whiteboard */
+      @media (max-width: 768px) {
+        :root {
+          --panel-w: clamp(180px, 44vw, 280px);
+          --expl-w:  0px;
         }
+        .explanation { display: none; }
+
+        /* Collapse instructions to save space */
+        .instructions { display: none; }
+        .info-box     { display: none; }
+      }
+
+      /* Phone / very small screen */
+      @media (max-width: 480px) {
+        :root { --panel-w: calc(100vw - 16px); }
+
+        #ui-panel {
+          top: auto;
+          bottom: clamp(8px, 2vh, 16px);
+          left: 8px;
+          right: 8px;
+          width: auto;
+          max-height: 42vh;
+        }
+
+        .explanation { display: none; }
+
+        #dragHint {
+          top: 35%;
+          font-size: 0.82rem;
+        }
+      }
+
+      /* Wide whiteboard / projector (landscape, very wide) */
+      @media (min-width: 1600px) {
+        :root {
+          --panel-w: clamp(300px, 22vw, 420px);
+          --expl-w:  clamp(260px, 20vw, 380px);
+        }
+      }
+
+      /* High DPI / 4K whiteboard */
+      @media (min-resolution: 2dppx) {
+        #ui-panel, .explanation { backdrop-filter: blur(8px); }
       }
     </style>
   </head>
   <body>
     <div id="container">
       <canvas id="canvas"></canvas>
+
       <div id="ui-panel">
         <h1>🔥 Atmospheric Pressure: Dramatic Drum Crushing</h1>
         <div class="instructions">
@@ -326,22 +381,16 @@
           6. Steam condenses → Vacuum → DRUM CRUSHED by atmospheric pressure
         </div>
         <div class="stage-info" id="stage1">
-          <strong>Stage 1:</strong> Drum at room temperature (25°C), contains
-          60% water
+          <strong>Stage 1:</strong> Drum at room temperature (25°C), contains 60% water
         </div>
-        <div class="stage-info" id="stage2" style="display: none">
-          <strong>Stage 2:</strong> <span class="highlight">HEATING</span> -
-          Fire heats drum to >100°C
+        <div class="stage-info" id="stage2" style="display:none">
+          <strong>Stage 2:</strong> <span class="highlight">HEATING</span> - Fire heats drum to &gt;100°C
         </div>
-        <div class="stage-info" id="stage3" style="display: none">
-          <strong>Stage 3:</strong>
-          <span class="highlight">STEAM FORMATION</span> - Water boils, steam
-          replaces air
+        <div class="stage-info" id="stage3" style="display:none">
+          <strong>Stage 3:</strong> <span class="highlight">STEAM FORMATION</span> - Water boils, steam replaces air
         </div>
-        <div class="stage-info" id="stage4" style="display: none">
-          <strong>Stage 4:</strong>
-          <span class="highlight">ATMOSPHERIC CRUSHING</span> - Steam condenses
-          → Vacuum → Drum crushed INWARD by atmospheric pressure
+        <div class="stage-info" id="stage4" style="display:none">
+          <strong>Stage 4:</strong> <span class="highlight">ATMOSPHERIC CRUSHING</span> - Steam condenses → Vacuum → Drum crushed INWARD by atmospheric pressure
         </div>
         <div class="button-group">
           <button id="btnHeat">🔥 START HEATING</button>
@@ -365,22 +414,19 @@
           Atmospheric pressure (101.3 kPa) crushes the drum INWARD dramatically!
         </div>
       </div>
+
       <div id="dragHint">← Drag drum onto burner to begin →</div>
+
       <div class="explanation">
         <h3>Physics Principles</h3>
         <p>1. <strong>Phase Change:</strong> Liquid water ↔ Steam</p>
         <p>2. <strong>Volume Expansion:</strong> 1 mL water → 1600 mL steam</p>
         <p>3. <strong>Gas Laws:</strong> PV = nRT</p>
         <p>4. <strong>Condensation:</strong> Steam → Water creates vacuum</p>
-        <p>
-          5. <strong>Pressure Differential:</strong> 101.3 kPa (outside) vs ~5
-          kPa (inside)
-        </p>
-        <p>
-          6. <strong>ATMOSPHERIC CRUSHING:</strong> Drum crushed INWARD by
-          atmospheric pressure
-        </p>
+        <p>5. <strong>Pressure Differential:</strong> 101.3 kPa (outside) vs ~5 kPa (inside)</p>
+        <p>6. <strong>ATMOSPHERIC CRUSHING:</strong> Drum crushed INWARD by atmospheric pressure</p>
       </div>
+
       <div id="status"></div>
     </div>
 
@@ -420,45 +466,32 @@
       let steamFormed = false;
       let heatingActive = false;
 
+      // Scale factor — recomputed on resize so all objects fit any screen
+      let SCALE = 1;
+
       let drum = {
-        x: 0,
-        y: 0,
-        width: 130,
-        height: 180,
-        originalWidth: 130,
-        originalHeight: 180,
-        waterLevel: 0.6,
-        steamVolume: 0,
-        containsSteam: false,
-        dents: [],
-        draggable: true,
-        isCrushing: false,
-        // Zig-zag implosion state
-        zigzagProgress: 0, // 0 to 1
-        zigzagPhase: 0, // time-based phase for wobble
-        implosionRings: [], // per-ring inward offsets for zig-zag
+        x: 0, y: 0,
+        width: 130, height: 180,
+        originalWidth: 130, originalHeight: 180,
+        waterLevel: 0.6, steamVolume: 0,
+        containsSteam: false, dents: [],
+        draggable: true, isCrushing: false,
+        zigzagProgress: 0, zigzagPhase: 0,
+        implosionRings: [],
       };
 
       let burner = {
-        x: 0,
-        y: 0,
-        width: 160,
-        height: 45,
-        baseWidth: 200,
-        baseHeight: 30,
-        isBurning: false,
-        flameIntensity: 0,
-        fireVisible: false,
-        grateBars: 6,
+        x: 0, y: 0,
+        width: 160, height: 45,
+        baseWidth: 200, baseHeight: 30,
+        isBurning: false, flameIntensity: 0,
+        fireVisible: false, grateBars: 6,
       };
 
       let waterTub = {
-        x: 0,
-        y: 0,
-        width: 240,
-        height: 150,
-        waterLevel: 0.8,
-        temperature: 20.0,
+        x: 0, y: 0,
+        width: 240, height: 150,
+        waterLevel: 0.8, temperature: 20.0,
       };
 
       let fireParticles = [];
@@ -469,25 +502,28 @@
       let implosionParticles = [];
       let flameShapes = [];
 
-      // Number of zig-zag rings on drum body
       const ZIGZAG_RINGS = 8;
 
+      /* ─────────────────────────────────────────
+         INIT & RESPONSIVE RESIZE
+      ───────────────────────────────────────── */
       function init() {
         resize();
         window.addEventListener("resize", resize);
+        window.addEventListener("orientationchange", () => setTimeout(resize, 150));
+
         btnHeat.addEventListener("click", startHeating);
         btnStopHeat.addEventListener("click", stopHeating);
         btnReset.addEventListener("click", resetExperiment);
 
-        canvas.addEventListener("mousedown", startDrag);
-        canvas.addEventListener("mousemove", drag);
-        canvas.addEventListener("mouseup", stopDrag);
+        canvas.addEventListener("mousedown",  startDrag);
+        canvas.addEventListener("mousemove",  drag);
+        canvas.addEventListener("mouseup",    stopDrag);
         canvas.addEventListener("mouseleave", stopDrag);
-        canvas.addEventListener("touchstart", startDragTouch, {
-          passive: false,
-        });
-        canvas.addEventListener("touchmove", dragTouch, { passive: false });
-        canvas.addEventListener("touchend", stopDrag);
+        canvas.addEventListener("touchstart", startDragTouch, { passive: false });
+        canvas.addEventListener("touchmove",  dragTouch,      { passive: false });
+        canvas.addEventListener("touchend",   stopDrag,       { passive: false });
+        canvas.addEventListener("touchcancel",stopDrag,       { passive: false });
 
         initDrumDents();
         createFlameShapes();
@@ -495,7 +531,67 @@
         animate();
       }
 
+      function resize() {
+        // Match canvas pixel size to actual CSS display size (handles HiDPI)
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width  = window.innerWidth  * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width  = window.innerWidth  + "px";
+        canvas.style.height = window.innerHeight + "px";
+        ctx.scale(dpr, dpr);
+
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+
+        // Compute a uniform scale so objects fit all screen sizes
+        // Reference design was ~1400×900
+        SCALE = Math.min(W / 1400, H / 900);
+        SCALE = Math.max(0.35, Math.min(SCALE, 1.4));
+
+        // Scaled object sizes
+        drum.originalWidth  = Math.round(130 * SCALE);
+        drum.originalHeight = Math.round(180 * SCALE);
+        burner.width        = Math.round(160 * SCALE);
+        burner.height       = Math.round(45  * SCALE);
+        burner.baseWidth    = Math.round(200 * SCALE);
+        burner.baseHeight   = Math.round(30  * SCALE);
+        waterTub.width      = Math.round(240 * SCALE);
+        waterTub.height     = Math.round(150 * SCALE);
+
+        // Compute the "usable" horizontal band (avoiding panels)
+        const panelEl  = document.getElementById("ui-panel");
+        const explEl   = document.querySelector(".explanation");
+        const panelW   = (panelEl  && getComputedStyle(panelEl).display  !== "none") ? (panelEl.offsetWidth  + 20) : 0;
+        const explW    = (explEl   && getComputedStyle(explEl).display   !== "none") ? (explEl.offsetWidth   + 20) : 0;
+
+        const usableLeft  = panelW;
+        const usableRight = W - explW;
+        const centerX     = (usableLeft + usableRight) / 2;
+        const floorY      = H - Math.round(100 * Math.min(1, H / 900));
+
+        burner.x   = centerX - Math.round(220 * SCALE);
+        burner.y   = floorY - burner.height - 10;
+        waterTub.x = centerX + Math.round(180 * SCALE);
+        waterTub.y = floorY - waterTub.height + 10;
+
+        // Only reset drum position when not mid-experiment
+        if (state === "IDLE" || state === "HEATING") {
+          if (!isDragging) {
+            drum.width  = drum.originalWidth;
+            drum.height = drum.originalHeight;
+            drum.x = burner.x;
+            drum.y = burner.y - drum.height / 2 - 15;
+          }
+        }
+
+        createFlameShapes();
+      }
+
+      /* ─────────────────────────────────────────
+         SETUP HELPERS
+      ───────────────────────────────────────── */
       function initDrumDents() {
+        drum.dents = [];
         for (let i = 0; i < 5; i++) {
           drum.dents.push({
             x: Math.random() * 90 - 45,
@@ -508,10 +604,9 @@
       function initImplosionRings() {
         drum.implosionRings = [];
         for (let i = 0; i < ZIGZAG_RINGS; i++) {
-          // alternating even/odd rings will bulge in opposite directions for zig-zag
           drum.implosionRings.push({
-            inward: 0, // how far inward this ring buckles (px)
-            direction: i % 2 === 0 ? 1 : -1, // alternating inward/outward
+            inward: 0,
+            direction: i % 2 === 0 ? 1 : -1,
           });
         }
       }
@@ -520,34 +615,32 @@
         flameShapes = [];
         for (let i = 0; i < 12; i++) {
           flameShapes.push({
-            x: -70 + i * 13,
-            width: 8 + Math.random() * 8,
-            height: 30 + Math.random() * 40,
+            x: -Math.round(70 * SCALE) + i * Math.round(13 * SCALE),
+            width:  Math.round((8  + Math.random() * 8)  * SCALE),
+            height: Math.round((30 + Math.random() * 40) * SCALE),
             offset: Math.random() * Math.PI * 2,
-            speed: 0.2 + Math.random() * 1.0,
+            speed:  0.2 + Math.random() * 1.0,
           });
         }
       }
 
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const centerX = canvas.width / 2;
-        const floorY = canvas.height - 100;
-        burner.x = centerX - 250;
-        burner.y = floorY - burner.height - 10;
-        waterTub.x = centerX + 200;
-        waterTub.y = floorY - waterTub.height + 10;
-        drum.x = burner.x;
-        drum.y = burner.y - drum.height / 2 - 15;
+      /* ─────────────────────────────────────────
+         INPUT HELPERS — normalise pointer coords
+      ───────────────────────────────────────── */
+      function getCanvasXY(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+          return {
+            x: e.touches[0].clientX - rect.left,
+            y: e.touches[0].clientY - rect.top,
+          };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
       }
 
       function startHeating() {
         if (state === "CRUSHING" || state === "FINISHED") return;
-        if (!isDrumOnBurner()) {
-          showStatus("Place drum on burner first");
-          return;
-        }
+        if (!isDrumOnBurner()) { showStatus("Place drum on burner first"); return; }
         state = "HEATING";
         heatingTimer = 0;
         burner.isBurning = true;
@@ -581,19 +674,19 @@
       }
 
       function isMouseOverDrum(x, y) {
+        // Slightly enlarged hit-target for touch
+        const pad = Math.max(10, 15 * SCALE);
         return (
-          x > drum.x - drum.width / 2 &&
-          x < drum.x + drum.width / 2 &&
-          y > drum.y - drum.height / 2 &&
-          y < drum.y + drum.height / 2
+          x > drum.x - drum.width  / 2 - pad &&
+          x < drum.x + drum.width  / 2 + pad &&
+          y > drum.y - drum.height / 2 - pad &&
+          y < drum.y + drum.height / 2 + pad
         );
       }
 
       function startDrag(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        if (drum.draggable && isMouseOverDrum(mouseX, mouseY)) {
+        const { x, y } = getCanvasXY(e);
+        if (drum.draggable && isMouseOverDrum(x, y)) {
           isDragging = true;
           canvas.style.cursor = "grabbing";
           if (heatingActive) stopHeating();
@@ -602,39 +695,20 @@
 
       function startDragTouch(e) {
         e.preventDefault();
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const touchX = touch.clientX - rect.left;
-        const touchY = touch.clientY - rect.top;
-        if (drum.draggable && isMouseOverDrum(touchX, touchY)) {
-          isDragging = true;
-          canvas.style.cursor = "grabbing";
-          if (heatingActive) stopHeating();
-        }
+        startDrag(e);
       }
 
       function drag(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        if (isDragging) {
-          drum.x = mouseX;
-          drum.y = mouseY;
-          checkDrumPosition();
-        }
+        if (!isDragging) return;
+        const { x, y } = getCanvasXY(e);
+        drum.x = x;
+        drum.y = y;
+        checkDrumPosition();
       }
 
       function dragTouch(e) {
         e.preventDefault();
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const touchX = touch.clientX - rect.left;
-        const touchY = touch.clientY - rect.top;
-        if (isDragging) {
-          drum.x = touchX;
-          drum.y = touchY;
-          checkDrumPosition();
-        }
+        drag(e);
       }
 
       function checkDrumPosition() {
@@ -644,24 +718,20 @@
 
       function checkDrumInWater() {
         const drumBottom = drum.y + drum.height / 2;
-        const drumLeft = drum.x - drum.width / 2;
-        const drumRight = drum.x + drum.width / 2;
+        const drumLeft   = drum.x - drum.width  / 2;
+        const drumRight  = drum.x + drum.width  / 2;
         const wasInWater = drumInWater;
         drumInWater =
           drumBottom > waterTub.y &&
-          drumLeft > waterTub.x - waterTub.width / 2 &&
-          drumRight < waterTub.x + waterTub.width / 2;
-        if (
-          drumInWater &&
-          !wasInWater &&
-          drum.containsSteam &&
-          temperature >= WATER_BOILING_POINT
-        ) {
+          drumLeft   > waterTub.x - waterTub.width  / 2 &&
+          drumRight  < waterTub.x + waterTub.width  / 2;
+        if (drumInWater && !wasInWater && drum.containsSteam && temperature >= WATER_BOILING_POINT) {
           startCrushing();
         }
       }
 
-      function stopDrag() {
+      function stopDrag(e) {
+        if (e && e.preventDefault) e.preventDefault();
         if (isDragging) {
           isDragging = false;
           canvas.style.cursor = "grab";
@@ -683,7 +753,6 @@
         tempGauge.classList.add("critical");
         showStatus("💥 DRUM CRUSHING DUE TO ATMOSPHERIC PRESSURE!");
 
-        // Water splash
         for (let i = 0; i < 80; i++) {
           waterSplashParticles.push({
             x: drum.x + (Math.random() - 0.5) * drum.width * 2,
@@ -695,7 +764,6 @@
           });
         }
 
-        // Implosion debris
         for (let i = 0; i < 50; i++) {
           const angle = Math.random() * Math.PI * 2;
           implosionParticles.push({
@@ -709,7 +777,6 @@
           });
         }
 
-        // Pressure arrows pointing inward
         for (let i = 0; i < 20; i++) {
           const angle = (i / 20) * Math.PI * 2;
           arrowParticles.push({
@@ -739,7 +806,7 @@
         drum.containsSteam = false;
         drum.steamVolume = 0;
         drum.waterLevel = 0.6;
-        drum.width = drum.originalWidth;
+        drum.width  = drum.originalWidth;
         drum.height = drum.originalHeight;
         drum.isCrushing = false;
         drum.zigzagProgress = 0;
@@ -776,6 +843,9 @@
         setTimeout(() => (statusDiv.className = ""), 3000);
       }
 
+      /* ─────────────────────────────────────────
+         PHYSICS (logic unchanged)
+      ───────────────────────────────────────── */
       function updatePhysics() {
         drumOnBurner = isDrumOnBurner();
 
@@ -783,10 +853,7 @@
           heatingTimer++;
           burner.flameIntensity = Math.min(1, 0.5 + heatingTimer / 40);
           burner.flameIntensity += (Math.random() - 0.5) * 0.1;
-          burner.flameIntensity = Math.max(
-            0.3,
-            Math.min(1, burner.flameIntensity),
-          );
+          burner.flameIntensity = Math.max(0.3, Math.min(1, burner.flameIntensity));
           temperature = Math.min(MAX_HEATING_TEMP, temperature + 0.25);
 
           if (temperature > 60 && drum.waterLevel > 0) {
@@ -827,7 +894,6 @@
           temperature = Math.max(ROOM_TEMP, temperature - 0.1);
         }
 
-        // ===== DRUM CRUSHING PHYSICS =====
         if (state === "CRUSHING") {
           coolingTimer++;
           temperature = Math.max(waterTub.temperature, temperature - 2);
@@ -837,37 +903,22 @@
             crushAmount = Math.min(1, coolingTimer / 40);
             drum.zigzagProgress = crushAmount;
 
-            // Update per-ring zig-zag inward offsets
             for (let i = 0; i < ZIGZAG_RINGS; i++) {
               const ring = drum.implosionRings[i];
               const ringDelay = (i / ZIGZAG_RINGS) * 0.4;
-              const ringProgress = Math.max(
-                0,
-                Math.min(1, (crushAmount - ringDelay) / (1 - ringDelay + 0.01)),
-              );
+              const ringProgress = Math.max(0, Math.min(1, (crushAmount - ringDelay) / (1 - ringDelay + 0.01)));
               const maxIn = ring.direction === 1 ? 30 : 8;
               const eased = Math.pow(ringProgress, 0.6);
-              const wobble =
-                ringProgress > 0 && ringProgress < 0.95
-                  ? Math.sin(drum.zigzagPhase * 2 + i * 1.5) *
-                    4 *
-                    (1 - ringProgress)
-                  : 0;
+              const wobble = ringProgress > 0 && ringProgress < 0.95
+                ? Math.sin(drum.zigzagPhase * 2 + i * 1.5) * 4 * (1 - ringProgress)
+                : 0;
               ring.inward = eased * maxIn + wobble;
             }
 
-            pressure =
-              ATMOSPHERIC_PRESSURE -
-              (ATMOSPHERIC_PRESSURE - VACUUM_PRESSURE) *
-                Math.pow(crushAmount, 0.7);
+            pressure = ATMOSPHERIC_PRESSURE - (ATMOSPHERIC_PRESSURE - VACUUM_PRESSURE) * Math.pow(crushAmount, 0.7);
             pressureVal.textContent = pressure.toFixed(1);
 
-            // Crumple sparks
-            if (
-              crushAmount > 0.15 &&
-              crushAmount < 0.92 &&
-              Math.random() < 0.35
-            ) {
+            if (crushAmount > 0.15 && crushAmount < 0.92 && Math.random() < 0.35) {
               for (let i = 0; i < 4; i++) {
                 crumpleParticles.push({
                   x: drum.x + (Math.random() - 0.5) * drum.width,
@@ -879,38 +930,30 @@
               }
             }
 
-            // Update implosion particles
             for (let i = implosionParticles.length - 1; i >= 0; i--) {
               const p = implosionParticles[i];
               p.x += (drum.x - p.x) * 0.02;
               p.y += (drum.y - p.y) * 0.02;
               p.life -= 0.01;
               p.size *= 0.98;
-              if (p.life <= 0 || Math.abs(p.x - drum.x) < 5)
-                implosionParticles.splice(i, 1);
+              if (p.life <= 0 || Math.abs(p.x - drum.x) < 5) implosionParticles.splice(i, 1);
             }
 
             for (let i = 0; i < arrowParticles.length; i++) {
-              arrowParticles[i].pulse =
-                Math.sin(Date.now() * 0.005 + i) * (15 + crushAmount * 25);
+              arrowParticles[i].pulse = Math.sin(Date.now() * 0.005 + i) * (15 + crushAmount * 25);
               arrowParticles[i].scale = 1 + crushAmount * 0.4;
             }
           } else {
             state = "FINISHED";
             stage4.classList.remove("active");
             dragHint.style.display = "none";
-            // Removed the completion message from showing
           }
         }
 
-        // Flame physics
         if (burner.isBurning) {
           burner.flameIntensity = Math.min(1, burner.flameIntensity + 0.01);
           burner.flameIntensity += (Math.random() - 0.5) * 0.1;
-          burner.flameIntensity = Math.max(
-            0.3,
-            Math.min(1, burner.flameIntensity),
-          );
+          burner.flameIntensity = Math.max(0.3, Math.min(1, burner.flameIntensity));
         } else {
           burner.flameIntensity = Math.max(0, burner.flameIntensity - 0.03);
           if (burner.flameIntensity <= 0.1) burner.fireVisible = false;
@@ -933,6 +976,9 @@
         tempVal.textContent = temperature.toFixed(1) + "°C";
       }
 
+      /* ─────────────────────────────────────────
+         PARTICLES (logic unchanged)
+      ───────────────────────────────────────── */
       function updateParticles() {
         updateParticleArray(fireParticles, 0.03, 0.95);
         updateParticleArray(steamParticles, 0.02, 1.02);
@@ -960,17 +1006,21 @@
           p.y += p.vy;
           p.vy += 0.4;
           p.life -= 0.015;
-          if (p.life <= 0 || p.y > canvas.height)
-            waterSplashParticles.splice(i, 1);
+          if (p.life <= 0 || p.y > window.innerHeight) waterSplashParticles.splice(i, 1);
         }
       }
 
+      /* ─────────────────────────────────────────
+         DRAW (logic unchanged; uses window.innerW/H for floor)
+      ───────────────────────────────────────── */
       function draw() {
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        const gradient = ctx.createLinearGradient(0, 0, 0, H);
         gradient.addColorStop(0, "#0a0f1e");
         gradient.addColorStop(1, "#1a1f2e");
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, W, H);
         drawFloor();
         drawBurner();
         drawFire();
@@ -985,12 +1035,15 @@
       }
 
       function drawFloor() {
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        const floorH = Math.round(100 * Math.min(1, H / 900));
         ctx.fillStyle = "#2a2a3a";
-        ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+        ctx.fillRect(0, H - floorH, W, floorH);
         for (let i = 0; i < 30; i++) {
           ctx.beginPath();
-          ctx.moveTo(i * 50, canvas.height - 100);
-          ctx.lineTo(i * 50, canvas.height);
+          ctx.moveTo(i * 50, H - floorH);
+          ctx.lineTo(i * 50, H);
           ctx.strokeStyle = "#3a3a4a";
           ctx.lineWidth = 1;
           ctx.stroke();
@@ -999,26 +1052,11 @@
 
       function drawBurner() {
         ctx.fillStyle = "#3a3a4a";
-        ctx.fillRect(
-          burner.x - burner.baseWidth / 2,
-          burner.y + 10,
-          burner.baseWidth,
-          burner.baseHeight,
-        );
+        ctx.fillRect(burner.x - burner.baseWidth / 2, burner.y + 10, burner.baseWidth, burner.baseHeight);
         ctx.fillStyle = "#4a4a5a";
-        ctx.fillRect(
-          burner.x - burner.width / 2,
-          burner.y,
-          burner.width,
-          burner.height,
-        );
+        ctx.fillRect(burner.x - burner.width / 2, burner.y, burner.width, burner.height);
         ctx.fillStyle = "#5a5a6a";
-        ctx.fillRect(
-          burner.x - burner.width / 2 + 5,
-          burner.y - 8,
-          burner.width - 10,
-          10,
-        );
+        ctx.fillRect(burner.x - burner.width / 2 + 5, burner.y - 8, burner.width - 10, 10);
         ctx.fillStyle = "#6a6a7a";
         for (let i = 0; i < burner.grateBars; i++) {
           const barX = burner.x - burner.width / 2 + 15 + i * 22;
@@ -1044,67 +1082,28 @@
             const flame = flameShapes[i];
             const flicker = Math.sin(time * flame.speed + flame.offset) * 5;
             const x = burner.x + flame.x + flicker;
-            const gradient = ctx.createRadialGradient(
-              x,
-              burner.y - 15,
-              0,
-              x,
-              burner.y - 40,
-              flame.height * burner.flameIntensity,
-            );
+            const gradient = ctx.createRadialGradient(x, burner.y - 15, 0, x, burner.y - 40, flame.height * burner.flameIntensity);
             if (layer === 0) {
-              gradient.addColorStop(
-                0,
-                `rgba(255,255,200,${0.9 * burner.flameIntensity})`,
-              );
-              gradient.addColorStop(
-                0.4,
-                `rgba(255,200,100,${0.7 * burner.flameIntensity})`,
-              );
+              gradient.addColorStop(0, `rgba(255,255,200,${0.9 * burner.flameIntensity})`);
+              gradient.addColorStop(0.4, `rgba(255,200,100,${0.7 * burner.flameIntensity})`);
               gradient.addColorStop(1, `rgba(255,100,0,0)`);
             } else {
-              gradient.addColorStop(
-                0,
-                `rgba(255,200,100,${0.6 * burner.flameIntensity})`,
-              );
-              gradient.addColorStop(
-                0.5,
-                `rgba(255,100,0,${0.4 * burner.flameIntensity})`,
-              );
+              gradient.addColorStop(0, `rgba(255,200,100,${0.6 * burner.flameIntensity})`);
+              gradient.addColorStop(0.5, `rgba(255,100,0,${0.4 * burner.flameIntensity})`);
               gradient.addColorStop(1, `rgba(200,50,0,0)`);
             }
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.moveTo(x - flame.width / 2, burner.y - 10);
-            ctx.quadraticCurveTo(
-              x - flame.width / 4,
-              burner.y - 30 - flame.height * burner.flameIntensity * 0.5,
-              x,
-              burner.y - 40 - flame.height * burner.flameIntensity,
-            );
-            ctx.quadraticCurveTo(
-              x + flame.width / 4,
-              burner.y - 30 - flame.height * burner.flameIntensity * 0.5,
-              x + flame.width / 2,
-              burner.y - 10,
-            );
+            ctx.quadraticCurveTo(x - flame.width / 4, burner.y - 30 - flame.height * burner.flameIntensity * 0.5, x, burner.y - 40 - flame.height * burner.flameIntensity);
+            ctx.quadraticCurveTo(x + flame.width / 4, burner.y - 30 - flame.height * burner.flameIntensity * 0.5, x + flame.width / 2, burner.y - 10);
             ctx.fill();
           }
         }
         for (let p of fireParticles) {
-          const gradient = ctx.createRadialGradient(
-            p.x,
-            p.y,
-            0,
-            p.x,
-            p.y,
-            p.size,
-          );
+          const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
           gradient.addColorStop(0, `hsla(${p.hue},100%,80%,${p.life})`);
-          gradient.addColorStop(
-            0.7,
-            `hsla(${p.hue - 15},100%,60%,${p.life * 0.6})`,
-          );
+          gradient.addColorStop(0.7, `hsla(${p.hue - 15},100%,60%,${p.life * 0.6})`);
           gradient.addColorStop(1, `hsla(${p.hue - 30},100%,40%,0)`);
           ctx.fillStyle = gradient;
           ctx.beginPath();
@@ -1115,113 +1114,45 @@
 
       function drawWaterTub() {
         ctx.fillStyle = "#4a3a2a";
-        ctx.fillRect(
-          waterTub.x - waterTub.width / 2,
-          waterTub.y,
-          waterTub.width,
-          waterTub.height,
-        );
+        ctx.fillRect(waterTub.x - waterTub.width / 2, waterTub.y, waterTub.width, waterTub.height);
         const waterHeight = waterTub.height * waterTub.waterLevel;
         ctx.fillStyle = "rgba(64,164,244,0.8)";
-        ctx.fillRect(
-          waterTub.x - waterTub.width / 2 + 5,
-          waterTub.y + waterTub.height - waterHeight,
-          waterTub.width - 10,
-          waterHeight,
-        );
+        ctx.fillRect(waterTub.x - waterTub.width / 2 + 5, waterTub.y + waterTub.height - waterHeight, waterTub.width - 10, waterHeight);
         ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.fillRect(
-          waterTub.x - waterTub.width / 2 + 5,
-          waterTub.y + waterTub.height - waterHeight,
-          waterTub.width - 10,
-          4,
-        );
+        ctx.fillRect(waterTub.x - waterTub.width / 2 + 5, waterTub.y + waterTub.height - waterHeight, waterTub.width - 10, 4);
         ctx.fillStyle = "#aaccff";
-        ctx.font = "bold 14px Arial";
+        ctx.font = `bold ${Math.round(14 * SCALE)}px Arial`;
         ctx.textAlign = "center";
         ctx.fillText("COLD WATER (20°C)", waterTub.x, waterTub.y - 8);
       }
 
-      // =============================================
-      // DRUM CRUSHING DRAWING
-      // =============================================
       function drawCrushingDrum() {
         ctx.save();
-
         const w = drum.width;
         const h = drum.height;
         const cx = drum.x;
         const cy = drum.y;
 
-        // Drum color based on temperature
         let bodyColor, rimColor, shadowColor;
-        if (temperature > 100) {
-          bodyColor = "#ff6b4a";
-          rimColor = "#ffaa66";
-          shadowColor = "#cc3300";
-        } else if (temperature > 60) {
-          bodyColor = "#4a7aff";
-          rimColor = "#6a9aff";
-          shadowColor = "#1a3aaa";
-        } else {
-          bodyColor = "#2a4a9a";
-          rimColor = "#3a6aba";
-          shadowColor = "#0a1a5a";
-        }
+        if (temperature > 100)      { bodyColor = "#ff6b4a"; rimColor = "#ffaa66"; shadowColor = "#cc3300"; }
+        else if (temperature > 60)  { bodyColor = "#4a7aff"; rimColor = "#6a9aff"; shadowColor = "#1a3aaa"; }
+        else                        { bodyColor = "#2a4a9a"; rimColor = "#3a6aba"; shadowColor = "#0a1a5a"; }
 
         const topY = cy - h / 2;
         const botY = cy + h / 2;
         const leftX = cx - w / 2;
         const rightX = cx + w / 2;
-        const bodyTop = topY + 18; // below top cap
-        const bodyBot = botY - 18; // above bottom cap
-        const bodyH = bodyBot - bodyTop;
-
+        const bodyTop = topY + 18;
+        const bodyBot = botY - 18;
         const crushProg = drum.zigzagProgress;
 
         if (crushProg < 0.01) {
-          // Draw normal cylinder (no crushing yet)
-          drawNormalDrumBody(
-            cx,
-            cy,
-            w,
-            h,
-            bodyColor,
-            rimColor,
-            shadowColor,
-            bodyTop,
-            bodyBot,
-            leftX,
-            rightX,
-            topY,
-            botY,
-          );
+          drawNormalDrumBody(cx, cy, w, h, bodyColor, rimColor, shadowColor, bodyTop, bodyBot, leftX, rightX, topY, botY);
         } else {
-          // Draw crushed drum body
-          drawCrushedBody(
-            cx,
-            cy,
-            w,
-            h,
-            bodyColor,
-            rimColor,
-            shadowColor,
-            bodyTop,
-            bodyBot,
-            leftX,
-            rightX,
-            topY,
-            botY,
-            crushProg,
-          );
+          drawCrushedBody(cx, cy, w, h, bodyColor, rimColor, shadowColor, bodyTop, bodyBot, leftX, rightX, topY, botY, crushProg);
         }
 
-        // Draw water inside (only before crushing)
-        if (
-          drum.waterLevel > 0.01 &&
-          state !== "CRUSHING" &&
-          state !== "FINISHED"
-        ) {
+        if (drum.waterLevel > 0.01 && state !== "CRUSHING" && state !== "FINISHED") {
           const waterH = h * drum.waterLevel;
           const wX = leftX + 8;
           const wW = w - 16;
@@ -1231,65 +1162,39 @@
           ctx.fillStyle = "rgba(255,255,255,0.4)";
           ctx.fillRect(wX, wY, wW, 3);
           ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 12px Arial";
+          ctx.font = `bold ${Math.round(12 * SCALE)}px Arial`;
           ctx.textAlign = "center";
           ctx.fillText(Math.round(drum.waterLevel * 100) + "%", cx, wY - 8);
         }
-
         ctx.restore();
       }
 
-      function drawNormalDrumBody(
-        cx,
-        cy,
-        w,
-        h,
-        bodyColor,
-        rimColor,
-        shadowColor,
-        bodyTop,
-        bodyBot,
-        leftX,
-        rightX,
-        topY,
-        botY,
-      ) {
-        // Main rectangle body
+      function drawNormalDrumBody(cx, cy, w, h, bodyColor, rimColor, shadowColor, bodyTop, bodyBot, leftX, rightX, topY, botY) {
         ctx.fillStyle = bodyColor;
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = 2;
         ctx.fillRect(leftX, bodyTop, w, bodyBot - bodyTop);
         ctx.strokeRect(leftX, bodyTop, w, bodyBot - bodyTop);
-
-        // Top cap ellipse
         ctx.fillStyle = bodyColor;
         ctx.beginPath();
         ctx.ellipse(cx, bodyTop, w / 2, 18, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = shadowColor;
         ctx.stroke();
-
-        // Bottom cap ellipse
         ctx.beginPath();
         ctx.ellipse(cx, bodyBot, w / 2, 18, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-
-        // Top rim
         ctx.fillStyle = rimColor;
         ctx.beginPath();
         ctx.ellipse(cx, bodyTop, w / 2, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = shadowColor;
         ctx.stroke();
-
-        // Bottom rim
         ctx.beginPath();
         ctx.ellipse(cx, bodyBot, w / 2, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-
-        // Horizontal ring lines
         ctx.strokeStyle = rimColor;
         ctx.lineWidth = 2;
         for (let r = 1; r <= 3; r++) {
@@ -1300,115 +1205,57 @@
         }
       }
 
-      function drawCrushedBody(
-        cx,
-        cy,
-        w,
-        h,
-        bodyColor,
-        rimColor,
-        shadowColor,
-        bodyTop,
-        bodyBot,
-        leftX,
-        rightX,
-        topY,
-        botY,
-        crushProg,
-      ) {
+      function drawCrushedBody(cx, cy, w, h, bodyColor, rimColor, shadowColor, bodyTop, bodyBot, leftX, rightX, topY, botY, crushProg) {
         const bodyH = bodyBot - bodyTop;
         const n = ZIGZAG_RINGS;
-
-        // Build the crushed profile points for left and right sides
-        const leftPts = [];
-        const rightPts = [];
-
+        const leftPts = [], rightPts = [];
         for (let i = 0; i <= n; i++) {
           const t = i / n;
           const y = bodyTop + t * bodyH;
-
-          // Interpolate between adjacent rings
-          let inward = 0;
-          if (i < n) {
-            inward = drum.implosionRings[i].inward;
-          } else {
-            inward = 0; // bottom edge
-          }
-
-          // Additional global squeeze as crushProg increases (overall narrowing)
+          const inward = i < n ? drum.implosionRings[i].inward : 0;
           const globalSqueeze = crushProg * 10;
-
           leftPts.push({ x: leftX + inward + globalSqueeze, y });
           rightPts.push({ x: rightX - inward - globalSqueeze, y });
         }
-
-        // Draw left crushed wall
         ctx.save();
-
-        // Clip to drum bounding box to keep within drum area
         ctx.beginPath();
         ctx.rect(leftX - 5, topY, w + 10, h + 5);
         ctx.clip();
-
-        // Fill the drum body using the crushed outline
         ctx.beginPath();
-        // Start top-left
         ctx.moveTo(leftPts[0].x, leftPts[0].y);
-        // Down left side through crushed points
-        for (let i = 1; i <= n; i++) {
-          ctx.lineTo(leftPts[i].x, leftPts[i].y);
-        }
-        // Across bottom
+        for (let i = 1; i <= n; i++) ctx.lineTo(leftPts[i].x, leftPts[i].y);
         ctx.lineTo(rightPts[n].x, rightPts[n].y);
-        // Up right side through crushed (reversed)
-        for (let i = n - 1; i >= 0; i--) {
-          ctx.lineTo(rightPts[i].x, rightPts[i].y);
-        }
-        // Across top
+        for (let i = n - 1; i >= 0; i--) ctx.lineTo(rightPts[i].x, rightPts[i].y);
         ctx.closePath();
         ctx.fillStyle = bodyColor;
         ctx.fill();
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = 1.5;
         ctx.stroke();
-
-        // Draw left wall crushed outline (highlight the crumple lines)
         ctx.beginPath();
         ctx.moveTo(leftPts[0].x, leftPts[0].y);
-        for (let i = 1; i <= n; i++) {
-          ctx.lineTo(leftPts[i].x, leftPts[i].y);
-        }
+        for (let i = 1; i <= n; i++) ctx.lineTo(leftPts[i].x, leftPts[i].y);
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = 2.5;
         ctx.stroke();
-
-        // Draw right wall crushed outline
         ctx.beginPath();
         ctx.moveTo(rightPts[0].x, rightPts[0].y);
-        for (let i = 1; i <= n; i++) {
-          ctx.lineTo(rightPts[i].x, rightPts[i].y);
-        }
+        for (let i = 1; i <= n; i++) ctx.lineTo(rightPts[i].x, rightPts[i].y);
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = 2.5;
         ctx.stroke();
-
-        // Draw horizontal crumple rings at each crushed junction
         for (let i = 0; i < n; i++) {
           const lx = leftPts[i].x;
           const rx = rightPts[i].x;
           const ry = leftPts[i].y;
           const ringW = (rx - lx) / 2;
           const inwardAmount = drum.implosionRings[i].inward;
-
-          // Ellipse at ring height showing inward crumple depth
           const ellH = Math.max(3, 5 + inwardAmount * 0.25);
           ctx.beginPath();
           ctx.ellipse(cx, ry, ringW, ellH, 0, 0, Math.PI * 2);
           ctx.strokeStyle = rimColor;
           ctx.lineWidth = 1.8;
           ctx.stroke();
-
-          // Stress highlight lines on heavily buckled rings
           if (inwardAmount > 18 && crushProg > 0.3) {
             ctx.strokeStyle = `rgba(255,107,74,${Math.min(1, crushProg * 1.2)})`;
             ctx.lineWidth = 1.5;
@@ -1424,20 +1271,15 @@
             ctx.setLineDash([]);
           }
         }
-
-        // Shading gradient overlay for 3D effect
         const grad = ctx.createLinearGradient(leftX, 0, rightX, 0);
-        grad.addColorStop(0, "rgba(0,0,0,0.25)");
+        grad.addColorStop(0,    "rgba(0,0,0,0.25)");
         grad.addColorStop(0.15, "rgba(255,255,255,0.08)");
-        grad.addColorStop(0.5, "rgba(255,255,255,0.0)");
+        grad.addColorStop(0.5,  "rgba(255,255,255,0.0)");
         grad.addColorStop(0.85, "rgba(255,255,255,0.05)");
-        grad.addColorStop(1, "rgba(0,0,0,0.3)");
+        grad.addColorStop(1,    "rgba(0,0,0,0.3)");
         ctx.fillStyle = grad;
         ctx.fillRect(leftX, bodyTop, w, bodyH);
-
         ctx.restore();
-
-        // Top cap (stays normal, slightly squeezed)
         const capSqueeze = crushProg * 8;
         ctx.fillStyle = bodyColor;
         ctx.beginPath();
@@ -1446,40 +1288,25 @@
         ctx.strokeStyle = shadowColor;
         ctx.lineWidth = 2;
         ctx.stroke();
-
-        // Bottom cap
         ctx.beginPath();
         ctx.ellipse(cx, bodyBot, w / 2 - capSqueeze, 18, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-
-        // Top rim
         ctx.fillStyle = rimColor;
         ctx.beginPath();
         ctx.ellipse(cx, bodyTop, w / 2 - capSqueeze, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = shadowColor;
         ctx.stroke();
-
-        // Bottom rim
         ctx.beginPath();
         ctx.ellipse(cx, bodyBot, w / 2 - capSqueeze, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-
-        // Hot glow effect during crushing
         if (crushProg > 0.1) {
-          const glowGrad = ctx.createRadialGradient(
-            cx,
-            cy,
-            20,
-            cx,
-            cy,
-            w / 2 + 20,
-          );
-          glowGrad.addColorStop(0, `rgba(255,100,50,0)`);
+          const glowGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, w / 2 + 20);
+          glowGrad.addColorStop(0,   `rgba(255,100,50,0)`);
           glowGrad.addColorStop(0.6, `rgba(255,80,30,${0.08 * crushProg})`);
-          glowGrad.addColorStop(1, `rgba(255,50,10,0)`);
+          glowGrad.addColorStop(1,   `rgba(255,50,10,0)`);
           ctx.fillStyle = glowGrad;
           ctx.fillRect(cx - w, cy - h, w * 2, h * 2);
         }
@@ -1548,55 +1375,45 @@
       }
 
       function drawLabels() {
+        const fontSize = Math.round(14 * SCALE);
         ctx.fillStyle = "#aaccff";
-        ctx.font = "bold 14px Arial";
+        ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = "center";
         ctx.fillText("GAS BURNER", burner.x, burner.y + burner.height + 25);
 
         if (steamFormed && state !== "CRUSHING" && state !== "FINISHED") {
           ctx.fillStyle = "#ff8a6a";
-          ctx.font = "bold 16px Arial";
+          ctx.font = `bold ${Math.round(16 * SCALE)}px Arial`;
           ctx.fillText("💨 STEAM", drum.x, drum.y - drum.height / 2 - 20);
         }
 
-        // Show pressure difference during crushing at the top of the experiment
         if (state === "CRUSHING") {
           const pressureDiff = ATMOSPHERIC_PRESSURE - pressure;
           ctx.fillStyle = "#ff3d2a";
-          ctx.font = "bold 22px Arial";
+          ctx.font = `bold ${Math.round(22 * SCALE)}px Arial`;
           ctx.shadowColor = "#ff0000";
           ctx.shadowBlur = 15;
-          ctx.fillText(
-            `ΔP = ${pressureDiff.toFixed(1)} kPa`,
-            drum.x,
-            drum.y - drum.height / 2 - 80,
-          );
+          ctx.fillText(`ΔP = ${pressureDiff.toFixed(1)} kPa`, drum.x, drum.y - drum.height / 2 - 80);
           ctx.shadowBlur = 0;
         }
-
-        // COMPLETELY REMOVED - No completion message appears
 
         if (state === "IDLE" && !drumOnBurner) {
           dragHint.style.display = "block";
           dragHint.textContent = "← Drag drum onto burner →";
-        } else if (
-          steamFormed &&
-          !drumInWater &&
-          state !== "CRUSHING" &&
-          state !== "FINISHED"
-        ) {
+        } else if (steamFormed && !drumInWater && state !== "CRUSHING" && state !== "FINISHED") {
           dragHint.style.display = "block";
-          dragHint.textContent =
-            "← Drag hot drum into cold water for ATMOSPHERIC CRUSHING →";
+          dragHint.textContent = "← Drag hot drum into cold water for ATMOSPHERIC CRUSHING →";
         } else if (state === "FINISHED") {
           dragHint.style.display = "block";
-          dragHint.textContent =
-            "← Drag hot drum into cold water for ATMOSPHERIC CRUSHING →";
+          dragHint.textContent = "← Drag hot drum into cold water for ATMOSPHERIC CRUSHING →";
         } else {
           dragHint.style.display = "none";
         }
       }
 
+      /* ─────────────────────────────────────────
+         ANIMATION LOOP
+      ───────────────────────────────────────── */
       function animate() {
         updatePhysics();
         updateParticles();

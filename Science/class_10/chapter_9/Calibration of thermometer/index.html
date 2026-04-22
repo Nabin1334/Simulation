@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>🔬 Thermometer Calibration | Real Beaker & Gas Burner</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1a2635 0%, #2c3a4b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .horizontal-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            max-width: 1400px;
+            width: 100%;
+            align-items: stretch;
+        }
+        .left-control-panel {
+            background: rgba(18, 28, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid #3a5375;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 280px;
+            width: 300px;
+        }
+        .panel-title {
+            color: #bdd4ff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-bottom: 2px solid #3c7aff;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .button-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button {
+            background: linear-gradient(135deg, #3c7aff, #5b8eff);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(60, 122, 255, 0.4);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5b8eff, #7ca5ff);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(60, 122, 255, 0.6);
+        }
+        button:disabled {
+            background: linear-gradient(135deg, #2d3b52, #3a4c69);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        button#resetButton {
+            background: linear-gradient(135deg, #9570d1, #7d5fb8);
+            box-shadow: 0 4px 14px rgba(149, 112, 209, 0.4);
+        }
+        button#resetButton:hover {
+            background: linear-gradient(135deg, #a888e0, #9570d1);
+            box-shadow: 0 6px 18px rgba(149, 112, 209, 0.6);
+        }
+        .status-box {
+            background: rgba(15, 26, 40, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #3c7aff;
+        }
+        .status-label {
+            color: #9bb5d9;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        .temp-readout {
+            background: linear-gradient(135deg, #0b1422, #1a2635);
+            padding: 24px;
+            border-radius: 12px;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #e3f0ff;
+            border: 2px solid #4f86c9;
+            box-shadow: 0 0 24px rgba(79, 134, 201, 0.4);
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+        .temp-unit {
+            font-size: 1.4rem;
+            color: #9bb5d9;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .info-item {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #3a4c69;
+        }
+        .info-item-label {
+            font-size: 0.75rem;
+            color: #9bb5d9;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-item-value {
+            font-size: 1.1rem;
+            color: #e3f0ff;
+            font-weight: 600;
+        }
+        .right-canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+        .stepper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(31, 42, 57, 0.9);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #3a4c69;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .step-chip {
+            background: #2d3b52;
+            color: #b8cef0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid #4a6085;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .step-chip:hover:not(.locked) {
+            background: #3a4c69;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(60, 122, 255, 0.3);
+        }
+        .step-chip.active {
+            background: linear-gradient(135deg, #3c7aff, #5b8eff);
+            color: white;
+            border-color: #8bb2ff;
+            box-shadow: 0 0 18px rgba(60, 122, 255, 0.7);
+            transform: scale(1.05);
+            cursor: default;
+        }
+        .step-chip.completed {
+            background: linear-gradient(135deg, #1e4a3b, #2d6850);
+            color: #b0f0d0;
+            border-color: #2d8b5a;
+            padding-right: 36px;
+            position: relative;
+        }
+        .step-chip.completed::after {
+            content: "✓";
+            position: absolute;
+            right: 12px;
+            color: #8fecb0;
+            font-weight: bold;
+        }
+        .step-chip.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .canvas-wrapper {
+            background: rgba(25, 33, 46, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #405a7a;
+            box-shadow: inset 0 0 20px rgba(10, 16, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #d8e4f0 0%, #e5edf8 100%);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .instruction-box {
+            background: rgba(60, 122, 255, 0.15);
+            border: 1px solid rgba(60, 122, 255, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            color: #bdd4ff;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .instruction-title {
+            font-weight: 600;
+            color: #e3f0ff;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+        @media (max-width: 1100px) {
+            .horizontal-layout {
+                flex-direction: column;
+            }
+            .left-control-panel {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+        @media (max-width: 480px) {
+            .temp-readout {
+                font-size: 2.4rem;
+                padding: 16px;
+            }
+            .temp-unit {
+                font-size: 1.2rem;
+            }
+            .step-chip {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+            .stepper {
+                padding: 10px;
+            }
+            .info-item-value {
+                font-size: 0.95rem;
+            }
+        }
+        @media (max-height: 600px) and (orientation: landscape) {
+            .horizontal-layout {
+                gap: 12px;
+            }
+            .left-control-panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="horizontal-layout">
+    <div class="left-control-panel">
+        <div class="panel-title">
+            <span>⚗️</span>
+            <span>Thermometer Calibration</span>
+        </div>
+        
+        <div class="button-stack">
+            <button id="actionButton">▶ Start Calibration</button>
+            <button id="resetButton">↻ Reset Experiment</button>
+        </div>
+        
+        <div class="status-box">
+            <div class="status-label">Temperature Reading</div>
+            <div class="temp-readout">
+                <span id="tempValue">22.5</span><span class="temp-unit">°C</span>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-item-label">Mercury Level</div>
+                    <div class="info-item-value" id="mercuryLevel">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Status</div>
+                    <div class="info-item-value" id="statusIndicator">Ready</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">0°C Mark</div>
+                    <div class="info-item-value" id="zeroMark">Not Set</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">100°C Mark</div>
+                    <div class="info-item-value" id="hundredMark">Not Set</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instruction-box" id="instructionBox">
+            <div class="instruction-title">🧊 Step 1: Prepare Ice Bath</div>
+            <div>Click "Start Calibration" to begin. You can also click step buttons to navigate, or drag the thermometer to different temperatures.</div>
+        </div>
+    </div>
+    
+    <div class="right-canvas-area">
+        <div class="stepper">
+            <div class="step-chip active" id="step0" data-step="0">1. Ice Bath</div>
+            <div class="step-chip locked" id="step1" data-step="1">2. Cool 0°C</div>
+            <div class="step-chip locked" id="step2" data-step="2">3. Mark 0°C</div>
+            <div class="step-chip locked" id="step3" data-step="3">4. Boiling</div>
+            <div class="step-chip locked" id="step4" data-step="4">5. Heat 100°C</div>
+            <div class="step-chip locked" id="step5" data-step="5">6. Mark 100°C</div>
+            <div class="step-chip locked" id="step6" data-step="6">7. Scale</div>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="labCanvas" width="1200" height="600"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+    
+    const canvas = document.getElementById('labCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const tempValue = document.getElementById('tempValue');
+    const mercuryLevel = document.getElementById('mercuryLevel');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const zeroMark = document.getElementById('zeroMark');
+    const hundredMark = document.getElementById('hundredMark');
+    const actionButton = document.getElementById('actionButton');
+    const resetButton = document.getElementById('resetButton');
+    const instructionBox = document.getElementById('instructionBox');
+    
+    const state = {
+        currentStep: 0,
+        maxReachedStep: 0,
+        temperature: 22.5,
+        targetTemp: 22.5,
+        
+        thermoX: 600,
+        thermoY: 300,
+        targetX: 600,
+        targetY: 300,
+        isDragging: false,
+        
+        iceBathReady: false,
+        boilingSetupReady: false,
+        zeroMarkY: null,
+        hundredMarkY: null,
+        scaleCalibrated: false,
+        
+        animFrame: 0,
+        stabilizing: false,
+        stabilityCounter: 0,
+        
+        inIceBath: false,
+        inSteam: false
+    };
+    
+    const THERMO = {
+        bulbRadius: 40,
+        bulbY: 495,
+        tubeWidth: 26,
+        tubeHeight: 350,
+        tubeTop: 145,
+        boreWidth: 8,
+        scaleWidth: 45,
+        scalePadding: 35
+    };
+    
+    const POSITIONS = {
+        center: { x: 600, y: 300 },
+        iceBath: { x: 250, y: 400 },
+        steam: { x: 950, y: 300 }
+    };
+    
+    const EASING = 0.08;
+    const TEMP_CHANGE_RATE = 0.12;
+    const STABILITY_THRESHOLD = 0.15;
+    const STABILITY_FRAMES = 25;
+    
+    const steps = [
+        {
+            title: "🧊 Step 1: Prepare Ice Bath",
+            instruction: "Set up a real beaker with ice and water. The ice-water mixture maintains exactly 0°C - your lower fixed point reference.",
+            action: () => {
+                state.iceBathReady = true;
+                updateUI();
+            },
+            canSkipTo: true
+        },
+        {
+            title: "❄️ Step 2: Immerse in Ice Water",
+            instruction: "Drag the thermometer bulb into the ice bath beaker on the left. Red mercury will contract as it cools to exactly 0°C.",
+            action: () => {
+                state.targetX = POSITIONS.iceBath.x;
+                state.targetY = POSITIONS.iceBath.y;
+                state.targetTemp = 0;
+                state.stabilizing = true;
+                actionButton.disabled = true;
+                statusIndicator.textContent = "Cooling...";
+                statusIndicator.style.color = "#67e8f9";
+                updateUI();
+            },
+            canSkipTo: true
+        },
+        {
+            title: "📍 Step 3: Mark 0°C Point",
+            instruction: "Red mercury stabilized at exactly 0°C. Click to mark this level on the scale - your lower fixed point.",
+            action: () => {
+                state.zeroMarkY = getMercuryTop();
+                state.targetX = POSITIONS.center.x;
+                state.targetY = POSITIONS.center.y;
+                state.targetTemp = 22.5;
+                state.stabilizing = false;
+                zeroMark.textContent = "✓ Set";
+                zeroMark.style.color = "#8fecb0";
+                statusIndicator.textContent = "Marked";
+                statusIndicator.style.color = "#8fecb0";
+                updateUI();
+            },
+            requiresStable: true
+        },
+        {
+            title: "🔥 Step 4: Prepare Boiling Water with Burner",
+            instruction: "Turn on the gas burner below the beaker. The flame heats water to boiling point (100°C) - your upper fixed point.",
+            action: () => {
+                state.boilingSetupReady = true;
+                state.iceBathReady = false;
+                updateUI();
+            },
+            canSkipTo: state.zeroMarkY !== null
+        },
+        {
+            title: "💨 Step 5: Place in Steam",
+            instruction: "Drag the thermometer into the steam bath beaker on the right. Red mercury will expand and rise to exactly 100°C.",
+            action: () => {
+                state.targetX = POSITIONS.steam.x;
+                state.targetY = POSITIONS.steam.y;
+                state.targetTemp = 100;
+                state.stabilizing = true;
+                actionButton.disabled = true;
+                statusIndicator.textContent = "Heating...";
+                statusIndicator.style.color = "#fbbf24";
+                updateUI();
+            },
+            canSkipTo: state.zeroMarkY !== null
+        },
+        {
+            title: "📍 Step 6: Mark 100°C Point",
+            instruction: "Red mercury stabilized at exactly 100°C. Click to mark this level - your upper fixed point.",
+            action: () => {
+                state.hundredMarkY = getMercuryTop();
+                state.targetX = POSITIONS.center.x;
+                state.targetY = POSITIONS.center.y;
+                state.targetTemp = 22.5;
+                state.stabilizing = false;
+                hundredMark.textContent = "✓ Set";
+                hundredMark.style.color = "#8fecb0";
+                statusIndicator.textContent = "Marked";
+                statusIndicator.style.color = "#8fecb0";
+                updateUI();
+            },
+            requiresStable: true
+        },
+        {
+            title: "📏 Step 7: Create Celsius Scale",
+            instruction: "Divide the distance between 0°C and 100°C into 100 equal divisions. Each represents 1°C. Calibration complete!",
+            action: () => {
+                state.scaleCalibrated = true;
+                state.boilingSetupReady = false;
+                actionButton.textContent = "✓ Complete";
+                actionButton.disabled = true;
+                statusIndicator.textContent = "Complete";
+                statusIndicator.style.color = "#8fecb0";
+                state.targetTemp = 25 + Math.random() * 15;
+                updateUI();
+            },
+            canSkipTo: state.zeroMarkY !== null && state.hundredMarkY !== null
+        }
+    ];
+    
+    document.querySelectorAll('.step-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            const stepNum = parseInt(this.dataset.step);
+            if (!this.classList.contains('locked') && !this.classList.contains('active')) {
+                jumpToStep(stepNum);
+            }
+        });
+    });
+    
+    function jumpToStep(stepNum) {
+        if (stepNum <= state.maxReachedStep || steps[stepNum].canSkipTo) {
+            state.currentStep = stepNum;
+            if (stepNum < steps.length) {
+                steps[stepNum].action();
+            }
+            refreshChips();
+            updateUI();
+        }
+    }
+    
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    
+    function handlePointerStart(x, y) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mx = (x - rect.left) * scaleX;
+        const my = (y - rect.top) * scaleY;
+        
+        const bulbScreenY = state.thermoY - 300 + THERMO.bulbY;
+        const dx = mx - state.thermoX;
+        const dy = my - bulbScreenY;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        const tubeTop = state.thermoY - 300 + THERMO.tubeTop;
+        const tubeBottom = state.thermoY - 300 + THERMO.bulbY + THERMO.bulbRadius;
+        const inTubeX = Math.abs(mx - state.thermoX) < 50;
+        const inTubeY = my >= tubeTop && my <= tubeBottom;
+        
+        if (distance < 80 || (inTubeX && inTubeY)) {
+            state.isDragging = true;
+            dragOffsetX = mx - state.thermoX;
+            dragOffsetY = my - state.thermoY;
+            canvas.style.cursor = 'grabbing';
+            state.targetX = state.thermoX;
+            state.targetY = state.thermoY;
+        }
+    }
+    
+    function handlePointerMove(x, y) {
+        if (!state.isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mx = (x - rect.left) * scaleX;
+        const my = (y - rect.top) * scaleY;
+        
+        state.thermoX = mx - dragOffsetX;
+        state.thermoY = my - dragOffsetY;
+        state.thermoX = Math.max(150, Math.min(canvas.width - 150, state.thermoX));
+        state.thermoY = Math.max(200, Math.min(canvas.height - 100, state.thermoY));
+        state.targetX = state.thermoX;
+        state.targetY = state.thermoY;
+        updateImmediateTemperature();
+    }
+    
+    function handlePointerEnd() {
+        if (state.isDragging) {
+            state.isDragging = false;
+            canvas.style.cursor = 'grab';
+        }
+    }
+    
+    canvas.addEventListener('mousedown', (e) => { e.preventDefault(); handlePointerStart(e.clientX, e.clientY); });
+    canvas.addEventListener('mousemove', (e) => { handlePointerMove(e.clientX, e.clientY); });
+    canvas.addEventListener('mouseup', handlePointerEnd);
+    canvas.addEventListener('mouseleave', handlePointerEnd);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const touch = e.touches[0]; handlePointerStart(touch.clientX, touch.clientY); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); const touch = e.touches[0]; handlePointerMove(touch.clientX, touch.clientY); }, { passive: false });
+    canvas.addEventListener('touchend', (e) => { e.preventDefault(); handlePointerEnd(); });
+    canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); handlePointerEnd(); });
+    
+    function updateImmediateTemperature() {
+        const distToIce = Math.hypot(state.thermoX - POSITIONS.iceBath.x, state.thermoY - POSITIONS.iceBath.y);
+        const distToSteam = Math.hypot(state.thermoX - POSITIONS.steam.x, state.thermoY - POSITIONS.steam.y);
+        
+        if (state.iceBathReady && distToIce < 120) {
+            state.inIceBath = true;
+            state.inSteam = false;
+            state.targetTemp = 0;
+            if (state.isDragging) {
+                const proximity = 1 - (distToIce / 120);
+                state.temperature = state.temperature * 0.6 + 0 * 0.4 * proximity;
+            }
+        } else if (state.boilingSetupReady && distToSteam < 120) {
+            state.inIceBath = false;
+            state.inSteam = true;
+            state.targetTemp = 100;
+            if (state.isDragging) {
+                const proximity = 1 - (distToSteam / 120);
+                state.temperature = state.temperature * 0.6 + 100 * 0.4 * proximity;
+            }
+        } else {
+            state.inIceBath = false;
+            state.inSteam = false;
+            state.targetTemp = 22.5;
+        }
+    }
+    
+    function getMercuryTop() {
+        const tempRange = 110;
+        const normalizedTemp = (state.temperature + 10) / tempRange;
+        const clampedTemp = Math.max(0, Math.min(1, normalizedTemp));
+        const mercuryRange = THERMO.tubeHeight - 40;
+        return THERMO.tubeTop + 20 + mercuryRange * (1 - clampedTemp);
+    }
+    
+    function drawBackground() {
+        const grad = ctx.createLinearGradient(0, 500, 0, 600);
+        grad.addColorStop(0, '#8b9bb0');
+        grad.addColorStop(1, '#6b7e99');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 500, canvas.width, 100);
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+        for (let y = 0; y < canvas.height; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+    }
+    
+    // REALISTIC GAS BURNER WITH FIRE
+    function drawGasBurner(x, y) {
+        ctx.save();
+        ctx.shadowBlur = 0;
+        // Burner base (metal stand)
+        ctx.fillStyle = '#4a4f5e';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.beginPath();
+        ctx.rect(x - 55, y + 105, 110, 18);
+        ctx.fill();
+        ctx.fillStyle = '#6b7280';
+        ctx.beginPath();
+        ctx.rect(x - 45, y + 123, 90, 12);
+        ctx.fill();
+        
+        // Burner ring
+        ctx.fillStyle = '#2d3748';
+        ctx.beginPath();
+        ctx.ellipse(x, y + 100, 42, 14, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#1f2937';
+        ctx.beginPath();
+        ctx.ellipse(x, y + 98, 36, 11, 0, 0, Math.PI*2);
+        ctx.fill();
+        
+        // FLAMES (dynamic fire)
+        const flicker = 0.7 + Math.sin(state.animFrame * 0.2) * 0.25;
+        const flicker2 = 0.6 + Math.cos(state.animFrame * 0.27) * 0.3;
+        
+        for (let i = 0; i < 5; i++) {
+            const offsetX = (i - 2) * 12;
+            const heightVar = 22 + Math.sin(state.animFrame * 0.4 + i) * 9;
+            const flameWidth = 16 + Math.sin(state.animFrame * 0.5 + i) * 4;
+            
+            const grad = ctx.createLinearGradient(x + offsetX, y + 95, x + offsetX, y + 95 - heightVar);
+            grad.addColorStop(0, '#f97316');
+            grad.addColorStop(0.5, '#ea580c');
+            grad.addColorStop(1, '#fef08a');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(x + offsetX - flameWidth/2, y + 95);
+            ctx.quadraticCurveTo(x + offsetX, y + 95 - heightVar * 0.7, x + offsetX, y + 95 - heightVar);
+            ctx.quadraticCurveTo(x + offsetX, y + 95 - heightVar * 0.7, x + offsetX + flameWidth/2, y + 95);
+            ctx.fill();
+        }
+        
+        // Outer flame glow
+        ctx.fillStyle = `rgba(249, 115, 22, 0.35)`;
+        ctx.beginPath();
+        ctx.ellipse(x, y + 90, 50, 28, 0, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Sparks
+        for (let s = 0; s < 6; s++) {
+            const sparkLife = (state.animFrame * 0.15 + s) % 1;
+            const sx = x - 25 + (s * 10) + Math.sin(state.animFrame * 0.8 + s) * 8;
+            const sy = y + 75 - sparkLife * 40;
+            ctx.fillStyle = `rgba(255, 200, 50, ${1 - sparkLife})`;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2.5, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        ctx.restore();
+    }
+    
+    function drawRealBeaker(x, y, type) {
+        const isIce = (type === 'ice');
+        ctx.save();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        
+        // Beaker body - glass effect
+        ctx.beginPath();
+        ctx.moveTo(x - 85, y - 40);
+        ctx.lineTo(x - 85, y + 115);
+        ctx.quadraticCurveTo(x, y + 145, x + 85, y + 115);
+        ctx.lineTo(x + 85, y - 40);
+        ctx.closePath();
+        
+        const glassGrad = ctx.createLinearGradient(x - 70, y - 20, x + 70, y + 80);
+        glassGrad.addColorStop(0, 'rgba(210, 230, 250, 0.65)');
+        glassGrad.addColorStop(0.5, 'rgba(180, 210, 240, 0.55)');
+        glassGrad.addColorStop(1, 'rgba(140, 180, 220, 0.6)');
+        ctx.fillStyle = glassGrad;
+        ctx.fill();
+        ctx.strokeStyle = '#a0b8d4';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        
+        // Liquid content
+        if (isIce) {
+            const liqGrad = ctx.createLinearGradient(x - 70, y, x + 70, y + 100);
+            liqGrad.addColorStop(0, 'rgba(103, 232, 249, 0.75)');
+            liqGrad.addColorStop(1, 'rgba(56, 189, 248, 0.85)');
+            ctx.fillStyle = liqGrad;
+            ctx.fillRect(x - 82, y - 5, 164, 115);
+            for (let i = 0; i < 14; i++) {
+                ctx.fillStyle = 'rgba(255,255,245,0.9)';
+                ctx.beginPath();
+                ctx.rect(x - 60 + (i*13)%140, y + 15 + Math.sin(state.animFrame*0.02 + i)*4, 11, 11);
+                ctx.fill();
+            }
+        } else {
+            // BOILING BEAKER: add burner under it
+            drawGasBurner(x, y);
+            const boilGrad = ctx.createLinearGradient(x - 70, y + 20, x + 70, y + 110);
+            boilGrad.addColorStop(0, 'rgba(251, 146, 60, 0.85)');
+            boilGrad.addColorStop(1, 'rgba(234, 88, 12, 0.95)');
+            ctx.fillStyle = boilGrad;
+            ctx.fillRect(x - 82, y - 5, 164, 115);
+            // Bubbles and steam
+            for (let i = 0; i < 24; i++) {
+                const bubbleRise = (state.animFrame * 1.4 + i * 12) % 130;
+                ctx.fillStyle = `rgba(255, 220, 100, ${0.5 + Math.sin(state.animFrame*0.15 + i)*0.3})`;
+                ctx.beginPath();
+                ctx.arc(x - 55 + (i*14)%130, y + 30 + bubbleRise, 4 + (i%3), 0, Math.PI*2);
+                ctx.fill();
+            }
+            // Steam wisps above beaker
+            for (let s=0; s<12; s++) {
+                const drift = state.animFrame * 0.05 + s;
+                ctx.fillStyle = `rgba(255,250,210,${0.25+Math.sin(drift)*0.15})`;
+                ctx.beginPath();
+                ctx.ellipse(x - 30 + s*8 + Math.sin(drift)*12, y - 25 - (state.animFrame*0.6 + s*8)%90, 14, 9, 0, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+        
+        // Glass rim highlight
+        ctx.strokeStyle = 'rgba(255,255,245,0.6)';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(x - 70, y - 28);
+        ctx.lineTo(x - 70, y + 100);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px Inter';
+        ctx.textAlign = 'center';
+        ctx.shadowBlur = 8;
+        ctx.fillText(isIce ? '🧊 ICE BATH 0°C' : '🔥 BOILING 100°C', x, y - 58);
+        ctx.restore();
+    }
+    
+    function drawIceBath() {
+        if (!state.iceBathReady) return;
+        drawRealBeaker(POSITIONS.iceBath.x, POSITIONS.iceBath.y, 'ice');
+    }
+    
+    function drawBoilingSetup() {
+        if (!state.boilingSetupReady) return;
+        drawRealBeaker(POSITIONS.steam.x, POSITIONS.steam.y, 'steam');
+    }
+    
+    function drawThermometer() {
+        const x = state.thermoX;
+        const y = state.thermoY;
+        ctx.save();
+        ctx.translate(0, y - 300);
+        ctx.shadowBlur = 28;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+        const tubeGrad = ctx.createLinearGradient(x - THERMO.tubeWidth/2, 0, x + THERMO.tubeWidth/2, 0);
+        tubeGrad.addColorStop(0, 'rgba(195, 215, 235, 0.98)');
+        tubeGrad.addColorStop(1, 'rgba(195, 215, 235, 0.98)');
+        ctx.fillStyle = tubeGrad;
+        ctx.strokeStyle = '#7a92ab';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(x - THERMO.tubeWidth/2, THERMO.tubeTop, THERMO.tubeWidth, THERMO.tubeHeight, [15,15,0,0]);
+        ctx.fill();
+        ctx.stroke();
+        const bulbGrad = ctx.createRadialGradient(x - 15, THERMO.bulbY - 15, 0, x, THERMO.bulbY, THERMO.bulbRadius);
+        bulbGrad.addColorStop(0, '#ffffff');
+        bulbGrad.addColorStop(1, '#cbd5e1');
+        ctx.beginPath();
+        ctx.arc(x, THERMO.bulbY, THERMO.bulbRadius, 0, Math.PI*2);
+        ctx.fillStyle = bulbGrad;
+        ctx.fill();
+        ctx.stroke();
+        const mercBulbGrad = ctx.createRadialGradient(x - 12, THERMO.bulbY - 12, 0, x, THERMO.bulbY, THERMO.bulbRadius - 9);
+        mercBulbGrad.addColorStop(0, '#f87171');
+        mercBulbGrad.addColorStop(1, '#b91c1c');
+        ctx.beginPath();
+        ctx.arc(x, THERMO.bulbY, THERMO.bulbRadius - 9, 0, Math.PI*2);
+        ctx.fillStyle = mercBulbGrad;
+        ctx.fill();
+        const mercTop = getMercuryTop();
+        ctx.fillStyle = '#dc2626';
+        const mercHeight = THERMO.bulbY - THERMO.bulbRadius + 9 - mercTop;
+        if (mercHeight > 0) ctx.fillRect(x - THERMO.boreWidth/2, mercTop, THERMO.boreWidth, mercHeight);
+        ctx.fillStyle = '#fca5a5';
+        ctx.beginPath();
+        ctx.ellipse(x, mercTop - 3, THERMO.boreWidth/2, 4, 0, 0, Math.PI*2);
+        ctx.fill();
+        const scaleX = x - THERMO.tubeWidth/2 - THERMO.scalePadding;
+        ctx.fillStyle = '#2a2a2a';
+        ctx.font = 'bold 13px Inter';
+        for (let temp = -10; temp <= 110; temp += 10) {
+            const tempFraction = (temp + 10) / 120;
+            const tickY = THERMO.tubeTop + 20 + (THERMO.tubeHeight - 40) * (1 - tempFraction);
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = temp % 20 === 0 ? 2.5 : 1.8;
+            ctx.beginPath();
+            ctx.moveTo(scaleX + 5, tickY);
+            ctx.lineTo(scaleX + THERMO.scaleWidth - 5, tickY);
+            ctx.stroke();
+            if (temp >= 0 && temp <= 100) ctx.fillText(temp + '°', scaleX - 8, tickY + 4);
+        }
+        if (state.zeroMarkY !== null) {
+            ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.moveTo(scaleX, state.zeroMarkY); ctx.lineTo(scaleX + THERMO.scaleWidth, state.zeroMarkY); ctx.stroke();
+            ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 16px Inter'; ctx.fillText('0°C', scaleX + THERMO.scaleWidth/2, state.zeroMarkY - 8);
+        }
+        if (state.hundredMarkY !== null) {
+            ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.moveTo(scaleX, state.hundredMarkY); ctx.lineTo(scaleX + THERMO.scaleWidth, state.hundredMarkY); ctx.stroke();
+            ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 16px Inter'; ctx.fillText('100°C', scaleX + THERMO.scaleWidth/2, state.hundredMarkY - 8);
+        }
+        if (state.scaleCalibrated && state.zeroMarkY && state.hundredMarkY) {
+            const span = state.zeroMarkY - state.hundredMarkY;
+            const div = span / 10;
+            ctx.fillStyle = '#1a1a1a'; ctx.font = 'bold 13px Inter';
+            for (let i = 1; i < 10; i++) {
+                const tickY = state.hundredMarkY + div * i;
+                ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(scaleX + 5, tickY); ctx.lineTo(scaleX + THERMO.scaleWidth - 5, tickY); ctx.stroke();
+                const temp = 100 - (i * 10);
+                ctx.fillText(temp + '°', scaleX + THERMO.scaleWidth/2, tickY - 6);
+            }
+        }
+        ctx.restore();
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+        drawIceBath();
+        drawBoilingSetup();
+        drawThermometer();
+        if (!state.isDragging) {
+            const dx = state.targetX - state.thermoX;
+            const dy = state.targetY - state.thermoY;
+            if (Math.hypot(dx,dy) > 1) {
+                state.thermoX += dx * EASING;
+                state.thermoY += dy * EASING;
+                updateImmediateTemperature();
+            } else {
+                state.thermoX = state.targetX;
+                state.thermoY = state.targetY;
+            }
+        }
+        let changeRate = TEMP_CHANGE_RATE;
+        if (state.inIceBath || state.inSteam) changeRate = TEMP_CHANGE_RATE * 2.8;
+        const tempDiff = state.targetTemp - state.temperature;
+        if (Math.abs(tempDiff) > 0.05) state.temperature += tempDiff * changeRate;
+        else state.temperature = state.targetTemp;
+        
+        tempValue.textContent = state.temperature.toFixed(1);
+        const mercPercent = ((state.temperature + 10) / 120) * 100;
+        mercuryLevel.textContent = mercPercent.toFixed(0) + '%';
+        
+        if (state.stabilizing) {
+            if (Math.abs(state.temperature - state.targetTemp) < STABILITY_THRESHOLD) {
+                state.stabilityCounter++;
+                if (state.stabilityCounter >= STABILITY_FRAMES) {
+                    state.stabilizing = false;
+                    actionButton.disabled = false;
+                    statusIndicator.textContent = "Stable ✓";
+                    statusIndicator.style.color = "#8fecb0";
+                }
+            } else state.stabilityCounter = 0;
+        }
+        state.animFrame++;
+        requestAnimationFrame(animate);
+    }
+    
+    function updateUI() {
+        if (state.currentStep < steps.length) {
+            const step = steps[state.currentStep];
+            instructionBox.innerHTML = `<div class="instruction-title">${step.title}</div><div>${step.instruction}</div>`;
+            if (state.currentStep === 0) actionButton.textContent = '▶ Start';
+            else if (state.currentStep === steps.length - 1) actionButton.textContent = '✓ Complete';
+            else actionButton.textContent = `▶ Continue`;
+        }
+    }
+    function refreshChips() {
+        for (let i = 0; i < 7; i++) {
+            const chip = document.getElementById(`step${i}`);
+            if (chip) {
+                chip.classList.remove('active', 'completed', 'locked');
+                if (i < state.currentStep) chip.classList.add('completed');
+                else if (i === state.currentStep) chip.classList.add('active');
+                else if (i > state.maxReachedStep && (!steps[i] || !steps[i].canSkipTo)) chip.classList.add('locked');
+            }
+        }
+    }
+    function nextStep() {
+        if (state.currentStep >= steps.length) return;
+        if (steps[state.currentStep].requiresStable && state.stabilizing) return;
+        steps[state.currentStep].action();
+        state.currentStep++;
+        if (state.currentStep > state.maxReachedStep) state.maxReachedStep = state.currentStep;
+        refreshChips();
+        updateUI();
+    }
+    function reset() {
+        state.currentStep = 0; state.maxReachedStep = 0; state.temperature = 22.5; state.targetTemp = 22.5;
+        state.thermoX = POSITIONS.center.x; state.thermoY = POSITIONS.center.y;
+        state.targetX = POSITIONS.center.x; state.targetY = POSITIONS.center.y;
+        state.iceBathReady = false; state.boilingSetupReady = false; state.zeroMarkY = null; state.hundredMarkY = null;
+        state.scaleCalibrated = false; state.stabilizing = false; state.inIceBath = false; state.inSteam = false;
+        zeroMark.textContent = "Not Set"; zeroMark.style.color = "#e3f0ff";
+        hundredMark.textContent = "Not Set"; hundredMark.style.color = "#e3f0ff";
+        statusIndicator.textContent = "Ready"; actionButton.disabled = false;
+        updateUI(); refreshChips();
+    }
+    actionButton.addEventListener('click', nextStep);
+    resetButton.addEventListener('click', reset);
+    updateUI(); refreshChips(); animate();
+})();
+</script>
+</body>
+</html>
